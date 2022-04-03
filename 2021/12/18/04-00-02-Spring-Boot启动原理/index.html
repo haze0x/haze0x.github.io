@@ -185,6 +185,15 @@
    
   <nav class="article-nav">
     
+      <a href="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            操作系统原理
+          
+        </div>
+      </a>
+    
     
       <a href="/2021/12/18/04-00-01-Spring-Boot%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D%E5%8E%9F%E7%90%86/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
@@ -620,6 +629,42 @@
 
     
     
+<script>
+  const password = "zz123456";
+  const lock_password = window.sessionStorage.getItem("lock_password");
+  console.log(password, lock_password);
+  if (lock_password !== password) {
+    Swal.fire({
+      title: "Please enter password",
+      input: "text",
+      inputAttributes: {
+        autocapitalize: "off",
+      },
+      showCancelButton: false,
+      showLoaderOnConfirm: true,
+      allowOutsideClick: false,
+      confirmButtonText: "Ok",
+    }).then((result) => {
+      console.log(result);
+      if (result.isConfirmed) {
+        console.log(password);
+        if (result.value === password) {
+          window.sessionStorage.setItem("lock_password", result.value);
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Incorrect password, please try again",
+            confirmButtonText: "Ok",
+            allowOutsideClick: false,
+          }).then(() => {
+            window.location.reload();
+          });
+        }
+      }
+    });
+  }
+</script>
+
 
   </div>
   

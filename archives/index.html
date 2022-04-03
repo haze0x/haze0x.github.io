@@ -70,6 +70,38 @@
   
   <div class="archives-wrap">
     <div class="archive-year-wrap">
+      <a href="/archives/2022" class="archive-year">2022</a>
+    </div>
+    <div class="archives">
+      
+      <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+      <a href="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/" class="archive-article-date">
+  <time datetime="2022-04-03T08:01:51.000Z" itemprop="datePublished">04/03</time>
+</a>
+       
+<h2 itemprop="name">
+  <a class="archive-article-title" href="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/"
+    >操作系统原理</a> 
+</h2>
+ 
+
+    </header>
+    
+    
+  </div>
+</article>
+      
+  
+  
+  
+  </div>
+  </div>
+  
+  
+  <div class="archives-wrap">
+    <div class="archive-year-wrap">
       <a href="/archives/2021" class="archive-year">2021</a>
     </div>
     <div class="archives">
@@ -261,33 +293,17 @@
   </div>
 </article>
       
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2021/12/10/hello-world/" class="archive-article-date">
-  <time datetime="2021-12-10T14:31:44.288Z" itemprop="datePublished">12/10</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2021/12/10/hello-world/"
-    >Hello World</a> 
-</h2>
- 
-
-    </header>
-    
-    
-  </div>
-</article>
-      
       
     </div>
   </div>
   
   
 
+  
+  <nav class="page-nav">
+    
+    <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/">2</a><a class="extend next" rel="next" href="/archives/page/2/">下一页</a>
+  </nav>
   
 </section>
       <footer class="footer">
@@ -647,6 +663,42 @@
 
     
     
+<script>
+  const password = "zz123456";
+  const lock_password = window.sessionStorage.getItem("lock_password");
+  console.log(password, lock_password);
+  if (lock_password !== password) {
+    Swal.fire({
+      title: "Please enter password",
+      input: "text",
+      inputAttributes: {
+        autocapitalize: "off",
+      },
+      showCancelButton: false,
+      showLoaderOnConfirm: true,
+      allowOutsideClick: false,
+      confirmButtonText: "Ok",
+    }).then((result) => {
+      console.log(result);
+      if (result.isConfirmed) {
+        console.log(password);
+        if (result.value === password) {
+          window.sessionStorage.setItem("lock_password", result.value);
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Incorrect password, please try again",
+            confirmButtonText: "Ok",
+            allowOutsideClick: false,
+          }).then(() => {
+            window.location.reload();
+          });
+        }
+      }
+    });
+  }
+</script>
+
 
   </div>
   
