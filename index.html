@@ -370,6 +370,236 @@
 <p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404113021908.png" alt="浏览器验证"></p>
 <p>知名的 CA 全世界就那么几家，比如 DigiCert、VeriSign、Entrust、Let’s Encrypt 等，它们签发的证书分域名验证（domain validated,DV）证书、组织验证（organization validated,OV）证 书、扩展验证（extended validation,EV）证书三种，区别在于可信程 度。</p>
 <p>DV可信级别是最低的，只是域名级别的可信，背后是谁不知道。OV证书可信级别比DV高，会验证申请证书时填写的组织，企业信息是 否是正确的，申请往往需要几天时间， EV 是最高的，经过了法律和审计的严格核查，可以证明网站拥有者的身份。</p>
+<h2 id="六、计算机网络常见问题"><a href="#六、计算机网络常见问题" class="headerlink" title="六、计算机网络常见问题"></a>六、计算机网络常见问题</h2><ol>
+<li><code>为什么TCP连接的时候是3次？2次不可以吗？</code></li>
+</ol>
+<p>因为需要考虑连接时丢包的问题，如果只握手2次，第二次握手时如果服务端发给客户端的确认报文段丢失，此时服务端已经准备好了收发数(可以理解服务端已经连接成功)据，而客户端一直没收到服务端的确认报文，所以客户端就不知道服务端是否已经准备好了(可以理解为客户端未连接成功)，这种情况下客户端不会给服务端发数据，也会忽略服务端发过来的数据。</p>
+<p>如果是三次握手，即便发生丢包也不会有问题，比如如果第三次握手客户端发的确认ack报文丢失，服务端在一段时间内没有收到确认ack报文的话就会重新进行第二次握手，也就是服务端会重发SYN报文段，客户端收到重发的报文段后会再次给服务端发送确认ack报文。</p>
+<ol start="2">
+<li><code>为什么TCP连接的时候是3次，关闭的时候却是4次？</code></li>
+</ol>
+<p>因为只有在客户端和服务端都没有数据要发送的时候才能断开TCP。而客户端发出FIN报文时只能保证客户端没有数据发了，服务端还有没有数据发客户端是不知道的。而服务端收到客户端的FIN报文后只能先回复客户端一个确认报文来告诉客户端我服务端已经收到你的FIN报文了，但我服务端还有一些数据没发完，等这些数据发完了服务端才能给客户端发FIN报文(所以不能一次性将确认报文和FIN报文发给客户端，就是这里多出来了一次)。</p>
+<ol start="3">
+<li><code>为什么客户端发出第四次挥手的确认报文后要等2MSL【<strong>MSL是Maximum Segment Lifetime的英文缩写，可译为“最长报文段寿命”，它是任何报文在网络上存在的最长的最长时间，超过这个时间报文将被丢弃</strong>】的时间才能释放TCP连接？</code></li>
+</ol>
+<p>这里同样是要考虑丢包的问题，如果第四次挥手的报文丢失，服务端没收到确认ack报文就会重发第三次挥手的报文，这样报文一去一回最长时间就是2MSL，所以需要等这么长时间来确认服务端确实已经收到了。</p>
+<ol start="4">
+<li><code>如果已经建立了连接，但是客户端突然出现故障了怎么办？</code></li>
+</ol>
+<p>TCP设有一个保活计时器，客户端如果出现故障，服务器不能一直等下去，白白浪费资源。服务器每收到一次客户端的请求后都会重新复位这个计时器，时间通常是设置为2小时，若两小时还没有收到客户端的任何数据，服务器就会发送一个探测报文段，以后每隔75秒钟发送一次。若一连发送10个探测报文仍然没反应，服务器就认为客户端出了故障，接着就关闭连接。</p>
+<ol start="5">
+<li><code>TCP 挥手可以只需要三次吗？</code></li>
+</ol>
+<p>因为服务器端收到客户端的FIN后，服务器端同时也要关闭连接，这样就可以把ACK和FIN合并到一起发送，节省了一个包，变成了“三次挥手”。</p>
+<ol start="6">
+<li><code>什么是HTTP，HTTP 与 HTTPS 的区别</code></li>
+</ol>
+<p>HTTP 是一个在计算机世界里专门在两点之间传输文字、图片、音频、视频等超文本数据的约定和规范</p>
+<table>
+<thead>
+<tr>
+<th><strong>区别</strong></th>
+<th><strong>HTTP</strong></th>
+<th><strong>HTTPS</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>协议</td>
+<td>运行在 TCP 之上，明文传输，客户端与服务器端都无法验证对方的身份</td>
+<td>身披 SSL( Secure Socket Layer )外壳的 HTTP，运行于 SSL 上，SSL 运行于 TCP 之上， 是添加了加密和认证机制的 HTTP。</td>
+</tr>
+<tr>
+<td>端口</td>
+<td>80</td>
+<td>443</td>
+</tr>
+<tr>
+<td>资源消耗</td>
+<td>较少</td>
+<td>由于加解密处理，会消耗更多的 CPU 和内存资源</td>
+</tr>
+<tr>
+<td>开销</td>
+<td>无需证书</td>
+<td>需要证书，而证书一般需要向认证机构购买</td>
+</tr>
+<tr>
+<td>加密机制</td>
+<td>无</td>
+<td>共享密钥加密和公开密钥加密并用的混合加密机制</td>
+</tr>
+<tr>
+<td>安全性</td>
+<td>弱</td>
+<td>由于加密机制，安全性强</td>
+</tr>
+</tbody></table>
+<ol start="7">
+<li><code>常用HTTP状态码</code></li>
+</ol>
+<p>HTTP状态码表示客户端HTTP请求的返回结果、标识服务器处理是否正常、表明请求出现的错误等。</p>
+<p>状态码的类别：</p>
+<table>
+<thead>
+<tr>
+<th><strong>类别</strong></th>
+<th><strong>原因短语</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1XX</td>
+<td>Informational（信息性状态码） 接受的请求正在处理</td>
+</tr>
+<tr>
+<td>2XX</td>
+<td>Success（成功状态码） 请求正常处理完毕</td>
+</tr>
+<tr>
+<td>3XX</td>
+<td>Redirection（重定向状态码） 需要进行附加操作以完成请求</td>
+</tr>
+<tr>
+<td>4XX</td>
+<td>Client Error（客户端错误状态码） 服务器无法处理请求</td>
+</tr>
+<tr>
+<td>5XX</td>
+<td>Server Error（服务器错误状态码） 服务器处理请求出错</td>
+</tr>
+</tbody></table>
+<p>常用HTTP状态码：</p>
+<table>
+<thead>
+<tr>
+<th><strong>2XX</strong></th>
+<th><strong>成功（这系列表明请求被正常处理了）</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>200</td>
+<td>OK，表示从客户端发来的请求在服务器端被正确处理</td>
+</tr>
+<tr>
+<td>204</td>
+<td>No content，表示请求成功，但响应报文不含实体的主体部分</td>
+</tr>
+<tr>
+<td>206</td>
+<td>Partial Content，进行范围请求成功</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th><strong>3XX</strong></th>
+<th><strong>重定向（表明浏览器要执行特殊处理）</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>301</td>
+<td>moved permanently，永久性重定向，表示资源已被分配了新的 URL</td>
+</tr>
+<tr>
+<td>302</td>
+<td>found，临时性重定向，表示资源临时被分配了新的 URL</td>
+</tr>
+<tr>
+<td>303</td>
+<td>see other，表示资源存在着另一个 URL，应使用 GET 方法获取资源（对于301/302/303响应，几乎所有浏览器都会删除报文主体并自动用GET重新请求）</td>
+</tr>
+<tr>
+<td>304</td>
+<td>not modified，表示服务器允许访问资源，但请求未满足条件的情况（与重定向无关）</td>
+</tr>
+<tr>
+<td>307</td>
+<td>temporary redirect，临时重定向，和302含义类似，但是期望客户端保持请求方法不变向新的地址发出请求</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th><strong>4XX</strong></th>
+<th><strong>客户端错误</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>400</td>
+<td>bad request，请求报文存在语法错误</td>
+</tr>
+<tr>
+<td>401</td>
+<td>unauthorized，表示发送的请求需要有通过 HTTP 认证的认证信息</td>
+</tr>
+<tr>
+<td>403</td>
+<td>forbidden，表示对请求资源的访问被服务器拒绝，可在实体主体部分返回原因描述</td>
+</tr>
+<tr>
+<td>404</td>
+<td>not found，表示在服务器上没有找到请求的资源</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th><strong>5XX</strong></th>
+<th><strong>服务器错误</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>500</td>
+<td>internal sever error，表示服务器端在执行请求时发生了错误</td>
+</tr>
+<tr>
+<td>501</td>
+<td>Not Implemented，表示服务器不支持当前请求所需要的某个功能</td>
+</tr>
+<tr>
+<td>503</td>
+<td>service unavailable，表明服务器暂时处于超负载或正在停机维护，无法处理请求</td>
+</tr>
+</tbody></table>
+<ol start="8">
+<li><code>GET和POST区别</code></li>
+</ol>
+<p>说道GET和POST，就不得不提HTTP协议，因为浏览器和服务器的交互是通过HTTP协议执行的，而GET和POST也是HTTP协议中的两种方法。</p>
+<p>HTTP全称为Hyper Text Transfer Protocol，中文翻译为超文本传输协议，目的是保证浏览器与服务器之间的通信。HTTP的工作方式是客户端与服务器之间的请求-应答协议。</p>
+<p>HTTP协议中定义了浏览器和服务器进行交互的不同方法，基本方法有4种，分别是GET，POST，PUT，DELETE。这四种方法可以理解为，对服务器资源的查，改，增，删。</p>
+<ul>
+<li>GET：从服务器上获取数据，也就是所谓的查，仅仅是获取服务器资源，不进行修改。</li>
+<li>POST：向服务器提交数据，这就涉及到了数据的更新，也就是更改服务器的数据。</li>
+<li>PUT：英文含义是放置，也就是向服务器新添加数据，就是所谓的增。</li>
+<li>DELETE：从字面意思也能看出，这种方式就是删除服务器数据的过程。</li>
+</ul>
+<ol start="9">
+<li><p><code>GET和POST区别</code></p>
+</li>
+<li><p>Get是不安全的，因为在传输过程，数据被放在请求的URL中；Post的所有操作对用户来说都是不可见的。 但是这种做法也不时绝对的，大部分人的做法也是按照上面的说法来的，但是也可以在get请求加上 request body，给 post请求带上 URL 参数。</p>
+</li>
+<li><p>Get请求提交的url中的数据最多只能是2048字节，这个限制是浏览器或者服务器给添加的，http协议并没有对url长度进行限制，目的是为了保证服务器和浏览器能够正常运行，防止有人恶意发送请求。Post请求则没有大小限制。</p>
+</li>
+<li><p>Get限制Form表单的数据集的值必须为ASCII字符；而Post支持整个ISO10646字符集。</p>
+</li>
+<li><p>Get执行效率却比Post方法好。Get是form提交的默认方法。</p>
+</li>
+<li><p>GET产生一个TCP数据包；POST产生两个TCP数据包。</p>
+</li>
+</ol>
+<p>对于GET方式的请求，浏览器会把http header和data一并发送出去，服务器响应200（返回数据）；</p>
+<p>而对于POST，浏览器先发送header，服务器响应100 continue，浏览器再发送data，服务器响应200 ok（返回数据）。</p>
+<ol start="10">
+<li><code>什么是对称加密与非对称加密</code></li>
+</ol>
+<p>对称密钥加密是指加密和解密使用同一个密钥的方式，<strong>这种方式存在的最大问题就是密钥发送问题，即如何安全地将密钥发给对方；</strong></p>
+<p>而非对称加密是指使用一对非对称密钥，即公钥和私钥，公钥可以随意发布，但私钥只有自己知道。发送密文的一方使用对方的公钥进行加密处理，对方接收到加密信息后，使用自己的私钥进行解密。</p>
+<p>由于非对称加密的方式不需要发送用来解密的私钥，所以可以保证安全性；但是和对称加密比起来，非常的慢</p>
+<ol start="11">
+<li><code>什么是HTTP2</code></li>
+</ol>
+<p>HTTP2 可以提高了网页的性能。</p>
+<p>在 HTTP1 中浏览器限制了同一个域名下的请求数量（Chrome 下一般是六个），当在请求很多资源的时候，由于队头阻塞当浏览器达到最大请求数量时，剩余的资源需等待当前的六个请求完成后才能发起请求。</p>
+<p>HTTP2 中引入了多路复用的技术，这个技术可以只通过一个 TCP 连接就可以传输所有的请求数据。多路复用可以绕过浏览器限制同一个域名下的请求数量的问题，进而提高了网页的性能。</p>
  
       <!-- reward -->
       
