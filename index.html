@@ -355,8 +355,7 @@
 <p><strong>浏览器如何验证呢？</strong> </p>
 <p>有了CA签名过的数字证书，当浏览器访问服务器时，服务器会返回数字证书给浏览器。浏览器收到证书后会对数字证书进行验证。首先浏览器读取证书中相关的明文信息，采用CA签名时相同的hash函数计算得到信息摘要A，再利用对应的CA公钥解密数字签名数据得到信息摘要B，如果摘要A和摘要B一致，则可以确认证书时合法的。</p>
 <p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404113021908.png" alt="浏览器验证"></p>
-<p>知名的 CA 全世界就那么几家，比如 DigiCert、VeriSign、Entrust、Let’s Encrypt 等，它们签发的证书分域名验证（domain validated,DV）证书、组织验证（</p>
-<p>organization validated,OV）证 书、扩展验证（extended validation,EV）证书三种，区别在于可信程 度。</p>
+<p>知名的 CA 全世界就那么几家，比如 DigiCert、VeriSign、Entrust、Let’s Encrypt 等，它们签发的证书分域名验证（domain validated,DV）证书、组织验证（organization validated,OV）证 书、扩展验证（extended validation,EV）证书三种，区别在于可信程 度。</p>
 <p>DV可信级别是最低的，只是域名级别的可信，背后是谁不知道。OV证书可信级别比DV高，会验证申请证书时填写的组织，企业信息是 否是正确的，申请往往需要几天时间， EV 是最高的，经过了法律和审计的严格核查，可以证明网站拥有者的身份。</p>
  
       <!-- reward -->
