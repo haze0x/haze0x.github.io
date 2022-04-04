@@ -276,9 +276,9 @@
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h2 id="一、网络分层原理"><a href="#一、网络分层原理" class="headerlink" title="一、网络分层原理"></a>一、网络分层原理</h2><h3 id="1、复杂的网络"><a href="#1、复杂的网络" class="headerlink" title="1、复杂的网络"></a>1、复杂的网络</h3><p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404090937050.png" alt="网络传输过程"></p>
 <h3 id="2、网络分层"><a href="#2、网络分层" class="headerlink" title="2、网络分层"></a>2、网络分层</h3><p><strong>为了简化网络的复杂度，网络通信的不同方面被分解为多层次结构，每一层只与紧挨着的上一层或下一层进行交互，将网络分层，这样就可以修改，甚至替换某一层的软件，只要层与层之间的接口保持不变，就不会影响到其它层。</strong></p>
 <ul>
-<li><p>OSI（Open System Interconnection Reference Model）:开放系统互连参考模型</p>
+<li><p><code>OSI（Open System Interconnection Reference Model）:开放系统互连参考模型</code></p>
 </li>
-<li><p>TCP/IP协议族</p>
+<li><p><code>TCP/IP协议族</code></p>
 <p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404091034519.png" alt="网络分层"></p>
 </li>
 </ul>
@@ -286,9 +286,9 @@
 <h2 id="二、HTTP协议"><a href="#二、HTTP协议" class="headerlink" title="二、HTTP协议"></a>二、HTTP协议</h2><p><strong>超文本传输协议(HyperText Transfer Protocol，HTTP)：</strong> 一种无状态的（本身不会存储用户的信息），以请求/应答方式运行的协议，它使用可扩展的语义和自描述消息格式，与 基于网络的超文本信息系统灵活的互动。</p>
 <h3 id="1、HTTP报文格式"><a href="#1、HTTP报文格式" class="headerlink" title="1、HTTP报文格式"></a>1、HTTP报文格式</h3><p>HTTP 协议的请求报文和响应报文的结构基本相同，由三大部分组成： </p>
 <ul>
-<li>起始行（start line）：描述请求或响应的基本信息 </li>
-<li>头部字段集合（header）：使用 key-value 形式更详细地说明报文 </li>
-<li>消息正文（entity）：实际传输的数据，它不一定是纯文本，可以是图片、视频 等二进制数据</li>
+<li><code>起始行（start line）</code>：描述请求或响应的基本信息 </li>
+<li><code>头部字段集合（header）</code>：使用 key-value 形式更详细地说明报文 </li>
+<li><code>消息正文（entity）</code>：实际传输的数据，它不一定是纯文本，可以是图片、视频 等二进制数据</li>
 </ul>
 <p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404092725026.png" alt="HTTP报文格式"></p>
 <h3 id="2、请求行报文格式"><a href="#2、请求行报文格式" class="headerlink" title="2、请求行报文格式"></a>2、请求行报文格式</h3><p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404092555777.png" alt="请求行报文格式"></p>
@@ -307,38 +307,31 @@
 </ul>
 <h3 id="5、常用头字段"><a href="#5、常用头字段" class="headerlink" title="5、常用头字段"></a>5、常用头字段</h3><p>HTTP 协议中有非常多的头字段，但基本上可以分为四大类： </p>
 <ul>
-<li><p>请求字段：请求头中的头字段；如Host，Referer（防盗链会用到）。 </p>
-</li>
-<li><p>响应字段：响应头中的头字段，如：Server（标识哪种类型的服务器 nginx、apache）、Date（请求字段/响应字段都会存在）； </p>
-</li>
-<li><p>通用字段：在请求头和响应头里都可以出现，如 Content-type（数据传输到服务器用的什么格式）， Connection ；</p>
-</li>
+<li><code>请求字段</code>：请求头中的头字段；如Host，Referer（防盗链会用到）。 </li>
+<li><code>响应字段</code>：响应头中的头字段，如：Server（标识哪种类型的服务器 nginx、apache）、Date（请求字段/响应字段都会存在）； </li>
+<li><code>通用字段</code>：在请求头和响应头里都可以出现，如 Content-type（数据传输到服务器用的什么格式）， Connection ；</li>
 </ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">HTTP 400 – 请求无效</span><br><span class="line"></span><br><span class="line">HTTP 404- 无法找到文件或目录</span><br><span class="line"></span><br><span class="line">HTTP 500 – 内部服务器错误</span><br><span class="line"></span><br><span class="line">HTTP 502 – 网关错误</span><br><span class="line"></span><br><span class="line">HTTP 400 – 请求无效</span><br><span class="line">HTTP 401.1 – 未授权：登录失败</span><br><span class="line">HTTP 401.2 – 未授权：服务器配置问题导致登录失败</span><br><span class="line">HTTP 401.3 – ACL 禁止访问资源</span><br><span class="line">HTTP 401.4 – 未授权：授权被筛选器拒绝</span><br><span class="line">HTTP 401.5 – 未授权：ISAPI 或 CGI 授权失败</span><br><span class="line"></span><br><span class="line">HTTP 403 – 禁止访问</span><br><span class="line">HTTP 403 – 对 Internet 服务管理器 的访问仅限于 Localhost</span><br><span class="line">HTTP 403.1 禁止访问：禁止可执行访问</span><br><span class="line">HTTP 403.2 – 禁止访问：禁止读访问</span><br><span class="line">HTTP 403.3 – 禁止访问：禁止写访问</span><br><span class="line">HTTP 403.4 – 禁止访问：要求 SSL</span><br><span class="line">HTTP 403.5 – 禁止访问：要求 SSL 128</span><br><span class="line">HTTP 403.6 – 禁止访问：IP 地址被拒绝</span><br><span class="line">HTTP 403.7 – 禁止访问：要求客户证书</span><br><span class="line">HTTP 403.8 – 禁止访问：禁止站点访问</span><br><span class="line">HTTP 403.9 – 禁止访问：连接的用户过多</span><br><span class="line">HTTP 403.10 – 禁止访问：配置无效</span><br><span class="line">HTTP 403.11 – 禁止访问：密码更改</span><br><span class="line">HTTP 403.12 – 禁止访问：映射器拒绝访问</span><br><span class="line">HTTP 403.13 – 禁止访问：客户证书已被吊销</span><br><span class="line">HTTP 403.15 – 禁止访问：客户访问许可过多</span><br><span class="line">HTTP 403.16 – 禁止访问：客户证书不可信或者无效</span><br><span class="line">HTTP 403.17 – 禁止访问：客户证书已经到期或者尚未生效 HTTP 404.1 -</span><br><span class="line"></span><br><span class="line">无法找到 Web 站点</span><br><span class="line">HTTP 404- 无法找到文件</span><br><span class="line">HTTP 405 – 资源被禁止</span><br><span class="line">HTTP 406 – 无法接受</span><br><span class="line">HTTP 407 – 要求代理身份验证</span><br><span class="line">HTTP 410 – 永远不可用</span><br><span class="line">HTTP 412 – 先决条件失败</span><br><span class="line">HTTP 414 – 请求 – URI 太长</span><br><span class="line"></span><br><span class="line">HTTP 500 – 内部服务器错误</span><br><span class="line">HTTP 500.100 – 内部服务器错误 – ASP 错误</span><br><span class="line">HTTP 500-11 服务器关闭</span><br><span class="line">HTTP 500-12 应用程序重新启动</span><br><span class="line">HTTP 500-13 – 服务器太忙</span><br><span class="line">HTTP 500-14 – 应用程序无效</span><br><span class="line">HTTP 500-15 – 不允许请求 global.asa</span><br><span class="line">Error 501 – 未实现</span><br><span class="line">HTTP 502 – 网关错误</span><br></pre></td></tr></table></figure>
+
 <h2 id="三、HTTP请求的完整过程"><a href="#三、HTTP请求的完整过程" class="headerlink" title="三、HTTP请求的完整过程"></a>三、HTTP请求的完整过程</h2><h3 id="1、当用户在浏览器输入网址回车之后，网络协议都做了哪些工作呢？"><a href="#1、当用户在浏览器输入网址回车之后，网络协议都做了哪些工作呢？" class="headerlink" title="1、当用户在浏览器输入网址回车之后，网络协议都做了哪些工作呢？"></a>1、当用户在浏览器输入网址回车之后，网络协议都做了哪些工作呢？</h3><ol>
-<li><p>首先干活的是 浏览器应用程序，他要解析出 URL中的域名 </p>
-</li>
-<li><p>根据域名获取对应的ip地址，首先从浏览器缓存中查看，如下可以查看浏览器中域名对应 </p>
-</li>
+<li><code>首先干活的是 浏览器应用程序，他要解析出 URL中的域名 </code></li>
+<li><code>根据域名获取对应的ip地址，首先从浏览器缓存中查看，如下可以查看浏览器中域名对应 </code></li>
 </ol>
 <p>ip的解析</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">chrome://net‐internals/#events</span><br></pre></td></tr></table></figure>
 
 <p>如果没有则从本机域名解析文件hosts（/etc/hosts）中查看，还没有则从 LDNS（Localdnsserver）、Rootserver域名服务器、国际顶级域名服务商的DNS 的层层解析</p>
 <ol start="3">
-<li><p>拿到IP地址后，浏览器就可以发起 与服务器的三次握手 </p>
-</li>
-<li><p>握手建立之后，就开始组装http请求报文，发送报文 </p>
-</li>
-<li><p>服务器收到请求报文之后开始，请求报文解析，生成响应数据，发送响应数据 </p>
-</li>
-<li><p>浏览器收到响应之后，开始渲染页面</p>
-</li>
+<li><code>拿到IP地址后，浏览器就可以发起 与服务器的三次握手</code></li>
+<li><code>握手建立之后，就开始组装http请求报文，发送报文 </code></li>
+<li><code>服务器收到请求报文之后开始，请求报文解析，生成响应数据，发送响应数据 </code></li>
+<li><code>浏览器收到响应之后，开始渲染页面</code></li>
 </ol>
 <p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404094446754.png" alt="HTTP请求完整过程"></p>
 <h2 id="四、TCP协议"><a href="#四、TCP协议" class="headerlink" title="四、TCP协议"></a>四、TCP协议</h2><h3 id="1、TCP协议"><a href="#1、TCP协议" class="headerlink" title="1、TCP协议"></a>1、TCP协议</h3><p>TCP（Transmission Control Protocol）： 面向连接的，可靠的，基于字节流的传输层通信协议 </p>
 <p>特点： </p>
 <ul>
-<li>基于连接的：数据传输之前需要建立连接 </li>
+<li>基于连接的 ：数据传输之前需要建立连接 </li>
 <li>全双工的：双向传输 </li>
 <li>字节流：不限制数据大小，打包成报文段，保证有序接收，重复报文自动丢弃 </li>
 <li>流量缓冲：解决双方处理能力的不匹配 ，三次握手的时候双方会建立缓冲区</li>
