@@ -86,7 +86,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">1.6k</span>
+            <span class="post-count">1.8k</span>
         </span>
     </span>
 
@@ -95,7 +95,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> Reading time≈</span>
-            <span class="post-count">6 min</span>
+            <span class="post-count">7 min</span>
         </span>
     </span>
 </div>
@@ -118,7 +118,13 @@
 <p><img src="/2022/04/07/06-00-02-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E9%93%BE%E8%A1%A8/image-20220408010218463.png"></p>
 <p><code>2.约瑟夫问题：约瑟夫问题是个有名的问题：N个人围成一圈，从第一个开始报数，第M个将被杀掉，最后剩下一个，其余人都将被杀掉。</code></p>
 <p><code>例如N=6，M=5，被杀掉的顺序是：5，4，6，2，3，1。现在问你最后留下的人是谁？</code></p>
+<p>约瑟夫问题：有 N 个人围成一圈，每个人都有一个编号，编号由入圈的顺序决定，第一个入圈的人编号为 1，最后一个为 N，从第 k (1&lt;=k&lt;=N)个人开始报数，数</p>
+<p>到 m (1&lt;=m&lt;=N)的人将出圈，然后下一个人继续从 1 开始报数，直至所有人全部出圈，求依次出圈的编号。</p>
 <p>循环链表</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ListNode</span></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> ListNode next;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> val;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ListNode</span><span class="params">(<span class="keyword">int</span> data)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.pre = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">this</span>.next = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">this</span>.val = data;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> class <span class="title">Main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 约瑟夫算法</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">yosef</span><span class="params">(<span class="keyword">int</span> N,<span class="keyword">int</span> M)</span></span>&#123;</span><br><span class="line">        ListNode head = <span class="keyword">new</span> ListNode(<span class="number">1</span>);</span><br><span class="line">        ListNode cur =  head;</span><br><span class="line">        <span class="keyword">for</span>( <span class="keyword">int</span> i=<span class="number">2</span>;i&lt;<span class="number">7</span>;i++ )&#123;</span><br><span class="line">            cur.next = <span class="keyword">new</span> ListNode(i);</span><br><span class="line">            cur = cur.next;</span><br><span class="line">        &#125;</span><br><span class="line">        cur.next = head;</span><br><span class="line">        <span class="keyword">int</span> count=<span class="number">0</span>;</span><br><span class="line">        ListNode prev;</span><br><span class="line">        <span class="keyword">while</span>(head.next!=head)&#123;</span><br><span class="line">			<span class="keyword">if</span>( count == M )&#123;</span><br><span class="line">                prev.next = head.next;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 上述三行可换为如下</span></span><br><span class="line">            <span class="comment">// if(count == M-1)&#123;</span></span><br><span class="line">            <span class="comment">// head.next = head.next.next;</span></span><br><span class="line">            <span class="comment">//&#125;</span></span><br><span class="line">            </span><br><span class="line">            count++;</span><br><span class="line">            prev = head;</span><br><span class="line">            head = head.next;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> head.val</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
 <h3 id="1、什么是链表"><a href="#1、什么是链表" class="headerlink" title="1、什么是链表"></a>1、什么是链表</h3><p><code>定义：</code></p>
 <p>链表通过指针将一组零散的内存块串联在一起。其中，我们把内存块称为链表的“结点”。为了将所有的结点串起来，每个链表的结点除了存储数据之外，还需要记录链上的下一个结点的地址。</p>
 <p><img src="/2022/04/07/06-00-02-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E9%93%BE%E8%A1%A8/image-20220407224540790.png"></p>
@@ -243,7 +249,7 @@
         <strong class="article-nav-caption">上一篇</strong>
         <div class="article-nav-title">
           
-            06_00_03_基础数据结构-栈
+            基础数据结构-栈
           
         </div>
       </a>
