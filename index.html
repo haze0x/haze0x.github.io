@@ -151,6 +151,138 @@
     
     
     <article
+  id="post-03-00-05-Redis核心数据结构-Redis6新特性"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/"
+    >Redis核心数据结构&amp;Redis6新特性</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/" class="article-date">
+  <time datetime="2022-04-09T13:56:35.000Z" itemprop="datePublished">2022-04-09</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a> / <a class="article-category-link" href="/categories/Java/%E5%88%86%E5%B8%83%E5%BC%8F/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h2 id="Redis核心数据结构-amp-Redis6新特性"><a href="#Redis核心数据结构-amp-Redis6新特性" class="headerlink" title="Redis核心数据结构&amp;Redis6新特性"></a>Redis核心数据结构&amp;Redis6新特性</h2><h3 id="1、Redis-C底层数据结构"><a href="#1、Redis-C底层数据结构" class="headerlink" title="1、Redis C底层数据结构"></a>1、Redis C底层数据结构</h3><p>RedisDB：redis 数据库，select db</p>
+<p>Dict：字典，所有的k,v都是存在于字典里面；字典里面包含两个dictht【两个dictht原因是扩容使用，redis的渐进式rehash扩容，当需要扩容时不是一次性将数据迁移过去，而是分多次】</p>
+<p>dictht：就是一个数组，里面存储的是dictEntity指针，指向dictEntity</p>
+<p>dictEntity：dictht里面存储的数据，包含 key、value、next【当键发生hash冲突的时候将冲突的值使用next指针指向，并且采用头插法，后面进来的数据放到表头，用来解决hash冲突】；value指向redisObject对象，存放具体的值</p>
+<p>redisObject：封装redis 键值对的值数据的，type：指定用什么类型【string、list、hash、set、zset】，encoding用来表示编码类型【raw、int、embstr、ziplist】、*ptr指向真实存储的位置</p>
+<h3 id><a href="#" class="headerlink" title></a><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/RedisDB%E4%B8%BB%E4%BD%93%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.png" alt="RedisDB主体数据结构"></h3><h2 id="2、List数据结构"><a href="#2、List数据结构" class="headerlink" title="2、List数据结构"></a>2、List数据结构</h2><p><code>List数据结构</code></p>
+<p>List是一个有序的数据结构（按加入的时序排序），Redis采用quicklist（双端链表）和ziplist作为list的底层实现。可以通过设置每个ziplist的最大容量，quicklist的数据压缩范围，提升数据存取效率。</p>
+<p><code>List常用操作</code></p>
+<p>LPUSH  key  value [value …]         //将一个或多个值value插入到key列表的表头(最左边)</p>
+<p>RPUSH  key  value [value …]         //将一个或多个值value插入到key列表的表尾(最右边)</p>
+<p>LPOP  key            //移除并返回key列表的头元素</p>
+<p>RPOP  key            //移除并返回key列表的尾元素</p>
+<p>LRANGE  key  start  stop        //返回列表key中指定区间内的元素，区间以偏移量start和stop指定</p>
+<p>BLPOP  key  [key …]  timeout    //从key列表表头弹出一个元素，若列表中没有元素，阻塞等待                    timeout秒,如果timeout=0,一直阻塞等待</p>
+<p>BRPOP  key  [key …]  timeout     //从key列表表尾弹出一个元素，若列表中没有元素，阻塞等待                    timeout秒,如果timeout=0,一直阻塞等待</p>
+<p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/image-20220409221812515.png" alt="Redis数据结构之List"></p>
+<p><code>常用数据结构</code></p>
+<p>Stack(栈) = LPUSH + LPOP</p>
+<p>Queue(队列）= LPUSH + RPOP</p>
+<p>Blocking MQ(阻塞队列）= LPUSH + BRPOP</p>
+<p><code>redis List数据结构实现方式</code></p>
+<p>List数据结构可以使用数组和链表实现，redis底层为什么不用链表来实现list呢？</p>
+<ul>
+<li>1)胖指针问题，链表需要存储下一个元素指针，这个通常占用较大空间</li>
+<li>2)链表数据随机存储，产生大量的内存碎片，没法很好的利用cpu读取内存的空间局部性原理</li>
+</ul>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java/" rel="tag">Java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redis/" rel="tag">Redis</a></li></ul>
+
+    </footer>
+  </div>
+
+    
+ 
+    
+</article>
+
+    
+    <article
+  id="post-0303-00-00-Redis核心数据结构及高性能原理"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2022/04/09/0303-00-00-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%8F%8A%E9%AB%98%E6%80%A7%E8%83%BD%E5%8E%9F%E7%90%86/"
+    >Redis核心数据结构及高性能原理</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/04/09/0303-00-00-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%8F%8A%E9%AB%98%E6%80%A7%E8%83%BD%E5%8E%9F%E7%90%86/" class="article-date">
+  <time datetime="2022-04-09T13:49:11.000Z" itemprop="datePublished">2022-04-09</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a> / <a class="article-category-link" href="/categories/Java/%E5%88%86%E5%B8%83%E5%BC%8F/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h2 id="Redis核心数据结构及高性能原理"><a href="#Redis核心数据结构及高性能原理" class="headerlink" title="Redis核心数据结构及高性能原理"></a>Redis核心数据结构及高性能原理</h2> 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java/" rel="tag">Java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redis/" rel="tag">Redis</a></li></ul>
+
+    </footer>
+  </div>
+
+    
+ 
+    
+</article>
+
+    
+    <article
   id="post-06-00-04-基础数据结构-队列"
   class="article article-type-post"
   itemscope
@@ -211,17 +343,14 @@
 <p>循环队列、阻塞队列、并发队列。它们在很多偏底层系统、框架、中间件的开发中，起着关键性的作用。</p>
 <h3 id="2、队列的实现"><a href="#2、队列的实现" class="headerlink" title="2、队列的实现"></a>2、队列的实现</h3><p><code>实现方式：</code></p>
 <p><strong>顺序队列&amp;链式:</strong></p>
-<p>链表就是可以无限扩容:内存 size大小控制。add 缓存；LRU</p>
+<p>链表就是可以无限扩容:内存 size大小控制。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line">## 数组实现队列</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ArrayQueue</span></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span>[] data;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> head;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> tail;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> cap;<span class="comment">// 数组的大小，最大容量</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ArrayQueue</span><span class="params">(<span class="keyword">int</span> n)</span></span>&#123;</span><br><span class="line">        data = <span class="keyword">new</span> <span class="keyword">int</span>[n];</span><br><span class="line">        cap = n;</span><br><span class="line">        head = <span class="number">0</span>;</span><br><span class="line">        tail = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 插入数据</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">push</span><span class="params">(<span class="keyword">int</span> data)</span></span>&#123;</span><br><span class="line">		<span class="comment">// 满了</span></span><br><span class="line">        <span class="keyword">if</span>( tail == cap )&#123;</span><br><span class="line">            <span class="comment">// 这里可以优化 把数据往前移动</span></span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        data[tail++] = data;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 出队</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">pop</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="comment">// 为空</span></span><br><span class="line">        <span class="keyword">if</span>( head == tail )&#123;</span><br><span class="line">            <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> data[head++];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">## 用单向链表实现队列</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ListNodeQueue</span></span>&#123;</span><br><span class="line">	<span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">ListNode</span></span>&#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">int</span> val;</span><br><span class="line">        <span class="keyword">public</span> ListNode next;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">ListNode</span><span class="params">(<span class="keyword">int</span> data)</span></span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.val = data;</span><br><span class="line">            next = <span class="keyword">null</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> ListNode head;</span><br><span class="line">    <span class="keyword">public</span> ListNode tail;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> cap;<span class="comment">// 总容量</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> size;<span class="comment">// 当前容量</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ListNodeQueue</span><span class="params">(<span class="keyword">int</span> cap)</span></span>&#123;</span><br><span class="line">        head = <span class="keyword">null</span>;</span><br><span class="line">        tail = <span class="keyword">null</span>;</span><br><span class="line">        cap = cap;</span><br><span class="line">        size = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 插入数据</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">push</span><span class="params">(<span class="keyword">int</span> data)</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>( size == cap )&#123;</span><br><span class="line">            <span class="keyword">return</span>;           </span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>( size == <span class="number">0</span> )&#123;</span><br><span class="line">            head = <span class="keyword">new</span> ListNode(data);</span><br><span class="line">            tail = head;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            tail.next = <span class="keyword">new</span> ListNode(data);</span><br><span class="line">            tail = tail.next;</span><br><span class="line">        &#125;</span><br><span class="line">        size++;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// pop取数据</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ListNode <span class="title">pop</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>( head == <span class="keyword">null</span> )&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>( head == tail )&#123;</span><br><span class="line">            ListNode cur = head;</span><br><span class="line">            head = <span class="keyword">null</span>;</span><br><span class="line">            tail = <span class="keyword">null</span>;</span><br><span class="line">            size--;</span><br><span class="line">            <span class="keyword">return</span> cur;</span><br><span class="line">        &#125;</span><br><span class="line">        ListNode cur = head;</span><br><span class="line">        head = head.next;</span><br><span class="line">        size--;</span><br><span class="line">        <span class="keyword">return</span> cur;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p><strong>循环队列</strong></p>
 <p>怎么判断队列已经满了？</p>
-<p>head=tail-1</p>
-<p>tail=n</p>
 <p>两种方法：</p>
-<p>加了一个实际的size变量就可以了。</p>
-<p>画一个循环队列满了的图。</p>
-<p>判断满：(tail+1)%n==head</p>
+<p>1、加了一个实际的size变量就可以了。</p>
+<p>2、判断满：(tail+1)%n==head</p>
 <p>怎么判断空？tail==head</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">## 循环队列</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CircleQueue</span></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span>[] data;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> head;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> tail;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> cap;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">CircleQueue</span><span class="params">(<span class="keyword">int</span> n)</span></span>&#123;</span><br><span class="line">        head = <span class="number">0</span>;</span><br><span class="line">        tail = <span class="number">0</span>;</span><br><span class="line">        data = <span class="keyword">new</span> <span class="keyword">int</span>[n];</span><br><span class="line">        cap = n;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 入队</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">push</span><span class="params">(<span class="keyword">int</span> data)</span></span>&#123;</span><br><span class="line">        <span class="comment">// 队列满 下面这种判断  等同于 (tail-head == -1) || (tail - head == cap -1)</span></span><br><span class="line">        <span class="keyword">if</span>( (tail+<span class="number">1</span>)%cap == head )&#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;       </span><br><span class="line">        data[tail]=data;</span><br><span class="line">        tail = (tail+<span class="number">1</span>)%cap; <span class="comment">// 这种判断防止越界从 cap-1 到 0  等同于 if(tail+1 == cap) tail =0; else tail++;</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 出队</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">pop</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>( head == tail )&#123;</span><br><span class="line">            <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> data = data[head];</span><br><span class="line">        head = (head+<span class="number">1</span>)%cap;<span class="comment">// 这种判断防止越界从 cap-1 -&gt; 0</span></span><br><span class="line">        <span class="keyword">return</span> data;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -233,9 +362,9 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">## 具体实现 后续补充 [本质是插入的时候排序]</span><br></pre></td></tr></table></figure>
 
 <p><strong>阻塞队列</strong></p>
-<p>此种具有特殊特性的队列应用却比较广泛，比如阻塞队列和并发队列。阻塞队列其实就是在队列基础上增加了阻塞操作。简单来说，就是在队列为空的时候，从队</p>
-<p>头取数据会被阻塞。因为此时还没有数据可取，直到队列中有了数据才能返回；如果队列已经满了，那么插入数据的操作就会被阻塞，直到队列中有空闲位置后再</p>
-<p>插入数据，然后再返回。</p>
+<p>此种具有特殊特性的队列应用却比较广泛，比如阻塞队列和并发队列。阻塞队列其实就是在队列基础上增加了阻塞操作。<strong>简单来说，就是在队列为空的时候，从队</strong></p>
+<p><strong>头取数据会被阻塞。因为此时还没有数据可取，直到队列中有了数据才能返回；如果队列已经满了，那么插入数据的操作就会被阻塞，直到队列中有空闲位置后再</strong></p>
+<p><strong>插入数据，然后再返回。</strong></p>
 <p>CPU：</p>
 <p>线程池里面当任务满时，此时又来一个新任务，线程池是如何处理的？具体有哪些策略？这些策略又是如何实现的呢？</p>
 <p>有几种处理策略：</p>
@@ -1437,123 +1566,6 @@
     <footer class="article-footer">
        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Boot/" rel="tag">Spring Boot</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D/" rel="tag">自动装配</a></li></ul>
-
-    </footer>
-  </div>
-
-    
- 
-    
-</article>
-
-    
-    <article
-  id="post-04-00-01-Spring-Boot自动装配原理"
-  class="article article-type-post"
-  itemscope
-  itemprop="blogPost"
-  data-scroll-reveal
->
-  <div class="article-inner">
-    
-    <header class="article-header">
-       
-<h2 itemprop="name">
-  <a class="article-title" href="/2021/12/18/04-00-01-Spring-Boot%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D%E5%8E%9F%E7%90%86/"
-    >Spring Boot自动装配原理</a> 
-</h2>
- 
-
-      
-    </header>
-     
-    <div class="article-meta">
-      <a href="/2021/12/18/04-00-01-Spring-Boot%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D%E5%8E%9F%E7%90%86/" class="article-date">
-  <time datetime="2021-12-18T02:47:33.000Z" itemprop="datePublished">2021-12-18</time>
-</a> 
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/Spring-Boot/">Spring Boot</a> / <a class="article-category-link" href="/categories/Java/Spring-Boot/%E5%BE%AE%E6%9C%8D%E5%8A%A1/">微服务</a>
-  </div>
-   
-    </div>
-      
-    <div class="article-entry" itemprop="articleBody">
-       
-  <p id="hitokoto">正在加载一言...</p> 
-      <!-- reward -->
-      
-    </div>
-    
-
-    <!-- copyright -->
-    
-    <footer class="article-footer">
-       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Boot/" rel="tag">Spring Boot</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D/" rel="tag">自动装配</a></li></ul>
-
-    </footer>
-  </div>
-
-    
- 
-    
-</article>
-
-    
-    <article
-  id="post-pdf-preview"
-  class="article article-type-post"
-  itemscope
-  itemprop="blogPost"
-  data-scroll-reveal
->
-  <div class="article-inner">
-    
-    <header class="article-header">
-       
-<h2 itemprop="name">
-  <a class="article-title" href="/2021/12/13/pdf-preview/"
-    >pdf预览</a> 
-</h2>
- 
-
-      
-    </header>
-     
-    <div class="article-meta">
-      <a href="/2021/12/13/pdf-preview/" class="article-date">
-  <time datetime="2021-12-13T13:37:55.000Z" itemprop="datePublished">2021-12-13</time>
-</a> 
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/%E5%85%B6%E4%BB%96/">其他</a> / <a class="article-category-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a>
-  </div>
-   
-    </div>
-      
-    <div class="article-entry" itemprop="articleBody">
-       
-  <p id="hitokoto">正在加载一言...</p>
-
-
-
-	<div class="row">
-    <embed src="alibaba.pdf" width="100%" height="550" type="application/pdf">
-	</div>
-
-
-
-
- 
-      <!-- reward -->
-      
-    </div>
-    
-
-    <!-- copyright -->
-    
-    <footer class="article-footer">
-       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pdf/" rel="tag">pdf</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%96%87%E4%BB%B6%E9%A2%84%E8%A7%88/" rel="tag">文件预览</a></li></ul>
 
     </footer>
   </div>
