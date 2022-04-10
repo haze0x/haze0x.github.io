@@ -133,7 +133,7 @@
 <p><strong>调度算法分为两类：</strong></p>
 <ul>
 <li><strong>非抢占式调度算法</strong>挑选一个进程，然后让该进程运行直到被阻塞，才会调用另外一个进程，也就是说不会理时钟中断这个事情。</li>
-<li>抢占式调度算法挑选要给进程，然后让该进程只运行某段时间，如果在该时段结束时，该进程仍然在运行时，则会把它挂起，接着调度程序从就绪队列中挑选另外一个进程，这种抢占式调度处理，需要在时间间隔的末端发生<strong>时钟中断</strong>，以便把cpu控制返回给调度程序进行调度，这就是常说的<strong>时间片机制</strong>。</li>
+<li>抢占式调度算法挑选一个进程，然后让该进程只运行某段时间，如果在该时段结束时，该进程仍然在运行时，则会把它挂起，接着调度程序从就绪队列中挑选另外一个进程，这种抢占式调度处理，需要在时间间隔的末端发生<strong>时钟中断</strong>，以便把cpu控制返回给调度程序进行调度，这就是常说的<strong>时间片机制</strong>。</li>
 </ul>
 <p><strong>以什么原则来调度进程</strong></p>
 <p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215344419.png"></p>
@@ -394,7 +394,7 @@
 <li>第三次挥手：服务端将最后数据(比如50个字节)发送完毕后就向客户端发出连接释放报文，报文包含FIN和ACK标志位(FIN=1,ACK=1)、确认号和第二次挥手一样ack=1102、序列号seq=2350(2300+50)。</li>
 <li>第四次挥手：客户端收到服务端发的FIN报文后，向服务端发出确认报文，确认报文包含ACK标志位(ACK=1)、确认号ack=2351、序列号seq=1102。注意客户端发出确认报文后不是立马释放TCP连接，而是要经过2MSL(最长报文段寿命的2倍时长)后才释放TCP连接。而服务端一旦收到客户端发出的确认报文就会立马释放TCP连接，所以服务端结束TCP连接的时间要比客户端早一些。</li>
 </ul>
-<h3 id="4、字节流的协议"><a href="#4、字节流的协议" class="headerlink" title="4、字节流的协议"></a>4、字节流的协议</h3><p>TCP把应用交付的数据仅仅看成时一连串的无结构的字节流，TCP并不知道字节流的含义，TCP并不关心应用程序一次将多大的报文发送到TCP的缓存中，而是根据对方给出的窗口值和当前网络拥堵的程度来决 定一个报文段应该包含多少个字节。 </p>
+<h3 id="4、字节流的协议"><a href="#4、字节流的协议" class="headerlink" title="4、字节流的协议"></a>4、字节流的协议</h3><p>TCP把应用交付的数据仅仅看成是一连串的无结构的字节流，TCP并不知道字节流的含义，TCP并不关心应用程序一次将多大的报文发送到TCP的缓存中，而是根据对方给出的窗口值和当前网络拥堵的程度来决 定一个报文段应该包含多少个字节。 </p>
 <p><strong>MSS: Max Segment Size, 默认 536byte 实际数据</strong></p>
 <p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404103821430.png" alt="TCP数据传输"></p>
 <h3 id="5、数据可靠性传输"><a href="#5、数据可靠性传输" class="headerlink" title="5、数据可靠性传输"></a>5、数据可靠性传输</h3><ol>
@@ -1135,12 +1135,26 @@
 <p>Stack(栈) = LPUSH + LPOP</p>
 <p>Queue(队列）= LPUSH + RPOP</p>
 <p>Blocking MQ(阻塞队列）= LPUSH + BRPOP</p>
-<p><code>redis List数据结构实现方式</code></p>
+<p><code>redis List数据结构为什么不用链表实现</code></p>
 <p>List数据结构可以使用数组和链表实现，redis底层为什么不用链表来实现list呢？</p>
 <ul>
 <li>1)胖指针问题，链表需要存储下一个元素指针，这个通常占用较大空间</li>
 <li>2)链表数据随机存储，产生大量的内存碎片，没法很好的利用cpu读取内存的空间局部性原理</li>
 </ul>
+<p><code>ziplist</code></p>
+<p>zlbytes：4个字节，标识当前ziplist存多少数据</p>
+<p>zltail：4个字节，尾节点的索引的位置，可以通过o(1)的时间复杂度找到尾结点，方便从尾到头遍历</p>
+<p>zllen：当前ziplist有多少个元素</p>
+<p>zlend：恒等于255，标识数据结尾</p>
+<p>entry：包含三个部分，prerawlen：前面元素的信息，方便从前往后，从后往前遍历；len：当前数据的信息，例如类型</p>
+<p>ziplist：是一个非常紧凑的二进制数据结构，Redis并没有直接将数据存储在ziplist中。</p>
+<p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/ziplist.png" alt="ziplist"></p>
+<p><code>quicklist双端链表 + ziplist</code></p>
+<p>双端链表：把整个ziplist分块，用链表对其关联，每一个链表的节点对应非常多的元素，包含头节点head，尾节点tail;</p>
+<p>quicklistNode：存放每个节点的信息</p>
+<p>每个ziplist数据越来越多的时候，ziplist也会进行分裂，分裂成多个节点，具体多大就分裂，参考下面配置list-max-ziplist-size参数</p>
+<p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/quicklist.png" alt="quicklist"></p>
+<p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/image-20220409233909847.png"></p>
 ]]></content>
       <categories>
         <category>Java</category>
@@ -1154,7 +1168,7 @@
   </entry>
   <entry>
     <title>Redis核心数据结构及高性能原理</title>
-    <url>/2022/04/09/0303-00-00-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%8F%8A%E9%AB%98%E6%80%A7%E8%83%BD%E5%8E%9F%E7%90%86/</url>
+    <url>/2022/04/09/03-00-00-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%8F%8A%E9%AB%98%E6%80%A7%E8%83%BD%E5%8E%9F%E7%90%86/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h2 id="Redis核心数据结构及高性能原理"><a href="#Redis核心数据结构及高性能原理" class="headerlink" title="Redis核心数据结构及高性能原理"></a>Redis核心数据结构及高性能原理</h2>]]></content>
       <categories>
         <category>Java</category>
@@ -1164,6 +1178,24 @@
       <tags>
         <tag>Java</tag>
         <tag>Redis</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>操作系统&amp;网络&amp;基础数据结构总结</title>
+    <url>/2022/04/10/09-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E7%BD%91%E7%BB%9C-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E6%80%BB%E7%BB%93/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p><img src="/2022/04/10/09-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E7%BD%91%E7%BB%9C-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E6%80%BB%E7%BB%93/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E3%80%81%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E3%80%81%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E6%80%BB%E7%BB%93.png" alt="操作系统、计算机网络、基本数据结构总结"></p>
+]]></content>
+      <categories>
+        <category>Java</category>
+        <category>操作系统</category>
+        <category>学习计划</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>操作系统</tag>
+        <tag>计算机网络</tag>
+        <tag>基础数据结构</tag>
+        <tag>总结</tag>
       </tags>
   </entry>
 </search>

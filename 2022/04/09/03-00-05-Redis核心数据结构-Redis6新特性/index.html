@@ -86,7 +86,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">622</span>
+            <span class="post-count">875</span>
         </span>
     </span>
 
@@ -95,7 +95,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> Reading time≈</span>
-            <span class="post-count">2 min</span>
+            <span class="post-count">3 min</span>
         </span>
     </span>
 </div>
@@ -130,12 +130,26 @@
 <p>Stack(栈) = LPUSH + LPOP</p>
 <p>Queue(队列）= LPUSH + RPOP</p>
 <p>Blocking MQ(阻塞队列）= LPUSH + BRPOP</p>
-<p><code>redis List数据结构实现方式</code></p>
+<p><code>redis List数据结构为什么不用链表实现</code></p>
 <p>List数据结构可以使用数组和链表实现，redis底层为什么不用链表来实现list呢？</p>
 <ul>
 <li>1)胖指针问题，链表需要存储下一个元素指针，这个通常占用较大空间</li>
 <li>2)链表数据随机存储，产生大量的内存碎片，没法很好的利用cpu读取内存的空间局部性原理</li>
 </ul>
+<p><code>ziplist</code></p>
+<p>zlbytes：4个字节，标识当前ziplist存多少数据</p>
+<p>zltail：4个字节，尾节点的索引的位置，可以通过o(1)的时间复杂度找到尾结点，方便从尾到头遍历</p>
+<p>zllen：当前ziplist有多少个元素</p>
+<p>zlend：恒等于255，标识数据结尾</p>
+<p>entry：包含三个部分，prerawlen：前面元素的信息，方便从前往后，从后往前遍历；len：当前数据的信息，例如类型</p>
+<p>ziplist：是一个非常紧凑的二进制数据结构，Redis并没有直接将数据存储在ziplist中。</p>
+<p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/ziplist.png" alt="ziplist"></p>
+<p><code>quicklist双端链表 + ziplist</code></p>
+<p>双端链表：把整个ziplist分块，用链表对其关联，每一个链表的节点对应非常多的元素，包含头节点head，尾节点tail;</p>
+<p>quicklistNode：存放每个节点的信息</p>
+<p>每个ziplist数据越来越多的时候，ziplist也会进行分裂，分裂成多个节点，具体多大就分裂，参考下面配置list-max-ziplist-size参数</p>
+<p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/quicklist.png" alt="quicklist"></p>
+<p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/image-20220409233909847.png"></p>
  
       <!-- reward -->
       
@@ -213,8 +227,17 @@
    
   <nav class="article-nav">
     
+      <a href="/2022/04/10/09-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E7%BD%91%E7%BB%9C-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E6%80%BB%E7%BB%93/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            操作系统&amp;网络&amp;基础数据结构总结
+          
+        </div>
+      </a>
     
-      <a href="/2022/04/09/0303-00-00-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%8F%8A%E9%AB%98%E6%80%A7%E8%83%BD%E5%8E%9F%E7%90%86/" class="article-nav-link">
+    
+      <a href="/2022/04/09/03-00-00-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%8F%8A%E9%AB%98%E6%80%A7%E8%83%BD%E5%8E%9F%E7%90%86/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
         <div class="article-nav-title">Redis核心数据结构及高性能原理</div>
       </a>
