@@ -248,7 +248,7 @@
 
 
 
-]]></content>
+<object data="./alibaba.pdf" type="application/pdf" width="100%" height="100%"></object>]]></content>
       <categories>
         <category>其他</category>
         <category>工具</category>
@@ -1183,7 +1183,15 @@
   <entry>
     <title>操作系统&amp;网络&amp;基础数据结构总结</title>
     <url>/2022/04/10/09-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E7%BD%91%E7%BB%9C-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E6%80%BB%E7%BB%93/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p><img src="/2022/04/10/09-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E7%BD%91%E7%BB%9C-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E6%80%BB%E7%BB%93/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E3%80%81%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E3%80%81%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E6%80%BB%E7%BB%93.png" alt="操作系统、计算机网络、基本数据结构总结"></p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script>
+
+	<div class="row">
+    <embed src="summary_01.png" width="100%" height="550" type="application/pdf">
+	</div>
+
+
+
+
 ]]></content>
       <categories>
         <category>Java</category>
