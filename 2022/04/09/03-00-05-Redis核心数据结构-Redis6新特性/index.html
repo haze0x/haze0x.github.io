@@ -86,7 +86,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">875</span>
+            <span class="post-count">1k</span>
         </span>
     </span>
 
@@ -144,12 +144,15 @@
 <p>entry：包含三个部分，prerawlen：前面元素的信息，方便从前往后，从后往前遍历；len：当前数据的信息，例如类型</p>
 <p>ziplist：是一个非常紧凑的二进制数据结构，Redis并没有直接将数据存储在ziplist中。</p>
 <p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/ziplist.png" alt="ziplist"></p>
-<p><code>quicklist双端链表 + ziplist</code></p>
+<p><code>quicklist双端链表 + ziplist 实现Redis list存储</code></p>
 <p>双端链表：把整个ziplist分块，用链表对其关联，每一个链表的节点对应非常多的元素，包含头节点head，尾节点tail;</p>
 <p>quicklistNode：存放每个节点的信息</p>
 <p>每个ziplist数据越来越多的时候，ziplist也会进行分裂，分裂成多个节点，具体多大就分裂，参考下面配置list-max-ziplist-size参数</p>
 <p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/quicklist.png" alt="quicklist"></p>
 <p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/image-20220409233909847.png"></p>
+<h3 id="3、Hash数据结构"><a href="#3、Hash数据结构" class="headerlink" title="3、Hash数据结构"></a>3、Hash数据结构</h3><p>Hash 数据结构底层实现为一个字典( dict ),也是RedisBb用来存储K-V的数据结构,当数据量比较小，或者单个元素比较小时，底层用ziplist存储，数据大小和元素数量阈值可以通过如下参数设置</p>
+<p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/image-20220410162948512.png" alt="image-20220410162948512"></p>
+<p>hash-max-ziplist-entries  512    //  ziplist 元素个数超过 512 ，将改为hashtable编码 【即使用hashtable存储】<br>hash-max-ziplist-value    64      //  单个元素大小超过 64 byte时，将改为hashtable编码</p>
  
       <!-- reward -->
       
