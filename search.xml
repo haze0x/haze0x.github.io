@@ -1355,4 +1355,102 @@
         <tag>Jvm</tag>
       </tags>
   </entry>
+  <entry>
+    <title>Jvm内存模型深度剖析与优化</title>
+    <url>/2022/04/14/00-00-02-Jvm%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h2 id="Jvm内存模型深度剖析与优化"><a href="#Jvm内存模型深度剖析与优化" class="headerlink" title="Jvm内存模型深度剖析与优化"></a>Jvm内存模型深度剖析与优化</h2><p><img src="/2022/04/14/00-00-02-Jvm%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96/clipboard.png"></p>
+<p><strong>Java语言的跨平台特性</strong></p>
+<p><img src="/2022/04/14/00-00-02-Jvm%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96/clipboard-1650033076633.png" alt="img"></p>
+<p><strong>JVM整体结构及内存模型</strong></p>
+<p><img src="/2022/04/14/00-00-02-Jvm%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96/jvm%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B.png" alt="img"></p>
+<p><strong>栈帧结构：</strong></p>
+<p>局部变量表：存放局部变量</p>
+<p>操作数栈：存放运算时的操作数</p>
+<p>方法出口：方法执行完回到方法的初始位置，这个位置在调用方法的时候就已经记录到方法出口了</p>
+<p>动态链接：区别于静态链接【静态链接是类加载过程中，符号引用替换为直接引用，比如 public main 等符号转化为原空间的地址】，动态链接是运行过程中，把符号引用转换成符号对应的代码的直接地址，比如上节课的main方法的 compute()方法</p>
+<p><strong>虚拟机栈和堆之间的关系：</strong></p>
+<p>堆中存放着虚拟机栈中的对象，虚拟机栈存放的是队中对象的引用</p>
+<p><strong>方法区和堆之间的关系：</strong></p>
+<p>方法区里面主要存放一些常量信息、静态变量和类元信息，堆中才是存放的实际对象，方法区里面存放的常量信息实际是d堆中对象的地址</p>
+<p><strong>本地方法栈：</strong></p>
+<p>存放调用本地方法的一些内存</p>
+<p><strong>补充一个问题：</strong></p>
+<p><strong>在minor gc过程中对象挪动后，引用如何修改？</strong></p>
+<p>对象在堆内部挪动的过程其实是复制，原有区域对象还在，一般不直接清理，JVM内部清理过程只是将对象分配指针移动到区域的头位置即可，比如扫描s0区域，扫到gcroot引用的非垃圾对象是将这些对象<strong>复制</strong>到s1或老年代，最后扫描完了将s0区域的对象分配指针移动到区域的起始位置即可，s0区域之前对象并不直接清理，当有新对象分配了，原有区域里的对象也就被清除了。</p>
+<p>minor gc在根扫描过程中会记录所有被扫描到的对象引用(在年轻代这些引用很少，因为大部分都是垃圾对象不会扫描到)，如果引用的对象被复制到新地址了，最后会一并更新引用指向新地址。</p>
+<p>这里面内部算法比较复杂，感兴趣可以参考R大的这篇文章：</p>
+<p><a href="https://www.zhihu.com/question/42181722/answer/145085437">https://www.zhihu.com/question/42181722/answer/145085437</a></p>
+<p><a href="https://hllvm-group.iteye.com/group/topic/39376#post-257329">https://hllvm-group.iteye.com/group/topic/39376#post-257329</a></p>
+<p><strong>二、JVM内存参数设置</strong></p>
+<p><img src="/2022/04/14/00-00-02-Jvm%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96/clipboard-1650033076634.png" alt="img"></p>
+<p>Spring Boot程序的JVM参数设置格式(Tomcat启动直接加在bin目录下catalina.sh文件里)：</p>
+<p>java -Xms2048M -Xmx2048M -Xmn1024M -Xss512K -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=256M -jar microservice-eureka-server.jar</p>
+<p>-Xss：每个线程的栈大小</p>
+<p>-Xms：设置堆的初始可用大小，默认物理内存的1/64 </p>
+<p>-Xmx：设置堆的最大可用大小，默认物理内存的1/4</p>
+<p>-Xmn：新生代大小</p>
+<p>-XX:NewRatio：默认2表示新生代占年老代的1/2，占整个堆内存的1/3。</p>
+<p>-XX:SurvivorRatio：默认8表示一个survivor区占用1/8的Eden内存，即1/10的新生代内存。</p>
+<p>关于元空间的JVM参数有两个：-XX:MetaspaceSize=N和 -XX:MaxMetaspaceSize=N</p>
+<p><strong>-XX：MaxMetaspaceSize</strong>： 设置元空间最大值， 默认是-1， 即不限制， 或者说只受限于本地内存大小。</p>
+<p><strong>-XX：MetaspaceSize</strong>： 指定元空间触发Fullgc的初始阈值(元空间无固定初始大小)， 以字节为单位，默认是21M左右，达到该值就会触发full gc进行类型卸载， 同时收集器会对该值进行调整： 如果释放了大量的空间， 就适当降低该值； 如果释放了很少的空间， 那么在不超过-XX：MaxMetaspaceSize（如果设置了的话） 的情况下， 适当提高该值。这个跟早期jdk版本的**-XX:PermSize**参数意思不一样，-<strong>XX:PermSize</strong>代表永久代的初始容量。</p>
+<p>由于调整元空间的大小需要Full GC，这是非常昂贵的操作，如果应用在启动的时候发生大量Full GC，通常都是由于永久代或元空间发生了大小调整，基于这种情况，一般建议在JVM参数中将MetaspaceSize和MaxMetaspaceSize设置成一样的值，并设置得比初始值要大，对于8G物理内存的机器来说，一般我会将这两个值都设置为256M。</p>
+<p><strong>StackOverflowError</strong>示例：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// JVM设置  -Xss128k(默认1M)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">StackOverflowTest</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">redo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        count++;</span><br><span class="line">        redo();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            redo();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable t) &#123;</span><br><span class="line">            t.printStackTrace();</span><br><span class="line">            System.out.println(count);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">运行结果：</span><br><span class="line">java.lang.StackOverflowError</span><br><span class="line">	at com.tuling.jvm.StackOverflowTest.redo(StackOverflowTest.java:<span class="number">12</span>)</span><br><span class="line">	at com.tuling.jvm.StackOverflowTest.redo(StackOverflowTest.java:<span class="number">13</span>)</span><br><span class="line">	at com.tuling.jvm.StackOverflowTest.redo(StackOverflowTest.java:<span class="number">13</span>)</span><br><span class="line">   ......</span><br></pre></td></tr></table></figure>
+
+<p><strong>结论：</strong></p>
+<p>-Xss设置越小count值越小，说明一个线程栈里能分配的栈帧就越少，但是对JVM整体来说能开启的线程数会更多</p>
+<p><strong>JVM内存参数大小该如何设置？</strong></p>
+<p>JVM参数大小设置并没有固定标准，需要根据实际项目情况分析，给大家举个例子</p>
+<p><strong>日均百万级订单交易系统如何设置JVM参数</strong></p>
+<p><img src="/2022/04/14/00-00-02-Jvm%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96/%E4%BA%BF%E7%BA%A7%E6%B5%81%E9%87%8F%E7%94%B5%E5%95%86%E7%B3%BB%E7%BB%9Fjvm%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE%E4%BC%98%E5%8C%96.png" alt="img"></p>
+<p><strong>结论：****通过上面这些内容介绍，大家应该对JVM优化有些概念了，就是尽可能让对象都在新生代里分配和回收，尽量别让太多对象频繁进入老年代，避免频繁对老年代进行垃圾回收，同时给系统充足的内存大小，避免新生代频繁的进行垃圾回收。</strong></p>
+<p>每日总结：</p>
+<p>1、JDK体系结构及跨平台性：Jdk包含JRE【java运行时环境】，java语言的跨平台性，jvm在windows和linux上各自有对应的实现，javac编译的字节码文件可以运行在windows和linux环境，jvm屏蔽了底层操作系统的细节，使得java代码可以实现一次编译，到处运行。</p>
+<p>2、Jvm整体结构和内存模型：Jvm分为三部分：类加载子系统【装载class类文件】、运行时数据区【Jvm内存区域】、执行引擎【执行字节码指令】</p>
+<p>3、Jvm内存模型详解：</p>
+<p>1)方法区：也叫元空间，存放class文件的地方</p>
+<p>2)堆：存放内存对象</p>
+<p>3)虚拟机栈：一个线程运行对应一个栈，线程内的方法对应一个栈帧【非嵌套】，栈帧包含：局部变量表、操作数栈、动态链接、方法出口</p>
+<p>4)程序计数器：指针指令执行的行号。</p>
+<p>5)本地方法栈</p>
+<p>每日总结：</p>
+<p>1、jvm内存模型详解</p>
+<p>共享</p>
+<p>方法区【原空间】：存放常量+静态变量+类信息</p>
+<p>堆：存放对象的地方</p>
+<p>线程独占</p>
+<p>程序计数器：指示程序执行的行号，线程上下文切换时可以通过程序计数器回复线程执行</p>
+<p>本地方法栈：存放执行本地native方法的变量</p>
+<p>虚拟机栈：一个线程运行对应一个栈，线程内的方法对应一个栈帧【非嵌套】，</p>
+<p>栈帧包含：</p>
+<p>局部变量表：存放局部变量</p>
+<p>操作数栈：存放运算时的操作数</p>
+<p>方法出口：方法执行完回到方法的初始位置，这个位置在调用方法的时候就已经记录到方法出口了</p>
+<p>动态链接：区别于静态链接【静态链接是类加载过程中，符号引用替换为直接引用，比如 public main 等符号转化为原空间的地址】，动态链接是运行过程中，把符号引用转换成符号对应的代码的直接地址，比如上节课的main方法的 compute()方法</p>
+<p>2、堆区内存模型</p>
+<p>堆=新生代【eden(8/10)+s0(1/10)+s1(1/10)】+老年代</p>
+<p>新生代：老年代=1：2</p>
+<p>3、JVM内存参数配置</p>
+<p>-Xss：每个线程的栈大小</p>
+<p>-Xms：设置堆的初始可用大小，默认物理内存的1/64 </p>
+<p>-Xmx：设置堆的最大可用大小，默认物理内存的1/4</p>
+<p>-Xmn：新生代大小</p>
+<p>-XX:NewRatio：默认2表示新生代占年老代的1/2，占整个堆内存的1/3。</p>
+<p>-XX:SurvivorRatio：默认8表示一个survivor区占用1/8的Eden内存，即1/10的新生代内存。</p>
+<p>关于元空间的JVM参数有两个：-XX:MetaspaceSize=N和 -XX:MaxMetaspaceSize=N</p>
+<p><strong>-XX：MaxMetaspaceSize</strong>： 设置元空间最大值， 默认是-1， 即不限制， 或者说只受限于本地内存大小。</p>
+<p><strong>-XX：MetaspaceSize</strong>： 指定元空间触发Fullgc的初始阈值(元空间无固定初始大小)， 以字节为单位，默认是21M左右，达到该值就会触发full gc进行类型卸载， 同时收集器会对该值进行调整： 如果释放了大量的空间， 就适当降低该值； 如果释放了很少的空间， 那么在不超过-XX：MaxMetaspaceSize（如果设置了的话） 的情况下， 适当提高该值。这个跟早期jdk版本的**-XX:PermSize**参数意思不一样，-<strong>XX:PermSize</strong>代表永久代的初始容量。</p>
+<p>由于调整元空间的大小需要Full GC，这是非常昂贵的操作，如果应用在启动的时候发生大量Full GC，通常都是由于永久代或元空间发生了大小调整，基于这种情况，一般建议在JVM参数中将MetaspaceSize和MaxMetaspaceSize设置成一样的值，并设置得比初始值要大，对于8G物理内存的机器来说，一般我会将这两个值都设置为256M。</p>
+]]></content>
+      <categories>
+        <category>Java</category>
+        <category>性能调优</category>
+        <category>Jvm</category>
+        <category>学习计划</category>
+      </categories>
+      <tags>
+        <tag>Jvm</tag>
+      </tags>
+  </entry>
 </search>
