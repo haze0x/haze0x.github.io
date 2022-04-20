@@ -1630,4 +1630,51 @@
         <tag>Jvm</tag>
       </tags>
   </entry>
+  <entry>
+    <title>Jvm总结</title>
+    <url>/2022/04/20/00-00-04-Jvm%E6%80%BB%E7%BB%93/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script>
+
+	<div class="row">
+    <embed src="Jvm-xmind.png" width="100%" height="550" type="application/pdf">
+	</div>
+
+
+]]></content>
+      <categories>
+        <category>Java</category>
+        <category>性能调优</category>
+        <category>Jvm</category>
+        <category>学习计划</category>
+      </categories>
+      <tags>
+        <tag>Jvm</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>垃圾收集器ParNew&amp;CMS与底层三色标记算法详解</title>
+    <url>/2022/04/19/00-00-05-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8ParNew-CMS%E4%B8%8E%E5%BA%95%E5%B1%82%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h2 id="每日总结"><a href="#每日总结" class="headerlink" title="每日总结"></a>每日总结</h2><p>1、JVM垃圾收集算法</p>
+<p>标记-复制算法：将内存区域分为大小想等的两块区域，每次垃圾回收只针对其中一块区域，将存活对象移到到另外一块区域，然后在把使用过的区域清除掉，这样每次的回收就是对内存区域的一半进行回收。优点：回收效率高，速度快；缺点：浪费空间</p>
+<p>标记-清除算法：分为标记和清除两部分，标记存活的对象（也可以标记垃圾对象），统一回收所有未被标记的对象，也可以反过来。缺点：效率问题，如果需要比较的对象很多，效率不高；空间问题：标记清除后会产生大量不连续的内存碎片</p>
+<p>标记-整理算法：标记过程和标记-清除算法一样，只是后续回收过程是把所有标记为存活的对象统一移动到一端，然后直接清理掉边界以外的内存。</p>
+<p>分代收集理论：没有具体的算法，只是一个理论，根据老年代和年轻代的特点，采用不同的策略做垃圾回收。比如针对年轻代每次有99%的对象会死亡，采用复制算法只需要付出少量对象的复制成本就可以完成每次垃圾收集。而老年代的对象存活几率是比较高的，而且没有额外的空间对它进行分配担保，所以我们必须选择“标记-清除”或“标记-整理”算法进行垃圾收集。注意，“标记-清除”或“标记-整理”算法会比复制算法慢10倍以上。</p>
+<p>2、垃圾收集器</p>
+<p>垃圾收集器是垃圾收集算法的具体实现。</p>
+<p>serial垃圾收集器：串行单线程收集器，适用于管理的内存比较小，比如几十M左右。年轻代采用复制算法，老年代采用标记整理算法。优点是简单。Serial Old是其老年代的垃圾收集器，同样是一个单线程收集器。</p>
+<p>parallel Scavenge收集器：parallel是serial垃圾收集器的多线程版本，其关注的是吞吐量【即用户程序执行时间和总时间的比值】，新生代采用复制算法，老年代采用标记-整理算法。jdk1.8默认的垃圾收集器</p>
+<p>parnew收集器：跟parallel收集器很像，区别主要是它可以配合cms垃圾收集器使用，新生代采用标记复制，老年代采用标记-整理。</p>
+<p>CMS垃圾收集器：真正意义上的并行收集器。分为几个阶段1)初始标记：标记与gc root直接相连的对象，此阶段会产生stw。2）并发标记：用户线程和垃圾收集线程同时运行，从GC Roots的直接关联对象开始遍历整个对象图的过程，这个过程耗时较长但是不需要停顿用户线程 ，可以与垃圾收集线程一起并发运行。因为用户程序继续运行，可能会有导致已经标记过的对象状态发生改变。【并发的原因，提升用户体验，减少停顿时间】。3)重新标记：重新标记阶段就是为了修正并发标记期间因为用户程序继续运行而导致标记产生变动的那一部分对象的标记记录，这个阶段的停顿时间一般会比初始标记阶段的时间稍长，远远比并发标记阶段时间短。主要用到三色标记里的增量更新算法(见下面详解)做重新标记。 4）并发清理： 开启用户线程，同时GC线程开始对未标记的区域做清扫。这个阶段如果有新增对象会被标记为黑色不做任何处理(见下面三色标记算法详解)。5）并发重置：重置本次GC过程中的标记数据。</p>
+<p>优点：以最小用户停顿时间为目标，对用户体验友好；缺点：1）gc线程和用户线程同时运行，争抢服务器资源，对资源比较敏感2）无法处理浮动垃圾，即并发标记和并发清理阶段又产生的垃圾无法处理，只能下一次垃圾回收处理。3)老年代使用标记-清理算法会产生大量的垃圾碎片。4）可能发生concurrent mode failure的情况，在进行并发标记和并发清理时，由于用户程序也在运行导致可能在次触发gc，从而导致使用serial old串行收集器进行内存回收</p>
+]]></content>
+      <categories>
+        <category>Java</category>
+        <category>性能调优</category>
+        <category>Jvm</category>
+        <category>学习计划</category>
+      </categories>
+      <tags>
+        <tag>Jvm</tag>
+      </tags>
+  </entry>
 </search>
