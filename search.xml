@@ -1772,7 +1772,7 @@
 
 <p><img src="/2022/04/19/00-00-05-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8ParNew-CMS%E4%B8%8E%E5%BA%95%E5%B1%82%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/clipboard-1650554820731.png" alt="img"></p>
 <p><strong>优化原则：</strong>让短期存活的对象尽量都留在survivor里，不要进入老年代，这样在minor gc的时候这些对象都会被回收，不会进到老年代从而导致full gc**。</p>
-<p><strong>优化手段</strong>：1、降低对象进入老年代的gc分代年龄</p>
+<p><strong>优化手段</strong>：1、降低对象进入老年代的gc分代年龄 2、提高年轻代内存占比</p>
 <p>对于对象年龄应该为多少才移动到老年代比较合适，本例中一次minor gc要间隔二三十秒，大多数对象一般在几秒内就会变为垃圾，完全可以将默认的15岁改小一点，比如改为5，那么意味着对象要经过5次minor gc才会进入老年代，整个时间也有一两分钟了，如果对象这么长时间都没被回收，完全可以认为这些对象是会存活的比较长的对象，可以移动到老年代，而不是继续一直占用survivor区空间。</p>
 <p>对于多大的对象直接进入老年代(参数-XX:PretenureSizeThreshold)，这个一般可以结合你自己系统看下有没有什么大对象生成，预估下大对象的大小，一般来说设置为1M就差不多了，很少有超过1M的大对象，这些对象一般就是你系统初始化分配的缓存对象，比如大的缓存List，Map之类的对象。</p>
 <p>可以适当调整JVM参数如下：</p>
@@ -1869,6 +1869,20 @@
 <p>CMS垃圾收集器：真正意义上的并行收集器。分为几个阶段1)初始标记：标记与gc root直接相连的对象，此阶段会产生stw。2）并发标记：用户线程和垃圾收集线程同时运行，从GC Roots的直接关联对象开始遍历整个对象图的过程，这个过程耗时较长但是不需要停顿用户线程 ，可以与垃圾收集线程一起并发运行。因为用户程序继续运行，可能会有导致已经标记过的对象状态发生改变。【并发的原因，提升用户体验，减少停顿时间】。3)重新标记：重新标记阶段就是为了修正并发标记期间因为用户程序继续运行而导致标记产生变动的那一部分对象的标记记录，这个阶段的停顿时间一般会比初始标记阶段的时间稍长，远远比并发标记阶段时间短。主要用到三色标记里的增量更新算法(见下面详解)做重新标记。 4）并发清理： 开启用户线程，同时GC线程开始对未标记的区域做清扫。这个阶段如果有新增对象会被标记为黑色不做任何处理(见下面三色标记算法详解)。5）并发重置：重置本次GC过程中的标记数据。</p>
 <p>优点：以最小用户停顿时间为目标，对用户体验友好；缺点：1）gc线程和用户线程同时运行，争抢服务器资源，对资源比较敏感2）无法处理浮动垃圾，即并发标记和并发清理阶段又产生的垃圾无法处理，只能下一次垃圾回收处理。3)老年代使用标记-清理算法会产生大量的垃圾碎片。4）可能发生concurrent mode failure的情况，在进行并发标记和并发清理时，由于用户程序也在运行导致可能在次触发gc，从而导致使用serial old串行收集器进行内存回收</p>
 ]]></content>
+      <categories>
+        <category>Java</category>
+        <category>性能调优</category>
+        <category>Jvm</category>
+        <category>学习计划</category>
+      </categories>
+      <tags>
+        <tag>Jvm</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>垃圾收集器G1&amp;ZGC详解</title>
+    <url>/2022/04/22/00-00-06-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8G1-ZGC%E8%AF%A6%E8%A7%A3/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script>]]></content>
       <categories>
         <category>Java</category>
         <category>性能调优</category>

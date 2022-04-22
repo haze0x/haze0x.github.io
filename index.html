@@ -151,6 +151,59 @@
     
     
     <article
+  id="post-00-00-06-垃圾收集器G1-ZGC详解"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2022/04/22/00-00-06-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8G1-ZGC%E8%AF%A6%E8%A7%A3/"
+    >垃圾收集器G1&amp;ZGC详解</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/04/22/00-00-06-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8G1-ZGC%E8%AF%A6%E8%A7%A3/" class="article-date">
+  <time datetime="2022-04-22T14:05:12.000Z" itemprop="datePublished">2022-04-22</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/">性能调优</a> / <a class="article-category-link" href="/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/Jvm/">Jvm</a> / <a class="article-category-link" href="/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/Jvm/%E5%AD%A6%E4%B9%A0%E8%AE%A1%E5%88%92/">学习计划</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+   
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Jvm/" rel="tag">Jvm</a></li></ul>
+
+    </footer>
+  </div>
+
+    
+ 
+    
+</article>
+
+    
+    <article
   id="post-00-00-04-Jvm总结"
   class="article article-type-post"
   itemscope
@@ -360,7 +413,7 @@
 
 <p><img src="/2022/04/19/00-00-05-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8ParNew-CMS%E4%B8%8E%E5%BA%95%E5%B1%82%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/clipboard-1650554820731.png" alt="img"></p>
 <p><strong>优化原则：</strong>让短期存活的对象尽量都留在survivor里，不要进入老年代，这样在minor gc的时候这些对象都会被回收，不会进到老年代从而导致full gc**。</p>
-<p><strong>优化手段</strong>：1、降低对象进入老年代的gc分代年龄</p>
+<p><strong>优化手段</strong>：1、降低对象进入老年代的gc分代年龄 2、提高年轻代内存占比</p>
 <p>对于对象年龄应该为多少才移动到老年代比较合适，本例中一次minor gc要间隔二三十秒，大多数对象一般在几秒内就会变为垃圾，完全可以将默认的15岁改小一点，比如改为5，那么意味着对象要经过5次minor gc才会进入老年代，整个时间也有一两分钟了，如果对象这么长时间都没被回收，完全可以认为这些对象是会存活的比较长的对象，可以移动到老年代，而不是继续一直占用survivor区空间。</p>
 <p>对于多大的对象直接进入老年代(参数-XX:PretenureSizeThreshold)，这个一般可以结合你自己系统看下有没有什么大对象生成，预估下大对象的大小，一般来说设置为1M就差不多了，很少有超过1M的大对象，这些对象一般就是你系统初始化分配的缓存对象，比如大的缓存List，Map之类的对象。</p>
 <p>可以适当调整JVM参数如下：</p>
@@ -1328,105 +1381,6 @@
     <footer class="article-footer">
        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java/" rel="tag">Java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%98%9F%E5%88%97/" rel="tag">队列</a></li></ul>
-
-    </footer>
-  </div>
-
-    
- 
-    
-</article>
-
-    
-    <article
-  id="post-06-00-03-基础数据结构-栈"
-  class="article article-type-post"
-  itemscope
-  itemprop="blogPost"
-  data-scroll-reveal
->
-  <div class="article-inner">
-    
-    <header class="article-header">
-       
-<h2 itemprop="name">
-  <a class="article-title" href="/2022/04/08/06-00-03-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E6%A0%88/"
-    >基础数据结构-栈</a> 
-</h2>
- 
-
-      
-    </header>
-     
-    <div class="article-meta">
-      <a href="/2022/04/08/06-00-03-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E6%A0%88/" class="article-date">
-  <time datetime="2022-04-08T12:51:30.000Z" itemprop="datePublished">2022-04-08</time>
-</a> 
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a> / <a class="article-category-link" href="/categories/Java/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%AE%97%E6%B3%95/">算法</a> / <a class="article-category-link" href="/categories/Java/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%AE%97%E6%B3%95/%E5%AD%A6%E4%B9%A0%E8%AE%A1%E5%88%92/">学习计划</a>
-  </div>
-   
-    </div>
-      
-    <div class="article-entry" itemprop="articleBody">
-       
-  <h2 id="栈"><a href="#栈" class="headerlink" title="栈"></a>栈</h2><p><code>经典算法题:</code></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span>、如何设计一个括号匹配的功能？比如给你一串括号让你判断是否符合我们的括号原则，如下所示：</span><br><span class="line">[()&#123;()&#125;&#123;&#125;]符合&#123;&#125;[]&#123;[][[]</span><br><span class="line">[][]&#123;[](&#125;)</span><br><span class="line">&#123;&#125;[&#125;&#125;&#123;&#125;&#125;]]] 不符合</span><br><span class="line"><span class="number">2</span>、如何设计一个浏览器的前进和后退功能？</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span></span>&#123;</span><br><span class="line">    ## 栈数据结构处理</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isValid</span><span class="params">(String ss)</span> </span>&#123;</span><br><span class="line">        Stack&lt;Character&gt; stack = <span class="keyword">new</span> Stack&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;ss.length();i++)&#123;</span><br><span class="line">            <span class="keyword">if</span>(<span class="string">&#x27;[&#x27;</span> == ss.charAt(i) || <span class="string">&#x27;(&#x27;</span> == ss.charAt(i) || <span class="string">&#x27;&#123;&#x27;</span> == ss.charAt(i))&#123;</span><br><span class="line">                stack.push(ss.charAt(i));</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                <span class="keyword">if</span>(stack.isEmpty())&#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                Character ch = stack.pop();</span><br><span class="line">                </span><br><span class="line">                <span class="keyword">if</span>( !(ch == <span class="string">&#x27;[&#x27;</span> &amp;&amp; ss.charAt(i) == <span class="string">&#x27;]&#x27;</span>|| ch == <span class="string">&#x27;(&#x27;</span> &amp;&amp; ss.charAt(i) == <span class="string">&#x27;)&#x27;</span> || ch == <span class="string">&#x27;&#123;&#x27;</span> &amp;&amp; ss.charAt(i) == <span class="string">&#x27;&#125;&#x27;</span>))&#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> stack.isEmpty();<span class="comment">// 栈为空 才有匹配 有值  说明左括号比较多</span></span><br><span class="line">    &#125;</span><br><span class="line">    ## 字符串替换</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isValid</span><span class="params">(String ss)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">char</span> c:s.toCharArray())&#123;</span><br><span class="line">            s = s.replace(<span class="string">&quot;&#123;&#125;&quot;</span>,<span class="string">&quot;&quot;</span>).replace(<span class="string">&quot;[]&quot;</span>,<span class="string">&quot;&quot;</span>).replace(<span class="string">&quot;()&quot;</span>,<span class="string">&quot;&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> s == <span class="string">&quot;&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="1、什么是栈"><a href="#1、什么是栈" class="headerlink" title="1、什么是栈"></a>1、什么是栈</h3><p><code>如何理解栈</code></p>
-<p>比如我们在放盘子的时候都是从下往上一个个放，拿的时候是从上往下一个个的那，不能从中间抽，这种其实就是一个典型的栈型数据结构。后进先出即Last In </p>
-<p>First Out （LIFO）。</p>
-<p><code>栈如何实现</code></p>
-<p>其实它是一个限定仅在<strong>表尾</strong>进行插入和删除操作的线性表。这一端被称为栈顶，相对地，把另一端称为栈底。向一个栈插入新元素又称作进栈、入栈或压栈，它是</p>
-<p>把新元素放到栈顶元素的上面，使之成为新的栈顶元素；从一个栈删除元素又称作出栈或退栈，它是把栈顶元素删除掉，使其相邻的元素成为新的栈顶元素。</p>
-<p>栈其实就是一个特殊的链表或者数组。</p>
-<p>既然栈也是一个线性表，那么我们肯定会想到数组和链表，而且栈还有这么多限制，那为什么我们还要使用这个数据结构呢？不如直接使用数组和链表来的更直接</p>
-<p>么？数组和链表暴露太多的接口，实现上更灵活了，有些技术理解不到位的人员就可能出错。所以在某些特定场景下最好是选择栈这个数据结构。</p>
-<p>3.栈的分类</p>
-<ul>
-<li>（1）基于数组的栈——以数组为底层数据结构时，通常以数组头为栈底，数组头到数组尾为栈顶的生长方向</li>
-</ul>
-<p><img src="/2022/04/08/06-00-03-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E6%A0%88/image-20220408220827005.png" alt="基于数组的栈"></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ArrayStack</span>&lt;<span class="title">Item</span>&gt; <span class="keyword">implements</span> <span class="title">MyStack</span>&lt;<span class="title">Item</span>&gt;</span>&#123;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> Item[] a = (Item[]) <span class="keyword">new</span> Object[<span class="number">1</span>];		<span class="comment">//最好就是开始的时候就设置大小</span></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">int</span> n = <span class="number">0</span>;		<span class="comment">//大小 初始的元素个数</span></span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">ArrayStack</span><span class="params">(<span class="keyword">int</span> cap)</span> </span>&#123;</span><br><span class="line">		a = (Item[]) <span class="keyword">new</span> Object[cap];</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> MyStack&lt;Item&gt; <span class="title">push</span><span class="params">(Item item)</span> </span>&#123;	<span class="comment">//入栈就完成了		//时间复杂度 O(1)</span></span><br><span class="line">		</span><br><span class="line">		judgeSize();</span><br><span class="line">		a[n++] = item;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">judgeSize</span><span class="params">()</span></span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(n &gt;= a.length)&#123;		<span class="comment">//元素个数已经超出了数组的个数</span></span><br><span class="line">			resize(<span class="number">2</span> * a.length);		<span class="comment">//10*2*2=40个大小了，我出栈了20个了，只剩下20了吧。</span></span><br><span class="line">		&#125;<span class="keyword">else</span> <span class="keyword">if</span>(n &gt; <span class="number">0</span> &amp;&amp; n &lt;= a.length / <span class="number">2</span>)&#123;</span><br><span class="line">			resize(a.length / <span class="number">2</span>);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">resize</span><span class="params">(<span class="keyword">int</span> size)</span></span>&#123;		<span class="comment">//扩容O（n）</span></span><br><span class="line">		Item[] temp = (Item[]) <span class="keyword">new</span> Object[size];</span><br><span class="line">		<span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span> ; i &lt; n; i ++)&#123;</span><br><span class="line">			temp[i] = a[i];</span><br><span class="line">		&#125;</span><br><span class="line">		a = temp;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Item <span class="title">pop</span><span class="params">()</span> </span>&#123;		<span class="comment">//出栈 O(1)</span></span><br><span class="line">		<span class="keyword">if</span>(isEmpty())&#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//item[n--]</span></span><br><span class="line">		<span class="comment">//item[--n]</span></span><br><span class="line">		Item item = a[--n];	<span class="comment">//n不是已经--了么 --n和n-- --n是先把n减了在用，n--先用了在减</span></span><br><span class="line">		a[n] = <span class="keyword">null</span>;	<span class="comment">//为什么要这一步</span></span><br><span class="line">		<span class="keyword">return</span> item;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">size</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> n;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isEmpty</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> n == <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>（2）基于单链表的栈——以链表为底层的数据结构时，以链表头为栈顶，便于节点的插入与删除，压栈产生的新节点将一直出现在链表的头部</li>
-</ul>
-<p><img src="/2022/04/08/06-00-03-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E6%A0%88/image-20220408220833196.png" alt="基于单链表的栈"></p>
-<p><strong>最大的区别就是扩容，链表天然支持动态扩容。栈溢出。</strong></p>
-<p>比较常用的是数组，链表容易溢出，数组可以灵活的控制长度。</p>
-<p>4.栈的基本操作：假定以数组来实现</p>
-<p>(1)入栈</p>
-<p>(2)出栈</p>
-<p>(3)时间复杂度分析</p>
-<h3 id="2、栈的应用"><a href="#2、栈的应用" class="headerlink" title="2、栈的应用"></a>2、栈的应用</h3><ul>
-<li><p>函数调用就是用栈来实现的</p>
-</li>
-<li><p>数学表达式求值：</p>
-<p>比如用栈实现一个简单的四则运算：3+11*2+8-15/5，用栈来实现这个算术表达式</p>
-<p>两个栈来实现：一个放数字 一个放符号。</p>
-<p>我们从头开始遍历这个算术表达式：</p>
-<p>1.遇到是数字 我们就直接入栈到数字栈里面去。</p>
-<p>2.遇到是符合 就把符号栈的栈顶拿出来做比较。如果说他比栈顶符号的优先级高就直接入栈，如果比符号栈顶的优先级低或者相同，就从符号栈里面取栈顶进</p>
-<p>行计算（从数字栈中取栈顶的2个数），计算完的结果还要再放入到数字栈中。</p>
-</li>
-<li><p>四则运算</p>
-<p><img src="/2022/04/08/06-00-03-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E6%A0%88/image-20220409001447367.png" alt="四则运算"></p>
-</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">## opt 保存上一个操作符  num 保存上一个操作数  ch 是当前字符</span><br><span class="line">## 每次ch为一个操作符时   判断上一个操作符 opt的情况 根据类型 做不同操作（操作数为 栈顶元素  和 上一个操作数 num）</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">calculate</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">        Stack&lt;Integer&gt; stack = <span class="keyword">new</span> Stack&lt;&gt;();</span><br><span class="line">        <span class="keyword">int</span> num = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">char</span> opt = <span class="string">&#x27;+&#x27;</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; s.length(); i++) &#123;</span><br><span class="line">            <span class="keyword">char</span> ch = s.charAt(i);</span><br><span class="line">            <span class="keyword">if</span> (Character.isDigit(ch)) &#123;</span><br><span class="line">                num = num * <span class="number">10</span> + (ch - <span class="string">&#x27;0&#x27;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> ((!Character.isDigit(ch) &amp;&amp; <span class="string">&#x27; &#x27;</span> != ch) || i == s.length() - <span class="number">1</span>) &#123;</span><br><span class="line">                <span class="keyword">switch</span> (opt) &#123;</span><br><span class="line">                    <span class="keyword">case</span> <span class="string">&#x27;+&#x27;</span>:</span><br><span class="line">                        stack.push(num);</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    <span class="keyword">case</span> <span class="string">&#x27;-&#x27;</span>:</span><br><span class="line">                        stack.push(-num);</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    <span class="keyword">case</span> <span class="string">&#x27;*&#x27;</span>:</span><br><span class="line">                        stack.push(stack.pop() * num);</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    <span class="keyword">case</span> <span class="string">&#x27;/&#x27;</span>:</span><br><span class="line">                        stack.push(stack.pop() / num);</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    <span class="keyword">default</span>:</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                opt = ch;</span><br><span class="line">                num = <span class="number">0</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> res = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span> (!stack.isEmpty()) &#123;</span><br><span class="line">            res += stack.pop();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
- 
-      <!-- reward -->
-      
-    </div>
-    
-
-    <!-- copyright -->
-    
-    <footer class="article-footer">
-       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java/" rel="tag">Java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%A0%88/" rel="tag">栈</a></li></ul>
 
     </footer>
   </div>
