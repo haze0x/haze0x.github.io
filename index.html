@@ -151,6 +151,319 @@
     
     
     <article
+  id="post-00-00-07-JVM调优工具详解及调优实战"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/"
+    >00_00_07_JVM调优工具详解及调优实战</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/" class="article-date">
+  <time datetime="2022-04-23T12:31:55.000Z" itemprop="datePublished">2022-04-23</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/">性能调优</a> / <a class="article-category-link" href="/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/Jvm/">Jvm</a> / <a class="article-category-link" href="/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/Jvm/%E5%AD%A6%E4%B9%A0%E8%AE%A1%E5%88%92/">学习计划</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p><strong>前置启动程序</strong></p>
+<p>事先启动一个web应用程序，用jps查看其进程id，接着用各种jdk自带命令优化应用</p>
+<p><strong>Jmap</strong></p>
+<p>此命令可以用来查看内存信息，实例个数以及占用内存大小</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard.png" alt="img"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">jmap -histo <span class="number">14660</span>  #查看历史生成的实例</span><br><span class="line">jmap -histo:live <span class="number">14660</span>  #查看当前存活的实例，执行过程中可能会触发一次full gc</span><br></pre></td></tr></table></figure>
+
+<p>打开log.txt，文件内容如下：</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717297968.png" alt="img"></p>
+<ul>
+<li>num：序号</li>
+<li>instances：实例数量</li>
+<li>bytes：占用空间大小</li>
+<li>class name：类名称，[C is a char[]，[S is a short[]，[I is a int[]，[B is a byte[]，[[I is a int[][]</li>
+</ul>
+<p>堆信息</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717336518.png" alt="img"></p>
+<p>堆内存dump</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jmap -dump:format=b,file=eureka.hprof 14660</span><br></pre></td></tr></table></figure>
+
+<p>也可以设置内存溢出自动导出dump文件(内存很大的时候，可能会导不出来)</p>
+<ol>
+<li>-XX:+HeapDumpOnOutOfMemoryError</li>
+<li>-XX:HeapDumpPath=./  （路径）</li>
+</ol>
+<p>示例代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OOMTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">public</span> <span class="keyword">static</span> List&lt;Object&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">   <span class="comment">// JVM设置    </span></span><br><span class="line">   <span class="comment">// -Xms10M -Xmx10M -XX:+PrintGCDetails -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=D:\jvm.dump </span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">      List&lt;Object&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">      <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">      <span class="keyword">int</span> j = <span class="number">0</span>;</span><br><span class="line">      <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">         list.add(<span class="keyword">new</span> User(i++, UUID.randomUUID().toString()));</span><br><span class="line">         <span class="keyword">new</span> User(j--, UUID.randomUUID().toString());</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>可以用jvisualvm命令工具导入该dump文件分析</strong></p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717373368.png" alt="img"></p>
+<p><strong>Jstack</strong></p>
+<p>查看堆栈情况</p>
+<p>用jstack加进程id查找死锁，见如下示例</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DeadLockTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">static</span> Object lock1 = <span class="keyword">new</span> Object();</span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">static</span> Object lock2 = <span class="keyword">new</span> Object();</span><br><span class="line"></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">         <span class="keyword">synchronized</span> (lock1) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">               System.out.println(<span class="string">&quot;thread1 begin&quot;</span>);</span><br><span class="line">               Thread.sleep(<span class="number">5000</span>);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">synchronized</span> (lock2) &#123;</span><br><span class="line">               System.out.println(<span class="string">&quot;thread1 end&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;).start();</span><br><span class="line"></span><br><span class="line">      <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">         <span class="keyword">synchronized</span> (lock2) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">               System.out.println(<span class="string">&quot;thread2 begin&quot;</span>);</span><br><span class="line">               Thread.sleep(<span class="number">5000</span>);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">synchronized</span> (lock1) &#123;</span><br><span class="line">               System.out.println(<span class="string">&quot;thread2 end&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;).start();</span><br><span class="line"></span><br><span class="line">      System.out.println(<span class="string">&quot;main thread end&quot;</span>);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717418373.png" alt="img"></p>
+<p>“Thread-1” 线程名 </p>
+<p>prio=5 优先级=5</p>
+<p>tid=0x000000001fa9e000 线程id</p>
+<p>nid=0x2d64 线程对应的本地线程标识nid</p>
+<p>java.lang.Thread.State: BLOCKED 线程状态</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717426097.png" alt="img"></p>
+<p>还可以用jvisualvm自动检测死锁</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717432836.png" alt="img"></p>
+<p> <strong>远程连接jvisualvm</strong></p>
+<p><strong>启动普通的jar程序JMX端口配置：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -Dcom.sun.management.jmxremote.port=<span class="number">8888</span> -Djava.rmi.server.hostname=<span class="number">192.168</span><span class="number">.65</span><span class="number">.60</span> -Dcom.sun.management.jmxremote.ssl=<span class="keyword">false</span> -Dcom.sun.management.jmxremote.authenticate=<span class="keyword">false</span> -jar microservice-eureka-server.jar</span><br></pre></td></tr></table></figure>
+
+<p>PS：</p>
+<p>-Dcom.sun.management.jmxremote.port 为远程机器的JMX端口</p>
+<p>-Djava.rmi.server.hostname 为远程机器IP</p>
+<p><strong>tomcat的JMX配置：在catalina.sh文件里的最后一个JAVA_OPTS的赋值语句下一行增加如下配置行</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">JAVA_OPTS=<span class="string">&quot;$JAVA_OPTS -Dcom.sun.management.jmxremote.port=8888 -Djava.rmi.server.hostname=192.168.50.60 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>连接时确认下端口是否通畅，可以临时关闭下防火墙</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop firewalld   #临时关闭防火墙</span><br></pre></td></tr></table></figure>
+
+<p><strong>jstack找出占用cpu最高的线程堆栈信息</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.tuling.jvm;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 运行此代码，cpu会飙高</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Math</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> initData = <span class="number">666</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> User user = <span class="keyword">new</span> User();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compute</span><span class="params">()</span> </span>&#123;  <span class="comment">//一个方法对应一块栈帧内存区域</span></span><br><span class="line">        <span class="keyword">int</span> a = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">int</span> b = <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">int</span> c = (a + b) * <span class="number">10</span>;</span><br><span class="line">        <span class="keyword">return</span> c;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Math math = <span class="keyword">new</span> Math();</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>)&#123;</span><br><span class="line">            math.compute();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>1，使用命令top -p <pid> ，显示你的java进程的内存情况，pid是你的java进程号，比如19663</pid></p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717539962.png" alt="img"></p>
+<p>2，按H，获取每个线程的内存情况 【shift+h】</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717539962.png" alt="img"></p>
+<p>3，找到内存和cpu占用最高的线程tid，比如19664</p>
+<p>4，转为十六进制得到 0x4cd0，此为线程id的十六进制表示</p>
+<p>5，执行 jstack 19663|grep -A 10 4cd0，得到线程堆栈信息中 4cd0 这个线程所在行的后面10行，从堆栈中可以发现导致cpu飙高的调用方法</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717539962.png" alt="img"></p>
+<p>6，查看对应的堆栈信息找出可能存在问题的代码</p>
+<p><strong>Jinfo</strong> </p>
+<p>查看正在运行的Java应用程序的扩展参数 </p>
+<p>查看jvm的参数</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/SoftWare/YoudaoNote/data/weixinobU7VjhvI_xPabJNr-TrodDikjY4/dade07b0551f49cf8a2170830ccaa0ed/clipboard.png" alt="img"></p>
+<p>查看java系统参数</p>
+<p>jinfo -sysprops pid 查询系统属性</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/SoftWare/YoudaoNote/data/weixinobU7VjhvI_xPabJNr-TrodDikjY4/84209ef135164aa69707e9e56f9942f3/clipboard.png" alt="img"></p>
+<p><strong>Jstat</strong></p>
+<p>jstat命令可以查看堆内存各部分的使用量，以及加载类的数量。命令的格式如下：</p>
+<p>jstat [-命令选项] [vmid] [间隔时间(毫秒)] [查询次数]</p>
+<p>注意：使用的jdk版本是jdk8</p>
+<p>垃圾回收统计</p>
+<p><strong>jstat -gc pid 最常用</strong>，可以评估程序内存使用及GC压力整体情况</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717633232.png" alt="img"></p>
+<ul>
+<li>S0C：第一个幸存区的大小，单位KB</li>
+<li>S1C：第二个幸存区的大小</li>
+<li>S0U：第一个幸存区的使用大小</li>
+<li>S1U：第二个幸存区的使用大小</li>
+<li>EC：伊甸园区的大小</li>
+<li>EU：伊甸园区的使用大小</li>
+<li>OC：老年代大小</li>
+<li>OU：老年代使用大小</li>
+<li>MC：方法区大小(元空间)</li>
+<li>MU：方法区使用大小</li>
+<li>CCSC:压缩类空间大小</li>
+<li>CCSU:压缩类空间使用大小</li>
+<li>YGC：年轻代垃圾回收次数</li>
+<li>YGCT：年轻代垃圾回收消耗时间，单位s</li>
+<li>FGC：老年代垃圾回收次数 </li>
+<li>FGCT：老年代垃圾回收消耗时间，单位s</li>
+<li>GCT：垃圾回收消耗总时间，单位s</li>
+</ul>
+<p>堆内存统计</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717642147.png" alt="img"></p>
+<ul>
+<li>NGCMN：新生代最小容量</li>
+<li>NGCMX：新生代最大容量</li>
+<li>NGC：当前新生代容量</li>
+<li>S0C：第一个幸存区大小</li>
+<li>S1C：第二个幸存区的大小</li>
+<li>EC：伊甸园区的大小</li>
+<li>OGCMN：老年代最小容量</li>
+<li>OGCMX：老年代最大容量</li>
+<li>OGC：当前老年代大小</li>
+<li>OC:当前老年代大小</li>
+<li>MCMN:最小元数据容量</li>
+<li>MCMX：最大元数据容量</li>
+<li>MC：当前元数据空间大小</li>
+<li>CCSMN：最小压缩类空间大小</li>
+<li>CCSMX：最大压缩类空间大小</li>
+<li>CCSC：当前压缩类空间大小</li>
+<li>YGC：年轻代gc次数</li>
+<li>FGC：老年代GC次数</li>
+</ul>
+<p>新生代垃圾回收统计</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717653233.png" alt="img"></p>
+<ul>
+<li>S0C：第一个幸存区的大小</li>
+<li>S1C：第二个幸存区的大小</li>
+<li>S0U：第一个幸存区的使用大小</li>
+<li>S1U：第二个幸存区的使用大小</li>
+<li>TT:对象在新生代存活的次数</li>
+<li>MTT:对象在新生代存活的最大次数</li>
+<li>DSS:期望的幸存区大小</li>
+<li>EC：伊甸园区的大小</li>
+<li>EU：伊甸园区的使用大小</li>
+<li>YGC：年轻代垃圾回收次数</li>
+<li>YGCT：年轻代垃圾回收消耗时间</li>
+</ul>
+<p>新生代内存统计</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717662929.png" alt="img"></p>
+<ul>
+<li>NGCMN：新生代最小容量</li>
+<li>NGCMX：新生代最大容量</li>
+<li>NGC：当前新生代容量</li>
+<li>S0CMX：最大幸存1区大小</li>
+<li>S0C：当前幸存1区大小</li>
+<li>S1CMX：最大幸存2区大小</li>
+<li>S1C：当前幸存2区大小</li>
+<li>ECMX：最大伊甸园区大小</li>
+<li>EC：当前伊甸园区大小</li>
+<li>YGC：年轻代垃圾回收次数</li>
+<li>FGC：老年代回收次数</li>
+</ul>
+<p>老年代垃圾回收统计</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/SoftWare/YoudaoNote/data/weixinobU7VjhvI_xPabJNr-TrodDikjY4/8f6d44c9d9134a78a516100242f38d60/clipboard.png" alt="img"></p>
+<ul>
+<li>MC：方法区大小</li>
+<li>MU：方法区使用大小</li>
+<li>CCSC:压缩类空间大小</li>
+<li>CCSU:压缩类空间使用大小</li>
+<li>OC：老年代大小</li>
+<li>OU：老年代使用大小</li>
+<li>YGC：年轻代垃圾回收次数</li>
+<li>FGC：老年代垃圾回收次数</li>
+<li>FGCT：老年代垃圾回收消耗时间</li>
+<li>GCT：垃圾回收消耗总时间</li>
+</ul>
+<p>老年代内存统计</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/SoftWare/YoudaoNote/data/weixinobU7VjhvI_xPabJNr-TrodDikjY4/db0afa703b8b45cdb33b603877fd14ee/clipboard.png" alt="img"></p>
+<ul>
+<li>OGCMN：老年代最小容量</li>
+<li>OGCMX：老年代最大容量</li>
+<li>OGC：当前老年代大小</li>
+<li>OC：老年代大小</li>
+<li>YGC：年轻代垃圾回收次数</li>
+<li>FGC：老年代垃圾回收次数</li>
+<li>FGCT：老年代垃圾回收消耗时间</li>
+<li>GCT：垃圾回收消耗总时间</li>
+</ul>
+<p>元数据空间统计</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/SoftWare/YoudaoNote/data/weixinobU7VjhvI_xPabJNr-TrodDikjY4/fbf747efc2a84ffb97ea5ae79bf46c87/clipboard.png" alt="img"></p>
+<ul>
+<li>MCMN:最小元数据容量</li>
+<li>MCMX：最大元数据容量</li>
+<li>MC：当前元数据空间大小 </li>
+<li>CCSMN：最小压缩类空间大小</li>
+<li>CCSMX：最大压缩类空间大小</li>
+<li>CCSC：当前压缩类空间大小</li>
+<li>YGC：年轻代垃圾回收次数</li>
+<li>FGC：老年代垃圾回收次数</li>
+<li>FGCT：老年代垃圾回收消耗时间</li>
+<li>GCT：垃圾回收消耗总时间</li>
+</ul>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717687825.png" alt="img"></p>
+<ul>
+<li>S0：幸存1区当前使用比例</li>
+<li>S1：幸存2区当前使用比例</li>
+<li>E：伊甸园区使用比例</li>
+<li>O：老年代使用比例</li>
+<li>M：元数据区使用比例</li>
+<li>CCS：压缩使用比例</li>
+<li>YGC：年轻代垃圾回收次数</li>
+<li>FGC：老年代垃圾回收次数</li>
+<li>FGCT：老年代垃圾回收消耗时间</li>
+<li>GCT：垃圾回收消耗总时间</li>
+</ul>
+<p><strong>JVM运行情况预估</strong></p>
+<p>用 jstat gc -pid 命令可以计算出如下一些关键数据，有了这些数据就可以采用之前介绍过的优化思路，先给自己的系统设置一些初始性的JVM参数，比如堆内存大小，年轻代大小，Eden和Survivor的比例，老年代的大小，大对象的阈值，大龄对象进入老年代的阈值等。</p>
+<p><strong>年轻代对象增长的速率</strong></p>
+<p>可以执行命令 jstat -gc pid 1000 10 (每隔1秒执行1次命令，共执行10次)，通过观察EU(eden区的使用)来估算每秒eden大概新增多少对象，如果系统负载不高，可以把频率1秒换成1分钟，甚至10分钟来观察整体情况。注意，一般系统可能有高峰期和日常期，所以需要在不同的时间分别估算不同情况下对象增长速率。</p>
+<p><strong>Young GC的触发频率和每次耗时</strong></p>
+<p>知道年轻代对象增长速率我们就能推根据eden区的大小推算出Young GC大概多久触发一次，Young GC的平均耗时可以通过 YGCT/YGC 公式算出，根据结果我们大概就能知道<strong>系统大概多久会因为Young GC的执行而卡顿多久。</strong></p>
+<p><strong>每次Young GC后有多少对象存活和进入老年代</strong></p>
+<p>这个因为之前已经大概知道Young GC的频率，假设是每5分钟一次，那么可以执行命令 jstat -gc pid 300000 10 ，观察每次结果eden，survivor和老年代使用的变化情况，在每次gc后eden区使用一般会大幅减少，survivor和老年代都有可能增长，这些增长的对象就是每次Young GC后存活的对象，同时还可以看出每次Young GC后进去老年代大概多少对象，从而可以推算出<strong>老年代对象增长速率。</strong></p>
+<p><strong>Full GC的触发频率和每次耗时</strong></p>
+<p>知道了老年代对象的增长速率就可以推算出Full GC的触发频率了，Full GC的每次耗时可以用公式 FGCT/FGC 计算得出。</p>
+<p><strong>优化思路</strong>其实简单来说就是尽量让每次Young GC后的存活对象小于Survivor区域的50%，都留存在年轻代里。尽量别让对象进入老年代。尽量减少Full GC的频率，避免频繁Full GC对JVM性能的影响。</p>
+<p><strong>系统频繁Full GC导致系统卡顿是怎么回事</strong></p>
+<ul>
+<li>机器配置：2核4G</li>
+<li>JVM内存大小：2G</li>
+<li>系统运行时间：7天</li>
+<li>期间发生的Full GC次数和耗时：500多次，200多秒</li>
+<li>期间发生的Young GC次数和耗时：1万多次，500多秒</li>
+</ul>
+<p>大致算下来每天会发生70多次Full GC，平均每小时3次，每次Full GC在400毫秒左右；</p>
+<p>每天会发生1000多次Young GC，每分钟会发生1次，每次Young GC在50毫秒左右。</p>
+<p>JVM参数设置如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-Xms1536M -Xmx1536M -Xmn512M -Xss256K -XX:SurvivorRatio=<span class="number">6</span>  -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=256M </span><br><span class="line">-XX:+UseParNewGC  -XX:+UseConcMarkSweepGC  -XX:CMSInitiatingOccupancyFraction=<span class="number">75</span> -XX:+UseCMSInitiatingOccupancyOnly </span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717714884.png" alt="img"></p>
+<p>大家可以结合<strong>对象挪动到老年代那些规则</strong>推理下我们这个程序可能存在的一些问题</p>
+<p>经过分析感觉可能会由于对象动态年龄判断机制导致full gc较为频繁</p>
+<p>为了给大家看效果，我模拟了一个示例程序(见课程对应工程代码：jvm-full-gc)，打印了jstat的结果如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jstat -gc <span class="number">13456</span> <span class="number">2000</span> <span class="number">10000</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717742876.png" alt="img"></p>
+<p>对于对象动态年龄判断机制导致的full gc较为频繁可以先试着优化下JVM参数，把年轻代适当调大点：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-Xms1536M -Xmx1536M -Xmn1024M -Xss256K -XX:SurvivorRatio=<span class="number">6</span>  -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=256M </span><br><span class="line">-XX:+UseParNewGC  -XX:+UseConcMarkSweepGC  -XX:CMSInitiatingOccupancyFraction=<span class="number">92</span> -XX:+UseCMSInitiatingOccupancyOnly </span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717768183.png" alt="img"></p>
+<p>优化完发现没什么变化，<strong>full gc的次数比minor gc的次数还多了</strong></p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717806011.png" alt="img"></p>
+<p>我们可以推测下full gc比minor gc还多的原因有哪些？</p>
+<p>1、元空间不够导致的多余full gc</p>
+<p>2、显示调用System.gc()造成多余的full gc，这种一般线上尽量通过-XX:+DisableExplicitGC参数禁用，如果加上了这个JVM启动参数，那么代码中调用System.gc()没有任何效果</p>
+<p>3、老年代空间分配担保机制</p>
+<p>最快速度分析完这些我们推测的原因以及优化后，我们发现young gc和full gc依然很频繁了，而且看到有大量的对象频繁的被挪动到老年代，这种情况我们可以借助jmap命令大概看下是什么对象</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717814247.png" alt="img"></p>
+<p>查到了有大量User对象产生，这个可能是问题所在，但不确定，还必须找到对应的代码确认，如何去找对应的代码了？</p>
+<p>1、代码里全文搜索生成User对象的地方(适合只有少数几处地方的情况)</p>
+<p>2、如果生成User对象的地方太多，无法定位具体代码，我们可以同时分析下占用cpu较高的线程，一般有大量对象不断产生，对应的方法代码肯定会被频繁调用，占用的cpu必然较高</p>
+<p>可以用上面讲过的jstack或jvisualvm来定位cpu使用较高的代码，最终定位到的代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">IndexController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping(&quot;/user/process&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">processUserData</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        ArrayList&lt;User&gt; users = queryUsers();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (User user: users) &#123;</span><br><span class="line">            <span class="comment">//TODO 业务处理</span></span><br><span class="line">            System.out.println(<span class="string">&quot;user:&quot;</span> + user.toString());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;end&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 模拟批量查询用户场景</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> ArrayList&lt;User&gt; <span class="title">queryUsers</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        ArrayList&lt;User&gt; users = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5000</span>; i++) &#123;</span><br><span class="line">            users.add(<span class="keyword">new</span> User(i,<span class="string">&quot;zhuge&quot;</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> users;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同时，java的代码也是需要优化的，一次查询出500M的对象出来，明显不合适，要根据之前说的各种原则尽量优化到合适的值，尽量消除这种朝生夕死的对象导致的full gc</p>
+<p><strong>内存泄露到底是怎么回事</strong></p>
+<p>再给大家讲一种情况，一般电商架构可能会使用多级缓存架构，就是redis加上JVM级缓存，大多数同学可能为了图方便对于JVM级缓存就简单使用一个hashmap，于是不断往里面放缓存数据，但是很少考虑这个map的容量问题，结果这个缓存map越来越大，一直占用着老年代的很多空间，时间长了就会导致full gc非常频繁，这就是一种内存泄漏，对于一些老旧数据没有及时清理导致一直占用着宝贵的内存资源，时间长了除了导致full gc，还有可能导致OOM。</p>
+<p>这种情况完全可以考虑采用一些成熟的JVM级缓存框架来解决，比如ehcache等自带一些LRU数据淘汰算法的框架来作为JVM级的缓存。</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Jvm/" rel="tag">Jvm</a></li></ul>
+
+    </footer>
+  </div>
+
+    
+ 
+    
+</article>
+
+    
+    <article
   id="post-00-00-06-垃圾收集器G1-ZGC详解"
   class="article article-type-post"
   itemscope
@@ -182,7 +495,7 @@
       
     <div class="article-entry" itemprop="articleBody">
        
-  <h2 id="G1收集器-XX-UseG1GC"><a href="#G1收集器-XX-UseG1GC" class="headerlink" title="G1收集器(-XX:+UseG1GC)"></a>G1收集器(-XX:+UseG1GC)</h2><p><strong>G1 (Garbage-First)是一款面向服务器的垃圾收集器,<strong><strong>主要针对配备多颗处理器及大容量内存的机器</strong></strong>. 以极高概率满足GC停顿时间要求的同时,还具备高吞吐量性能特征.</strong></p>
+  <h2 id="垃圾收集器G1-amp-ZGC详解"><a href="#垃圾收集器G1-amp-ZGC详解" class="headerlink" title="垃圾收集器G1&amp;ZGC详解"></a>垃圾收集器G1&amp;ZGC详解</h2><h3 id="1、G1收集器-XX-UseG1GC"><a href="#1、G1收集器-XX-UseG1GC" class="headerlink" title="1、G1收集器(-XX:+UseG1GC)"></a>1、G1收集器(-XX:+UseG1GC)</h3><p><strong>G1 (Garbage-First)是一款面向服务器的垃圾收集器,<strong><strong>主要针对配备多颗处理器及大容量内存的机器</strong></strong>. 以极高概率满足GC停顿时间要求的同时,还具备高吞吐量性能特征.</strong></p>
 <p><img src="/2022/04/22/00-00-06-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8G1-ZGC%E8%AF%A6%E8%A7%A3/%E6%88%AA%E5%9B%BE-1650643122599.png" alt="img"></p>
 <p><img src="/2022/04/22/00-00-06-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8G1-ZGC%E8%AF%A6%E8%A7%A3/%E6%88%AA%E5%9B%BE-1650643129820.png" alt="img"></p>
 <p>G1将Java堆划分为多个大小相等的独立区域（<strong>Region</strong>），JVM目标是不超过2048个Region(JVM源码里TARGET_REGION_NUMBER 定义)，实际可以超过该值，但是不推荐。</p>
@@ -562,7 +875,7 @@
 <ul>
 <li><strong>初始标记：</strong> 暂停所有的其他线程(STW)，并记录下gc roots<strong>直接能引用的对象</strong>，<strong>速度很快</strong>。【需要stw的原因是如果不做stw，那么跟gc roots直接引用的对象可能不断增加，导致初始标记一直无法完成】</li>
 <li><strong>并发标记：</strong> 并发标记阶段就是从GC Roots的直接关联对象开始遍历整个对象图的过程， 这个过程耗时较长但是不需要停顿用户线程， 可以与垃圾收集线程一起并发运行。因为用户程序继续运行，可能会有导致已经标记过的对象状态发生改变。【并发的原因，提升用户体验，减少停顿时间】</li>
-<li><strong>重新标记：</strong> 重新标记阶段就是为了修正并发标记期间因为用户程序继续运行而导致标记【三色标记】产生变动的那一部分对象的标记记录，<strong>这个阶段的停顿时间一般会比初始标记阶段的时间稍长，远远比并发标记阶段时间短。主要用到三色标记里的****增量更新算法(见下面详解)做重新标记。</strong></li>
+<li><strong>重新标记：</strong> 重新标记阶段就是为了修正并发标记期间因为用户程序继续运行而导致标记【三色标记】产生变动的那一部分对象的标记记录，<strong>这个阶段的停顿时间一般会比初始标记阶段的时间稍长，远远比并发标记阶段时间短。主要用到三色标记里的增量更新算法(见下面详解)做重新标记。</strong></li>
 <li><strong>并发清理：</strong> 开启用户线程，同时GC线程开始对未标记的区域做清扫。这个阶段如果有新增对象会被标记为黑色不做任何处理(见下面三色标记算法详解)。</li>
 <li><strong>并发重置：</strong>重置本次GC过程中的标记数据。</li>
 </ul>
@@ -1462,118 +1775,6 @@
     <footer class="article-footer">
        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java/" rel="tag">Java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redis/" rel="tag">Redis</a></li></ul>
-
-    </footer>
-  </div>
-
-    
- 
-    
-</article>
-
-    
-    <article
-  id="post-06-00-04-基础数据结构-队列"
-  class="article article-type-post"
-  itemscope
-  itemprop="blogPost"
-  data-scroll-reveal
->
-  <div class="article-inner">
-    
-    <header class="article-header">
-       
-<h2 itemprop="name">
-  <a class="article-title" href="/2022/04/09/06-00-04-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E9%98%9F%E5%88%97/"
-    >基础数据结构-队列</a> 
-</h2>
- 
-
-      
-    </header>
-     
-    <div class="article-meta">
-      <a href="/2022/04/09/06-00-04-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E9%98%9F%E5%88%97/" class="article-date">
-  <time datetime="2022-04-09T04:19:55.000Z" itemprop="datePublished">2022-04-09</time>
-</a> 
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a> / <a class="article-category-link" href="/categories/Java/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%AE%97%E6%B3%95/">算法</a> / <a class="article-category-link" href="/categories/Java/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%AE%97%E6%B3%95/%E5%AD%A6%E4%B9%A0%E8%AE%A1%E5%88%92/">学习计划</a>
-  </div>
-   
-    </div>
-      
-    <div class="article-entry" itemprop="articleBody">
-       
-  <h2 id="队列"><a href="#队列" class="headerlink" title="队列"></a>队列</h2><h3 id="1、什么是队列"><a href="#1、什么是队列" class="headerlink" title="1、什么是队列"></a>1、什么是队列</h3><p><code>队列的定义：</code></p>
-<p>定义：队列是一种特殊的线性表，特殊之处在于它只允许在表的前端（front）进行删除操作，而在表的后端（rear）进行插入操作，和栈一样，队列是一种操作受</p>
-<p>限制的线性表。进行插入操作的端称为队尾，进行删除操作的端称为队头。队列中没有元素时，称为空队列。</p>
-<p>队列的数据元素又称为队列元素。在队列中插入一个队列元素称为入队，从队列中删除一个队列元素称为出队。因为队列只允许在一端插入，在另一端删除，所以</p>
-<p>只有最早进入队列的元素才能最先从队列中删除，故队列又称为先进先出（FIFO—first in first out）线性表，LIFO。树</p>
-<p>队列这个概念非常好理解。你可以把它想成排队买票，先来的先买，后来的人只能站末尾，不允许插队。先进者先出，这就是典型的“队列”。</p>
-<p>栈：后进先出。</p>
-<p><code>队列的特点</code></p>
-<p>（1）线性表：链表或者数组</p>
-<p>（2）FIFO</p>
-<p><code>队列的分类</code></p>
-<ul>
-<li><p>（1）顺序（单向）队列：（Queue） 只能在一端插入数据，另一端删除数据</p>
-<p><img src="/2022/04/09/06-00-04-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E9%98%9F%E5%88%97/image-20220409122653217.png" alt="单向队列"></p>
-</li>
-<li><p>（2）循环（双向）队列（Deque）：每一端都可以进行插入数据和删除数据操作</p>
-</li>
-</ul>
-<p><img src="/2022/04/09/06-00-04-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E9%98%9F%E5%88%97/image-20220409122711940.png" alt="循环队列"></p>
-<p><code>队列的基本操作</code></p>
-<p>队列的基本操作：</p>
-<p>两个基本操作：入栈push()和出栈pop()。队列跟栈非常相似，支持的操作也很有限，</p>
-<p>最基本的操作也是两个：</p>
-<p>入队enqueue()，放一个数据到队列尾部；</p>
-<p>出队dequeue()，从队列头部取一个元素。</p>
-<p>所以，队列跟栈一样，也是一种操作受限的线性表数据结构。作为一种非常基础的数据结构，队列的应用也非常广泛，特别是一些具有某些额外特性的队列，比如</p>
-<p>循环队列、阻塞队列、并发队列。它们在很多偏底层系统、框架、中间件的开发中，起着关键性的作用。</p>
-<h3 id="2、队列的实现"><a href="#2、队列的实现" class="headerlink" title="2、队列的实现"></a>2、队列的实现</h3><p><code>实现方式：</code></p>
-<p><strong>顺序队列&amp;链式:</strong></p>
-<p>链表就是可以无限扩容:内存 size大小控制。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line">## 数组实现队列</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ArrayQueue</span></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span>[] data;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> head;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> tail;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> cap;<span class="comment">// 数组的大小，最大容量</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ArrayQueue</span><span class="params">(<span class="keyword">int</span> n)</span></span>&#123;</span><br><span class="line">        data = <span class="keyword">new</span> <span class="keyword">int</span>[n];</span><br><span class="line">        cap = n;</span><br><span class="line">        head = <span class="number">0</span>;</span><br><span class="line">        tail = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 插入数据</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">push</span><span class="params">(<span class="keyword">int</span> data)</span></span>&#123;</span><br><span class="line">		<span class="comment">// 满了</span></span><br><span class="line">        <span class="keyword">if</span>( tail == cap )&#123;</span><br><span class="line">            <span class="comment">// 这里可以优化 把数据往前移动</span></span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        data[tail++] = data;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 出队</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">pop</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="comment">// 为空</span></span><br><span class="line">        <span class="keyword">if</span>( head == tail )&#123;</span><br><span class="line">            <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> data[head++];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">## 用单向链表实现队列</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ListNodeQueue</span></span>&#123;</span><br><span class="line">	<span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">ListNode</span></span>&#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">int</span> val;</span><br><span class="line">        <span class="keyword">public</span> ListNode next;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">ListNode</span><span class="params">(<span class="keyword">int</span> data)</span></span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.val = data;</span><br><span class="line">            next = <span class="keyword">null</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> ListNode head;</span><br><span class="line">    <span class="keyword">public</span> ListNode tail;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> cap;<span class="comment">// 总容量</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> size;<span class="comment">// 当前容量</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ListNodeQueue</span><span class="params">(<span class="keyword">int</span> cap)</span></span>&#123;</span><br><span class="line">        head = <span class="keyword">null</span>;</span><br><span class="line">        tail = <span class="keyword">null</span>;</span><br><span class="line">        cap = cap;</span><br><span class="line">        size = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 插入数据</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">push</span><span class="params">(<span class="keyword">int</span> data)</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>( size == cap )&#123;</span><br><span class="line">            <span class="keyword">return</span>;           </span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>( size == <span class="number">0</span> )&#123;</span><br><span class="line">            head = <span class="keyword">new</span> ListNode(data);</span><br><span class="line">            tail = head;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            tail.next = <span class="keyword">new</span> ListNode(data);</span><br><span class="line">            tail = tail.next;</span><br><span class="line">        &#125;</span><br><span class="line">        size++;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// pop取数据</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ListNode <span class="title">pop</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>( head == <span class="keyword">null</span> )&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>( head == tail )&#123;</span><br><span class="line">            ListNode cur = head;</span><br><span class="line">            head = <span class="keyword">null</span>;</span><br><span class="line">            tail = <span class="keyword">null</span>;</span><br><span class="line">            size--;</span><br><span class="line">            <span class="keyword">return</span> cur;</span><br><span class="line">        &#125;</span><br><span class="line">        ListNode cur = head;</span><br><span class="line">        head = head.next;</span><br><span class="line">        size--;</span><br><span class="line">        <span class="keyword">return</span> cur;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>循环队列</strong></p>
-<p>怎么判断队列已经满了？</p>
-<p>两种方法：</p>
-<p>1、加了一个实际的size变量就可以了。</p>
-<p>2、判断满：(tail+1)%n==head</p>
-<p>怎么判断空？tail==head</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">## 循环队列</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CircleQueue</span></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span>[] data;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> head;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> tail;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> cap;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">CircleQueue</span><span class="params">(<span class="keyword">int</span> n)</span></span>&#123;</span><br><span class="line">        head = <span class="number">0</span>;</span><br><span class="line">        tail = <span class="number">0</span>;</span><br><span class="line">        data = <span class="keyword">new</span> <span class="keyword">int</span>[n];</span><br><span class="line">        cap = n;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 入队</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">push</span><span class="params">(<span class="keyword">int</span> data)</span></span>&#123;</span><br><span class="line">        <span class="comment">// 队列满 下面这种判断  等同于 (tail-head == -1) || (tail - head == cap -1)</span></span><br><span class="line">        <span class="keyword">if</span>( (tail+<span class="number">1</span>)%cap == head )&#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;       </span><br><span class="line">        data[tail]=data;</span><br><span class="line">        tail = (tail+<span class="number">1</span>)%cap; <span class="comment">// 这种判断防止越界从 cap-1 到 0  等同于 if(tail+1 == cap) tail =0; else tail++;</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 出队</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">pop</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>( head == tail )&#123;</span><br><span class="line">            <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> data = data[head];</span><br><span class="line">        head = (head+<span class="number">1</span>)%cap;<span class="comment">// 这种判断防止越界从 cap-1 -&gt; 0</span></span><br><span class="line">        <span class="keyword">return</span> data;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>push的时候：    </p>
-<p>// 队列满 下面这种判断  等同于 (tail-head == -1) || (tail - head == cap -1)<br>        if( (tail+1)%cap == head ){<br>            return;<br>        }   </p>
-<p>这种判断会浪费一个存储单元</p>
-<p><img src="/2022/04/09/06-00-04-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E9%98%9F%E5%88%97/image-20220409170649951.png" alt="循环链表浪费一个存储空间"></p>
-<p><strong>优先队列</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">## 具体实现 后续补充 [本质是插入的时候排序]</span><br></pre></td></tr></table></figure>
-
-<p><strong>阻塞队列</strong></p>
-<p>此种具有特殊特性的队列应用却比较广泛，比如阻塞队列和并发队列。阻塞队列其实就是在队列基础上增加了阻塞操作。<strong>简单来说，就是在队列为空的时候，从队</strong></p>
-<p><strong>头取数据会被阻塞。因为此时还没有数据可取，直到队列中有了数据才能返回；如果队列已经满了，那么插入数据的操作就会被阻塞，直到队列中有空闲位置后再</strong></p>
-<p><strong>插入数据，然后再返回。</strong></p>
-<p>CPU：</p>
-<p>线程池里面当任务满时，此时又来一个新任务，线程池是如何处理的？具体有哪些策略？这些策略又是如何实现的呢？</p>
-<p>有几种处理策略：</p>
-<p>1.排队：阻塞队列。有空闲的时候再拿，不就是那个take和put，如果是在公平的情况下，那肯定就是先进先出。这就是今天讲的队列。这时候我们就有两种方</p>
-<p>式，一个是无限的排队队列。（链表，千万别用。LinkedBlockingQueue，JDK的），还有一种就是有界（用数组来实现的），只处理我们开的空间大小，多了的</p>
-<p>继续抛出去。Integer.MAX=?2^32-1=21亿多，但是注意的是这个队列大小，别搞小了。就不够，大了就浪费。在一些小型系统，你知道数据请求量是不大的，可</p>
-<p>以用。</p>
-<p>2.丢弃：不处理了，直接抛出去。</p>
- 
-      <!-- reward -->
-      
-    </div>
-    
-
-    <!-- copyright -->
-    
-    <footer class="article-footer">
-       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java/" rel="tag">Java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%98%9F%E5%88%97/" rel="tag">队列</a></li></ul>
 
     </footer>
   </div>
