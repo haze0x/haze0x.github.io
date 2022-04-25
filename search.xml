@@ -2578,4 +2578,29 @@
         <tag>Jvm</tag>
       </tags>
   </entry>
+  <entry>
+    <title>hexo解决推送github ssh key过期问题</title>
+    <url>/2022/04/25/10-00-00-hexo%E8%A7%A3%E5%86%B3%E6%8E%A8%E9%80%81github-ssh-key%E8%BF%87%E6%9C%9F%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>最近用hexo 推送博客到github，老是过一段时间提示</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">错误报告:You‘re using an RSA key with SHA-1, which is no longer allowed </span><br><span class="line">错误报告nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use)</span><br><span class="line">ENOENT: no such file or directory, uv_cwd</span><br></pre></td></tr></table></figure>
+
+<p>后通过如下步骤解决：</p>
+<p>1、重新生成ssh key</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">ssh-keygen -t ed25519 -C <span class="string">&quot;your_email@example.com&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>2、找到生成的公钥</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">linux:</span><br><span class="line">cat /root/.ssh/id_ed25519.pub</span><br><span class="line">windows:</span><br><span class="line">C:\Users\用户名\.ssh   【去这个目录找到生成时候的对应的文件名的文件】</span><br></pre></td></tr></table></figure>
+
+<p>3、复制到github</p>
+<p>而后在GitHub的setting中，找到SSH keys的设置选项，点击New SSH key把你的id_rsa.pub里面的信息复制进去。</p>
+]]></content>
+      <categories>
+        <category>随笔</category>
+        <category>hexo</category>
+      </categories>
+      <tags>
+        <tag>随笔</tag>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
 </search>
