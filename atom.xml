@@ -6,7 +6,7 @@
   <link href="https://haze0x.github.io/atom.xml" rel="self"/>
   
   <link href="https://haze0x.github.io/"/>
-  <updated>2022-04-25T12:04:13.579Z</updated>
+  <updated>2022-04-25T14:43:40.655Z</updated>
   <id>https://haze0x.github.io/</id>
   
   <author>
@@ -15,6 +15,39 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>ZGC深度剖析</title>
+    <link href="https://haze0x.github.io/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/"/>
+    <id>https://haze0x.github.io/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/</id>
+    <published>2022-04-25T14:40:53.000Z</published>
+    <updated>2022-04-25T14:43:40.655Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;\assets\css\APlayer.min.css&quot;&gt;&lt;script src=&quot;\assets\js\APlayer.min.js&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="Java" scheme="https://haze0x.github.io/categories/Java/"/>
+    
+    <category term="性能调优" scheme="https://haze0x.github.io/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/"/>
+    
+    <category term="Jvm" scheme="https://haze0x.github.io/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/Jvm/"/>
+    
+    <category term="学习计划" scheme="https://haze0x.github.io/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/Jvm/%E5%AD%A6%E4%B9%A0%E8%AE%A1%E5%88%92/"/>
+    
+    
+    <category term="Jvm" scheme="https://haze0x.github.io/tags/Jvm/"/>
+    
+    <category term="ZGC" scheme="https://haze0x.github.io/tags/ZGC/"/>
+    
+  </entry>
   
   <entry>
     <title>hexo解决推送github ssh key过期问题</title>
@@ -614,37 +647,6 @@
     <category term="Java" scheme="https://haze0x.github.io/tags/Java/"/>
     
     <category term="操作系统" scheme="https://haze0x.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Spring Boot启动原理</title>
-    <link href="https://haze0x.github.io/2021/12/18/04-00-02-Spring-Boot%E5%90%AF%E5%8A%A8%E5%8E%9F%E7%90%86/"/>
-    <id>https://haze0x.github.io/2021/12/18/04-00-02-Spring-Boot%E5%90%AF%E5%8A%A8%E5%8E%9F%E7%90%86/</id>
-    <published>2021-12-18T06:07:58.000Z</published>
-    <updated>2021-12-18T11:59:39.728Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;\assets\css\APlayer.min.css&quot;&gt;&lt;script src=&quot;\assets\js\APlayer.min.js&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="Java" scheme="https://haze0x.github.io/categories/Java/"/>
-    
-    <category term="Spring Boot" scheme="https://haze0x.github.io/categories/Java/Spring-Boot/"/>
-    
-    <category term="微服务" scheme="https://haze0x.github.io/categories/Java/Spring-Boot/%E5%BE%AE%E6%9C%8D%E5%8A%A1/"/>
-    
-    
-    <category term="Spring Boot" scheme="https://haze0x.github.io/tags/Spring-Boot/"/>
-    
-    <category term="自动装配" scheme="https://haze0x.github.io/tags/%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D/"/>
     
   </entry>
   
