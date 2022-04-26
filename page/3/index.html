@@ -151,6 +151,175 @@
     
     
     <article
+  id="post-08-00-00-操作系统原理"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/"
+    >操作系统原理</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/" class="article-date">
+  <time datetime="2022-04-03T08:01:51.000Z" itemprop="datePublished">2022-04-03</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a> / <a class="article-category-link" href="/categories/Java/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%AD%A6%E4%B9%A0%E8%AE%A1%E5%88%92/">学习计划</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h2 id="1、进程的概念"><a href="#1、进程的概念" class="headerlink" title="1、进程的概念"></a>1、进程的概念</h2><p>​        运行中的程序就叫做<strong>进程</strong>。</p>
+<h2 id="2、并行与并发"><a href="#2、并行与并发" class="headerlink" title="2、并行与并发"></a>2、并行与并发</h2><p>​        并发是一种<strong>物理架构</strong>，多个cpu核同一时间执行多个任务。而并行是一种<strong>逻辑架构</strong>，在一个核上，多个任务通过竞争时间片交替执行。</p>
+<p>​        并行与并发的关系图</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/%E5%B9%B6%E8%A1%8C%E4%B8%8E%E5%B9%B6%E5%8F%91.png"></p>
+<h2 id="3、进程的状态"><a href="#3、进程的状态" class="headerlink" title="3、进程的状态"></a>3、进程的状态</h2><p>​        <strong>单进程五状态模型：</strong></p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/%E8%BF%9B%E7%A8%8B%E4%BA%94%E6%88%96%E4%B8%83%E7%8A%B6%E6%80%81%E6%A8%A1%E5%9E%8B.png" alt="进程5/7状态模型"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">进程进入就绪队列，就会变为就绪状态，各个状态转换如下：</span><br><span class="line">1、就绪-&gt;运行，当操作系统内存在着调度程序，当需要运行一个新进程时，调度程序选择一个就绪状态的进程，让其进入运行状态</span><br><span class="line">2、运行-&gt;就绪，运行态的进程，会占有cpu，每个进程会被分配一定的执行时间，时间片用完，状态就由运行态变为就绪状态</span><br><span class="line">3、运行-&gt;阻塞，进程请求调用操作系统的某些服务，但是操作系统没法立即给到它（比如这些服务需要比较耗时的初始化，比如io资源需要等待等），那么它就会进入阻塞状态</span><br><span class="line">4、阻塞-&gt;就绪，当等待结束了，就由阻塞进入就绪状态</span><br><span class="line">5、运行-&gt;终止，当前进程表示自己已经完成了，它就会被操作系统终止</span><br></pre></td></tr></table></figure>
+
+<h2 id="4、进程的控制结构"><a href="#4、进程的控制结构" class="headerlink" title="4、进程的控制结构"></a>4、进程的控制结构</h2><p>​        在操作系统中，是用<strong>进程控制块</strong>（pcb）数据结构来描述进程的。</p>
+<p>​        pcb是进程存在的唯一标识，这意味着一个进程的存在，必然会有一个pcb,如果进程消失了，那么pcb也会消失。</p>
+<p>​        pcb包含的信息：</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403214515124.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1、进程管理：寄存器、程序计数器、堆栈指针、进程状态、优先级、调度参数、进程ID、父进程、进程组、信号...</span><br><span class="line">2、存储管理：Text段指针、数据段指针、堆栈段指针</span><br><span class="line">3、文件管理：根目录、工作目录、文件描述符、用户ID、组ID</span><br></pre></td></tr></table></figure>
+
+<p>pcb组织形式：</p>
+<p>通常是通过<strong>链表</strong>的方式进行组织，把具有相同状态的进程链在一起，组成各种队列，比如：</p>
+<ol>
+<li><p>所有处于就绪状态的进程链在一起，称为就绪队列</p>
+</li>
+<li><p>把所有因等待某事件而处于等待状态的进程链在一起就组成各种阻塞队列</p>
+<p>链表方式：</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403214747723.png"></p>
+<p>除了链表的方式，还有索引的方式，如下图。</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403214811202.png"></p>
+</li>
+</ol>
+<h2 id="5、进程的切换"><a href="#5、进程的切换" class="headerlink" title="5、进程的切换"></a>5、进程的切换</h2><p>当一个正在运行的进程被中断，操作系统指定另一个就绪态的进程进入运行状态，这个过程就是<strong>进程切换</strong>，也叫<strong>上下文切换</strong>。</p>
+<p><strong>该切换过程一般涉及以下步骤：</strong></p>
+<p>1.保存处理器上下文环境</p>
+<p>2.更新当前进程的pcb</p>
+<p>3.将当前进程移到就绪队列或阻塞队列</p>
+<p>4.根据调度算法，选择就绪队列中的一个合适的进程，将其更改为运行状态</p>
+<p>5.更新内存管理的数据结构</p>
+<p>6.新进程内对堆栈所保存的上下文信息载入到cpu的寄存器和程序计数器，占有cpu</p>
+<p><strong>发生进程切换的场景</strong></p>
+<ol>
+<li>为了保证所有进程可以得到公平调度，cpu的时间被划分为一段段时间片，这些时间片在被轮流分配给各个进程，这样当某个进程时间片用尽后，就会被系统挂起，切换到其它正在等在cpu的进程运行</li>
+<li>进程在系统资源不足时，需要等到资源满足后才可以运行，这个时候进程也会被挂起，并由系统调度其它进程运行</li>
+<li>当进程通过睡眠函数sleep这样的方法将自己主动挂起时，自然也会重新调度。</li>
+<li>当有优先级更高的进程运行时，为了保证高优先级的先运行 ，当前进程也会挂起，由高优先级进程来运行。</li>
+<li>发生硬件中断时，cpu上的 的进程也会被挂起，转而执行内核中的中断服务程序。</li>
+</ol>
+<h2 id="6、线程"><a href="#6、线程" class="headerlink" title="6、线程"></a>6、线程</h2><p><strong>进程是资源分配的最小单位，线程是cpu调度的基本单位，线程是进程中的一条执行流程，一个进程包含多个线程，线程又被称之为轻量级进程。</strong></p>
+<p>同一个进程内多个线程之间可以共享代码段、数据段、打开的文件资源等，但每个线程各自都有一套独立的寄存器和栈，这样可以确保线程的控制流程是独立的。</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215049674.png"></p>
+<p><strong>线程上下文切换的是什么</strong></p>
+<ol>
+<li>当两个线程不属于同一个进程，则切换的过程就跟进程切换是一样的</li>
+<li><strong>当两个线程属于同一个进程，因为虚拟内存是共享的，所以在切换时，虚拟内存这些资源就会保持不动，只需要切换线程的私有数据、寄存器等不共享的数据</strong></li>
+</ol>
+<p>所以线程的上下文切换要别进程上下文切换开销小的多。</p>
+<h2 id="7、进程调度"><a href="#7、进程调度" class="headerlink" title="7、进程调度"></a>7、进程调度</h2><p><strong>什么时候进行调度：</strong></p>
+<ol>
+<li><p>从就绪状态-&gt;运行状态</p>
+</li>
+<li><p>从运行状态-&gt;阻塞状态</p>
+</li>
+<li><p>从运行状态-&gt;结束状态</p>
+</li>
+</ol>
+<p><strong>调度算法分为两类：</strong></p>
+<ul>
+<li><strong>非抢占式调度算法</strong>挑选一个进程，然后让该进程运行直到被阻塞，才会调用另外一个进程，也就是说不会理时钟中断这个事情。</li>
+<li>抢占式调度算法挑选一个进程，然后让该进程只运行某段时间，如果在该时段结束时，该进程仍然在运行时，则会把它挂起，接着调度程序从就绪队列中挑选另外一个进程，这种抢占式调度处理，需要在时间间隔的末端发生<strong>时钟中断</strong>，以便把cpu控制返回给调度程序进行调度，这就是常说的<strong>时间片机制</strong>。</li>
+</ul>
+<p><strong>以什么原则来调度进程</strong></p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215344419.png"></p>
+<p>五种调度原则：</p>
+<ul>
+<li>cpu利用率</li>
+<li>系统吞吐量</li>
+<li>周转时间</li>
+<li>等待时间</li>
+<li>响应时间</li>
+</ul>
+<p><strong>进程调度算法</strong></p>
+<ul>
+<li><p>先来先服务：先进就绪队列，则先被调度。问题：当前面任务耗费很长时间执行，那么后面的任务只需要执行很短的时间，也必须一直等待，属于<strong>非抢占式</strong></p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215428609.png"></p>
+</li>
+<li><p>时间片轮转：每个进程会被分配时间片，表示运行该进程在这个时间段运行，如果时间结束了，进程还没有运行完毕，那么会通过抢占式调度，将cpu分配给其它进程，该进程回到就绪队列。这是一种最简单最公平的调度算法，但是有可能会存在问题。<strong>缺点：</strong>如果时间片太短，频繁进行切换，会影响效率。如果进程时间片太长，有可能导致排后面的进程等待太长时间。因此时间片的长度，需要有大致合理的数值。（一般建议时间片20ms~50ms）</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215506907.png"></p>
+</li>
+<li><p>最短作业优先：按照作业时长排队，作业时间短的排前面先执行。缺点：一个长作业在就绪队列等待运行，而这个就绪队列有非常多的短作业，那么就会使长作业不断的往后推，致使长作业不会被运行。</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215604603.png"></p>
+</li>
+<li><p>最短剩余时间优先：从就绪队列中选择剩余时间最短的进程进行调度。该算法可以理解为最短作业优先和时间片轮转的结合。如果没有时间片，那么最短剩余时间其实就是最短作业时间，因为每个进程都是从投执行到尾。</p>
+</li>
+<li><p>优先级调度：按照优先级来调度。</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215629550.png"></p>
+</li>
+<li><p>多级反馈队列调度：设置多个就绪队列，赋予每个就绪队列优先级，优先级越高的队列进程的时间片越短。兼顾了长短作业，同时有较好的响应时间。</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215655867.png"></p>
+</li>
+</ul>
+<h2 id="8、进程间通信"><a href="#8、进程间通信" class="headerlink" title="8、进程间通信"></a>8、进程间通信</h2><p>每个进程的用户地址空间都是独立的，一般而言是不能互相访问的，但内核空间都是每个进程共享的，所以进程之间的通信必须通过内核。</p>
+<p>进程间的通信目的一般有共享数据、数据传输、消息通知、进程控制等。进程间的通信方式：共享<strong>内存、管道、消息队列、信号量</strong>。</p>
+<ul>
+<li><p>管道：管道传输数据是单向的。匿名管道：用完了就销毁，如linux 【|】。<strong>缺点：</strong>通信方式效率低，不适合进程间频繁的交换数据。<strong>好处：</strong>简单，同时我们也很容易的知道管道里面的数据已经被另一个进程读取了。<strong>对于匿名管道，它的通讯范围是存在父子关系的进程。对于命名管道，可以在不相关的进程间通信，基于文件。</strong></p>
+</li>
+<li><p>消息队列：消息队列是保存在内核中的消息链表。A进程给B进程发送消息，A进程把数据放在对应的消息队列后就可以返回了，B进程需要的时候再去读取数据就可以换了，数据读完后，内核会将数据删除掉。如果没有释放消息队列或者没有关闭操作系统，消息队列会一直存在。<strong>缺点：</strong>消息队列通信过程中，存在用户态和内核态之间的数据拷贝。写入数据：用户态-&gt;内核态，读取消息：内核态-&gt;用户态。</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215835113.png"></p>
+</li>
+<li><p>共享内存：消息队列的方式存在数据内核态和用户态转换，共享内存可以解决这一问题。共享内存的机制，就是拿出一块虚拟地址空间来，映射到相同的物理内存中，这样这个进程写入的数据，另一个进程就能里面看到了，不需要拷贝来拷贝去。<strong>缺点：</strong>多个进程同时往这个物理内存写入，可以造成数据覆盖。</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215924096.png"></p>
+</li>
+<li><p>信号量：信号量其实就是一个整形的计数器，主要用于实现进程间的互斥和同步，而不是用于缓存进程通信的数据。信号量表示资源的数量，有两种原子操作，<strong>P操作</strong>信号量会减1，信号量&lt;0表示资源已被占用，进程阻塞等待 ,&gt;=0表示还有资源可用，进程可以正常执行，<strong>V操作</strong>信号量加1，信号量&lt;=0,表示当前有阻塞进程，于是会将该进程唤醒执行；&gt;0表示当前没有阻塞中的进程。</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403220010341.png"></p>
+</li>
+<li><p>信号：信号一般用于一些异常情况下的进程间的通信，是一种异步通信，它的数据结构一般就是一个数字。信号是进程间通信机制中的<strong>唯一的异步通信机制。</strong>信号的来源主要有硬件来源。常用信号：Ctrl+c（SIGINT信号，表示终止该进程）Ctrl+Z（SIGTSTP 表示停止该进程，但还未结束）。进程需要为信号设置相应的 监听处理，当收到特定信号时，执行相应的操作，类似很多变成语言里面的通知机制。</p>
+</li>
+<li><p>Socket:前面几种都是在同一台主机上的进程间的通信，如果需要跨网络与不同主机上的进程之间通信，就需要sokcet通信了。socket不仅可以跨网络与不同主机进行通信，还可以在同主机上进行进程间通信。</p>
+</li>
+</ul>
+<p><strong>进程间通信总结</strong></p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403214026093.png"></p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java/" rel="tag">Java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" rel="tag">操作系统</a></li></ul>
+
+    </footer>
+  </div>
+
+    
+ 
+    
+</article>
+
+    
+    <article
   id="post-04-00-02-Spring-Boot启动原理"
   class="article article-type-post"
   itemscope
@@ -633,73 +802,13 @@
 </article>
 
     
-    <article
-  id="post-hello-world"
-  class="article article-type-post"
-  itemscope
-  itemprop="blogPost"
-  data-scroll-reveal
->
-  <div class="article-inner">
-    
-    <header class="article-header">
-       
-<h2 itemprop="name">
-  <a class="article-title" href="/2021/12/10/hello-world/"
-    >Hello World</a> 
-</h2>
- 
-
-      
-    </header>
-     
-    <div class="article-meta">
-      <a href="/2021/12/10/hello-world/" class="article-date">
-  <time datetime="2021-12-10T14:31:44.288Z" itemprop="datePublished">2021-12-10</time>
-</a>    
-    </div>
-      
-    <div class="article-entry" itemprop="articleBody">
-       
-  <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
- 
-      <!-- reward -->
-      
-    </div>
-    
-
-    <!-- copyright -->
-    
-    <footer class="article-footer">
-       
-    </footer>
-  </div>
-
-    
- 
-    
-</article>
-
-    
   </article>
   
 
   
   <nav class="page-nav">
     
-    <a class="extend prev" rel="prev" href="/page/2/">上一页</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span>
+    <a class="extend prev" rel="prev" href="/page/2/">上一页</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/4/">下一页</a>
   </nav>
   
 </section>
