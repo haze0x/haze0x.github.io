@@ -2161,10 +2161,10 @@
 <p><strong>Jinfo</strong> </p>
 <p>查看正在运行的Java应用程序的扩展参数 </p>
 <p>查看jvm的参数</p>
-<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/SoftWare/YoudaoNote/data/weixinobU7VjhvI_xPabJNr-TrodDikjY4/dade07b0551f49cf8a2170830ccaa0ed/clipboard.png" alt="img"></p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650974007886.png" alt="img"></p>
 <p>查看java系统参数</p>
 <p>jinfo -sysprops pid 查询系统属性</p>
-<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/SoftWare/YoudaoNote/data/weixinobU7VjhvI_xPabJNr-TrodDikjY4/84209ef135164aa69707e9e56f9942f3/clipboard.png" alt="img"></p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650974020201.png" alt="img"></p>
 <p><strong>Jstat</strong></p>
 <p>jstat命令可以查看堆内存各部分的使用量，以及加载类的数量。命令的格式如下：</p>
 <p>jstat [-命令选项] [vmid] [间隔时间(毫秒)] [查询次数]</p>
