@@ -11,7 +11,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title>Jvm总结大全 |  Sword Heart</title>
+      <title>并发编程之深入理解JMM |  Sword Heart</title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/favicon.ico" />
@@ -55,7 +55,7 @@
     <main class="content on">
       <section class="outer">
   <article
-  id="post-00-00-10-Jvm总结大全"
+  id="post-01-00-00-并发编程之深入理解JMM"
   class="article article-type-post"
   itemscope
   itemprop="blogPost"
@@ -66,7 +66,7 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  Jvm总结大全
+  并发编程之深入理解JMM
 </h1>
  
 
@@ -74,11 +74,11 @@
     </header>
      
     <div class="article-meta">
-      <a href="/2022/04/26/00-00-10-Jvm%E6%80%BB%E7%BB%93%E5%A4%A7%E5%85%A8/" class="article-date">
-  <time datetime="2022-04-26T14:14:11.000Z" itemprop="datePublished">2022-04-26</time>
+      <a href="/2022/04/27/01-00-00-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3JMM/" class="article-date">
+  <time datetime="2022-04-27T14:15:02.000Z" itemprop="datePublished">2022-04-27</time>
 </a> 
   <div class="article-category">
-    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/">性能调优</a> / <a class="article-category-link" href="/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/Jvm/">Jvm</a> / <a class="article-category-link" href="/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/Jvm/%E5%AD%A6%E4%B9%A0%E8%AE%A1%E5%88%92/">学习计划</a>
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/">并发编程</a> / <a class="article-category-link" href="/categories/Java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E5%AD%A6%E4%B9%A0%E8%AE%A1%E5%88%92/">学习计划</a>
   </div>
   
 <div class="word_count">
@@ -86,7 +86,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">0</span>
+            <span class="post-count">1.3k</span>
         </span>
     </span>
 
@@ -95,26 +95,49 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> Reading time≈</span>
-            <span class="post-count">1 min</span>
+            <span class="post-count">5 min</span>
         </span>
     </span>
 </div>
  
     </div>
       
+    <div class="tocbot"></div>
+
 
 
 
   
     <div class="article-entry" itemprop="articleBody">
        
-  
+  <h2 id="并发编程之深入理解JMM-amp-并发三大特性"><a href="#并发编程之深入理解JMM-amp-并发三大特性" class="headerlink" title="并发编程之深入理解JMM&amp;并发三大特性"></a>并发编程之深入理解JMM&amp;并发三大特性</h2><p><strong>并发解决什么问题？</strong></p>
+<p>并发是为了解决多线程同步【线程依赖，一个或多个线程依赖另一个线程的执行】、互斥【共享资源一个线程占用了，其它的就不可用，必须等资源释放掉】、分工【把一个大的任务拆分成小的任务最后在合并】问题的。主要是解决线程协作问题。</p>
+<h3 id="1、并发和并行"><a href="#1、并发和并行" class="headerlink" title="1、并发和并行"></a>1、并发和并行</h3><p>目标都是最大化CPU的使用率</p>
+<p>**并行(parallel)**：指在同一时刻，有多条指令在多个处理器上同时执行。所以无论从微观还是从宏观来看，二者都是一起执行的。</p>
+<p><img src="/2022/04/27/01-00-00-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3JMM/28460.png" alt="img"></p>
+<p>**并发(concurrency)**：指在同一时刻只能有一条指令执行，但多个进程指令被快速的轮换执行，使得在宏观上具有多个进程同时执行的效果，但在微观上并不是同时执行的，只是把时间分成若干段，使多个进程快速交替的执行。 </p>
+<p><img src="/2022/04/27/01-00-00-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3JMM/28461.png" alt="img"></p>
+<p>并行在多处理器系统中存在，而并发可以在单处理器和多处理器系统中都存在，并发能够在单处理器系统中存在是因为并发是并行的假象，并行要求程序能够同时执行多个操作，而并发只是要求程序假装同时执行多个操作（每个小时间片执行一个操作，多个操作快速切换执行） </p>
+<p>JMM模型：</p>
+<p>内存模型，与线程间通信有关、共享内存模型。</p>
+<p><strong>例子</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VisibilityTest</span> </span>&#123;</span><br><span class="line">    <span class="comment">//  storeLoad  JVM内存屏障  ----&gt;  (汇编层面指令)  lock; addl $0,0(%%rsp)</span></span><br><span class="line">    <span class="comment">// lock前缀指令不是内存屏障的指令，但是有内存屏障的效果   缓存失效</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">boolean</span> flag = <span class="keyword">true</span>;</span><br><span class="line">    <span class="keyword">private</span> Integer count = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">refresh</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        flag = <span class="keyword">false</span>;</span><br><span class="line">        System.out.println(Thread.currentThread().getName() + <span class="string">&quot;修改flag:&quot;</span>+flag);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">load</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(Thread.currentThread().getName() + <span class="string">&quot;开始执行.....&quot;</span>);</span><br><span class="line">        <span class="keyword">while</span> (flag) &#123;</span><br><span class="line">            <span class="comment">//TODO  业务逻辑</span></span><br><span class="line">            count++;</span><br><span class="line">            <span class="comment">//JMM模型    内存模型： 线程间通信有关   共享内存模型</span></span><br><span class="line">            <span class="comment">//没有跳出循环   可见性的问题</span></span><br><span class="line">            <span class="comment">//能够跳出循环   内存屏障</span></span><br><span class="line">            <span class="comment">//UnsafeFactory.getUnsafe().storeFence();</span></span><br><span class="line">            <span class="comment">//能够跳出循环    ?   释放时间片，上下文切换   加载上下文：flag=true</span></span><br><span class="line">            <span class="comment">//Thread.yield();</span></span><br><span class="line">            <span class="comment">//能够跳出循环    内存屏障</span></span><br><span class="line">            <span class="comment">//System.out.println(count);</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">//LockSupport.unpark(Thread.currentThread());</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">//shortWait(1000000); //1ms</span></span><br><span class="line">            <span class="comment">//shortWait(1000);</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//            try &#123;</span></span><br><span class="line"><span class="comment">//                Thread.sleep(1);   //内存屏障</span></span><br><span class="line"><span class="comment">//            &#125; catch (InterruptedException e) &#123;</span></span><br><span class="line"><span class="comment">//                e.printStackTrace();</span></span><br><span class="line"><span class="comment">//            &#125;</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">//总结：  Java中可见性如何保证？ 方式归类有两种：</span></span><br><span class="line">            <span class="comment">//1.  jvm层面 storeLoad内存屏障    ===&gt;  x86   lock替代了mfence</span></span><br><span class="line">            <span class="comment">// 2.  上下文切换   Thread.yield();</span></span><br><span class="line">            </span><br><span class="line">			<span class="comment">// 自己总结：</span></span><br><span class="line">            <span class="comment">// 1、不加任何代码，线程不会终止，不会跳出循环，可见性问题，当前线程不会感知到其它线程对这个变量的更改    </span></span><br><span class="line">			<span class="comment">// 2、Thread.yield(); 能够跳出循环 与 释放时间片 上下文切换有关，上下文切换会去主存种加载最新的值【还原上下文会重新获取主内存数据】</span></span><br><span class="line">			<span class="comment">// 3、System.out.println(count); 能够跳出循环 底层synchronized语义可以保证可见性-&gt;调用UnsafeFactory.getUnsafe().storeFence()</span></span><br><span class="line">            <span class="comment">// 4、UnsafeFactory.getUnsafe().storeFence(); 能够跳出循环</span></span><br><span class="line">            <span class="comment">// 5、LockSupport.unpark(Thread.currentThread()); 能够跳出循环</span></span><br><span class="line">            <span class="comment">// 6、flag加volatile;能够跳出循环 volatile 保证可见性</span></span><br><span class="line">            <span class="comment">// 7、count 加volatile;能够跳出循环 </span></span><br><span class="line">            <span class="comment">// 8、count用Integer包装类型【开始用基本类型】；能够跳出循环</span></span><br><span class="line">            <span class="comment">// 9、shortWait(1000000); //1ms 能够跳出循环 线程本地缓存被清掉了，然后又去主内存里面加载最新的数据了</span></span><br><span class="line">            <span class="comment">// 10、shortWait(1000); //1us 不能够跳出循环 时间太短，线程本地缓存没有清理掉</span></span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(Thread.currentThread().getName() + <span class="string">&quot;跳出循环: count=&quot;</span> + count);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        VisibilityTest test = <span class="keyword">new</span> VisibilityTest();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 线程threadA模拟数据加载场景</span></span><br><span class="line">        Thread threadA = <span class="keyword">new</span> Thread(() -&gt; test.load(), <span class="string">&quot;threadA&quot;</span>);</span><br><span class="line">        threadA.start();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 让threadA执行一会儿</span></span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        <span class="comment">// 线程threadB通过flag控制threadA的执行时间</span></span><br><span class="line">        Thread threadB = <span class="keyword">new</span> Thread(() -&gt; test.refresh(), <span class="string">&quot;threadB&quot;</span>);</span><br><span class="line">        threadB.start();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">shortWait</span><span class="params">(<span class="keyword">long</span> interval)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">long</span> start = System.nanoTime();</span><br><span class="line">        <span class="keyword">long</span> end;</span><br><span class="line">        <span class="keyword">do</span> &#123;</span><br><span class="line">            end = System.nanoTime();</span><br><span class="line">        &#125; <span class="keyword">while</span> (start + interval &gt;= end);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    ##备注：</span><br><span class="line">    <span class="keyword">while</span>(<span class="keyword">true</span>)&#123;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//这种代码不会释放时间片，在分时调度系统中，会按照优先级进行分时调度，这种代码优先级很高，所以不会释放时间片，及时时间片释放了，下次竞争获取的时候会认为它优先级比较高，优先分配时间片-&gt;这种导致的问题，可能导致优先级比较低的线程饥饿</span></span><br></pre></td></tr></table></figure>
 
-	<div class="row">
-    <embed src="Jvm-whole.png" width="100%" height="550" type="application/pdf">
-	</div>
 
 
+<p><strong>并发三大特性</strong></p>
+<p><strong>可见性</strong></p>
+<p>当一个线程修改了共享变量的值，其他线程能够看到修改的值。Java 内存模型是通过在变量修改后将新值同步回主内存，在变量读取前从主内存刷新变量值这种依赖主内存作为传递媒介的方法来实现可见性的。</p>
+<p><strong>如何保证可见性</strong></p>
+<ul>
+<li>通过 volatile 关键字保证可见性。</li>
+<li>通过 内存屏障保证可见性。</li>
+<li>通过 synchronized 关键字保证可见性。</li>
+<li>通过 Lock保证可见性。</li>
+<li>通过 final 关键字保证可见性</li>
+</ul>
+<p><strong>有序性</strong></p>
+<p><strong>原子性</strong></p>
  
       <!-- reward -->
       
@@ -179,12 +202,12 @@
     <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/04/26/00-00-10-Jvm%E6%80%BB%E7%BB%93%E5%A4%A7%E5%85%A8/" alt="微信分享二维码">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/04/27/01-00-00-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3JMM/" alt="微信分享二维码">
     </div>
 </div>
 
 <div id="share-mask"></div>  
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Jvm/" rel="tag">Jvm</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ZGC/" rel="tag">ZGC</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JMM/" rel="tag">JMM</a></li></ul>
 
     </footer>
   </div>
@@ -192,19 +215,10 @@
    
   <nav class="article-nav">
     
-      <a href="/2022/04/27/01-00-00-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3JMM/" class="article-nav-link">
-        <strong class="article-nav-caption">上一篇</strong>
-        <div class="article-nav-title">
-          
-            并发编程之深入理解JMM
-          
-        </div>
-      </a>
     
-    
-      <a href="/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/" class="article-nav-link">
+      <a href="/2022/04/26/00-00-10-Jvm%E6%80%BB%E7%BB%93%E5%A4%A7%E5%85%A8/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">ZGC深度剖析</div>
+        <div class="article-nav-title">Jvm总结大全</div>
       </a>
     
   </nav>

@@ -151,6 +151,87 @@
     
     
     <article
+  id="post-01-00-00-并发编程之深入理解JMM"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2022/04/27/01-00-00-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3JMM/"
+    >并发编程之深入理解JMM</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/04/27/01-00-00-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3JMM/" class="article-date">
+  <time datetime="2022-04-27T14:15:02.000Z" itemprop="datePublished">2022-04-27</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/">并发编程</a> / <a class="article-category-link" href="/categories/Java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E5%AD%A6%E4%B9%A0%E8%AE%A1%E5%88%92/">学习计划</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h2 id="并发编程之深入理解JMM-amp-并发三大特性"><a href="#并发编程之深入理解JMM-amp-并发三大特性" class="headerlink" title="并发编程之深入理解JMM&amp;并发三大特性"></a>并发编程之深入理解JMM&amp;并发三大特性</h2><p><strong>并发解决什么问题？</strong></p>
+<p>并发是为了解决多线程同步【线程依赖，一个或多个线程依赖另一个线程的执行】、互斥【共享资源一个线程占用了，其它的就不可用，必须等资源释放掉】、分工【把一个大的任务拆分成小的任务最后在合并】问题的。主要是解决线程协作问题。</p>
+<h3 id="1、并发和并行"><a href="#1、并发和并行" class="headerlink" title="1、并发和并行"></a>1、并发和并行</h3><p>目标都是最大化CPU的使用率</p>
+<p>**并行(parallel)**：指在同一时刻，有多条指令在多个处理器上同时执行。所以无论从微观还是从宏观来看，二者都是一起执行的。</p>
+<p><img src="/2022/04/27/01-00-00-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3JMM/28460.png" alt="img"></p>
+<p>**并发(concurrency)**：指在同一时刻只能有一条指令执行，但多个进程指令被快速的轮换执行，使得在宏观上具有多个进程同时执行的效果，但在微观上并不是同时执行的，只是把时间分成若干段，使多个进程快速交替的执行。 </p>
+<p><img src="/2022/04/27/01-00-00-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3JMM/28461.png" alt="img"></p>
+<p>并行在多处理器系统中存在，而并发可以在单处理器和多处理器系统中都存在，并发能够在单处理器系统中存在是因为并发是并行的假象，并行要求程序能够同时执行多个操作，而并发只是要求程序假装同时执行多个操作（每个小时间片执行一个操作，多个操作快速切换执行） </p>
+<p>JMM模型：</p>
+<p>内存模型，与线程间通信有关、共享内存模型。</p>
+<p><strong>例子</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VisibilityTest</span> </span>&#123;</span><br><span class="line">    <span class="comment">//  storeLoad  JVM内存屏障  ----&gt;  (汇编层面指令)  lock; addl $0,0(%%rsp)</span></span><br><span class="line">    <span class="comment">// lock前缀指令不是内存屏障的指令，但是有内存屏障的效果   缓存失效</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">boolean</span> flag = <span class="keyword">true</span>;</span><br><span class="line">    <span class="keyword">private</span> Integer count = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">refresh</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        flag = <span class="keyword">false</span>;</span><br><span class="line">        System.out.println(Thread.currentThread().getName() + <span class="string">&quot;修改flag:&quot;</span>+flag);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">load</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(Thread.currentThread().getName() + <span class="string">&quot;开始执行.....&quot;</span>);</span><br><span class="line">        <span class="keyword">while</span> (flag) &#123;</span><br><span class="line">            <span class="comment">//TODO  业务逻辑</span></span><br><span class="line">            count++;</span><br><span class="line">            <span class="comment">//JMM模型    内存模型： 线程间通信有关   共享内存模型</span></span><br><span class="line">            <span class="comment">//没有跳出循环   可见性的问题</span></span><br><span class="line">            <span class="comment">//能够跳出循环   内存屏障</span></span><br><span class="line">            <span class="comment">//UnsafeFactory.getUnsafe().storeFence();</span></span><br><span class="line">            <span class="comment">//能够跳出循环    ?   释放时间片，上下文切换   加载上下文：flag=true</span></span><br><span class="line">            <span class="comment">//Thread.yield();</span></span><br><span class="line">            <span class="comment">//能够跳出循环    内存屏障</span></span><br><span class="line">            <span class="comment">//System.out.println(count);</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">//LockSupport.unpark(Thread.currentThread());</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">//shortWait(1000000); //1ms</span></span><br><span class="line">            <span class="comment">//shortWait(1000);</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//            try &#123;</span></span><br><span class="line"><span class="comment">//                Thread.sleep(1);   //内存屏障</span></span><br><span class="line"><span class="comment">//            &#125; catch (InterruptedException e) &#123;</span></span><br><span class="line"><span class="comment">//                e.printStackTrace();</span></span><br><span class="line"><span class="comment">//            &#125;</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">//总结：  Java中可见性如何保证？ 方式归类有两种：</span></span><br><span class="line">            <span class="comment">//1.  jvm层面 storeLoad内存屏障    ===&gt;  x86   lock替代了mfence</span></span><br><span class="line">            <span class="comment">// 2.  上下文切换   Thread.yield();</span></span><br><span class="line">            </span><br><span class="line">			<span class="comment">// 自己总结：</span></span><br><span class="line">            <span class="comment">// 1、不加任何代码，线程不会终止，不会跳出循环，可见性问题，当前线程不会感知到其它线程对这个变量的更改    </span></span><br><span class="line">			<span class="comment">// 2、Thread.yield(); 能够跳出循环 与 释放时间片 上下文切换有关，上下文切换会去主存种加载最新的值【还原上下文会重新获取主内存数据】</span></span><br><span class="line">			<span class="comment">// 3、System.out.println(count); 能够跳出循环 底层synchronized语义可以保证可见性-&gt;调用UnsafeFactory.getUnsafe().storeFence()</span></span><br><span class="line">            <span class="comment">// 4、UnsafeFactory.getUnsafe().storeFence(); 能够跳出循环</span></span><br><span class="line">            <span class="comment">// 5、LockSupport.unpark(Thread.currentThread()); 能够跳出循环</span></span><br><span class="line">            <span class="comment">// 6、flag加volatile;能够跳出循环 volatile 保证可见性</span></span><br><span class="line">            <span class="comment">// 7、count 加volatile;能够跳出循环 </span></span><br><span class="line">            <span class="comment">// 8、count用Integer包装类型【开始用基本类型】；能够跳出循环</span></span><br><span class="line">            <span class="comment">// 9、shortWait(1000000); //1ms 能够跳出循环 线程本地缓存被清掉了，然后又去主内存里面加载最新的数据了</span></span><br><span class="line">            <span class="comment">// 10、shortWait(1000); //1us 不能够跳出循环 时间太短，线程本地缓存没有清理掉</span></span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(Thread.currentThread().getName() + <span class="string">&quot;跳出循环: count=&quot;</span> + count);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        VisibilityTest test = <span class="keyword">new</span> VisibilityTest();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 线程threadA模拟数据加载场景</span></span><br><span class="line">        Thread threadA = <span class="keyword">new</span> Thread(() -&gt; test.load(), <span class="string">&quot;threadA&quot;</span>);</span><br><span class="line">        threadA.start();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 让threadA执行一会儿</span></span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        <span class="comment">// 线程threadB通过flag控制threadA的执行时间</span></span><br><span class="line">        Thread threadB = <span class="keyword">new</span> Thread(() -&gt; test.refresh(), <span class="string">&quot;threadB&quot;</span>);</span><br><span class="line">        threadB.start();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">shortWait</span><span class="params">(<span class="keyword">long</span> interval)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">long</span> start = System.nanoTime();</span><br><span class="line">        <span class="keyword">long</span> end;</span><br><span class="line">        <span class="keyword">do</span> &#123;</span><br><span class="line">            end = System.nanoTime();</span><br><span class="line">        &#125; <span class="keyword">while</span> (start + interval &gt;= end);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    ##备注：</span><br><span class="line">    <span class="keyword">while</span>(<span class="keyword">true</span>)&#123;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//这种代码不会释放时间片，在分时调度系统中，会按照优先级进行分时调度，这种代码优先级很高，所以不会释放时间片，及时时间片释放了，下次竞争获取的时候会认为它优先级比较高，优先分配时间片-&gt;这种导致的问题，可能导致优先级比较低的线程饥饿</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>并发三大特性</strong></p>
+<p><strong>可见性</strong></p>
+<p>当一个线程修改了共享变量的值，其他线程能够看到修改的值。Java 内存模型是通过在变量修改后将新值同步回主内存，在变量读取前从主内存刷新变量值这种依赖主内存作为传递媒介的方法来实现可见性的。</p>
+<p><strong>如何保证可见性</strong></p>
+<ul>
+<li>通过 volatile 关键字保证可见性。</li>
+<li>通过 内存屏障保证可见性。</li>
+<li>通过 synchronized 关键字保证可见性。</li>
+<li>通过 Lock保证可见性。</li>
+<li>通过 final 关键字保证可见性</li>
+</ul>
+<p><strong>有序性</strong></p>
+<p><strong>原子性</strong></p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JMM/" rel="tag">JMM</a></li></ul>
+
+    </footer>
+  </div>
+
+    
+ 
+    
+</article>
+
+    
+    <article
   id="post-00-00-10-Jvm总结大全"
   class="article article-type-post"
   itemscope
@@ -1847,144 +1928,6 @@
 </ul>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br></pre></td><td class="code"><pre><span class="line">总结：</span><br><span class="line"></span><br><span class="line">一、java对象创建：</span><br><span class="line"></span><br><span class="line"><span class="number">1</span>、类加载检查</span><br><span class="line"></span><br><span class="line">jvm遇到一条<span class="keyword">new</span>指令时，首先会去检查这个指令对应的参数能否在常量池中定位到一个类的符号引用，并且检查这个类是否被加载、解析过，如果没有则执行类的加载过程</span><br><span class="line"></span><br><span class="line"><span class="number">2</span>、对象内存分配</span><br><span class="line"></span><br><span class="line">指针碰撞（默认使用）：如果Java堆中内存是绝对规整的，所有用过的内存都放在一边，空闲的内存放在另一边，中间放着一个指针作为分界点的指示器，那所分配内存就仅仅是把那个指针向空闲空间那边挪动一段与对象大小相等的距离。</span><br><span class="line"></span><br><span class="line">空闲列表：如果Java堆中的内存并不是规整的，已使用的内存和空 闲的内存相互交错，那就没有办法简单地进行指针碰撞了，虚拟机就必须维护一个列表，记 录上哪些内存块是可用的，在分配的时候从列表中找到一块足够大的空间划分给对象实例， 并更新列表上的记录</span><br><span class="line"></span><br><span class="line">解决内存分配并发问题：</span><br><span class="line"></span><br><span class="line">cas：虚拟机采用**CAS配上失败重试**的方式保证更新操作的原子性来对分配内存空间的动作进行同步处理。</span><br><span class="line"></span><br><span class="line">本地线程分配缓存（TLAB）：把内存分配的动作按照线程划分在不同的空间之中进行，即每个线程在Java堆中预先分配一小块内存，**-XX:+/- UseTLAB**参数来设定</span><br><span class="line"></span><br><span class="line"><span class="number">3</span>、初始化零值</span><br><span class="line"></span><br><span class="line">内存分配完成后，虚拟机需要将分配到的内存空间都初始化为零值（不包括对象头）， 如果使用TLAB，这一工作过程也可以提前至TLAB分配时进行。这一步操作保证了对象的实例字段在Java代码中可以不赋初始值就直接使用，程序能访问到这些字段的数据类型所对应的零值。</span><br><span class="line"></span><br><span class="line"><span class="number">4</span>、设置对象头</span><br><span class="line"></span><br><span class="line">对象头：</span><br><span class="line"></span><br><span class="line">markword标记字段、自身运行时数据（hashcode，对象分代年龄、锁状态标志位、线程持有的锁、偏向线程id、偏向时间戳）；Klass指针：指向方法区的类元数据，非java对象的<span class="class"><span class="keyword">class</span>；数组长度：针对数组类型，存储长度</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">实例数据：对象本身的数据存储</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">对齐填充位：对于大部分处理器，对象以8字节整数倍来对齐填充都是最高效的存取方式。</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">5、执行<span class="title">init</span>方法</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">执行方法，即对象按照程序员的意愿进行初始化。对应到语言层面上讲，就是为属性赋值（注意，这与上面的赋零值不同，这是由程序员赋的值），和执行构造方法。</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">这里区别下类加载过程的准备和初始化阶段：类加载过程中的准备阶段是针对静态变量赋默认值，比如<span class="title">int</span>类型就是0，引用类型就是<span class="title">null</span>；类加载过程中的初始化阶段也是针对静态变量和静态代码块</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">指针压缩：</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">关于指针压缩个人理解：32位最大表示内存4<span class="title">g</span>，当使用32位地址记录超过4<span class="title">g</span>内存地址时，采用一定的压缩算法，将本来需要超过32位表示的地址压缩成能够使用32位地址来表示，<span class="title">cpu</span>寄存器在使用使用时通过对应的解码算法算出对应的超过32位的地址寻址，使得32位地址可以表示超过4<span class="title">g</span>内存</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">指针压缩好处：在64位平台的<span class="title">HotSpot</span>中使用32位指针(实际存储用64位)，内存使用会多出1.5倍左右，使用较大指针在主内存和缓存之间移动数据，**占用较大宽带，同时<span class="title">GC</span>也会承受较大压力**</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">二、对象内存分配</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">一般来说，新创建的对象内存一般是在堆上分配，但是也有在栈上分配的。为了减少临时对象在堆内分配的数量，<span class="title">JVM</span>通过**逃逸分析**确定该对象不会被外部访问。如果不会逃逸可以将该对象在**栈上分配**内存，这样该对象所占用的内存空间就可以随栈帧出栈而销毁，就减轻了垃圾回收的压力。对象逃逸分析就是分析对象的动态作用域，当一个对象在方法中被定义后，它可能被外部方法所引用，例如作为调用参数传递到其他地方中。</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">标量替换：通过逃逸分析确定该对象不会被外部访问，并且对象可以被进一步分解时，<span class="title">Jvm</span>不会创建该对象，而是将该对象分解成若干个被这个方法使用的成员变量所替代，这些代替的成员变量在栈帧或寄存器上分配空间。这样就不会因为没有一大片连续空间导致对象内存不够分配。标量：就是不可被进一步分解的量，二<span class="title">java</span>的基本类型就是标量，标量对应的就是可以被进一步分解的量，这种就聚合量，在<span class="title">java</span>中对象就是可以被进一步分解的量。</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">大多数对象都是分配在<span class="title">eden</span>，<span class="title">eden</span>内存不够时，就会触发<span class="title">minor</span> <span class="title">gc</span> / <span class="title">young</span> <span class="title">gc</span></span>;</span><br><span class="line"></span><br><span class="line">minor gc /young gc：指在年轻代发生的gc，minor gc非常频繁，回收速度一般也比较快。</span><br><span class="line"></span><br><span class="line">major gc / full gc：一般时回收老年代，年轻代，方法区中的垃圾，major gc 的速度一般也比minor gc 慢十倍以上。</span><br><span class="line"></span><br><span class="line">新生代分为eden、survivor 区（s0,s1）比例为<span class="number">8</span>：<span class="number">1</span>：<span class="number">1</span></span><br><span class="line"></span><br><span class="line">**大对象直接进入老年代**</span><br><span class="line"></span><br><span class="line">大对象就是需要大量连续内存空间的对象（比如：字符串、数组）。JVM参数 -XX:PretenureSizeThreshold 可以设置大对象的大小，如果对象超过设置大小会直接进入老年代，不会进入年轻代，这个参数只在 Serial 和ParNew两个收集器下有效。</span><br><span class="line"></span><br><span class="line">比如设置JVM参数：-XX:PretenureSizeThreshold=<span class="number">1000000</span> (单位是字节)  -XX:+UseSerialGC  ，再执行下上面的第一个程序会发现大对象直接进了老年代</span><br><span class="line"></span><br><span class="line">**为什么要这样呢？**</span><br><span class="line"></span><br><span class="line">为了避免为大对象分配内存时的复制操作而降低效率。</span><br><span class="line"></span><br><span class="line">**长期存活的对象将进入老年代**</span><br><span class="line"></span><br><span class="line">既然虚拟机采用了分代收集的思想来管理内存，那么内存回收时就必须能识别哪些对象应放在新生代，哪些对象应放在老年代中。为了做到这一点，虚拟机给每个对象一个对象年龄（Age）计数器。</span><br><span class="line"></span><br><span class="line">如果对象在 Eden 出生并经过第一次 Minor GC 后仍然能够存活，并且能被 Survivor 容纳的话，将被移动到 Survivor 空间中，并将对象年龄设为<span class="number">1</span>。对象在 Survivor 中每熬过一次 MinorGC，年龄就增加<span class="number">1</span>岁，当它的年龄增加到一定程度（默认为<span class="number">15</span>岁，CMS收集器默认<span class="number">6</span>岁，不同的垃圾收集器会略微有点不同），就会被晋升到老年代中。对象晋升到老年代的年龄阈值，可以通过参数 **-XX:MaxTenuringThreshold** 来设置。</span><br><span class="line"></span><br><span class="line">**老年代空间分配担保机制**</span><br><span class="line"></span><br><span class="line">年轻代每次**minor gc**之前JVM都会计算下老年代**剩余可用空间**</span><br><span class="line"></span><br><span class="line">如果这个可用空间小于年轻代里现有的所有对象大小之和(**包括垃圾对象**)</span><br><span class="line"></span><br><span class="line">就会看一个“-XX:-HandlePromotionFailure”(jdk1<span class="number">.8</span>默认就设置了)的参数是否设置了</span><br><span class="line"></span><br><span class="line">如果有这个参数，就会看看老年代的可用内存大小，是否大于之前每一次minor gc后进入老年代的对象的**平均大小**。</span><br><span class="line"></span><br><span class="line">如果上一步结果是小于或者之前说的参数没有设置，那么就会触发一次Full gc，对老年代和年轻代一起回收一次垃圾，如果回收完还是没有足够空间存放新的对象就会发生<span class="string">&quot;OOM&quot;</span></span><br><span class="line"></span><br><span class="line">当然，如果minor gc之后剩余存活的需要挪动到老年代的对象大小还是大于老年代可用空间，那么也会触发full gc，full gc完之后如果还是没有空间放minor gc之后的存活对象，则也会发生“OOM”</span><br><span class="line"></span><br><span class="line">三、**对象内存回收**</span><br><span class="line"></span><br><span class="line"><span class="number">1</span>、引用计数法</span><br><span class="line"></span><br><span class="line">给对象中添加一个引用计数器，每当有一个地方引用它，计数器就加<span class="number">1</span>；当引用失效，计数器就减<span class="number">1</span>；任何时候计数器为<span class="number">0</span>的对象就是不可能再被使用的。</span><br><span class="line"></span><br><span class="line">**这个方法实现简单，效率高，但是目前主流的虚拟机中并没有选择这个算法来管理内存，其最主要的原因是它很难解决对象之间相互循环引用的问题。**</span><br><span class="line"></span><br><span class="line"><span class="number">2</span>、可达性分析算法</span><br><span class="line"></span><br><span class="line">将**“GC Roots”** 对象作为起点，从这些节点开始向下搜索引用的对象，找到的对象都标记为**非垃圾对象**，其余未标记的对象都是垃圾对象</span><br><span class="line"></span><br><span class="line">**GC Roots**根节点：线程栈的本地变量、静态变量、本地方法栈的变量等等</span><br><span class="line"></span><br><span class="line"><span class="number">3</span>、常见引用类型</span><br><span class="line"></span><br><span class="line">java的引用类型一般分为四种：**强引用**、**软引用**、弱引用、虚引用</span><br><span class="line"></span><br><span class="line">**强引用**：普通的变量引用</span><br><span class="line"></span><br><span class="line">**软引用**：将对象用SoftReference软引用类型的对象包裹，正常情况不会被回收，但是GC做完后发现释放不出空间存放新的对象，则会把这些软引用的对象回收掉。**软引用可用来实现内存敏感的高速缓存。**</span><br><span class="line"></span><br><span class="line">**弱引用**：将对象用WeakReference软引用类型的对象包裹，弱引用跟没引用差不多，**GC会直接回收掉**，很少用</span><br><span class="line"></span><br><span class="line">**虚引用：**虚引用也称为幽灵引用或者幻影引用，它是最弱的一种引用关系，几乎不用</span><br><span class="line"></span><br><span class="line">**finalize()方法最终判定对象是否存活**</span><br><span class="line"></span><br><span class="line">即使在可达性分析算法中不可达的对象，也并非是“非死不可”的，这时候它们暂时处于“缓刑”阶段，要真正宣告一个对象死亡，至少要经历再次标记过程。</span><br><span class="line"></span><br><span class="line">**标记的前提是对象在进行可达性分析后发现没有与GC Roots相连接的引用链。**</span><br><span class="line"></span><br><span class="line">**<span class="number">1.</span> 第一次标记并进行一次筛选。**</span><br><span class="line"></span><br><span class="line">筛选的条件是此对象是否有必要执行finalize()方法。</span><br><span class="line"></span><br><span class="line">当对象没有覆盖finalize方法，对象将直接被回收。</span><br><span class="line"></span><br><span class="line">**<span class="number">2.</span> 第二次标记**</span><br><span class="line"></span><br><span class="line">如果这个对象覆盖了finalize方法，finalize方法是对象脱逃死亡命运的最后一次机会，如果对象要在finalize()中成功拯救自己，只要重新与引用链上的任何的一个对象建立关联即可，譬如把自己赋值给某个类变量或对象的成员变量，那在第二次标记时它将移除出“即将回收”的集合。如果对象这时候还没逃脱，那基本上它就真的被回收了。</span><br><span class="line"></span><br><span class="line"><span class="number">4</span>、如何判断一个类是无用的类</span><br><span class="line"></span><br><span class="line">- 该类所有的对象实例都已经被回收，也就是 Java 堆中不存在该类的任何实例。</span><br><span class="line">- 加载该类的 ClassLoader 已经被回收。【一般是自定义类加载器比如tomcat自定义的类加载jsp类加载器】</span><br><span class="line">- 该类对应的 java.lang.Class 对象没有在任何地方被引用，无法在任何地方通过反射访问该类的方法。</span><br></pre></td></tr></table></figure>
 
- 
-      <!-- reward -->
-      
-    </div>
-    
-
-    <!-- copyright -->
-    
-    <footer class="article-footer">
-       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Jvm/" rel="tag">Jvm</a></li></ul>
-
-    </footer>
-  </div>
-
-    
- 
-    
-</article>
-
-    
-    <article
-  id="post-00-00-02-Jvm内存模型深度剖析与优化"
-  class="article article-type-post"
-  itemscope
-  itemprop="blogPost"
-  data-scroll-reveal
->
-  <div class="article-inner">
-    
-    <header class="article-header">
-       
-<h2 itemprop="name">
-  <a class="article-title" href="/2022/04/14/00-00-02-Jvm%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96/"
-    >Jvm内存模型深度剖析与优化</a> 
-</h2>
- 
-
-      
-    </header>
-     
-    <div class="article-meta">
-      <a href="/2022/04/14/00-00-02-Jvm%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96/" class="article-date">
-  <time datetime="2022-04-14T14:18:11.000Z" itemprop="datePublished">2022-04-14</time>
-</a> 
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/">性能调优</a> / <a class="article-category-link" href="/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/Jvm/">Jvm</a> / <a class="article-category-link" href="/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/Jvm/%E5%AD%A6%E4%B9%A0%E8%AE%A1%E5%88%92/">学习计划</a>
-  </div>
-   
-    </div>
-      
-    <div class="article-entry" itemprop="articleBody">
-       
-  <h2 id="Jvm内存模型深度剖析与优化"><a href="#Jvm内存模型深度剖析与优化" class="headerlink" title="Jvm内存模型深度剖析与优化"></a>Jvm内存模型深度剖析与优化</h2><p><img src="/2022/04/14/00-00-02-Jvm%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96/clipboard.png"></p>
-<p><strong>Java语言的跨平台特性</strong></p>
-<p><img src="/2022/04/14/00-00-02-Jvm%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96/clipboard-1650033076633.png" alt="img"></p>
-<p><strong>JVM整体结构及内存模型</strong></p>
-<p><img src="/2022/04/14/00-00-02-Jvm%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96/jvm%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B.png" alt="img"></p>
-<p><strong>栈帧结构：</strong></p>
-<p>局部变量表：存放局部变量</p>
-<p>操作数栈：存放运算时的操作数</p>
-<p>方法出口：方法执行完回到方法的初始位置，这个位置在调用方法的时候就已经记录到方法出口了</p>
-<p>动态链接：区别于静态链接【静态链接是类加载过程中，符号引用替换为直接引用，比如 public main 等符号转化为原空间的地址】，动态链接是运行过程中，把符号引用转换成符号对应的代码的直接地址，比如上节课的main方法的 compute()方法</p>
-<p><strong>虚拟机栈和堆之间的关系：</strong></p>
-<p>堆中存放着虚拟机栈中的对象，虚拟机栈存放的是队中对象的引用</p>
-<p><strong>方法区和堆之间的关系：</strong></p>
-<p>方法区里面主要存放一些常量信息、静态变量和类元信息，堆中才是存放的实际对象，方法区里面存放的常量信息实际是d堆中对象的地址</p>
-<p><strong>本地方法栈：</strong></p>
-<p>存放调用本地方法的一些内存</p>
-<p><strong>补充一个问题：</strong></p>
-<p><strong>在minor gc过程中对象挪动后，引用如何修改？</strong></p>
-<p>对象在堆内部挪动的过程其实是复制，原有区域对象还在，一般不直接清理，JVM内部清理过程只是将对象分配指针移动到区域的头位置即可，比如扫描s0区域，扫到gcroot引用的非垃圾对象是将这些对象<strong>复制</strong>到s1或老年代，最后扫描完了将s0区域的对象分配指针移动到区域的起始位置即可，s0区域之前对象并不直接清理，当有新对象分配了，原有区域里的对象也就被清除了。</p>
-<p>minor gc在根扫描过程中会记录所有被扫描到的对象引用(在年轻代这些引用很少，因为大部分都是垃圾对象不会扫描到)，如果引用的对象被复制到新地址了，最后会一并更新引用指向新地址。</p>
-<p>这里面内部算法比较复杂，感兴趣可以参考R大的这篇文章：</p>
-<p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/42181722/answer/145085437">https://www.zhihu.com/question/42181722/answer/145085437</a></p>
-<p><a target="_blank" rel="noopener" href="https://hllvm-group.iteye.com/group/topic/39376#post-257329">https://hllvm-group.iteye.com/group/topic/39376#post-257329</a></p>
-<p><strong>二、JVM内存参数设置</strong></p>
-<p><img src="/2022/04/14/00-00-02-Jvm%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96/clipboard-1650033076634.png" alt="img"></p>
-<p>Spring Boot程序的JVM参数设置格式(Tomcat启动直接加在bin目录下catalina.sh文件里)：</p>
-<p>java -Xms2048M -Xmx2048M -Xmn1024M -Xss512K -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=256M -jar microservice-eureka-server.jar</p>
-<p>-Xss：每个线程的栈大小</p>
-<p>-Xms：设置堆的初始可用大小，默认物理内存的1/64 </p>
-<p>-Xmx：设置堆的最大可用大小，默认物理内存的1/4</p>
-<p>-Xmn：新生代大小</p>
-<p>-XX:NewRatio：默认2表示新生代占年老代的1/2，占整个堆内存的1/3。</p>
-<p>-XX:SurvivorRatio：默认8表示一个survivor区占用1/8的Eden内存，即1/10的新生代内存。</p>
-<p>关于元空间的JVM参数有两个：-XX:MetaspaceSize=N和 -XX:MaxMetaspaceSize=N</p>
-<p><strong>-XX：MaxMetaspaceSize</strong>： 设置元空间最大值， 默认是-1， 即不限制， 或者说只受限于本地内存大小。</p>
-<p><strong>-XX：MetaspaceSize</strong>： 指定元空间触发Fullgc的初始阈值(元空间无固定初始大小)， 以字节为单位，默认是21M左右，达到该值就会触发full gc进行类型卸载， 同时收集器会对该值进行调整： 如果释放了大量的空间， 就适当降低该值； 如果释放了很少的空间， 那么在不超过-XX：MaxMetaspaceSize（如果设置了的话） 的情况下， 适当提高该值。这个跟早期jdk版本的**-XX:PermSize**参数意思不一样，-<strong>XX:PermSize</strong>代表永久代的初始容量。</p>
-<p>由于调整元空间的大小需要Full GC，这是非常昂贵的操作，如果应用在启动的时候发生大量Full GC，通常都是由于永久代或元空间发生了大小调整，基于这种情况，一般建议在JVM参数中将MetaspaceSize和MaxMetaspaceSize设置成一样的值，并设置得比初始值要大，对于8G物理内存的机器来说，一般我会将这两个值都设置为256M。</p>
-<p><strong>StackOverflowError</strong>示例：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// JVM设置  -Xss128k(默认1M)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">StackOverflowTest</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">redo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        count++;</span><br><span class="line">        redo();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            redo();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable t) &#123;</span><br><span class="line">            t.printStackTrace();</span><br><span class="line">            System.out.println(count);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">运行结果：</span><br><span class="line">java.lang.StackOverflowError</span><br><span class="line">	at com.tuling.jvm.StackOverflowTest.redo(StackOverflowTest.java:<span class="number">12</span>)</span><br><span class="line">	at com.tuling.jvm.StackOverflowTest.redo(StackOverflowTest.java:<span class="number">13</span>)</span><br><span class="line">	at com.tuling.jvm.StackOverflowTest.redo(StackOverflowTest.java:<span class="number">13</span>)</span><br><span class="line">   ......</span><br></pre></td></tr></table></figure>
-
-<p><strong>结论：</strong></p>
-<p>-Xss设置越小count值越小，说明一个线程栈里能分配的栈帧就越少，但是对JVM整体来说能开启的线程数会更多</p>
-<p><strong>JVM内存参数大小该如何设置？</strong></p>
-<p>JVM参数大小设置并没有固定标准，需要根据实际项目情况分析，给大家举个例子</p>
-<p><strong>日均百万级订单交易系统如何设置JVM参数</strong></p>
-<p><img src="/2022/04/14/00-00-02-Jvm%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96/%E4%BA%BF%E7%BA%A7%E6%B5%81%E9%87%8F%E7%94%B5%E5%95%86%E7%B3%BB%E7%BB%9Fjvm%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE%E4%BC%98%E5%8C%96.png" alt="img"></p>
-<p><strong>结论：****通过上面这些内容介绍，大家应该对JVM优化有些概念了，就是尽可能让对象都在新生代里分配和回收，尽量别让太多对象频繁进入老年代，避免频繁对老年代进行垃圾回收，同时给系统充足的内存大小，避免新生代频繁的进行垃圾回收。</strong></p>
-<p>每日总结：</p>
-<p>1、JDK体系结构及跨平台性：Jdk包含JRE【java运行时环境】，java语言的跨平台性，jvm在windows和linux上各自有对应的实现，javac编译的字节码文件可以运行在windows和linux环境，jvm屏蔽了底层操作系统的细节，使得java代码可以实现一次编译，到处运行。</p>
-<p>2、Jvm整体结构和内存模型：Jvm分为三部分：类加载子系统【装载class类文件】、运行时数据区【Jvm内存区域】、执行引擎【执行字节码指令】</p>
-<p>3、Jvm内存模型详解：</p>
-<p>1)方法区：也叫元空间，存放class文件的地方</p>
-<p>2)堆：存放内存对象</p>
-<p>3)虚拟机栈：一个线程运行对应一个栈，线程内的方法对应一个栈帧【非嵌套】，栈帧包含：局部变量表、操作数栈、动态链接、方法出口</p>
-<p>4)程序计数器：指针指令执行的行号。</p>
-<p>5)本地方法栈</p>
-<p>每日总结：</p>
-<p>整理笔记：<a href="https://haze0x.github.io/2022/04/14/00-00-02-Jvm%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96/">https://haze0x.github.io/2022/04/14/00-00-02-Jvm%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96/</a></p>
-<p>1、jvm内存模型详解</p>
-<p>共享</p>
-<p>方法区【原空间】：存放常量+静态变量+类信息</p>
-<p>堆：存放对象的地方</p>
-<p>线程独占</p>
-<p>程序计数器：指示程序执行的行号，线程上下文切换时可以通过程序计数器回复线程执行</p>
-<p>本地方法栈：存放执行本地native方法的变量</p>
-<p>虚拟机栈：一个线程运行对应一个栈，线程内的方法对应一个栈帧【非嵌套】，</p>
-<p>栈帧包含：</p>
-<p>局部变量表：存放局部变量</p>
-<p>操作数栈：存放运算时的操作数</p>
-<p>方法出口：方法执行完回到方法的初始位置，这个位置在调用方法的时候就已经记录到方法出口了</p>
-<p>动态链接：区别于静态链接【静态链接是类加载过程中，符号引用替换为直接引用，比如 public main 等符号转化为原空间的地址】，动态链接是运行过程中，把符号引用转换成符号对应的代码的直接地址，比如上节课的main方法的 compute()方法</p>
-<p>2、堆区内存模型</p>
-<p>堆=新生代【eden(8/10)+s0(1/10)+s1(1/10)】+老年代</p>
-<p>新生代：老年代=1：2</p>
-<p>3、JVM内存参数配置</p>
-<p>-Xss：每个线程的栈大小</p>
-<p>-Xms：设置堆的初始可用大小，默认物理内存的1/64 </p>
-<p>-Xmx：设置堆的最大可用大小，默认物理内存的1/4</p>
-<p>-Xmn：新生代大小</p>
-<p>-XX:NewRatio：默认2表示新生代占年老代的1/2，占整个堆内存的1/3。</p>
-<p>-XX:SurvivorRatio：默认8表示一个survivor区占用1/8的Eden内存，即1/10的新生代内存。</p>
-<p>关于元空间的JVM参数有两个：-XX:MetaspaceSize=N和 -XX:MaxMetaspaceSize=N</p>
-<p><strong>-XX：MaxMetaspaceSize</strong>： 设置元空间最大值， 默认是-1， 即不限制， 或者说只受限于本地内存大小。</p>
-<p><strong>-XX：MetaspaceSize</strong>： 指定元空间触发Fullgc的初始阈值(元空间无固定初始大小)， 以字节为单位，默认是21M左右，达到该值就会触发full gc进行类型卸载， 同时收集器会对该值进行调整： 如果释放了大量的空间， 就适当降低该值； 如果释放了很少的空间， 那么在不超过-XX：MaxMetaspaceSize（如果设置了的话） 的情况下， 适当提高该值。这个跟早期jdk版本的**-XX:PermSize**参数意思不一样，-<strong>XX:PermSize</strong>代表永久代的初始容量。</p>
-<p>由于调整元空间的大小需要Full GC，这是非常昂贵的操作，如果应用在启动的时候发生大量Full GC，通常都是由于永久代或元空间发生了大小调整，基于这种情况，一般建议在JVM参数中将MetaspaceSize和MaxMetaspaceSize设置成一样的值，并设置得比初始值要大，对于8G物理内存的机器来说，一般我会将这两个值都设置为256M。</p>
  
       <!-- reward -->
       
