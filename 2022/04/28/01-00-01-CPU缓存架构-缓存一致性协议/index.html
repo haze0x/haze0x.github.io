@@ -86,7 +86,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">3.8k</span>
+            <span class="post-count">4.5k</span>
         </span>
     </span>
 
@@ -95,7 +95,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> Reading time≈</span>
-            <span class="post-count">14 min</span>
+            <span class="post-count">16 min</span>
         </span>
     </span>
 </div>
@@ -214,6 +214,29 @@
 <p><strong>测试</strong></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FalseSharingTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        testPointer(<span class="keyword">new</span> Pointer());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">testPointer</span><span class="params">(Pointer pointer)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        <span class="keyword">long</span> start = System.currentTimeMillis();</span><br><span class="line">        Thread t1 = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100000000</span>; i++) &#123;</span><br><span class="line">                pointer.x++;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        Thread t2 = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100000000</span>; i++) &#123;</span><br><span class="line">                pointer.y++;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">        t1.join();</span><br><span class="line">        t2.join();</span><br><span class="line"></span><br><span class="line">        System.out.println(pointer.x+<span class="string">&quot;,&quot;</span>+pointer.y);</span><br><span class="line"></span><br><span class="line">        System.out.println(System.currentTimeMillis() - start);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Pointer</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 避免伪共享： @Contended +  jvm参数：-XX:-RestrictContended  jdk8支持</span></span><br><span class="line">    <span class="comment">//@Contended</span></span><br><span class="line">    <span class="keyword">volatile</span> <span class="keyword">long</span> x;</span><br><span class="line">    <span class="comment">//避免伪共享： 缓存行填充</span></span><br><span class="line">    <span class="comment">//long p1, p2, p3, p4, p5, p6, p7;</span></span><br><span class="line">    <span class="keyword">volatile</span> <span class="keyword">long</span> y;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
+<h3 id="三、as-if-serial-amp-happens-before"><a href="#三、as-if-serial-amp-happens-before" class="headerlink" title="三、as-if-serial   &amp;  happens-before"></a>三、<strong>as-if-serial</strong>   &amp;  <strong>happens-before</strong></h3><p>as-if-serial语义的意思是：<strong>不管怎么重排序（编译器和处理器为了提高并行度），（单线程）程序的执行结果不能被改变。</strong>编译器、runtime和处理器都必须遵守as-if-serial语义。  </p>
+<p>为了遵守as-if-serial语义，编译器和处理器不会对存在数据依赖关系的操作做重排序，因为这种重排序会改变执行结果。但是，如果操作之间不存在数据依赖关系，这些操作就可能被编译器和处理器重排序。</p>
+<p><strong>happens-before原则定义如下：</strong></p>
+<ol>
+<li>如果一个操作happens-before另一个操作，那么第一个操作的执行结果将对第二个操作可见，而且第一个操作的执行顺序排在第二个操作之前。 </li>
+<li>两个操作之间存在happens-before关系，并不意味着一定要按照happens-before原则制定的顺序来执行。如果重排序之后的执行结果与按照happens-before关系来执行的结果一致，那么这种重排序并不非法。</li>
+</ol>
+<p><strong>下面是happens-before原则规则：</strong></p>
+<p>1.程序次序规则：一个线程内，按照代码顺序，书写在前面的操作先行发生于书写在后面的操作；</p>
+<p>2.锁定规则：一个unLock操作先行发生于后面对同一个锁的lock操作；</p>
+<p>3.volatile变量规则：对一个变量的写操作先行发生于后面对这个变量的读操作；</p>
+<p>4.传递规则：如果操作A先行发生于操作B，而操作B又先行发生于操作C，则可以得出操作A先行发生于操作C；</p>
+<p>5.线程启动规则：Thread对象的start()方法先行发生于此线程的每个一个动作；</p>
+<p>6.线程中断规则：对线程interrupt()方法的调用先行发生于被中断线程的代码检测到中断事件的发生；</p>
+<p>7.线程终结规则：线程中所有的操作都先行发生于线程的终止检测，我们可以通过Thread.join()方法结束、Thread.isAlive()的返回值手段检测到线程已经终止执行；</p>
+<p>8.对象终结规则：一个对象的初始化完成先行发生于他的finalize()方法的开始；</p>
+<p><strong>=&gt;&gt;推导出其他满足happens-before的规则</strong></p>
+<p>1.将一个元素放入一个线程安全的队列的操作Happens-Before从队列中取出这个元素的操作</p>
+<p>2.将一个元素放入一个线程安全容器的操作Happens-Before从容器中取出这个元素的操作</p>
+<p>3.在CountDownLatch上的倒数操作Happens-Before CountDownLatch#await()操作</p>
+<p>4.释放Semaphore许可的操作Happens-Before获得许可操作</p>
+<p>5.Future表示的任务的所有操作Happens-Before Future#get()操作</p>
+<p>6.向Executor提交一个Runnable或Callable的操作Happens-Before任务开始执行操作</p>
  
       <!-- reward -->
       
