@@ -3,7 +3,7 @@
   <entry>
     <title>JVM类加载机制深度解析</title>
     <url>/2021/12/11/00_00_01_JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script>]]></content>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
       <categories>
         <category>Java</category>
         <category>性能调优</category>
@@ -18,7 +18,7 @@
   <entry>
     <title>Tomcat核心组件及应用架构详解</title>
     <url>/2021/12/11/00_01_01_Tomcat%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6%E5%8F%8A%E5%BA%94%E7%94%A8%E6%9E%B6%E6%9E%84%E8%AF%A6%E8%A7%A3/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script>]]></content>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
       <categories>
         <category>Java</category>
         <category>性能调优</category>
@@ -31,7 +31,7 @@
   <entry>
     <title>深入理解Mysql索引底层数据结构与算法</title>
     <url>/2021/12/11/00_02_01_%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Mysql%E7%B4%A2%E5%BC%95%E5%BA%95%E5%B1%82%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script>]]></content>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
       <categories>
         <category>Java</category>
         <category>性能调优</category>
@@ -58,7 +58,9 @@
   <entry>
     <title>操作系统原理</title>
     <url>/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h2 id="1、进程的概念"><a href="#1、进程的概念" class="headerlink" title="1、进程的概念"></a>1、进程的概念</h2><p>​        运行中的程序就叫做<strong>进程</strong>。</p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="1、进程的概念"><a href="#1、进程的概念" class="headerlink" title="1、进程的概念"></a>1、进程的概念</h2><p>​        运行中的程序就叫做<strong>进程</strong>。</p>
 <h2 id="2、并行与并发"><a href="#2、并行与并发" class="headerlink" title="2、并行与并发"></a>2、并行与并发</h2><p>​        并发是一种<strong>物理架构</strong>，多个cpu核同一时间执行多个任务。而并行是一种<strong>逻辑架构</strong>，在一个核上，多个任务通过竞争时间片交替执行。</p>
 <p>​        并行与并发的关系图</p>
 <p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/%E5%B9%B6%E8%A1%8C%E4%B8%8E%E5%B9%B6%E5%8F%91.png"></p>
@@ -261,7 +263,9 @@
   <entry>
     <title>计算机网络</title>
     <url>/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h2 id="一、网络分层原理"><a href="#一、网络分层原理" class="headerlink" title="一、网络分层原理"></a>一、网络分层原理</h2><h3 id="1、复杂的网络"><a href="#1、复杂的网络" class="headerlink" title="1、复杂的网络"></a>1、复杂的网络</h3><p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404090937050.png" alt="网络传输过程"></p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="一、网络分层原理"><a href="#一、网络分层原理" class="headerlink" title="一、网络分层原理"></a>一、网络分层原理</h2><h3 id="1、复杂的网络"><a href="#1、复杂的网络" class="headerlink" title="1、复杂的网络"></a>1、复杂的网络</h3><p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404090937050.png" alt="网络传输过程"></p>
 <h3 id="2、网络分层"><a href="#2、网络分层" class="headerlink" title="2、网络分层"></a>2、网络分层</h3><p><strong>为了简化网络的复杂度，网络通信的不同方面被分解为多层次结构，每一层只与紧挨着的上一层或下一层进行交互，将网络分层，这样就可以修改，甚至替换某一层的软件，只要层与层之间的接口保持不变，就不会影响到其它层。</strong></p>
 <ul>
 <li><p><code>OSI（Open System Interconnection Reference Model）:开放系统互连参考模型</code></p>
@@ -693,7 +697,9 @@
   <entry>
     <title>数据结构与算法入门基础</title>
     <url>/2022/04/05/06-00-00-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95%E5%85%A5%E9%97%A8%E5%9F%BA%E7%A1%80/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h2 id="数据结构与算法入门基础"><a href="#数据结构与算法入门基础" class="headerlink" title="数据结构与算法入门基础"></a>数据结构与算法入门基础</h2><h3 id="1、大纲"><a href="#1、大纲" class="headerlink" title="1、大纲"></a>1、大纲</h3><p><img src="/2022/04/05/06-00-00-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95%E5%85%A5%E9%97%A8%E5%9F%BA%E7%A1%80/data-1649164095365.png" alt="数据结构与算法"></p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="数据结构与算法入门基础"><a href="#数据结构与算法入门基础" class="headerlink" title="数据结构与算法入门基础"></a>数据结构与算法入门基础</h2><h3 id="1、大纲"><a href="#1、大纲" class="headerlink" title="1、大纲"></a>1、大纲</h3><p><img src="/2022/04/05/06-00-00-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95%E5%85%A5%E9%97%A8%E5%9F%BA%E7%A1%80/data-1649164095365.png" alt="数据结构与算法"></p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">算法题：判断一个数是否是<span class="number">2</span>的N次方。比如<span class="number">2</span> <span class="number">4</span> <span class="number">8</span> <span class="number">16</span> 是的<span class="number">6</span> <span class="number">10</span> 不是的就看这个数是不是可以拆成N个<span class="number">2</span>相乘</span><br><span class="line">常规方法：</span><br><span class="line">伪代码：</span><br><span class="line"><span class="keyword">while</span>(n &gt; <span class="number">1</span>)&#123;</span><br><span class="line"> <span class="keyword">if</span>(n % <span class="number">2</span> != <span class="number">0</span>) <span class="keyword">return</span> <span class="keyword">false</span>;		不等于<span class="number">0</span>那肯定就不是的 </span><br><span class="line"> n = n / <span class="number">2</span>;</span><br><span class="line">&#125;</span><br><span class="line">按位与：</span><br><span class="line"><span class="number">1</span>:<span class="number">01</span></span><br><span class="line"><span class="number">2</span>:<span class="number">10</span> &amp; :<span class="number">01</span> &amp; <span class="number">10</span> =<span class="number">00</span></span><br><span class="line"><span class="number">4</span>:<span class="number">100</span></span><br><span class="line"><span class="number">3</span>:<span class="number">011</span> <span class="number">4</span>&amp;<span class="number">3</span>==<span class="number">0</span></span><br><span class="line"><span class="number">8</span>:<span class="number">1000</span></span><br><span class="line"><span class="number">7</span>:<span class="number">0111</span></span><br><span class="line"><span class="number">16</span>:<span class="number">10000</span></span><br><span class="line"><span class="number">15</span>:<span class="number">01111</span>  ===&gt;转化成了 <span class="keyword">if</span>(n&amp;(n-<span class="number">1</span>) == <span class="number">0</span>) 那么n就是<span class="number">2</span>的次方 n  &gt; <span class="number">1</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="2、算法的重要性"><a href="#2、算法的重要性" class="headerlink" title="2、算法的重要性"></a>2、算法的重要性</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1.BAT一线互联网公司面试必问技术:</span><br><span class="line">为什么必问？数据结构与算法是所有计算机类的基础。大企业看重的是潜力。</span><br><span class="line">2.如果你不想做一辈子的CRUD工程师：业务工程师，CURD工程师，redis。redis的数据结构？集合 set 跳表。</span><br><span class="line">统计功能：排序+循环。</span><br><span class="line">3.架构师必备，写出框架级的代码；API，写出开源级代码。中年危机</span><br><span class="line">4.提升自己的能力，不被行业淘汰：H5，小程序。红黑树，几十年的时间。B+Tree.</span><br></pre></td></tr></table></figure>
@@ -792,7 +798,9 @@
   <entry>
     <title>基础数据结构-数组</title>
     <url>/2022/04/06/06-00-01-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E6%95%B0%E7%BB%84/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h2 id="数据结构之数组"><a href="#数据结构之数组" class="headerlink" title="数据结构之数组"></a>数据结构之数组</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">经典面试题：</span><br><span class="line">    给你一个文件里面包含全国人民（<span class="number">14</span>亿）的年龄数据（<span class="number">0</span>~<span class="number">180</span>），现在要你统计每一个年龄有多少人？</span><br><span class="line">    给定机器为 单台+2CPU+2G内存。不得使用现成的容器，比如map等。</span><br><span class="line">常用思路：</span><br><span class="line">    <span class="number">1</span>、分布式，跑多台机器。</span><br><span class="line">    <span class="number">2</span>、排序。不行×  全国<span class="number">14</span>亿，内存放不下最好的排序算法时间复杂度 O(nlogn)</span><br><span class="line">    <span class="number">3</span>、最好的方法：新建一个长度<span class="number">180</span>的数组，每次io读取一行数据，每次按照年龄到数组对应索引+<span class="number">1</span>;伪代码如下：</span><br><span class="line">        <span class="keyword">int</span>[] ageArray = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">180</span>];</span><br><span class="line">		<span class="keyword">int</span>[] data ;<span class="comment">// 14亿数据</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i =<span class="number">0</span>;i&lt;<span class="number">14</span>亿;i++)&#123;</span><br><span class="line">            ageArray[data[i]]++;<span class="comment">//a[1]表示一岁的人有多少个</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">		String str = <span class="keyword">null</span>;</span><br><span class="line">		String fileName = <span class="string">&quot;E:\\数组\\age1.txt&quot;</span>;</span><br><span class="line">		InputStreamReader isr = <span class="keyword">new</span> InputStreamReader(<span class="keyword">new</span> FileInputStream(fileName),<span class="string">&quot;UTF-8&quot;</span>);</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">long</span> start = System.currentTimeMillis();</span><br><span class="line">		BufferedReader br = <span class="keyword">new</span> BufferedReader(isr);</span><br><span class="line">		<span class="keyword">int</span> tot = <span class="number">0</span> ;	<span class="comment">// Integer 21亿</span></span><br><span class="line">		<span class="keyword">int</span> data [] = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">200</span>];</span><br><span class="line">		<span class="keyword">while</span>((str = br.readLine()) != <span class="keyword">null</span>)&#123;		<span class="comment">//一行一行的读 O(n)</span></span><br><span class="line">			<span class="keyword">int</span> age = Integer.valueOf(str);</span><br><span class="line">			data[age] ++ ;</span><br><span class="line">			tot ++ ;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//O(n) 14亿. 100万/秒 *1000 = 10亿 100~1000s之间 =&gt; 500s以下 60*8=480s</span></span><br><span class="line">		System.out.println(<span class="string">&quot;总共的数据大小: &quot;</span> + tot);</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span> ; i &lt; <span class="number">200</span> ; i ++)&#123;<span class="comment">//下标从0开始的</span></span><br><span class="line">			System.out.println(i + <span class="string">&quot;:&quot;</span> + data[i]);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//144239ms =&gt; 144s</span></span><br><span class="line">		System.out.println(<span class="string">&quot;计算花费的时间为:&quot;</span> + (System.currentTimeMillis() - start) + <span class="string">&quot;ms&quot;</span>);</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="数据结构之数组"><a href="#数据结构之数组" class="headerlink" title="数据结构之数组"></a>数据结构之数组</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">经典面试题：</span><br><span class="line">    给你一个文件里面包含全国人民（<span class="number">14</span>亿）的年龄数据（<span class="number">0</span>~<span class="number">180</span>），现在要你统计每一个年龄有多少人？</span><br><span class="line">    给定机器为 单台+2CPU+2G内存。不得使用现成的容器，比如map等。</span><br><span class="line">常用思路：</span><br><span class="line">    <span class="number">1</span>、分布式，跑多台机器。</span><br><span class="line">    <span class="number">2</span>、排序。不行×  全国<span class="number">14</span>亿，内存放不下最好的排序算法时间复杂度 O(nlogn)</span><br><span class="line">    <span class="number">3</span>、最好的方法：新建一个长度<span class="number">180</span>的数组，每次io读取一行数据，每次按照年龄到数组对应索引+<span class="number">1</span>;伪代码如下：</span><br><span class="line">        <span class="keyword">int</span>[] ageArray = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">180</span>];</span><br><span class="line">		<span class="keyword">int</span>[] data ;<span class="comment">// 14亿数据</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i =<span class="number">0</span>;i&lt;<span class="number">14</span>亿;i++)&#123;</span><br><span class="line">            ageArray[data[i]]++;<span class="comment">//a[1]表示一岁的人有多少个</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">		String str = <span class="keyword">null</span>;</span><br><span class="line">		String fileName = <span class="string">&quot;E:\\数组\\age1.txt&quot;</span>;</span><br><span class="line">		InputStreamReader isr = <span class="keyword">new</span> InputStreamReader(<span class="keyword">new</span> FileInputStream(fileName),<span class="string">&quot;UTF-8&quot;</span>);</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">long</span> start = System.currentTimeMillis();</span><br><span class="line">		BufferedReader br = <span class="keyword">new</span> BufferedReader(isr);</span><br><span class="line">		<span class="keyword">int</span> tot = <span class="number">0</span> ;	<span class="comment">// Integer 21亿</span></span><br><span class="line">		<span class="keyword">int</span> data [] = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">200</span>];</span><br><span class="line">		<span class="keyword">while</span>((str = br.readLine()) != <span class="keyword">null</span>)&#123;		<span class="comment">//一行一行的读 O(n)</span></span><br><span class="line">			<span class="keyword">int</span> age = Integer.valueOf(str);</span><br><span class="line">			data[age] ++ ;</span><br><span class="line">			tot ++ ;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//O(n) 14亿. 100万/秒 *1000 = 10亿 100~1000s之间 =&gt; 500s以下 60*8=480s</span></span><br><span class="line">		System.out.println(<span class="string">&quot;总共的数据大小: &quot;</span> + tot);</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span> ; i &lt; <span class="number">200</span> ; i ++)&#123;<span class="comment">//下标从0开始的</span></span><br><span class="line">			System.out.println(i + <span class="string">&quot;:&quot;</span> + data[i]);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//144239ms =&gt; 144s</span></span><br><span class="line">		System.out.println(<span class="string">&quot;计算花费的时间为:&quot;</span> + (System.currentTimeMillis() - start) + <span class="string">&quot;ms&quot;</span>);</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
 
 <h3 id="1、什么是数组"><a href="#1、什么是数组" class="headerlink" title="1、什么是数组"></a>1、什么是数组</h3><ol>
 <li><p>数组的定义</p>
@@ -891,7 +899,9 @@
   <entry>
     <title>基础数据结构-链表</title>
     <url>/2022/04/07/06-00-02-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E9%93%BE%E8%A1%A8/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h2 id="数据结构之链表"><a href="#数据结构之链表" class="headerlink" title="数据结构之链表"></a>数据结构之链表</h2><p><code>二维数组的内存地址是怎么样的？写出寻址公式？</code></p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="数据结构之链表"><a href="#数据结构之链表" class="headerlink" title="数据结构之链表"></a>数据结构之链表</h2><p><code>二维数组的内存地址是怎么样的？写出寻址公式？</code></p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">a[i][j]: (i&lt;n,j&lt;m)</span><br><span class="line">loc=init_loc+(i*n+j)*size</span><br></pre></td></tr></table></figure>
 
 <p><code>1.如何设计一个LRU缓存淘汰算法？</code></p>
@@ -968,7 +978,9 @@
   <entry>
     <title>基础数据结构-栈</title>
     <url>/2022/04/08/06-00-03-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E6%A0%88/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h2 id="栈"><a href="#栈" class="headerlink" title="栈"></a>栈</h2><p><code>经典算法题:</code></p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="栈"><a href="#栈" class="headerlink" title="栈"></a>栈</h2><p><code>经典算法题:</code></p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="number">1</span>、如何设计一个括号匹配的功能？比如给你一串括号让你判断是否符合我们的括号原则，如下所示：</span><br><span class="line">[()&#123;()&#125;&#123;&#125;]符合&#123;&#125;[]&#123;[][[]</span><br><span class="line">[][]&#123;[](&#125;)</span><br><span class="line">&#123;&#125;[&#125;&#125;&#123;&#125;&#125;]]] 不符合</span><br><span class="line"><span class="number">2</span>、如何设计一个浏览器的前进和后退功能？</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span></span>&#123;</span><br><span class="line">    ## 栈数据结构处理</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isValid</span><span class="params">(String ss)</span> </span>&#123;</span><br><span class="line">        Stack&lt;Character&gt; stack = <span class="keyword">new</span> Stack&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;ss.length();i++)&#123;</span><br><span class="line">            <span class="keyword">if</span>(<span class="string">&#x27;[&#x27;</span> == ss.charAt(i) || <span class="string">&#x27;(&#x27;</span> == ss.charAt(i) || <span class="string">&#x27;&#123;&#x27;</span> == ss.charAt(i))&#123;</span><br><span class="line">                stack.push(ss.charAt(i));</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                <span class="keyword">if</span>(stack.isEmpty())&#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                Character ch = stack.pop();</span><br><span class="line">                </span><br><span class="line">                <span class="keyword">if</span>( !(ch == <span class="string">&#x27;[&#x27;</span> &amp;&amp; ss.charAt(i) == <span class="string">&#x27;]&#x27;</span>|| ch == <span class="string">&#x27;(&#x27;</span> &amp;&amp; ss.charAt(i) == <span class="string">&#x27;)&#x27;</span> || ch == <span class="string">&#x27;&#123;&#x27;</span> &amp;&amp; ss.charAt(i) == <span class="string">&#x27;&#125;&#x27;</span>))&#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> stack.isEmpty();<span class="comment">// 栈为空 才有匹配 有值  说明左括号比较多</span></span><br><span class="line">    &#125;</span><br><span class="line">    ## 字符串替换</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isValid</span><span class="params">(String ss)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">char</span> c:s.toCharArray())&#123;</span><br><span class="line">            s = s.replace(<span class="string">&quot;&#123;&#125;&quot;</span>,<span class="string">&quot;&quot;</span>).replace(<span class="string">&quot;[]&quot;</span>,<span class="string">&quot;&quot;</span>).replace(<span class="string">&quot;()&quot;</span>,<span class="string">&quot;&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> s == <span class="string">&quot;&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <h3 id="1、什么是栈"><a href="#1、什么是栈" class="headerlink" title="1、什么是栈"></a>1、什么是栈</h3><p><code>如何理解栈</code></p>
@@ -1029,7 +1041,9 @@
   <entry>
     <title>基础数据结构-队列</title>
     <url>/2022/04/09/06-00-04-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E9%98%9F%E5%88%97/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h2 id="队列"><a href="#队列" class="headerlink" title="队列"></a>队列</h2><h3 id="1、什么是队列"><a href="#1、什么是队列" class="headerlink" title="1、什么是队列"></a>1、什么是队列</h3><p><code>队列的定义：</code></p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="队列"><a href="#队列" class="headerlink" title="队列"></a>队列</h2><h3 id="1、什么是队列"><a href="#1、什么是队列" class="headerlink" title="1、什么是队列"></a>1、什么是队列</h3><p><code>队列的定义：</code></p>
 <p>定义：队列是一种特殊的线性表，特殊之处在于它只允许在表的前端（front）进行删除操作，而在表的后端（rear）进行插入操作，和栈一样，队列是一种操作受</p>
 <p>限制的线性表。进行插入操作的端称为队尾，进行删除操作的端称为队头。队列中没有元素时，称为空队列。</p>
 <p>队列的数据元素又称为队列元素。在队列中插入一个队列元素称为入队，从队列中删除一个队列元素称为出队。因为队列只允许在一端插入，在另一端删除，所以</p>
@@ -1103,7 +1117,9 @@
   <entry>
     <title>Redis核心数据结构&amp;Redis6新特性</title>
     <url>/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h2 id="Redis核心数据结构-amp-Redis6新特性"><a href="#Redis核心数据结构-amp-Redis6新特性" class="headerlink" title="Redis核心数据结构&amp;Redis6新特性"></a>Redis核心数据结构&amp;Redis6新特性</h2><h3 id="1、Redis-C底层数据结构"><a href="#1、Redis-C底层数据结构" class="headerlink" title="1、Redis C底层数据结构"></a>1、Redis C底层数据结构</h3><p>RedisDB：redis 数据库，select db</p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="Redis核心数据结构-amp-Redis6新特性"><a href="#Redis核心数据结构-amp-Redis6新特性" class="headerlink" title="Redis核心数据结构&amp;Redis6新特性"></a>Redis核心数据结构&amp;Redis6新特性</h2><h3 id="1、Redis-C底层数据结构"><a href="#1、Redis-C底层数据结构" class="headerlink" title="1、Redis C底层数据结构"></a>1、Redis C底层数据结构</h3><p>RedisDB：redis 数据库，select db</p>
 <p>Dict：字典，所有的k,v都是存在于字典里面；字典里面包含两个dictht【两个dictht原因是扩容使用，redis的渐进式rehash扩容，当需要扩容时不是一次性将数据迁移过去，而是分多次】</p>
 <p>dictht：就是一个数组，里面存储的是dictEntity指针，指向dictEntity</p>
 <p>dictEntity：dictht里面存储的数据，包含 key、value、next【当键发生hash冲突的时候将冲突的值使用next指针指向，并且采用头插法，后面进来的数据放到表头，用来解决hash冲突】；value指向redisObject对象，存放具体的值</p>
@@ -1160,7 +1176,9 @@
   <entry>
     <title>Redis核心数据结构及高性能原理</title>
     <url>/2022/04/09/03-00-00-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%8F%8A%E9%AB%98%E6%80%A7%E8%83%BD%E5%8E%9F%E7%90%86/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h2 id="Redis核心数据结构及高性能原理"><a href="#Redis核心数据结构及高性能原理" class="headerlink" title="Redis核心数据结构及高性能原理"></a>Redis核心数据结构及高性能原理</h2>]]></content>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="Redis核心数据结构及高性能原理"><a href="#Redis核心数据结构及高性能原理" class="headerlink" title="Redis核心数据结构及高性能原理"></a>Redis核心数据结构及高性能原理</h2>]]></content>
       <categories>
         <category>Java</category>
         <category>分布式</category>
@@ -1174,7 +1192,9 @@
   <entry>
     <title>操作系统&amp;网络&amp;基础数据结构总结</title>
     <url>/2022/04/10/09-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E7%BD%91%E7%BB%9C-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E6%80%BB%E7%BB%93/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+
 
 	<div class="row">
     <embed src="summary_01.png" width="100%" height="550" type="application/pdf">
@@ -1200,7 +1220,9 @@
   <entry>
     <title>Jvm类加载机制</title>
     <url>/2022/04/12/00-00-00-Jvm%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h2 id="Jvm类加载机制"><a href="#Jvm类加载机制" class="headerlink" title="Jvm类加载机制"></a>Jvm类加载机制</h2><h3 id="1、类加载运行全过程"><a href="#1、类加载运行全过程" class="headerlink" title="1、类加载运行全过程"></a>1、类加载运行全过程</h3><p>当我们用java命令运行某个类的main函数启动程序时，首先需要通过<strong>类加载器</strong>把主类加载到JVM。</p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="Jvm类加载机制"><a href="#Jvm类加载机制" class="headerlink" title="Jvm类加载机制"></a>Jvm类加载机制</h2><h3 id="1、类加载运行全过程"><a href="#1、类加载运行全过程" class="headerlink" title="1、类加载运行全过程"></a>1、类加载运行全过程</h3><p>当我们用java命令运行某个类的main函数启动程序时，首先需要通过<strong>类加载器</strong>把主类加载到JVM。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> com.tuling.jvm;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Math</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> initData = <span class="number">666</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> User user = <span class="keyword">new</span> User();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compute</span><span class="params">()</span> </span>&#123;  <span class="comment">//一个方法对应一块栈帧内存区域</span></span><br><span class="line">        <span class="keyword">int</span> a = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">int</span> b = <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">int</span> c = (a + b) * <span class="number">10</span>;</span><br><span class="line">        <span class="keyword">return</span> c;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Math math = <span class="keyword">new</span> Math();</span><br><span class="line">        math.compute();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p><strong>通过Java命令执行代码的大体流程如下：</strong></p>
@@ -1346,7 +1368,9 @@
   <entry>
     <title>Jvm内存模型深度剖析与优化</title>
     <url>/2022/04/14/00-00-02-Jvm%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h2 id="Jvm内存模型深度剖析与优化"><a href="#Jvm内存模型深度剖析与优化" class="headerlink" title="Jvm内存模型深度剖析与优化"></a>Jvm内存模型深度剖析与优化</h2><p><img src="/2022/04/14/00-00-02-Jvm%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96/clipboard.png"></p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="Jvm内存模型深度剖析与优化"><a href="#Jvm内存模型深度剖析与优化" class="headerlink" title="Jvm内存模型深度剖析与优化"></a>Jvm内存模型深度剖析与优化</h2><p><img src="/2022/04/14/00-00-02-Jvm%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96/clipboard.png"></p>
 <p><strong>Java语言的跨平台特性</strong></p>
 <p><img src="/2022/04/14/00-00-02-Jvm%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96/clipboard-1650033076633.png" alt="img"></p>
 <p><strong>JVM整体结构及内存模型</strong></p>
@@ -1445,7 +1469,9 @@
   <entry>
     <title>Jvm对象创建与内存分配机制深度剖析</title>
     <url>/2022/04/16/00-00-03-Jvm%E5%AF%B9%E8%B1%A1%E5%88%9B%E5%BB%BA%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h2 id="Jvm对象创建与内存分配机制深度剖析"><a href="#Jvm对象创建与内存分配机制深度剖析" class="headerlink" title="Jvm对象创建与内存分配机制深度剖析"></a>Jvm对象创建与内存分配机制深度剖析</h2><h2 id="一、对象的创建"><a href="#一、对象的创建" class="headerlink" title="一、对象的创建"></a>一、对象的创建</h2><p>对象创建的主要流程:</p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="Jvm对象创建与内存分配机制深度剖析"><a href="#Jvm对象创建与内存分配机制深度剖析" class="headerlink" title="Jvm对象创建与内存分配机制深度剖析"></a>Jvm对象创建与内存分配机制深度剖析</h2><h2 id="一、对象的创建"><a href="#一、对象的创建" class="headerlink" title="一、对象的创建"></a>一、对象的创建</h2><p>对象创建的主要流程:</p>
 <p><img src="/2022/04/16/00-00-03-Jvm%E5%AF%B9%E8%B1%A1%E5%88%9B%E5%BB%BA%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/clipboard-1650200740666.png" alt="img"></p>
 <p><strong>1.类加载检查</strong></p>
 <p> 虚拟机遇到一条new指令时，首先将去检查这个指令的参数是否能在常量池中定位到一个类的符号引用，并且检查这个符号引用代表的类是否已被加载、解析和初始化过。如果没有，那必须先执行相应的类加载过程。</p>
@@ -1621,7 +1647,9 @@
   <entry>
     <title>Jvm总结</title>
     <url>/2022/04/20/00-00-04-Jvm%E6%80%BB%E7%BB%93/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+
 
 	<div class="row">
     <embed src="Jvm-xmind.png" width="100%" height="550" type="application/pdf">
@@ -1642,7 +1670,9 @@
   <entry>
     <title>垃圾收集器ParNew&amp;CMS与底层三色标记算法详解</title>
     <url>/2022/04/19/00-00-05-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8ParNew-CMS%E4%B8%8E%E5%BA%95%E5%B1%82%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h2 id="垃圾收集器ParNew-amp-CMS与底层三色标记算法详解"><a href="#垃圾收集器ParNew-amp-CMS与底层三色标记算法详解" class="headerlink" title="垃圾收集器ParNew&amp;CMS与底层三色标记算法详解"></a>垃圾收集器ParNew&amp;CMS与底层三色标记算法详解</h2><h3 id="1、垃圾收集算法"><a href="#1、垃圾收集算法" class="headerlink" title="1、垃圾收集算法"></a>1、垃圾收集算法</h3><p><img src="/2022/04/19/00-00-05-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8ParNew-CMS%E4%B8%8E%E5%BA%95%E5%B1%82%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/clipboard-1650552624990.png" alt="img"></p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="垃圾收集器ParNew-amp-CMS与底层三色标记算法详解"><a href="#垃圾收集器ParNew-amp-CMS与底层三色标记算法详解" class="headerlink" title="垃圾收集器ParNew&amp;CMS与底层三色标记算法详解"></a>垃圾收集器ParNew&amp;CMS与底层三色标记算法详解</h2><h3 id="1、垃圾收集算法"><a href="#1、垃圾收集算法" class="headerlink" title="1、垃圾收集算法"></a>1、垃圾收集算法</h3><p><img src="/2022/04/19/00-00-05-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8ParNew-CMS%E4%B8%8E%E5%BA%95%E5%B1%82%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/clipboard-1650552624990.png" alt="img"></p>
 <ul>
 <li><p><strong>分代收集理论</strong></p>
 <p>当前虚拟机的垃圾收集都采用分代收集算法，这种算法没有什么新的思想，只是根据对象存活周期的不同将内存分为几块。一般将java堆分为新生代和老年代，这样我们就可以根据各个年代的特点选择合适的垃圾收集算法。</p>
@@ -1870,7 +1900,9 @@
   <entry>
     <title>垃圾收集器G1&amp;ZGC详解</title>
     <url>/2022/04/22/00-00-06-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8G1-ZGC%E8%AF%A6%E8%A7%A3/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h2 id="垃圾收集器G1-amp-ZGC详解"><a href="#垃圾收集器G1-amp-ZGC详解" class="headerlink" title="垃圾收集器G1&amp;ZGC详解"></a>垃圾收集器G1&amp;ZGC详解</h2><h3 id="1、G1收集器-XX-UseG1GC"><a href="#1、G1收集器-XX-UseG1GC" class="headerlink" title="1、G1收集器(-XX:+UseG1GC)"></a>1、G1收集器(-XX:+UseG1GC)</h3><p><strong>G1 (Garbage-First)是一款面向服务器的垃圾收集器,<strong><strong>主要针对配备多颗处理器及大容量内存的机器</strong></strong>. 以极高概率满足GC停顿时间要求的同时,还具备高吞吐量性能特征.</strong></p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="垃圾收集器G1-amp-ZGC详解"><a href="#垃圾收集器G1-amp-ZGC详解" class="headerlink" title="垃圾收集器G1&amp;ZGC详解"></a>垃圾收集器G1&amp;ZGC详解</h2><h3 id="1、G1收集器-XX-UseG1GC"><a href="#1、G1收集器-XX-UseG1GC" class="headerlink" title="1、G1收集器(-XX:+UseG1GC)"></a>1、G1收集器(-XX:+UseG1GC)</h3><p><strong>G1 (Garbage-First)是一款面向服务器的垃圾收集器,<strong><strong>主要针对配备多颗处理器及大容量内存的机器</strong></strong>. 以极高概率满足GC停顿时间要求的同时,还具备高吞吐量性能特征.</strong></p>
 <p><img src="/2022/04/22/00-00-06-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8G1-ZGC%E8%AF%A6%E8%A7%A3/%E6%88%AA%E5%9B%BE-1650643122599.png" alt="img"></p>
 <p><img src="/2022/04/22/00-00-06-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8G1-ZGC%E8%AF%A6%E8%A7%A3/%E6%88%AA%E5%9B%BE-1650643129820.png" alt="img"></p>
 <p>G1将Java堆划分为多个大小相等的独立区域（<strong>Region</strong>），JVM目标是不超过2048个Region(JVM源码里TARGET_REGION_NUMBER 定义)，实际可以超过该值，但是不推荐。</p>
@@ -2077,7 +2109,9 @@
   <entry>
     <title>JVM调优工具详解及调优实战</title>
     <url>/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p><strong>前置启动程序</strong></p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<p><strong>前置启动程序</strong></p>
 <p>事先启动一个web应用程序，用jps查看其进程id，接着用各种jdk自带命令优化应用</p>
 <p><strong>Jmap</strong></p>
 <p>此命令可以用来查看内存信息，实例个数以及占用内存大小</p>
@@ -2351,7 +2385,9 @@
   <entry>
     <title>Jvm调优实战及常量池详解</title>
     <url>/2022/04/24/00-00-08-Jvm%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E8%AF%A6%E8%A7%A3/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p><strong>阿里巴巴Arthas详解</strong></p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<p><strong>阿里巴巴Arthas详解</strong></p>
 <p><strong>Arthas</strong> 是 Alibaba 在 2018 年 9 月开源的 <strong>Java 诊断</strong>工具。支持 JDK6+， 采用命令行交互模式，可以方便的定位和诊断线上程序运行问题。<strong>Arthas</strong> 官方文档十分详细，详见：<a href="https://alibaba.github.io/arthas"><em>https://alibaba.github.io/arthas</em></a></p>
 <p> <strong>Arthas****使用场景</strong></p>
 <p>得益于 <strong>Arthas</strong> 强大且丰富的功能，让 <strong>Arthas</strong> 能做的事情超乎想象。下面仅仅列举几项常见的使用情况，更多的使用场景可以在熟悉了 <strong>Arthas</strong> 之后自行探索。</p>
@@ -2569,7 +2605,9 @@
   <entry>
     <title>hexo解决推送github ssh key过期问题</title>
     <url>/2022/04/25/10-00-00-hexo%E8%A7%A3%E5%86%B3%E6%8E%A8%E9%80%81github-ssh-key%E8%BF%87%E6%9C%9F%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>最近用hexo 推送博客到github，老是过一段时间提示</p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<p>最近用hexo 推送博客到github，老是过一段时间提示</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">错误报告:You‘re using an RSA key with SHA-1, which is no longer allowed </span><br><span class="line">错误报告nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use)</span><br><span class="line">ENOENT: no such file or directory, uv_cwd</span><br></pre></td></tr></table></figure>
 
 <p>后通过如下步骤解决：</p>
@@ -2594,7 +2632,9 @@
   <entry>
     <title>ZGC深度剖析</title>
     <url>/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p><strong>ZGC深度剖析</strong></p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<p><strong>ZGC深度剖析</strong></p>
 <p>JVM是虚拟机，能够识别字节码，就是class文件或者你打包的jar文件，运行在操作系统上。</p>
 <p>JVM帮我们实现了跨平台，你只需要编译一次，就可以在不同的操作系统上运行，并且效果是一致的。</p>
 <p><img src="/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/09aca020f029.png" alt="img"></p>
@@ -2791,7 +2831,11 @@
   <entry>
     <title>Jvm总结大全</title>
     <url>/2022/04/26/00-00-10-Jvm%E6%80%BB%E7%BB%93%E5%A4%A7%E5%85%A8/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+
+
+
 
 	<div class="row">
     <embed src="Jvm-whole.png" width="100%" height="550" type="application/pdf">
@@ -2813,7 +2857,9 @@
   <entry>
     <title>并发编程之深入理解JMM</title>
     <url>/2022/04/27/01-00-00-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3JMM/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h2 id="并发编程之深入理解JMM-amp-并发三大特性"><a href="#并发编程之深入理解JMM-amp-并发三大特性" class="headerlink" title="并发编程之深入理解JMM&amp;并发三大特性"></a>并发编程之深入理解JMM&amp;并发三大特性</h2><p><strong>并发解决什么问题？</strong></p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="并发编程之深入理解JMM-amp-并发三大特性"><a href="#并发编程之深入理解JMM-amp-并发三大特性" class="headerlink" title="并发编程之深入理解JMM&amp;并发三大特性"></a>并发编程之深入理解JMM&amp;并发三大特性</h2><p><strong>并发解决什么问题？</strong></p>
 <p>并发是为了解决多线程同步【线程依赖，一个或多个线程依赖另一个线程的执行】、互斥【共享资源一个线程占用了，其它的就不可用，必须等资源释放掉】、分工【把一个大的任务拆分成小的任务最后在合并】问题的。主要是解决线程协作问题。</p>
 <h3 id="1、并发和并行"><a href="#1、并发和并行" class="headerlink" title="1、并发和并行"></a>1、并发和并行</h3><p>目标都是最大化CPU的使用率</p>
 <p>**并行(parallel)**：指在同一时刻，有多条指令在多个处理器上同时执行。所以无论从微观还是从宏观来看，二者都是一起执行的。</p>
@@ -2905,7 +2951,7 @@
   <entry>
     <title>CPU缓存架构&amp;缓存一致性协议</title>
     <url>/2022/04/28/01-00-01-CPU%E7%BC%93%E5%AD%98%E6%9E%B6%E6%9E%84-%E7%BC%93%E5%AD%98%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script>]]></content>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
       <categories>
         <category>Java</category>
         <category>并发编程</category>

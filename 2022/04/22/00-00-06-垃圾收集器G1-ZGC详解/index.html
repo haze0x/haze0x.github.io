@@ -110,7 +110,9 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <h2 id="垃圾收集器G1-amp-ZGC详解"><a href="#垃圾收集器G1-amp-ZGC详解" class="headerlink" title="垃圾收集器G1&amp;ZGC详解"></a>垃圾收集器G1&amp;ZGC详解</h2><h3 id="1、G1收集器-XX-UseG1GC"><a href="#1、G1收集器-XX-UseG1GC" class="headerlink" title="1、G1收集器(-XX:+UseG1GC)"></a>1、G1收集器(-XX:+UseG1GC)</h3><p><strong>G1 (Garbage-First)是一款面向服务器的垃圾收集器,<strong><strong>主要针对配备多颗处理器及大容量内存的机器</strong></strong>. 以极高概率满足GC停顿时间要求的同时,还具备高吞吐量性能特征.</strong></p>
+  <p id="hitokoto">正在加载一言...</p>
+
+<h2 id="垃圾收集器G1-amp-ZGC详解"><a href="#垃圾收集器G1-amp-ZGC详解" class="headerlink" title="垃圾收集器G1&amp;ZGC详解"></a>垃圾收集器G1&amp;ZGC详解</h2><h3 id="1、G1收集器-XX-UseG1GC"><a href="#1、G1收集器-XX-UseG1GC" class="headerlink" title="1、G1收集器(-XX:+UseG1GC)"></a>1、G1收集器(-XX:+UseG1GC)</h3><p><strong>G1 (Garbage-First)是一款面向服务器的垃圾收集器,<strong><strong>主要针对配备多颗处理器及大容量内存的机器</strong></strong>. 以极高概率满足GC停顿时间要求的同时,还具备高吞吐量性能特征.</strong></p>
 <p><img src="/2022/04/22/00-00-06-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8G1-ZGC%E8%AF%A6%E8%A7%A3/%E6%88%AA%E5%9B%BE-1650643122599.png" alt="img"></p>
 <p><img src="/2022/04/22/00-00-06-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8G1-ZGC%E8%AF%A6%E8%A7%A3/%E6%88%AA%E5%9B%BE-1650643129820.png" alt="img"></p>
 <p>G1将Java堆划分为多个大小相等的独立区域（<strong>Region</strong>），JVM目标是不超过2048个Region(JVM源码里TARGET_REGION_NUMBER 定义)，实际可以超过该值，但是不推荐。</p>

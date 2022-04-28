@@ -179,99 +179,7 @@
   </div>
    
     </div>
-      
-    <div class="article-entry" itemprop="articleBody">
        
-  <h2 id="数据结构与算法入门基础"><a href="#数据结构与算法入门基础" class="headerlink" title="数据结构与算法入门基础"></a>数据结构与算法入门基础</h2><h3 id="1、大纲"><a href="#1、大纲" class="headerlink" title="1、大纲"></a>1、大纲</h3><p><img src="/2022/04/05/06-00-00-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95%E5%85%A5%E9%97%A8%E5%9F%BA%E7%A1%80/data-1649164095365.png" alt="数据结构与算法"></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">算法题：判断一个数是否是<span class="number">2</span>的N次方。比如<span class="number">2</span> <span class="number">4</span> <span class="number">8</span> <span class="number">16</span> 是的<span class="number">6</span> <span class="number">10</span> 不是的就看这个数是不是可以拆成N个<span class="number">2</span>相乘</span><br><span class="line">常规方法：</span><br><span class="line">伪代码：</span><br><span class="line"><span class="keyword">while</span>(n &gt; <span class="number">1</span>)&#123;</span><br><span class="line"> <span class="keyword">if</span>(n % <span class="number">2</span> != <span class="number">0</span>) <span class="keyword">return</span> <span class="keyword">false</span>;		不等于<span class="number">0</span>那肯定就不是的 </span><br><span class="line"> n = n / <span class="number">2</span>;</span><br><span class="line">&#125;</span><br><span class="line">按位与：</span><br><span class="line"><span class="number">1</span>:<span class="number">01</span></span><br><span class="line"><span class="number">2</span>:<span class="number">10</span> &amp; :<span class="number">01</span> &amp; <span class="number">10</span> =<span class="number">00</span></span><br><span class="line"><span class="number">4</span>:<span class="number">100</span></span><br><span class="line"><span class="number">3</span>:<span class="number">011</span> <span class="number">4</span>&amp;<span class="number">3</span>==<span class="number">0</span></span><br><span class="line"><span class="number">8</span>:<span class="number">1000</span></span><br><span class="line"><span class="number">7</span>:<span class="number">0111</span></span><br><span class="line"><span class="number">16</span>:<span class="number">10000</span></span><br><span class="line"><span class="number">15</span>:<span class="number">01111</span>  ===&gt;转化成了 <span class="keyword">if</span>(n&amp;(n-<span class="number">1</span>) == <span class="number">0</span>) 那么n就是<span class="number">2</span>的次方 n  &gt; <span class="number">1</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="2、算法的重要性"><a href="#2、算法的重要性" class="headerlink" title="2、算法的重要性"></a>2、算法的重要性</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1.BAT一线互联网公司面试必问技术:</span><br><span class="line">为什么必问？数据结构与算法是所有计算机类的基础。大企业看重的是潜力。</span><br><span class="line">2.如果你不想做一辈子的CRUD工程师：业务工程师，CURD工程师，redis。redis的数据结构？集合 set 跳表。</span><br><span class="line">统计功能：排序+循环。</span><br><span class="line">3.架构师必备，写出框架级的代码；API，写出开源级代码。中年危机</span><br><span class="line">4.提升自己的能力，不被行业淘汰：H5，小程序。红黑树，几十年的时间。B+Tree.</span><br></pre></td></tr></table></figure>
-
-<h3 id="3、算法的特性"><a href="#3、算法的特性" class="headerlink" title="3、算法的特性"></a>3、算法的特性</h3><p>五个特征：有穷性、确定性、可行性、有输入、有输出</p>
-<p>设计原则：正确性、可读性、健壮性（ bug：写出代码很少有bug，而且系统比较稳定）</p>
-<p>高效率与低存储：内存+CPU 堆栈内存 （OOM：堆栈内存溢出） 内存占用最小，CPU占用最小，运算速度最快。</p>
-<p>评价算法的两个重要指标：</p>
-<p><strong>时间复杂度：</strong>运行一个程序所花费的时间。O()</p>
-<p><strong>空间复杂度：</strong>运行程序所需要的内存  OOM</p>
-<p><code>时间复杂度</code></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> a = <span class="number">1</span>;</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>;i&lt;<span class="number">3</span>;i++)&#123;<span class="comment">// 此行代码执行四次</span></span><br><span class="line">    a++;<span class="comment">//此行代码执行三次</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span>循环执行顺序如下所示：</span><br><span class="line"><span class="keyword">for</span>(表达式<span class="number">1</span>;表达式<span class="number">2</span>;表达式<span class="number">3</span>)</span><br><span class="line">&#123;</span><br><span class="line"><span class="comment">//循环体</span></span><br><span class="line">&#125;</span><br><span class="line">先执行“表达式<span class="number">1</span>”，再进行“表达式<span class="number">2</span>”的判断，判断为真则执行 “循环体”，循环体执行完以后执行表达式<span class="number">3.</span></span><br></pre></td></tr></table></figure>
-
-
-
-<p>1.时间复杂度计算的意义：通过分析代码时间复杂度分析接口性能。</p>
-<p>2.时间复杂度表示方法：大O表示法。O(n),O(nlogn);</p>
-<p>3.时间复杂度如何来分析</p>
-<p>（1）找for while 递归。而且要找循环量最大的那一段</p>
-<p>（2）同级循环怎么计算</p>
-<h3 id="4、几种常见的时间复杂度（指的是某一段代码）分析"><a href="#4、几种常见的时间复杂度（指的是某一段代码）分析" class="headerlink" title="4、几种常见的时间复杂度（指的是某一段代码）分析"></a>4、几种常见的时间复杂度（指的是某一段代码）分析</h3><p>计算时间复杂度往往是计算比较大的而且是不确定的数，如果已经确定了，那么就不用计算了，也是我们说的常量。</p>
-<ul>
-<li><p>常数：O(1) <strong>1表示是常数，所有能确定的数字我们都用O（1</strong>），O(1000)=&gt;o(1)</p>
-</li>
-<li><p>对数：O(logn),O(nlogn)</p>
-</li>
-<li><p>线性：O(n)</p>
-</li>
-<li><p>线性对数：O(nlogn)</p>
-</li>
-<li><p>平方：O(n^2)</p>
-</li>
-<li><p>N次方：O(n^n)</p>
-</li>
-</ul>
-<p>我们怎么找时间复杂度：</p>
-<ol>
-<li><p> 找到有循环的地方</p>
-</li>
-<li><p>找有网络请求（RPC，远程调用，分布式，数据库请求）的地方，就是测试时间：log打印，计算平均时间。</p>
-</li>
-</ol>
-<p><img src="/2022/04/05/06-00-00-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95%E5%85%A5%E9%97%A8%E5%9F%BA%E7%A1%80/image-20220405211010288.png" alt="常用时间复杂度"></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">O(<span class="number">1</span>)：<span class="number">1</span>表示是常数，所有能确定的数字我们都用O（<span class="number">1</span>）</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i =<span class="number">0</span> ;i&lt;<span class="number">3</span>;i++)&#123;</span><br><span class="line">  b++;<span class="comment">//O(1)</span></span><br><span class="line">&#125;</span><br><span class="line">o(N):</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i =<span class="number">0</span>;i&lt;N;i++)&#123;</span><br><span class="line">    b++;<span class="comment">// O(N) N是未知的 如果N是已知的则为O(1)</span></span><br><span class="line">&#125;</span><br><span class="line">O(logn):</span><br><span class="line"><span class="keyword">while</span>(i&lt;=n)&#123;</span><br><span class="line">    i = i * <span class="number">3</span>;</span><br><span class="line">&#125;</span><br><span class="line">O(nlogn):</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>;i&lt;n;i++)&#123;</span><br><span class="line">   <span class="keyword">while</span>(j&lt;=n)&#123;</span><br><span class="line">      j = j * <span class="number">3</span>;<span class="comment">//2^x=n;  x就是我们运行的次数，x=log3N</span></span><br><span class="line">	&#125;   </span><br><span class="line">&#125;</span><br><span class="line">O(N^<span class="number">2</span>):</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;N;i++)&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> j = <span class="number">0</span>;j&lt;N;j++)&#123;</span><br><span class="line">        a++;<span class="comment">//运行次数  N* （N+1）/2 忽略常数项 有加减法的时候 保留最高次项 即为 O(N^2) 平方级</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="5、几种常见的时间复杂度总结"><a href="#5、几种常见的时间复杂度总结" class="headerlink" title="5、几种常见的时间复杂度总结"></a>5、几种常见的时间复杂度总结</h3><p>学了时间复杂度，那我们的目的就是要把代码写到最优，效率最高(效率从高到低：O(1)&gt;O(logn)&gt;O(n)&gt;O(nlogn)&gt;O(n^2)&gt;O(n^x))</p>
-<p>优化的目的：就是要往O（1）的方向接近。</p>
-<p><strong>O(1)&gt;O(logn)&gt;O(n)&gt;O(nlogn) 效果都是很好的。几乎优化的空间不是很大。</strong></p>
-<p>登录：判断用户名密码O(1)到数据库里查记录=&gt;做分布式缓存。</p>
-<p>列表的接口：排序，冒泡排序；=&gt;找更优秀的排序算法如：快速排序，归并排序，堆排序。</p>
-<p>最坏情况、最好情况、平均情况时间复杂度。</p>
-<h3 id="6、空间复杂度"><a href="#6、空间复杂度" class="headerlink" title="6、空间复杂度"></a>6、空间复杂度</h3><p>1.空间复杂度分析的意义：<strong>找花了内存的地方，看数据</strong></p>
-<p>2.如何找出程序的空间复杂度：<strong>开了空间的地方， 比如数组、链表、map，缓存对象，递归【占用堆栈内存】</strong></p>
-<h3 id="7、总结十大基础排序算法"><a href="#7、总结十大基础排序算法" class="headerlink" title="7、总结十大基础排序算法"></a>7、总结十大基础排序算法</h3><p><code>冒泡排序</code></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BubbleSort</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span>[] sortArray(<span class="keyword">int</span>[] nums) &#123;</span><br><span class="line">        <span class="keyword">if</span> (nums.length == <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">return</span> nums;</span><br><span class="line">        <span class="comment">/*循环数组长度的次数*/</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; nums.length; i++)&#123;</span><br><span class="line"></span><br><span class="line">            <span class="comment">/*从第0个元素开始，依次和后面的元素进行比较</span></span><br><span class="line"><span class="comment">             * j &lt; array.length - 1 - i表示第[array.length - 1 - i]</span></span><br><span class="line"><span class="comment">             * 个元素已经冒泡到了合适的位置，无需进行比较，可以减少比较次数*/</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; nums.length - <span class="number">1</span> - i; j++)&#123;</span><br><span class="line">                <span class="comment">/*如果第j个元素比后面的第j+1元素大，交换两者的位置*/</span></span><br><span class="line">                <span class="keyword">if</span> (nums[j + <span class="number">1</span>] &lt; nums[j]) &#123;</span><br><span class="line">                    <span class="keyword">int</span> temp = nums[j + <span class="number">1</span>];</span><br><span class="line">                    nums[j + <span class="number">1</span>] = nums[j];</span><br><span class="line">                    nums[j] = temp;</span><br><span class="line">                &#125;</span><br><span class="line">                PrintArray.print(nums);</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(<span class="string">&quot;---------------&quot;</span>);</span><br><span class="line">            <span class="comment">//PrintArray.print(array);</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> nums;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        PrintArray.print(PrintArray.SRC);</span><br><span class="line">        System.out.println(<span class="string">&quot;============================================&quot;</span>);</span><br><span class="line">        <span class="keyword">int</span>[] dest = <span class="keyword">new</span> BubbleSort().sortArray(PrintArray.SRC);</span><br><span class="line">        PrintArray.print(dest);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>桶排序</code></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> array</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> bucketCap 桶的容量，即每个桶所能放置多少个不同数值</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ArrayList&lt;Integer&gt; <span class="title">sort</span><span class="params">(ArrayList&lt;Integer&gt; array, <span class="keyword">int</span> bucketCap)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (array == <span class="keyword">null</span> || array.size() &lt; <span class="number">2</span>)</span><br><span class="line">            <span class="keyword">return</span> array;</span><br><span class="line">        <span class="keyword">int</span> max = array.get(<span class="number">0</span>), min = array.get(<span class="number">0</span>);</span><br><span class="line">        <span class="comment">// 找到最大值最小值</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; array.size(); i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (array.get(i) &gt; max)</span><br><span class="line">                max = array.get(i);</span><br><span class="line">            <span class="keyword">if</span> (array.get(i) &lt; min)</span><br><span class="line">                min = array.get(i);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">/*获得桶的数量*/</span></span><br><span class="line">        <span class="keyword">int</span> bucketCount = (max - min) / bucketCap + <span class="number">1</span>;</span><br><span class="line">        <span class="comment">/*构建桶*/</span></span><br><span class="line">        ArrayList&lt;ArrayList&lt;Integer&gt;&gt; bucketArr = <span class="keyword">new</span> ArrayList&lt;&gt;(bucketCount);</span><br><span class="line">        ArrayList&lt;Integer&gt; resultArr = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; bucketCount; i++) &#123;</span><br><span class="line">            bucketArr.add(<span class="keyword">new</span> ArrayList&lt;Integer&gt;());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">/*将原始数组中的数据分配到桶中*/</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; array.size(); i++) &#123;</span><br><span class="line">            bucketArr.get((array.get(i) - min) / bucketCap).add(array.get(i));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">/*看看桶中数据的分布*/</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; bucketArr.size(); i++) &#123;</span><br><span class="line">            System.out.print(<span class="string">&quot;第&quot;</span>+i+<span class="string">&quot;个桶包含数据：&quot;</span>);</span><br><span class="line">            PrintArray.printObject(bucketArr.get(i));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; bucketCount; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (bucketCap == <span class="number">1</span>) &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; bucketArr.get(i).size(); j++)</span><br><span class="line">                    resultArr.add(bucketArr.get(i).get(j));</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (bucketCount == <span class="number">1</span>)</span><br><span class="line">                    bucketCap--;</span><br><span class="line">                System.out.println(<span class="string">&quot;对第&quot;</span>+i+<span class="string">&quot;桶中的数据再次用桶进行排序----&quot;</span>);</span><br><span class="line">                <span class="comment">/*对桶中的数据再次用桶进行排序*/</span></span><br><span class="line">                ArrayList&lt;Integer&gt; temp = sort(bucketArr.get(i), bucketCap);</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; temp.size(); j++)</span><br><span class="line">                    resultArr.add(temp.get(j));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> resultArr;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        ArrayList&lt;Integer&gt; array = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        array.add(<span class="number">86</span>);</span><br><span class="line">        array.add(<span class="number">11</span>);</span><br><span class="line">        array.add(<span class="number">77</span>);</span><br><span class="line">        array.add(<span class="number">23</span>);</span><br><span class="line">        array.add(<span class="number">32</span>);</span><br><span class="line">        array.add(<span class="number">45</span>);</span><br><span class="line">        array.add(<span class="number">58</span>);</span><br><span class="line">        array.add(<span class="number">63</span>);</span><br><span class="line">        array.add(<span class="number">93</span>);</span><br><span class="line">        array.add(<span class="number">4</span>);</span><br><span class="line">        array.add(<span class="number">37</span>);</span><br><span class="line">        array.add(<span class="number">22</span>);</span><br><span class="line">        PrintArray.printObject(array);</span><br><span class="line">        System.out.println(<span class="string">&quot;============================================&quot;</span>);</span><br><span class="line">        ArrayList&lt;Integer&gt; dest = BucketSort.sort(array,<span class="number">2</span>);</span><br><span class="line">        PrintArray.printObject(dest);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>简单选择排序</code></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">int</span>[] sortArray(<span class="keyword">int</span>[] nums) &#123;</span><br><span class="line">        <span class="keyword">if</span> (nums.length == <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">return</span> nums;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; nums.length; i++) &#123;</span><br><span class="line">            <span class="keyword">int</span> minIndex=i;<span class="comment">/*最小数的下标，每个循环开始总是假设第一个数最小*/</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = i; j &lt; nums.length; j++) &#123;</span><br><span class="line">                <span class="keyword">if</span> (nums[j] &lt; nums[minIndex]) <span class="comment">/*找到最小的数*/</span></span><br><span class="line">                    minIndex = j; <span class="comment">/*将最小数的索引保存*/</span></span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(<span class="string">&quot;最小数为：&quot;</span>+nums[minIndex]);</span><br><span class="line">            <span class="comment">/*交换最小数和i当前所指的元素*/</span></span><br><span class="line">            <span class="keyword">int</span> temp = nums[minIndex];</span><br><span class="line">            nums[minIndex] = nums[i];</span><br><span class="line">            nums[i] = temp;</span><br><span class="line">            PrintArray.print(nums);</span><br><span class="line">            System.out.println(<span class="string">&quot;---------------&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> nums;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        PrintArray.print(PrintArray.SRC);</span><br><span class="line">        System.out.println(<span class="string">&quot;============================================&quot;</span>);</span><br><span class="line">        <span class="keyword">int</span>[] dest = <span class="keyword">new</span> ChoiceSort().sortArray(PrintArray.SRC);</span><br><span class="line">        PrintArray.print(dest);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>计数排序</code></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">int</span>[] sortArray(<span class="keyword">int</span>[] nums) &#123;</span><br><span class="line">        <span class="keyword">if</span> (nums.length == <span class="number">0</span>) <span class="keyword">return</span> nums;</span><br><span class="line">        <span class="comment">/*寻找数组中最大值，最小值</span></span><br><span class="line"><span class="comment">        * bias:偏移量,用以定位原始数组每个元素在计数数组中的下标位置*/</span></span><br><span class="line">        <span class="keyword">int</span> bias, min = nums[<span class="number">0</span>], max = nums[<span class="number">0</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; nums.length; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (nums[i] &gt; max)</span><br><span class="line">                max = nums[i];</span><br><span class="line">            <span class="keyword">if</span> (nums[i] &lt; min)</span><br><span class="line">                min = nums[i];</span><br><span class="line">        &#125;</span><br><span class="line">        bias = <span class="number">0</span> - min;</span><br><span class="line">        <span class="comment">/*获得计数数组的容量*/</span></span><br><span class="line">        <span class="keyword">int</span>[] counterArray = <span class="keyword">new</span> <span class="keyword">int</span>[max - min + <span class="number">1</span>];</span><br><span class="line">        Arrays.fill(counterArray, <span class="number">0</span>);</span><br><span class="line">        <span class="comment">/*遍历整个原始数组，将原始数组中每个元素值转化为计数数组下标，</span></span><br><span class="line"><span class="comment">        并将计数数组下标对应的元素值大小进行累加*/</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; nums.length; i++) &#123;</span><br><span class="line">            counterArray[nums[i] + bias]++;</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">&quot;计数数组为：&quot;</span>);</span><br><span class="line">        PrintArray.print(counterArray);</span><br><span class="line">        System.out.println(<span class="string">&quot;============================================&quot;</span>);</span><br><span class="line">        <span class="keyword">int</span> index = <span class="number">0</span>;<span class="comment">/*访问原始数组时的下标计数器*/</span></span><br><span class="line">        <span class="keyword">int</span> i = <span class="number">0</span>;<span class="comment">/*访问计数数组时的下标计数器*/</span></span><br><span class="line">        <span class="comment">/*访问计数数组，将计数数组中的元素转换后，重新写回原始数组*/</span></span><br><span class="line">        <span class="keyword">while</span> (index &lt; nums.length) &#123;</span><br><span class="line">            <span class="comment">/*只要计数数组中当前下标元素的值不为0，就将计数数组中的元素转换后，重新写回原始数组*/</span></span><br><span class="line">            <span class="keyword">if</span> (counterArray[i] != <span class="number">0</span>) &#123;</span><br><span class="line">                nums[index] = i - bias;</span><br><span class="line">                counterArray[i]--;</span><br><span class="line">                index++;</span><br><span class="line">            &#125; <span class="keyword">else</span></span><br><span class="line">                i++;</span><br><span class="line">            PrintArray.print(counterArray);</span><br><span class="line">            PrintArray.print(nums);</span><br><span class="line">            System.out.println(<span class="string">&quot;--------------------&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> nums;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">static</span> <span class="keyword">int</span>[] src = &#123;<span class="number">5</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">0</span>,<span class="number">3</span>,<span class="number">6</span>,<span class="number">2</span>,<span class="number">0</span>,<span class="number">2</span>,<span class="number">4</span>,<span class="number">3</span>,<span class="number">3</span>&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        PrintArray.print(src);</span><br><span class="line">        System.out.println(<span class="string">&quot;============================================&quot;</span>);</span><br><span class="line">        <span class="keyword">int</span>[] dest = <span class="keyword">new</span> CountingSort().sortArray(src);</span><br><span class="line">        PrintArray.print(dest);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>堆排序</code></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//声明全局变量，用于记录数组array的长度；</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> len;</span><br><span class="line"></span><br><span class="line">     <span class="comment">/* 交换数组内两个元素*/</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">swap</span><span class="params">(<span class="keyword">int</span>[] array, <span class="keyword">int</span> i, <span class="keyword">int</span> j)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> temp = array[i];</span><br><span class="line">        array[i] = array[j];</span><br><span class="line">        array[j] = temp;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span>[] sortArray(<span class="keyword">int</span>[] nums) &#123;</span><br><span class="line">        len = nums.length;</span><br><span class="line">        <span class="keyword">if</span> (len &lt; <span class="number">1</span>) <span class="keyword">return</span> nums;</span><br><span class="line">        <span class="comment">/*1.构建一个最大堆*/</span></span><br><span class="line">        buildMaxHeap(nums);</span><br><span class="line">        <span class="comment">/*2.循环将堆首位（最大值）与未排序数据末位交换，然后重新调整为最大堆*/</span></span><br><span class="line">        <span class="keyword">while</span> (len &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            swap(nums, <span class="number">0</span>, len - <span class="number">1</span>);</span><br><span class="line">            len--;</span><br><span class="line">            adjustHeap(nums, <span class="number">0</span>);</span><br><span class="line">            PrintArray.print(nums);</span><br><span class="line">            System.out.println(<span class="string">&quot;--------------------&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> nums;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 建立最大堆</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">buildMaxHeap</span><span class="params">(<span class="keyword">int</span>[] array)</span> </span>&#123;</span><br><span class="line">        <span class="comment">/*从最后一个非叶子节点开始向上构造最大堆*/</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = (len/<span class="number">2</span>-<span class="number">1</span>); i &gt;= <span class="number">0</span>; i--) &#123;</span><br><span class="line">            adjustHeap(array, i);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">&quot;构造完成最大堆&quot;</span>);</span><br><span class="line">        PrintArray.print(array);</span><br><span class="line">        System.out.println(<span class="string">&quot;============================================&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 调整使之成为最大堆</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">adjustHeap</span><span class="params">(<span class="keyword">int</span>[] array, <span class="keyword">int</span> i)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> maxIndex = i;</span><br><span class="line">        <span class="keyword">int</span> left = <span class="number">2</span>*i+<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">int</span> right = <span class="number">2</span>*(i+<span class="number">1</span>);</span><br><span class="line">        <span class="comment">/*如果有左子树，且左子树大于父节点，则将最大指针指向左子树*/</span></span><br><span class="line">        <span class="keyword">if</span> (left &lt; len &amp;&amp; array[left] &gt; array[maxIndex])</span><br><span class="line">            maxIndex = left;</span><br><span class="line">        <span class="comment">/*如果有右子树，且右子树大于父节点且大于左子树，则将最大指针指向右子树*/</span></span><br><span class="line">        <span class="keyword">if</span> (right &lt; len &amp;&amp; array[right] &gt; array[maxIndex]&amp;&amp;array[right]&gt;array[left])</span><br><span class="line">            maxIndex = right;</span><br><span class="line">        <span class="comment">/*如果父节点不是最大值，则将父节点与最大值交换，并且递归调整与父节点交换的位置。*/</span></span><br><span class="line">        <span class="keyword">if</span> (maxIndex != i) &#123;</span><br><span class="line">            swap(array, maxIndex, i);</span><br><span class="line">            PrintArray.print(array);</span><br><span class="line">            adjustHeap(array, maxIndex);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        PrintArray.print(PrintArray.SRC);</span><br><span class="line">        System.out.println(<span class="string">&quot;============================================&quot;</span>);</span><br><span class="line">        <span class="keyword">int</span>[] dest = <span class="keyword">new</span> HeapSort().sortArray(PrintArray.SRC);</span><br><span class="line">        PrintArray.print(dest);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>简单插入排序</code></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">int</span>[] sortArray(<span class="keyword">int</span>[] nums) &#123;</span><br><span class="line">        <span class="keyword">if</span> (nums.length == <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">return</span> nums;</span><br><span class="line">        <span class="keyword">int</span> currentValue;<span class="comment">/*当前待排序数据，该元素之前的元素均已被排序过*/</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; nums.length - <span class="number">1</span>; i++) &#123;</span><br><span class="line">            <span class="keyword">int</span> preIndex = i;<span class="comment">/*已被排序数据的索引*/</span></span><br><span class="line">            currentValue = nums[preIndex + <span class="number">1</span>];</span><br><span class="line">            System.out.println(<span class="string">&quot;待排序元素索引:&quot;</span>+(i + <span class="number">1</span>)+<span class="string">&quot;，值为：&quot;</span> +currentValue+</span><br><span class="line">                    <span class="string">&quot;,已被排序数据的索引:&quot;</span>+preIndex);</span><br><span class="line"></span><br><span class="line">            <span class="comment">/*在已被排序过数据中倒序寻找合适的位置，如果当前待排序数据比比较的元素要小，</span></span><br><span class="line"><span class="comment">            将比较的元素元素后移一位*/</span></span><br><span class="line">            <span class="keyword">while</span> (preIndex &gt;= <span class="number">0</span> &amp;&amp; currentValue &lt; nums[preIndex]) &#123;</span><br><span class="line">                <span class="comment">//将当前元素后移一位</span></span><br><span class="line">                nums[preIndex + <span class="number">1</span>] = nums[preIndex];</span><br><span class="line">                preIndex--;</span><br><span class="line">                PrintArray.print(nums);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">/*while循环结束时，说明已经找到了当前待排序数据的合适位置，插入*/</span></span><br><span class="line">            nums[preIndex + <span class="number">1</span>] = currentValue;</span><br><span class="line">            System.out.println(<span class="string">&quot;本轮被插入排序后的数组&quot;</span>);</span><br><span class="line">            PrintArray.print(nums);</span><br><span class="line">            System.out.println(<span class="string">&quot;--------------------&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> nums;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        PrintArray.print(PrintArray.SRC);</span><br><span class="line">        System.out.println(<span class="string">&quot;============================================&quot;</span>);</span><br><span class="line">        <span class="keyword">int</span>[] dest = <span class="keyword">new</span> InsertionSort().sortArray(PrintArray.SRC);</span><br><span class="line">        PrintArray.print(dest);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>归并排序</code></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">int</span>[] sortArray(<span class="keyword">int</span>[] nums) &#123;</span><br><span class="line">        <span class="keyword">if</span> (nums.length &lt; <span class="number">2</span>) <span class="keyword">return</span> nums;</span><br><span class="line">        <span class="comment">/*切分数组，然后递归排序，并用merge合并*/</span></span><br><span class="line">        <span class="keyword">int</span> mid = nums.length / <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">int</span>[] left = Arrays.copyOfRange(nums, <span class="number">0</span>, mid);</span><br><span class="line">        <span class="keyword">int</span>[] right = Arrays.copyOfRange(nums, mid, nums.length);</span><br><span class="line">        <span class="keyword">return</span> merge(sortArray(left), sortArray(right));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 归并排序——将两段排序好的数组结合成一个排序数组</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> left</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> right</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span>[] merge(<span class="keyword">int</span>[] left, <span class="keyword">int</span>[] right) &#123;</span><br><span class="line">        <span class="keyword">int</span>[] result = <span class="keyword">new</span> <span class="keyword">int</span>[left.length + right.length];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> index = <span class="number">0</span>, i = <span class="number">0</span>, j = <span class="number">0</span>; index &lt; result.length; index++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (i &gt;= left.length)<span class="comment">/*左边数组已经取完，完全取右边数组的值即可*/</span></span><br><span class="line">                result[index] = right[j++];</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span> (j &gt;= right.length)<span class="comment">/*右边数组已经取完，完全取左边数组的值即可*/</span></span><br><span class="line">                result[index] = left[i++];</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span> (left[i] &gt; right[j])<span class="comment">/*左边数组的元素值大于右边数组，取右边数组的值*/</span></span><br><span class="line">                result[index] = right[j++];</span><br><span class="line">            <span class="keyword">else</span><span class="comment">/*右边数组的元素值大于左边数组，取左边数组的值*/</span></span><br><span class="line">                result[index] = left[i++];</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.print(<span class="string">&quot;左子数组:&quot;</span>);</span><br><span class="line">        PrintArray.print(left);</span><br><span class="line">        System.out.print(<span class="string">&quot;右子数组:&quot;</span>);</span><br><span class="line">        PrintArray.print(right);</span><br><span class="line">        System.out.print(<span class="string">&quot;合并后数组:&quot;</span>);</span><br><span class="line">        PrintArray.print(result);</span><br><span class="line">        System.out.println(<span class="string">&quot;--------------------&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        PrintArray.print(PrintArray.SRC);</span><br><span class="line">        System.out.println(<span class="string">&quot;============================================&quot;</span>);</span><br><span class="line">        <span class="keyword">int</span>[] dest = <span class="keyword">new</span> MergeSort().sortArray(PrintArray.SRC);</span><br><span class="line">        PrintArray.print(dest);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>快速排序</code></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">int</span>[] sortArray(<span class="keyword">int</span>[] nums) &#123;</span><br><span class="line">        <span class="keyword">return</span> sort(nums, <span class="number">0</span>, nums.length - <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span>[] sort(<span class="keyword">int</span>[] array, <span class="keyword">int</span> start, <span class="keyword">int</span> end) &#123;</span><br><span class="line">        <span class="keyword">if</span> (array.length &lt; <span class="number">1</span> || start &lt; <span class="number">0</span> || end &gt;= array.length || start &gt; end)</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        <span class="comment">/*数据分割成独立的两部分时，从哪儿分区的指示器*/</span></span><br><span class="line">        <span class="keyword">int</span> zoneIndex = partition(array, start, end);</span><br><span class="line">        <span class="keyword">if</span> (zoneIndex &gt; start)</span><br><span class="line">            sort(array, start, zoneIndex - <span class="number">1</span>);</span><br><span class="line">        <span class="keyword">if</span> (zoneIndex &lt; end)</span><br><span class="line">            sort(array, zoneIndex + <span class="number">1</span>, end);</span><br><span class="line">        System.out.println(<span class="string">&quot;本轮排序后的数组&quot;</span>);</span><br><span class="line">        PrintArray.printIndex(array, start, end);</span><br><span class="line">        System.out.println(<span class="string">&quot;--------------------&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> array;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 快速排序分区方法</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">partition</span><span class="params">(<span class="keyword">int</span>[] array, <span class="keyword">int</span> start, <span class="keyword">int</span> end)</span> </span>&#123;</span><br><span class="line">        <span class="comment">/*只有一个元素时，无需再分区*/</span></span><br><span class="line">        <span class="keyword">if</span> (start == end) <span class="keyword">return</span> start;</span><br><span class="line">        <span class="comment">/*随机选取一个基准数*/</span></span><br><span class="line">        <span class="keyword">int</span> pivot = (<span class="keyword">int</span>) (start + Math.random() * (end - start + <span class="number">1</span>));</span><br><span class="line">        <span class="comment">/*zoneIndex是分区指示器，初始值为分区头元素下标减一*/</span></span><br><span class="line">        <span class="keyword">int</span> zoneIndex = start - <span class="number">1</span>;</span><br><span class="line">        System.out.println(<span class="string">&quot;开始下标：&quot;</span> + start + <span class="string">&quot;,结束下标:&quot;</span> + end + <span class="string">&quot;,基准数下标：&quot;</span></span><br><span class="line">                + pivot + <span class="string">&quot;,元素值:&quot;</span> + array[pivot] + <span class="string">&quot;，分区指示器下标：&quot;</span> + zoneIndex);</span><br><span class="line">        <span class="comment">/*将基准数和分区尾元素交换位置*/</span></span><br><span class="line">        swap(array, pivot, end);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = start; i &lt;= end; i++) &#123;</span><br><span class="line">            <span class="comment">/*当前元素小于等于基准数*/</span></span><br><span class="line">            <span class="keyword">if</span> (array[i] &lt;= array[end]) &#123;</span><br><span class="line">                <span class="comment">/*首先分区指示器累加*/</span></span><br><span class="line">                zoneIndex++;</span><br><span class="line">                <span class="comment">/*当前元素在分区指示器的右边时，交换当前元素和分区指示器元素*/</span></span><br><span class="line">                <span class="keyword">if</span> (i &gt; zoneIndex)</span><br><span class="line">                    swap(array, i, zoneIndex);</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(<span class="string">&quot;分区指示器：&quot;</span> + zoneIndex + <span class="string">&quot;,遍历指示器:&quot;</span> + i);</span><br><span class="line">            PrintArray.printIndex(array, start, end);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">&quot;---------------&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> zoneIndex;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 交换数组内两个元素</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">swap</span><span class="params">(<span class="keyword">int</span>[] array, <span class="keyword">int</span> i, <span class="keyword">int</span> j)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> temp = array[i];</span><br><span class="line">        array[i] = array[j];</span><br><span class="line">        array[j] = temp;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        PrintArray.print(PrintArray.SRC);</span><br><span class="line">        System.out.println(<span class="string">&quot;============================================&quot;</span>);</span><br><span class="line">        <span class="keyword">int</span>[] dest = <span class="keyword">new</span> QuickSort().sortArray(PrintArray.SRC);</span><br><span class="line">        PrintArray.print(dest);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>基数排序</code></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">int</span>[] sortArray(<span class="keyword">int</span>[] nums) &#123;</span><br><span class="line">        <span class="keyword">if</span> (nums == <span class="keyword">null</span> || nums.length &lt; <span class="number">2</span>)</span><br><span class="line">            <span class="keyword">return</span> nums;</span><br><span class="line">        <span class="comment">/*找出最大数*/</span></span><br><span class="line">        <span class="keyword">int</span> max = nums[<span class="number">0</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; nums.length; i++) &#123;</span><br><span class="line">            max = Math.max(max, nums[i]);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/*先算出最大数的位数,它决定了我们要进行几轮排序*/</span></span><br><span class="line">        <span class="keyword">int</span> maxDigit = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span> (max != <span class="number">0</span>) &#123;</span><br><span class="line">            max /= <span class="number">10</span>;</span><br><span class="line">            maxDigit++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> mod = <span class="number">10</span>, div = <span class="number">1</span>;</span><br><span class="line">        <span class="comment">/*构建桶*/</span></span><br><span class="line">        ArrayList&lt;ArrayList&lt;Integer&gt;&gt; bucketList = <span class="keyword">new</span> ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++)</span><br><span class="line">            bucketList.add(<span class="keyword">new</span> ArrayList&lt;Integer&gt;());</span><br><span class="line">        <span class="comment">/*按照从右往左的顺序，依次将每一位都当做一次关键字，然后按照该关键字对数组排序，</span></span><br><span class="line"><span class="comment">        每一轮排序都基于上轮排序后的结果*/</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; maxDigit; i++, mod *= <span class="number">10</span>, div *= <span class="number">10</span>) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;----第&quot;</span>+i+<span class="string">&quot;轮排序-----&quot;</span>);</span><br><span class="line">            <span class="comment">/*遍历原始数组，投入桶中*/</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; nums.length; j++) &#123;</span><br><span class="line">                <span class="keyword">int</span> num = (nums[j] % mod) / div;</span><br><span class="line">                bucketList.get(num).add(nums[j]);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">/*看看桶中数据的分布*/</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> b = <span class="number">0</span>; b &lt; bucketList.size(); b++) &#123;</span><br><span class="line">                System.out.print(<span class="string">&quot;第&quot;</span>+b+<span class="string">&quot;个桶包含数据：&quot;</span>);</span><br><span class="line">                PrintArray.printObject(bucketList.get(b));</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">/*桶中的数据写回原始数组，清除桶，准备下一轮的排序*/</span></span><br><span class="line">            <span class="keyword">int</span> index = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; bucketList.size(); j++) &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> k = <span class="number">0</span>; k &lt; bucketList.get(j).size(); k++)</span><br><span class="line">                    nums[index++] = bucketList.get(j).get(k);</span><br><span class="line">                bucketList.get(j).clear();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> nums;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        PrintArray.print(PrintArray.SRC);</span><br><span class="line">        System.out.println(<span class="string">&quot;============================================&quot;</span>);</span><br><span class="line">        <span class="keyword">int</span>[] dest = <span class="keyword">new</span> RadixSort().sortArray(PrintArray.SRC);</span><br><span class="line">        PrintArray.print(dest);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>希尔排序</code></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">int</span>[] sortArray(<span class="keyword">int</span>[] nums) &#123;</span><br><span class="line">        <span class="keyword">int</span> len = nums.length;</span><br><span class="line">        <span class="comment">/*按增量分组后，每个分组中，temp代表当前待排序数据，该元素之前的组内元素均已被排序过*/</span></span><br><span class="line">        <span class="comment">/*gap指用来分组的增量，会依次递减*/</span></span><br><span class="line">        <span class="keyword">int</span> currentValue, gap = len / <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">while</span> (gap &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = gap; i &lt; len; i++) &#123;</span><br><span class="line">                currentValue = nums[i];</span><br><span class="line">                <span class="comment">/*组内已被排序数据的索引*/</span></span><br><span class="line">                <span class="keyword">int</span> preIndex = i - gap;</span><br><span class="line">                <span class="comment">/*在组内已被排序过数据中倒序寻找合适的位置，如果当前待排序数据比比较的元素要小，</span></span><br><span class="line"><span class="comment">                则将比较的元素在组内后移一位*/</span></span><br><span class="line">                <span class="keyword">while</span> (preIndex &gt;= <span class="number">0</span> &amp;&amp; nums[preIndex] &gt; currentValue) &#123;</span><br><span class="line">                    nums[preIndex + gap] = nums[preIndex];</span><br><span class="line">                    preIndex -= gap;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">/*while循环结束时，说明已经找到了当前待排序数据的合适位置，插入*/</span></span><br><span class="line">                nums[preIndex + gap] = currentValue;</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(<span class="string">&quot;本轮增量【&quot;</span>+gap+<span class="string">&quot;】排序后的数组&quot;</span>);</span><br><span class="line">            PrintArray.print(nums);</span><br><span class="line">            System.out.println(<span class="string">&quot;--------------------&quot;</span>);</span><br><span class="line">            gap /= <span class="number">2</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> nums;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        PrintArray.print(PrintArray.SRC);</span><br><span class="line">        System.out.println(<span class="string">&quot;============================================&quot;</span>);</span><br><span class="line">        <span class="keyword">int</span>[] dest = <span class="keyword">new</span> ShellSort().sortArray(PrintArray.SRC);</span><br><span class="line">        PrintArray.print(dest);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="8、排序算法总结"><a href="#8、排序算法总结" class="headerlink" title="8、排序算法总结"></a>8、排序算法总结</h3><p><img src="/2022/04/05/06-00-00-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95%E5%85%A5%E9%97%A8%E5%9F%BA%E7%A1%80/image-20220405220811573.png" alt="十大基本排序算法比较"></p>
- 
-      <!-- reward -->
-      
-    </div>
-    
 
     <!-- copyright -->
     
@@ -317,432 +225,7 @@
   </div>
    
     </div>
-      
-    <div class="article-entry" itemprop="articleBody">
        
-  <h2 id="一、网络分层原理"><a href="#一、网络分层原理" class="headerlink" title="一、网络分层原理"></a>一、网络分层原理</h2><h3 id="1、复杂的网络"><a href="#1、复杂的网络" class="headerlink" title="1、复杂的网络"></a>1、复杂的网络</h3><p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404090937050.png" alt="网络传输过程"></p>
-<h3 id="2、网络分层"><a href="#2、网络分层" class="headerlink" title="2、网络分层"></a>2、网络分层</h3><p><strong>为了简化网络的复杂度，网络通信的不同方面被分解为多层次结构，每一层只与紧挨着的上一层或下一层进行交互，将网络分层，这样就可以修改，甚至替换某一层的软件，只要层与层之间的接口保持不变，就不会影响到其它层。</strong></p>
-<ul>
-<li><p><code>OSI（Open System Interconnection Reference Model）:开放系统互连参考模型</code></p>
-</li>
-<li><p><code>TCP/IP协议族</code></p>
-<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404091034519.png" alt="网络分层"></p>
-</li>
-</ul>
-<h3 id="3、一个HTTP请求的分层解析流程"><a href="#3、一个HTTP请求的分层解析流程" class="headerlink" title="3、一个HTTP请求的分层解析流程"></a>3、一个HTTP请求的分层解析流程</h3><p>  <img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404091130168.png" alt="一个Http请求的分层解析流程"></p>
-<h2 id="二、HTTP协议"><a href="#二、HTTP协议" class="headerlink" title="二、HTTP协议"></a>二、HTTP协议</h2><p><strong>超文本传输协议(HyperText Transfer Protocol，HTTP)：</strong> 一种无状态的（本身不会存储用户的信息），以请求/应答方式运行的协议，它使用可扩展的语义和自描述消息格式，与 基于网络的超文本信息系统灵活的互动。</p>
-<h3 id="1、HTTP报文格式"><a href="#1、HTTP报文格式" class="headerlink" title="1、HTTP报文格式"></a>1、HTTP报文格式</h3><p>HTTP 协议的请求报文和响应报文的结构基本相同，由三大部分组成： </p>
-<ul>
-<li><code>起始行（start line）</code>：描述请求或响应的基本信息 </li>
-<li><code>头部字段集合（header）</code>：使用 key-value 形式更详细地说明报文 </li>
-<li><code>消息正文（entity）</code>：实际传输的数据，它不一定是纯文本，可以是图片、视频 等二进制数据</li>
-</ul>
-<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404092725026.png" alt="HTTP报文格式"></p>
-<h3 id="2、请求行报文格式"><a href="#2、请求行报文格式" class="headerlink" title="2、请求行报文格式"></a>2、请求行报文格式</h3><p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404092555777.png" alt="请求行报文格式"></p>
-<h3 id="3、响应行报文格式"><a href="#3、响应行报文格式" class="headerlink" title="3、响应行报文格式"></a>3、响应行报文格式</h3><p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404092929856.png" alt="响应行报文格式"></p>
-<ul>
-<li>版本号：表示报文使用的 HTTP 协议版本； </li>
-<li>状态码：一个三位数，用代码的形式表示处理的结果，比如 200 是成功，500 是服务器错误；</li>
-<li>原因：作为数字状态码补充，是更详细的解释文字，帮助人理解原因 </li>
-</ul>
-<h3 id="4、HTTP-头字段"><a href="#4、HTTP-头字段" class="headerlink" title="4、HTTP 头字段"></a>4、HTTP 头字段</h3><p>头部字段是 key-value 的形式，key 和 value 之间用“:”分隔，最后用 CRLF 换行表示字 段结束。比如前后分离时经常遇到的要与后端协商传输数据的类型“Content-type: application/json”，这里 key 就是“Content-type”，value 就 是“application/json”。HTTP 头字段非常灵活，不仅可以使用标准里的 Host、 Connection 等已有头，也可以任意添加自定义头，这就给 HTTP 协议带来了无限的扩展可能。</p>
-<p>头字段注意事项 </p>
-<ul>
-<li>字段名不区分大小写，字段名里不允许出现空格，可以使用连字符“-”，但不 能使用下划线“_”（有的服务器不会解析带“_”的头字段）。字段名后面必须紧接 着“:”，不能有空格，而“:”后的字段值前可以有多个空格；</li>
-<li> 字段的顺序是没有意义的，可以任意排列不影响语义；</li>
-<li> 字段原则上不能重复，除非这个字段本身的语义允许，例如 Set-Cookie。</li>
-</ul>
-<h3 id="5、常用头字段"><a href="#5、常用头字段" class="headerlink" title="5、常用头字段"></a>5、常用头字段</h3><p>HTTP 协议中有非常多的头字段，但基本上可以分为四大类： </p>
-<ul>
-<li><code>请求字段</code>：请求头中的头字段；如Host，Referer（防盗链会用到）。 </li>
-<li><code>响应字段</code>：响应头中的头字段，如：Server（标识哪种类型的服务器 nginx、apache）、Date（请求字段/响应字段都会存在）； </li>
-<li><code>通用字段</code>：在请求头和响应头里都可以出现，如 Content-type（数据传输到服务器用的什么格式）， Connection ；</li>
-</ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">HTTP 400 – 请求无效</span><br><span class="line"></span><br><span class="line">HTTP 404- 无法找到文件或目录</span><br><span class="line"></span><br><span class="line">HTTP 500 – 内部服务器错误</span><br><span class="line"></span><br><span class="line">HTTP 502 – 网关错误</span><br><span class="line"></span><br><span class="line">HTTP 400 – 请求无效</span><br><span class="line">HTTP 401.1 – 未授权：登录失败</span><br><span class="line">HTTP 401.2 – 未授权：服务器配置问题导致登录失败</span><br><span class="line">HTTP 401.3 – ACL 禁止访问资源</span><br><span class="line">HTTP 401.4 – 未授权：授权被筛选器拒绝</span><br><span class="line">HTTP 401.5 – 未授权：ISAPI 或 CGI 授权失败</span><br><span class="line"></span><br><span class="line">HTTP 403 – 禁止访问</span><br><span class="line">HTTP 403 – 对 Internet 服务管理器 的访问仅限于 Localhost</span><br><span class="line">HTTP 403.1 禁止访问：禁止可执行访问</span><br><span class="line">HTTP 403.2 – 禁止访问：禁止读访问</span><br><span class="line">HTTP 403.3 – 禁止访问：禁止写访问</span><br><span class="line">HTTP 403.4 – 禁止访问：要求 SSL</span><br><span class="line">HTTP 403.5 – 禁止访问：要求 SSL 128</span><br><span class="line">HTTP 403.6 – 禁止访问：IP 地址被拒绝</span><br><span class="line">HTTP 403.7 – 禁止访问：要求客户证书</span><br><span class="line">HTTP 403.8 – 禁止访问：禁止站点访问</span><br><span class="line">HTTP 403.9 – 禁止访问：连接的用户过多</span><br><span class="line">HTTP 403.10 – 禁止访问：配置无效</span><br><span class="line">HTTP 403.11 – 禁止访问：密码更改</span><br><span class="line">HTTP 403.12 – 禁止访问：映射器拒绝访问</span><br><span class="line">HTTP 403.13 – 禁止访问：客户证书已被吊销</span><br><span class="line">HTTP 403.15 – 禁止访问：客户访问许可过多</span><br><span class="line">HTTP 403.16 – 禁止访问：客户证书不可信或者无效</span><br><span class="line">HTTP 403.17 – 禁止访问：客户证书已经到期或者尚未生效 HTTP 404.1 -</span><br><span class="line"></span><br><span class="line">无法找到 Web 站点</span><br><span class="line">HTTP 404- 无法找到文件</span><br><span class="line">HTTP 405 – 资源被禁止</span><br><span class="line">HTTP 406 – 无法接受</span><br><span class="line">HTTP 407 – 要求代理身份验证</span><br><span class="line">HTTP 410 – 永远不可用</span><br><span class="line">HTTP 412 – 先决条件失败</span><br><span class="line">HTTP 414 – 请求 – URI 太长</span><br><span class="line"></span><br><span class="line">HTTP 500 – 内部服务器错误</span><br><span class="line">HTTP 500.100 – 内部服务器错误 – ASP 错误</span><br><span class="line">HTTP 500-11 服务器关闭</span><br><span class="line">HTTP 500-12 应用程序重新启动</span><br><span class="line">HTTP 500-13 – 服务器太忙</span><br><span class="line">HTTP 500-14 – 应用程序无效</span><br><span class="line">HTTP 500-15 – 不允许请求 global.asa</span><br><span class="line">Error 501 – 未实现</span><br><span class="line">HTTP 502 – 网关错误</span><br></pre></td></tr></table></figure>
-
-<h2 id="三、HTTP请求的完整过程"><a href="#三、HTTP请求的完整过程" class="headerlink" title="三、HTTP请求的完整过程"></a>三、HTTP请求的完整过程</h2><h3 id="1、当用户在浏览器输入网址回车之后，网络协议都做了哪些工作呢？"><a href="#1、当用户在浏览器输入网址回车之后，网络协议都做了哪些工作呢？" class="headerlink" title="1、当用户在浏览器输入网址回车之后，网络协议都做了哪些工作呢？"></a>1、当用户在浏览器输入网址回车之后，网络协议都做了哪些工作呢？</h3><ol>
-<li><code>首先干活的是 浏览器应用程序，他要解析出 URL中的域名 </code></li>
-<li><code>根据域名获取对应的ip地址，首先从浏览器缓存中查看，如下可以查看浏览器中域名对应 </code></li>
-</ol>
-<p>ip的解析</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chrome://net‐internals/#events</span><br></pre></td></tr></table></figure>
-
-<p>如果没有则从本机域名解析文件hosts（/etc/hosts）中查看，还没有则从 LDNS（Localdnsserver）、Rootserver域名服务器、国际顶级域名服务商的DNS 的层层解析</p>
-<ol start="3">
-<li><code>拿到IP地址后，浏览器就可以发起 与服务器的三次握手</code></li>
-<li><code>握手建立之后，就开始组装http请求报文，发送报文 </code></li>
-<li><code>服务器收到请求报文之后开始，请求报文解析，生成响应数据，发送响应数据 </code></li>
-<li><code>浏览器收到响应之后，开始渲染页面</code></li>
-</ol>
-<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404094446754.png" alt="HTTP请求完整过程"></p>
-<h2 id="四、TCP协议"><a href="#四、TCP协议" class="headerlink" title="四、TCP协议"></a>四、TCP协议</h2><h3 id="1、TCP协议"><a href="#1、TCP协议" class="headerlink" title="1、TCP协议"></a>1、TCP协议</h3><p>TCP（Transmission Control Protocol）： 面向连接的，可靠的，基于字节流的传输层通信协议 </p>
-<p>特点： </p>
-<ul>
-<li>基于连接的 ：数据传输之前需要建立连接 </li>
-<li>全双工的：双向传输 </li>
-<li>字节流：不限制数据大小，打包成报文段，保证有序接收，重复报文自动丢弃 </li>
-<li>流量缓冲：解决双方处理能力的不匹配 ，三次握手的时候双方会建立缓冲区</li>
-<li>可靠的传输服务：保证可达，丢包时通过重发机制实现可靠性 </li>
-<li>拥塞控制：防止网络出现恶性拥塞</li>
-</ul>
-<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404095635761.png" alt="TCP报文"></p>
-<p>报文标识：</p>
-<ul>
-<li>SYN:为1，标识同步序列号的报文，建立连接的报文</li>
-<li>ACK：响应报文，握手/数据传输中确认数据已经收到</li>
-<li>FIN：关闭连接的报文</li>
-</ul>
-<h3 id="2、TCP连接管理"><a href="#2、TCP连接管理" class="headerlink" title="2、TCP连接管理"></a>2、TCP连接管理</h3><ol>
-<li><p>TCP连接：四元组[ 源地址， 源端口， 目的地址， 目的端口 ] </p>
-</li>
-<li><p>确立连接：TCP三次握手 </p>
-<ol>
-<li><p>同步通信双方初始序列号( ISN, initial sequence number ) </p>
-</li>
-<li><p>协商TCP通信参数（MSS, 窗口信息，指定校验和算法） </p>
-</li>
-</ol>
-</li>
-</ol>
-<p>如何进行握手 ？</p>
-<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404100145862.png" alt="三次握手"></p>
-<p>连接状态查看: </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">netstat ‐ntp ‐c 1</span><br></pre></td></tr></table></figure>
-
-<p><code>三次握手补充:</code></p>
-<p><code>三次握手的本质是确认通信双方收发数据的能力</code></p>
-<p>首先，我让信使运输一份信件给对方，<strong>对方收到了，那么他就知道了我的发件能力和他的收件能力是可以的</strong>。</p>
-<p>于是他给我回信，<strong>我若收到了，我便知我的发件能力和他的收件能力是可以的，并且他的发件能力和我的收件能力是可以</strong>。</p>
-<p>然而此时他还不知道他的发件能力和我的收件能力到底可不可以，于是我最后回馈一次，<strong>他若收到了，他便清楚了他的发件能力和我的收件能力是可以的</strong>。</p>
-<p>这，就是三次握手。</p>
-<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/82a87c962f5c40249781b88f9af5019f.png" alt="三次握手.png"></p>
-<ul>
-<li>第一次握手：客户端要向服务端发起连接请求，首先客户端随机生成一个起始序列号ISN(比如是100)，那客户端向服务端发送的报文段包含SYN标志位(也就是SYN=1)，序列号seq=100。</li>
-<li>第二次握手：服务端收到客户端发过来的报文后，发现SYN=1，知道这是一个连接请求，于是将客户端的起始序列号100存起来，并且随机生成一个服务端的起始序列号(比如是300)。然后给客户端回复一段报文，回复报文包含SYN和ACK标志(也就是SYN=1,ACK=1)、序列号seq=300、确认号ack=101(客户端发过来的序列号+1)。</li>
-<li>第三次握手：客户端收到服务端的回复后发现ACK=1并且ack=101,于是知道服务端已经收到了序列号为100的那段报文；同时发现SYN=1，知道了服务端同意了这次连接，于是就将服务端的序列号300给存下来。然后客户端再回复一段报文给服务端，报文包含ACK标志位(ACK=1)、ack=301(服务端序列号+1)、seq=101(第一次握手时发送报文是占据一个序列号的，所以这次seq就从101开始，需要注意的是不携带数据的ACK报文是不占据序列号的，所以后面第一次正式发送数据时seq还是101)。当服务端收到报文后发现ACK=1并且ack=301，就知道客户端收到序列号为300的报文了，就这样客户端和服务端通过TCP建立了连接。</li>
-</ul>
-<h3 id="3、TCP四次挥手"><a href="#3、TCP四次挥手" class="headerlink" title="3、TCP四次挥手"></a>3、TCP四次挥手</h3><p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404102719024.png" alt="四次挥手"></p>
-<p>A：发送FIN数据包，代表A不在发送数据 </p>
-<p>B：收到请求，开始应答 ，避免了A重新发送FIN重试（应答机制） </p>
-<p>B： 处理完数据之后关闭，关闭连接,及发送FIN请求 </p>
-<p>A：收到请求后发送ACK应答，B服务可以释放连接 </p>
-<p><strong>等待 2MSL【MSL:最大报文生成时间，一个msl即客户端和服务端一个请求来回的时间】后释放连接</strong> </p>
-<ol>
-<li>防止报文丢失，导致B重复发送FIN ，服务端没有收到第四次握手响应，会重发第三次握手信息，如果这个时候客户端关闭，那么服务端会一直重试，造成资源不会释放</li>
-<li>防止滞留在网络中的报文，对新建立的连接造成数据扰乱</li>
-</ol>
-<p><code>四次挥手补充：</code></p>
-<p><code>四次挥手的目的是关闭一个连接</code></p>
-<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/ea60825747b44584915c144b4d16f5a7.jpeg" alt="四次挥手.jpeg"></p>
-<p>比如客户端初始化的序列号ISA=100，服务端初始化的序列号ISA=300。TCP连接成功后客户端总共发送了1000个字节的数据，服务端在客户端发FIN报文前总共回复了2000个字节的数据。</p>
-<ul>
-<li>第一次挥手：当客户端的数据都传输完成后，客户端向服务端发出连接释放报文(当然数据没发完时也可以发送连接释放报文并停止发送数据)，释放连接报文包含FIN标志位(FIN=1)、序列号seq=1101(100+1+1000，其中的1是建立连接时占的一个序列号)。需要注意的是客户端发出FIN报文段后只是不能发数据了，但是还可以正常收数据；另外FIN报文段即使不携带数据也要占据一个序列号。</li>
-<li>第二次挥手：服务端收到客户端发的FIN报文后给客户端回复确认报文，确认报文包含ACK标志位(ACK=1)、确认号ack=1102(客户端FIN报文序列号1101+1)、序列号seq=2300(300+2000)。此时服务端处于关闭等待状态，而不是立马给客户端发FIN报文，这个状态还要持续一段时间，因为服务端可能还有数据没发完。</li>
-<li>第三次挥手：服务端将最后数据(比如50个字节)发送完毕后就向客户端发出连接释放报文，报文包含FIN和ACK标志位(FIN=1,ACK=1)、确认号和第二次挥手一样ack=1102、序列号seq=2350(2300+50)。</li>
-<li>第四次挥手：客户端收到服务端发的FIN报文后，向服务端发出确认报文，确认报文包含ACK标志位(ACK=1)、确认号ack=2351、序列号seq=1102。注意客户端发出确认报文后不是立马释放TCP连接，而是要经过2MSL(最长报文段寿命的2倍时长)后才释放TCP连接。而服务端一旦收到客户端发出的确认报文就会立马释放TCP连接，所以服务端结束TCP连接的时间要比客户端早一些。</li>
-</ul>
-<h3 id="4、字节流的协议"><a href="#4、字节流的协议" class="headerlink" title="4、字节流的协议"></a>4、字节流的协议</h3><p>TCP把应用交付的数据仅仅看成是一连串的无结构的字节流，TCP并不知道字节流的含义，TCP并不关心应用程序一次将多大的报文发送到TCP的缓存中，而是根据对方给出的窗口值和当前网络拥堵的程度来决 定一个报文段应该包含多少个字节。 </p>
-<p><strong>MSS: Max Segment Size, 默认 536byte 实际数据</strong></p>
-<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404103821430.png" alt="TCP数据传输"></p>
-<h3 id="5、数据可靠性传输"><a href="#5、数据可靠性传输" class="headerlink" title="5、数据可靠性传输"></a>5、数据可靠性传输</h3><ol>
-<li><strong>停止等待协议：</strong></li>
-</ol>
-<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404105438069.png" alt="停止等待协议"></p>
-<ol start="2">
-<li><p><strong>重传机制</strong> </p>
-<ul>
-<li><p><strong>ack报文丢失</strong></p>
-<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404105654955.png" alt="ac报文丢失"></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">在一定时长的等待中，客户端没有收到服务端给其的ack，客户端认为报文丢失了，客户端就进行重传，直到收到服务端的ack.</span><br><span class="line">效率低下</span><br></pre></td></tr></table></figure></li>
-<li><p><strong>请求报文丢失</strong></p>
-<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404105709386.png" alt="请求报文丢失"></p>
-</li>
-</ul>
-</li>
-</ol>
-<p><strong>3、 滑动窗口协议与累计确认（延时ack）</strong> </p>
-<p>滑动窗口大小同通过 tcp三次握手和对端协商，且受网络状况影响</p>
-<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404105741286.png" alt="滑动窗口协议"></p>
-<h2 id="五、HTTPS协议"><a href="#五、HTTPS协议" class="headerlink" title="五、HTTPS协议"></a>五、HTTPS协议</h2><h3 id="1、HTTPS"><a href="#1、HTTPS" class="headerlink" title="1、HTTPS"></a>1、HTTPS</h3><p>由于 HTTP 天生“明文”的特点，整个传输过程完全透明，任何人都能 够在链路中截获、修改或者伪造请求 / 响应报文，数据不具有可信性。 因此就诞生了为安全而生的HTTPS协议。 使用HTTPS时，所有的HTTP请求和响应在发送到网络之前，都要进行加密。</p>
-<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404112521803.png" alt="HTTPS"></p>
-<h3 id="2、SSL-TLS"><a href="#2、SSL-TLS" class="headerlink" title="2、SSL/TLS"></a>2、SSL/TLS</h3><p>SSL 即安全套接层（Secure Sockets Layer），由网景公司于 1994 年 发明，IETF 在 1999 年把它改名为 TLS（传输层安全，Transport Layer Security），正式标准化，到今天 TLS 已经发展出了主流的三个 版本，分别是 2006 年的 1.1、2008 年的 1.2 ，2018的 1.3，每个新 版本都紧跟密码学的发展和互联网的现状，持续强化安全和性能，已经 成为了信息安全领域中的权威标准。 </p>
-<p><strong>摘要算法</strong> </p>
-<p>摘要算法能够把任意长度的数据“压缩”成固定长度、而且独一无二 的“摘要”字符串，就好像是给这段数据生成了一个数字“指纹”。任意微小的数据差异，都可以生成完全不同的摘要。所以可以通过把明文 信息的摘要和明文一起加密进行传输，数据传输到对方之后再进行解密，重新对数据进行摘要，再比对就能发现数据有没有被篡改。这样就保证了数据的完整性。</p>
-<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404112631820.png" alt="摘要算法"></p>
-<p><strong>加密算法</strong> </p>
-<p><strong>对称密钥加密算法</strong>：编、解码使用相同密钥的算法，如（AES，RC4,ChaCha20 ）。 </p>
-<p><strong>非对称密钥加密算法</strong>：它有两个密钥，一个叫“公钥”，一个叫“私 钥”。两个密钥是不同的，公钥可以公开给任何人使用，而私钥必须严格保密。非对称加密可以解决“密钥交换”的问题。<strong>网站秘密保管私钥，在网上任意分发公钥</strong>，你想要登录网站只要用公钥加密就行了，密文只能由私钥持有者才能解密。而黑客因为没有私钥，所以就无法破解密文。非对称密钥加密系统通常需要大量的数学运算，比较慢。如（DH、DSA、RSA、ECC ） </p>
-<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404112731961.png" alt="加密算法"></p>
-<p>TLS 里使用的混合加密方式，即把对称加密和非对称加密结合起来呢，两者互相取长补短，即能高效地加密解密，又能安全地密钥交换。大致流程如下： </p>
-<p>1.通信开始的时候使用非对称算法如 RSA,ECDHE先解决密钥交换的问题</p>
-<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404112757765.png" alt="请求公钥"></p>
-<p>2.用随机数产生对称算法使用的”会话密钥”，再用公钥加密。会话密钥很短，所以即便使用非对称加密算法也可以很快完成加解密。</p>
-<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404112820819.png" alt="会话密钥"></p>
-<p>3.对方拿到密文后用私钥解密，取出会话密钥。完成对称密钥的安全交换，后续就使用对称算法发完成数据交换</p>
-<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404112847331.png" alt="密钥解密"></p>
-<p><strong>身份验证</strong> </p>
-<p>数字证书组成： </p>
-<p>CA信息，公钥用户信息，公钥，权威机构的签名，有效期 </p>
-<p>数字证书作用： </p>
-<ol>
-<li><p>通过数字证书向浏览器证明身份 </p>
-</li>
-<li><p>数字证书里面包含了公钥 </p>
-</li>
-</ol>
-<p><strong>数字证书的申请和验证</strong> </p>
-<p>如何申请： </p>
-<ol>
-<li><p>生成自己的公钥和私钥，服务器自己保留私钥 </p>
-</li>
-<li><p>向CA机构提交公钥，公司，域名信息等待认证 </p>
-</li>
-<li><p>CA机构通过线上，线下多种途径验证你提交信息的真实性，合法性 </p>
-</li>
-<li><p>信息审核通过，CA机构则会向你签发认证的数字证书，包含了公钥，组织信息，CA信息，有效时间，证书序列号，同时生成一个签名；</p>
-</li>
-</ol>
-<p><strong>签名步骤:</strong> hash( 你用于申请证书所提交的明文信息 )=信息摘要；CA再使用私钥对 信息摘要进行加密，密文就是证书的数字签名 </p>
-<p><strong>浏览器如何验证呢？</strong> </p>
-<p>有了CA签名过的数字证书，当浏览器访问服务器时，服务器会返回数字证书给浏览器。浏览器收到证书后会对数字证书进行验证。首先浏览器读取证书中相关的明文信息，采用CA签名时相同的hash函数计算得到信息摘要A，再利用对应的CA公钥解密数字签名数据得到信息摘要B，如果摘要A和摘要B一致，则可以确认证书时合法的。</p>
-<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404113021908.png" alt="浏览器验证"></p>
-<p>知名的 CA 全世界就那么几家，比如 DigiCert、VeriSign、Entrust、Let’s Encrypt 等，它们签发的证书分域名验证（domain validated,DV）证书、组织验证（organization validated,OV）证 书、扩展验证（extended validation,EV）证书三种，区别在于可信程 度。</p>
-<p>DV可信级别是最低的，只是域名级别的可信，背后是谁不知道。OV证书可信级别比DV高，会验证申请证书时填写的组织，企业信息是 否是正确的，申请往往需要几天时间， EV 是最高的，经过了法律和审计的严格核查，可以证明网站拥有者的身份。</p>
-<h2 id="六、计算机网络常见问题"><a href="#六、计算机网络常见问题" class="headerlink" title="六、计算机网络常见问题"></a>六、计算机网络常见问题</h2><ol>
-<li><code>为什么TCP连接的时候是3次？2次不可以吗？</code></li>
-</ol>
-<p>因为需要考虑连接时丢包的问题，如果只握手2次，第二次握手时如果服务端发给客户端的确认报文段丢失，此时服务端已经准备好了收发数(可以理解服务端已经连接成功)据，而客户端一直没收到服务端的确认报文，所以客户端就不知道服务端是否已经准备好了(可以理解为客户端未连接成功)，这种情况下客户端不会给服务端发数据，也会忽略服务端发过来的数据。</p>
-<p>如果是三次握手，即便发生丢包也不会有问题，比如如果第三次握手客户端发的确认ack报文丢失，服务端在一段时间内没有收到确认ack报文的话就会重新进行第二次握手，也就是服务端会重发SYN报文段，客户端收到重发的报文段后会再次给服务端发送确认ack报文。</p>
-<ol start="2">
-<li><code>为什么TCP连接的时候是3次，关闭的时候却是4次？</code></li>
-</ol>
-<p>因为只有在客户端和服务端都没有数据要发送的时候才能断开TCP。而客户端发出FIN报文时只能保证客户端没有数据发了，服务端还有没有数据发客户端是不知道的。而服务端收到客户端的FIN报文后只能先回复客户端一个确认报文来告诉客户端我服务端已经收到你的FIN报文了，但我服务端还有一些数据没发完，等这些数据发完了服务端才能给客户端发FIN报文(所以不能一次性将确认报文和FIN报文发给客户端，就是这里多出来了一次)。</p>
-<ol start="3">
-<li><code>为什么客户端发出第四次挥手的确认报文后要等2MSL【<strong>MSL是Maximum Segment Lifetime的英文缩写，可译为“最长报文段寿命”，它是任何报文在网络上存在的最长的最长时间，超过这个时间报文将被丢弃</strong>】的时间才能释放TCP连接？</code></li>
-</ol>
-<p>这里同样是要考虑丢包的问题，如果第四次挥手的报文丢失，服务端没收到确认ack报文就会重发第三次挥手的报文，这样报文一去一回最长时间就是2MSL，所以需要等这么长时间来确认服务端确实已经收到了。</p>
-<ol start="4">
-<li><code>如果已经建立了连接，但是客户端突然出现故障了怎么办？</code></li>
-</ol>
-<p>TCP设有一个保活计时器，客户端如果出现故障，服务器不能一直等下去，白白浪费资源。服务器每收到一次客户端的请求后都会重新复位这个计时器，时间通常是设置为2小时，若两小时还没有收到客户端的任何数据，服务器就会发送一个探测报文段，以后每隔75秒钟发送一次。若一连发送10个探测报文仍然没反应，服务器就认为客户端出了故障，接着就关闭连接。</p>
-<ol start="5">
-<li><code>TCP 挥手可以只需要三次吗？</code></li>
-</ol>
-<p>因为服务器端收到客户端的FIN后，服务器端同时也要关闭连接，这样就可以把ACK和FIN合并到一起发送，节省了一个包，变成了“三次挥手”。</p>
-<ol start="6">
-<li><code>什么是HTTP，HTTP 与 HTTPS 的区别</code></li>
-</ol>
-<p>HTTP 是一个在计算机世界里专门在两点之间传输文字、图片、音频、视频等超文本数据的约定和规范</p>
-<table>
-<thead>
-<tr>
-<th><strong>区别</strong></th>
-<th><strong>HTTP</strong></th>
-<th><strong>HTTPS</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td>协议</td>
-<td>运行在 TCP 之上，明文传输，客户端与服务器端都无法验证对方的身份</td>
-<td>身披 SSL( Secure Socket Layer )外壳的 HTTP，运行于 SSL 上，SSL 运行于 TCP 之上， 是添加了加密和认证机制的 HTTP。</td>
-</tr>
-<tr>
-<td>端口</td>
-<td>80</td>
-<td>443</td>
-</tr>
-<tr>
-<td>资源消耗</td>
-<td>较少</td>
-<td>由于加解密处理，会消耗更多的 CPU 和内存资源</td>
-</tr>
-<tr>
-<td>开销</td>
-<td>无需证书</td>
-<td>需要证书，而证书一般需要向认证机构购买</td>
-</tr>
-<tr>
-<td>加密机制</td>
-<td>无</td>
-<td>共享密钥加密和公开密钥加密并用的混合加密机制</td>
-</tr>
-<tr>
-<td>安全性</td>
-<td>弱</td>
-<td>由于加密机制，安全性强</td>
-</tr>
-</tbody></table>
-<ol start="7">
-<li><code>常用HTTP状态码</code></li>
-</ol>
-<p>HTTP状态码表示客户端HTTP请求的返回结果、标识服务器处理是否正常、表明请求出现的错误等。</p>
-<p>状态码的类别：</p>
-<table>
-<thead>
-<tr>
-<th><strong>类别</strong></th>
-<th><strong>原因短语</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td>1XX</td>
-<td>Informational（信息性状态码） 接受的请求正在处理</td>
-</tr>
-<tr>
-<td>2XX</td>
-<td>Success（成功状态码） 请求正常处理完毕</td>
-</tr>
-<tr>
-<td>3XX</td>
-<td>Redirection（重定向状态码） 需要进行附加操作以完成请求</td>
-</tr>
-<tr>
-<td>4XX</td>
-<td>Client Error（客户端错误状态码） 服务器无法处理请求</td>
-</tr>
-<tr>
-<td>5XX</td>
-<td>Server Error（服务器错误状态码） 服务器处理请求出错</td>
-</tr>
-</tbody></table>
-<p>常用HTTP状态码：</p>
-<table>
-<thead>
-<tr>
-<th><strong>2XX</strong></th>
-<th><strong>成功（这系列表明请求被正常处理了）</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td>200</td>
-<td>OK，表示从客户端发来的请求在服务器端被正确处理</td>
-</tr>
-<tr>
-<td>204</td>
-<td>No content，表示请求成功，但响应报文不含实体的主体部分</td>
-</tr>
-<tr>
-<td>206</td>
-<td>Partial Content，进行范围请求成功</td>
-</tr>
-</tbody></table>
-<table>
-<thead>
-<tr>
-<th><strong>3XX</strong></th>
-<th><strong>重定向（表明浏览器要执行特殊处理）</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td>301</td>
-<td>moved permanently，永久性重定向，表示资源已被分配了新的 URL</td>
-</tr>
-<tr>
-<td>302</td>
-<td>found，临时性重定向，表示资源临时被分配了新的 URL</td>
-</tr>
-<tr>
-<td>303</td>
-<td>see other，表示资源存在着另一个 URL，应使用 GET 方法获取资源（对于301/302/303响应，几乎所有浏览器都会删除报文主体并自动用GET重新请求）</td>
-</tr>
-<tr>
-<td>304</td>
-<td>not modified，表示服务器允许访问资源，但请求未满足条件的情况（与重定向无关）</td>
-</tr>
-<tr>
-<td>307</td>
-<td>temporary redirect，临时重定向，和302含义类似，但是期望客户端保持请求方法不变向新的地址发出请求</td>
-</tr>
-</tbody></table>
-<table>
-<thead>
-<tr>
-<th><strong>4XX</strong></th>
-<th><strong>客户端错误</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td>400</td>
-<td>bad request，请求报文存在语法错误</td>
-</tr>
-<tr>
-<td>401</td>
-<td>unauthorized，表示发送的请求需要有通过 HTTP 认证的认证信息</td>
-</tr>
-<tr>
-<td>403</td>
-<td>forbidden，表示对请求资源的访问被服务器拒绝，可在实体主体部分返回原因描述</td>
-</tr>
-<tr>
-<td>404</td>
-<td>not found，表示在服务器上没有找到请求的资源</td>
-</tr>
-</tbody></table>
-<table>
-<thead>
-<tr>
-<th><strong>5XX</strong></th>
-<th><strong>服务器错误</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td>500</td>
-<td>internal sever error，表示服务器端在执行请求时发生了错误</td>
-</tr>
-<tr>
-<td>501</td>
-<td>Not Implemented，表示服务器不支持当前请求所需要的某个功能</td>
-</tr>
-<tr>
-<td>503</td>
-<td>service unavailable，表明服务器暂时处于超负载或正在停机维护，无法处理请求</td>
-</tr>
-</tbody></table>
-<ol start="8">
-<li><code>GET和POST区别</code></li>
-</ol>
-<p>说道GET和POST，就不得不提HTTP协议，因为浏览器和服务器的交互是通过HTTP协议执行的，而GET和POST也是HTTP协议中的两种方法。</p>
-<p>HTTP全称为Hyper Text Transfer Protocol，中文翻译为超文本传输协议，目的是保证浏览器与服务器之间的通信。HTTP的工作方式是客户端与服务器之间的请求-应答协议。</p>
-<p>HTTP协议中定义了浏览器和服务器进行交互的不同方法，基本方法有4种，分别是GET，POST，PUT，DELETE。这四种方法可以理解为，对服务器资源的查，改，增，删。</p>
-<ul>
-<li>GET：从服务器上获取数据，也就是所谓的查，仅仅是获取服务器资源，不进行修改。</li>
-<li>POST：向服务器提交数据，这就涉及到了数据的更新，也就是更改服务器的数据。</li>
-<li>PUT：英文含义是放置，也就是向服务器新添加数据，就是所谓的增。</li>
-<li>DELETE：从字面意思也能看出，这种方式就是删除服务器数据的过程。</li>
-</ul>
-<ol start="9">
-<li><p><code>GET和POST区别</code></p>
-</li>
-<li><p>Get是不安全的，因为在传输过程，数据被放在请求的URL中；Post的所有操作对用户来说都是不可见的。 但是这种做法也不时绝对的，大部分人的做法也是按照上面的说法来的，但是也可以在get请求加上 request body，给 post请求带上 URL 参数。</p>
-</li>
-<li><p>Get请求提交的url中的数据最多只能是2048字节，这个限制是浏览器或者服务器给添加的，http协议并没有对url长度进行限制，目的是为了保证服务器和浏览器能够正常运行，防止有人恶意发送请求。Post请求则没有大小限制。</p>
-</li>
-<li><p>Get限制Form表单的数据集的值必须为ASCII字符；而Post支持整个ISO10646字符集。</p>
-</li>
-<li><p>Get执行效率却比Post方法好。Get是form提交的默认方法。</p>
-</li>
-<li><p>GET产生一个TCP数据包；POST产生两个TCP数据包。</p>
-</li>
-</ol>
-<p>对于GET方式的请求，浏览器会把http header和data一并发送出去，服务器响应200（返回数据）；</p>
-<p>而对于POST，浏览器先发送header，服务器响应100 continue，浏览器再发送data，服务器响应200 ok（返回数据）。</p>
-<ol start="10">
-<li><code>什么是对称加密与非对称加密</code></li>
-</ol>
-<p>对称密钥加密是指加密和解密使用同一个密钥的方式，<strong>这种方式存在的最大问题就是密钥发送问题，即如何安全地将密钥发给对方；</strong></p>
-<p>而非对称加密是指使用一对非对称密钥，即公钥和私钥，公钥可以随意发布，但私钥只有自己知道。发送密文的一方使用对方的公钥进行加密处理，对方接收到加密信息后，使用自己的私钥进行解密。</p>
-<p>由于非对称加密的方式不需要发送用来解密的私钥，所以可以保证安全性；但是和对称加密比起来，非常的慢</p>
-<ol start="11">
-<li><code>什么是HTTP2</code></li>
-</ol>
-<p>HTTP2 可以提高了网页的性能。</p>
-<p>在 HTTP1 中浏览器限制了同一个域名下的请求数量（Chrome 下一般是六个），当在请求很多资源的时候，由于队头阻塞当浏览器达到最大请求数量时，剩余的资源需等待当前的六个请求完成后才能发起请求。</p>
-<p>HTTP2 中引入了多路复用的技术，这个技术可以只通过一个 TCP 连接就可以传输所有的请求数据。多路复用可以绕过浏览器限制同一个域名下的请求数量的问题，进而提高了网页的性能。</p>
- 
-      <!-- reward -->
-      
-    </div>
-    
 
     <!-- copyright -->
     
@@ -788,130 +271,7 @@
   </div>
    
     </div>
-      
-    <div class="article-entry" itemprop="articleBody">
        
-  <h2 id="1、进程的概念"><a href="#1、进程的概念" class="headerlink" title="1、进程的概念"></a>1、进程的概念</h2><p>​        运行中的程序就叫做<strong>进程</strong>。</p>
-<h2 id="2、并行与并发"><a href="#2、并行与并发" class="headerlink" title="2、并行与并发"></a>2、并行与并发</h2><p>​        并发是一种<strong>物理架构</strong>，多个cpu核同一时间执行多个任务。而并行是一种<strong>逻辑架构</strong>，在一个核上，多个任务通过竞争时间片交替执行。</p>
-<p>​        并行与并发的关系图</p>
-<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/%E5%B9%B6%E8%A1%8C%E4%B8%8E%E5%B9%B6%E5%8F%91.png"></p>
-<h2 id="3、进程的状态"><a href="#3、进程的状态" class="headerlink" title="3、进程的状态"></a>3、进程的状态</h2><p>​        <strong>单进程五状态模型：</strong></p>
-<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/%E8%BF%9B%E7%A8%8B%E4%BA%94%E6%88%96%E4%B8%83%E7%8A%B6%E6%80%81%E6%A8%A1%E5%9E%8B.png" alt="进程5/7状态模型"></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">进程进入就绪队列，就会变为就绪状态，各个状态转换如下：</span><br><span class="line">1、就绪-&gt;运行，当操作系统内存在着调度程序，当需要运行一个新进程时，调度程序选择一个就绪状态的进程，让其进入运行状态</span><br><span class="line">2、运行-&gt;就绪，运行态的进程，会占有cpu，每个进程会被分配一定的执行时间，时间片用完，状态就由运行态变为就绪状态</span><br><span class="line">3、运行-&gt;阻塞，进程请求调用操作系统的某些服务，但是操作系统没法立即给到它（比如这些服务需要比较耗时的初始化，比如io资源需要等待等），那么它就会进入阻塞状态</span><br><span class="line">4、阻塞-&gt;就绪，当等待结束了，就由阻塞进入就绪状态</span><br><span class="line">5、运行-&gt;终止，当前进程表示自己已经完成了，它就会被操作系统终止</span><br></pre></td></tr></table></figure>
-
-<h2 id="4、进程的控制结构"><a href="#4、进程的控制结构" class="headerlink" title="4、进程的控制结构"></a>4、进程的控制结构</h2><p>​        在操作系统中，是用<strong>进程控制块</strong>（pcb）数据结构来描述进程的。</p>
-<p>​        pcb是进程存在的唯一标识，这意味着一个进程的存在，必然会有一个pcb,如果进程消失了，那么pcb也会消失。</p>
-<p>​        pcb包含的信息：</p>
-<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403214515124.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1、进程管理：寄存器、程序计数器、堆栈指针、进程状态、优先级、调度参数、进程ID、父进程、进程组、信号...</span><br><span class="line">2、存储管理：Text段指针、数据段指针、堆栈段指针</span><br><span class="line">3、文件管理：根目录、工作目录、文件描述符、用户ID、组ID</span><br></pre></td></tr></table></figure>
-
-<p>pcb组织形式：</p>
-<p>通常是通过<strong>链表</strong>的方式进行组织，把具有相同状态的进程链在一起，组成各种队列，比如：</p>
-<ol>
-<li><p>所有处于就绪状态的进程链在一起，称为就绪队列</p>
-</li>
-<li><p>把所有因等待某事件而处于等待状态的进程链在一起就组成各种阻塞队列</p>
-<p>链表方式：</p>
-<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403214747723.png"></p>
-<p>除了链表的方式，还有索引的方式，如下图。</p>
-<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403214811202.png"></p>
-</li>
-</ol>
-<h2 id="5、进程的切换"><a href="#5、进程的切换" class="headerlink" title="5、进程的切换"></a>5、进程的切换</h2><p>当一个正在运行的进程被中断，操作系统指定另一个就绪态的进程进入运行状态，这个过程就是<strong>进程切换</strong>，也叫<strong>上下文切换</strong>。</p>
-<p><strong>该切换过程一般涉及以下步骤：</strong></p>
-<p>1.保存处理器上下文环境</p>
-<p>2.更新当前进程的pcb</p>
-<p>3.将当前进程移到就绪队列或阻塞队列</p>
-<p>4.根据调度算法，选择就绪队列中的一个合适的进程，将其更改为运行状态</p>
-<p>5.更新内存管理的数据结构</p>
-<p>6.新进程内对堆栈所保存的上下文信息载入到cpu的寄存器和程序计数器，占有cpu</p>
-<p><strong>发生进程切换的场景</strong></p>
-<ol>
-<li>为了保证所有进程可以得到公平调度，cpu的时间被划分为一段段时间片，这些时间片在被轮流分配给各个进程，这样当某个进程时间片用尽后，就会被系统挂起，切换到其它正在等在cpu的进程运行</li>
-<li>进程在系统资源不足时，需要等到资源满足后才可以运行，这个时候进程也会被挂起，并由系统调度其它进程运行</li>
-<li>当进程通过睡眠函数sleep这样的方法将自己主动挂起时，自然也会重新调度。</li>
-<li>当有优先级更高的进程运行时，为了保证高优先级的先运行 ，当前进程也会挂起，由高优先级进程来运行。</li>
-<li>发生硬件中断时，cpu上的 的进程也会被挂起，转而执行内核中的中断服务程序。</li>
-</ol>
-<h2 id="6、线程"><a href="#6、线程" class="headerlink" title="6、线程"></a>6、线程</h2><p><strong>进程是资源分配的最小单位，线程是cpu调度的基本单位，线程是进程中的一条执行流程，一个进程包含多个线程，线程又被称之为轻量级进程。</strong></p>
-<p>同一个进程内多个线程之间可以共享代码段、数据段、打开的文件资源等，但每个线程各自都有一套独立的寄存器和栈，这样可以确保线程的控制流程是独立的。</p>
-<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215049674.png"></p>
-<p><strong>线程上下文切换的是什么</strong></p>
-<ol>
-<li>当两个线程不属于同一个进程，则切换的过程就跟进程切换是一样的</li>
-<li><strong>当两个线程属于同一个进程，因为虚拟内存是共享的，所以在切换时，虚拟内存这些资源就会保持不动，只需要切换线程的私有数据、寄存器等不共享的数据</strong></li>
-</ol>
-<p>所以线程的上下文切换要别进程上下文切换开销小的多。</p>
-<h2 id="7、进程调度"><a href="#7、进程调度" class="headerlink" title="7、进程调度"></a>7、进程调度</h2><p><strong>什么时候进行调度：</strong></p>
-<ol>
-<li><p>从就绪状态-&gt;运行状态</p>
-</li>
-<li><p>从运行状态-&gt;阻塞状态</p>
-</li>
-<li><p>从运行状态-&gt;结束状态</p>
-</li>
-</ol>
-<p><strong>调度算法分为两类：</strong></p>
-<ul>
-<li><strong>非抢占式调度算法</strong>挑选一个进程，然后让该进程运行直到被阻塞，才会调用另外一个进程，也就是说不会理时钟中断这个事情。</li>
-<li>抢占式调度算法挑选一个进程，然后让该进程只运行某段时间，如果在该时段结束时，该进程仍然在运行时，则会把它挂起，接着调度程序从就绪队列中挑选另外一个进程，这种抢占式调度处理，需要在时间间隔的末端发生<strong>时钟中断</strong>，以便把cpu控制返回给调度程序进行调度，这就是常说的<strong>时间片机制</strong>。</li>
-</ul>
-<p><strong>以什么原则来调度进程</strong></p>
-<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215344419.png"></p>
-<p>五种调度原则：</p>
-<ul>
-<li>cpu利用率</li>
-<li>系统吞吐量</li>
-<li>周转时间</li>
-<li>等待时间</li>
-<li>响应时间</li>
-</ul>
-<p><strong>进程调度算法</strong></p>
-<ul>
-<li><p>先来先服务：先进就绪队列，则先被调度。问题：当前面任务耗费很长时间执行，那么后面的任务只需要执行很短的时间，也必须一直等待，属于<strong>非抢占式</strong></p>
-<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215428609.png"></p>
-</li>
-<li><p>时间片轮转：每个进程会被分配时间片，表示运行该进程在这个时间段运行，如果时间结束了，进程还没有运行完毕，那么会通过抢占式调度，将cpu分配给其它进程，该进程回到就绪队列。这是一种最简单最公平的调度算法，但是有可能会存在问题。<strong>缺点：</strong>如果时间片太短，频繁进行切换，会影响效率。如果进程时间片太长，有可能导致排后面的进程等待太长时间。因此时间片的长度，需要有大致合理的数值。（一般建议时间片20ms~50ms）</p>
-<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215506907.png"></p>
-</li>
-<li><p>最短作业优先：按照作业时长排队，作业时间短的排前面先执行。缺点：一个长作业在就绪队列等待运行，而这个就绪队列有非常多的短作业，那么就会使长作业不断的往后推，致使长作业不会被运行。</p>
-<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215604603.png"></p>
-</li>
-<li><p>最短剩余时间优先：从就绪队列中选择剩余时间最短的进程进行调度。该算法可以理解为最短作业优先和时间片轮转的结合。如果没有时间片，那么最短剩余时间其实就是最短作业时间，因为每个进程都是从投执行到尾。</p>
-</li>
-<li><p>优先级调度：按照优先级来调度。</p>
-<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215629550.png"></p>
-</li>
-<li><p>多级反馈队列调度：设置多个就绪队列，赋予每个就绪队列优先级，优先级越高的队列进程的时间片越短。兼顾了长短作业，同时有较好的响应时间。</p>
-<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215655867.png"></p>
-</li>
-</ul>
-<h2 id="8、进程间通信"><a href="#8、进程间通信" class="headerlink" title="8、进程间通信"></a>8、进程间通信</h2><p>每个进程的用户地址空间都是独立的，一般而言是不能互相访问的，但内核空间都是每个进程共享的，所以进程之间的通信必须通过内核。</p>
-<p>进程间的通信目的一般有共享数据、数据传输、消息通知、进程控制等。进程间的通信方式：共享<strong>内存、管道、消息队列、信号量</strong>。</p>
-<ul>
-<li><p>管道：管道传输数据是单向的。匿名管道：用完了就销毁，如linux 【|】。<strong>缺点：</strong>通信方式效率低，不适合进程间频繁的交换数据。<strong>好处：</strong>简单，同时我们也很容易的知道管道里面的数据已经被另一个进程读取了。<strong>对于匿名管道，它的通讯范围是存在父子关系的进程。对于命名管道，可以在不相关的进程间通信，基于文件。</strong></p>
-</li>
-<li><p>消息队列：消息队列是保存在内核中的消息链表。A进程给B进程发送消息，A进程把数据放在对应的消息队列后就可以返回了，B进程需要的时候再去读取数据就可以换了，数据读完后，内核会将数据删除掉。如果没有释放消息队列或者没有关闭操作系统，消息队列会一直存在。<strong>缺点：</strong>消息队列通信过程中，存在用户态和内核态之间的数据拷贝。写入数据：用户态-&gt;内核态，读取消息：内核态-&gt;用户态。</p>
-<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215835113.png"></p>
-</li>
-<li><p>共享内存：消息队列的方式存在数据内核态和用户态转换，共享内存可以解决这一问题。共享内存的机制，就是拿出一块虚拟地址空间来，映射到相同的物理内存中，这样这个进程写入的数据，另一个进程就能里面看到了，不需要拷贝来拷贝去。<strong>缺点：</strong>多个进程同时往这个物理内存写入，可以造成数据覆盖。</p>
-<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215924096.png"></p>
-</li>
-<li><p>信号量：信号量其实就是一个整形的计数器，主要用于实现进程间的互斥和同步，而不是用于缓存进程通信的数据。信号量表示资源的数量，有两种原子操作，<strong>P操作</strong>信号量会减1，信号量&lt;0表示资源已被占用，进程阻塞等待 ,&gt;=0表示还有资源可用，进程可以正常执行，<strong>V操作</strong>信号量加1，信号量&lt;=0,表示当前有阻塞进程，于是会将该进程唤醒执行；&gt;0表示当前没有阻塞中的进程。</p>
-<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403220010341.png"></p>
-</li>
-<li><p>信号：信号一般用于一些异常情况下的进程间的通信，是一种异步通信，它的数据结构一般就是一个数字。信号是进程间通信机制中的<strong>唯一的异步通信机制。</strong>信号的来源主要有硬件来源。常用信号：Ctrl+c（SIGINT信号，表示终止该进程）Ctrl+Z（SIGTSTP 表示停止该进程，但还未结束）。进程需要为信号设置相应的 监听处理，当收到特定信号时，执行相应的操作，类似很多变成语言里面的通知机制。</p>
-</li>
-<li><p>Socket:前面几种都是在同一台主机上的进程间的通信，如果需要跨网络与不同主机上的进程之间通信，就需要sokcet通信了。socket不仅可以跨网络与不同主机进行通信，还可以在同主机上进行进程间通信。</p>
-</li>
-</ul>
-<p><strong>进程间通信总结</strong></p>
-<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403214026093.png"></p>
- 
-      <!-- reward -->
-      
-    </div>
-    
 
     <!-- copyright -->
     
@@ -957,14 +317,7 @@
   </div>
    
     </div>
-      
-    <div class="article-entry" itemprop="articleBody">
        
-  <p id="hitokoto">正在加载一言...</p> 
-      <!-- reward -->
-      
-    </div>
-    
 
     <!-- copyright -->
     
@@ -1010,14 +363,7 @@
   </div>
    
     </div>
-      
-    <div class="article-entry" itemprop="articleBody">
        
-  <p id="hitokoto">正在加载一言...</p> 
-      <!-- reward -->
-      
-    </div>
-    
 
     <!-- copyright -->
     
@@ -1063,25 +409,7 @@
   </div>
    
     </div>
-      
-    <div class="article-entry" itemprop="articleBody">
        
-  <p id="hitokoto">正在加载一言...</p>
-
-
-
-	<div class="row">
-    <embed src="alibaba.pdf" width="100%" height="550" type="application/pdf">
-	</div>
-
-
-
-
-<object data="./alibaba.pdf" type="application/pdf" width="100%" height="100%"></object> 
-      <!-- reward -->
-      
-    </div>
-    
 
     <!-- copyright -->
     
@@ -1127,14 +455,7 @@
   </div>
    
     </div>
-      
-    <div class="article-entry" itemprop="articleBody">
        
-   
-      <!-- reward -->
-      
-    </div>
-    
 
     <!-- copyright -->
     
@@ -1180,14 +501,7 @@
   </div>
    
     </div>
-      
-    <div class="article-entry" itemprop="articleBody">
        
-   
-      <!-- reward -->
-      
-    </div>
-    
 
     <!-- copyright -->
     
@@ -1233,14 +547,7 @@
   </div>
    
     </div>
-      
-    <div class="article-entry" itemprop="articleBody">
        
-   
-      <!-- reward -->
-      
-    </div>
-    
 
     <!-- copyright -->
     
@@ -1282,14 +589,7 @@
   <time datetime="2021-12-11T03:38:40.000Z" itemprop="datePublished">2021-12-11</time>
 </a>    
     </div>
-      
-    <div class="article-entry" itemprop="articleBody">
        
-  <p id="hitokoto">正在加载一言...</p> 
-      <!-- reward -->
-      
-    </div>
-    
 
     <!-- copyright -->
     

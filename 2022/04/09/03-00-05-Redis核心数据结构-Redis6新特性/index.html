@@ -110,7 +110,9 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <h2 id="Redis核心数据结构-amp-Redis6新特性"><a href="#Redis核心数据结构-amp-Redis6新特性" class="headerlink" title="Redis核心数据结构&amp;Redis6新特性"></a>Redis核心数据结构&amp;Redis6新特性</h2><h3 id="1、Redis-C底层数据结构"><a href="#1、Redis-C底层数据结构" class="headerlink" title="1、Redis C底层数据结构"></a>1、Redis C底层数据结构</h3><p>RedisDB：redis 数据库，select db</p>
+  <p id="hitokoto">正在加载一言...</p>
+
+<h2 id="Redis核心数据结构-amp-Redis6新特性"><a href="#Redis核心数据结构-amp-Redis6新特性" class="headerlink" title="Redis核心数据结构&amp;Redis6新特性"></a>Redis核心数据结构&amp;Redis6新特性</h2><h3 id="1、Redis-C底层数据结构"><a href="#1、Redis-C底层数据结构" class="headerlink" title="1、Redis C底层数据结构"></a>1、Redis C底层数据结构</h3><p>RedisDB：redis 数据库，select db</p>
 <p>Dict：字典，所有的k,v都是存在于字典里面；字典里面包含两个dictht【两个dictht原因是扩容使用，redis的渐进式rehash扩容，当需要扩容时不是一次性将数据迁移过去，而是分多次】</p>
 <p>dictht：就是一个数组，里面存储的是dictEntity指针，指向dictEntity</p>
 <p>dictEntity：dictht里面存储的数据，包含 key、value、next【当键发生hash冲突的时候将冲突的值使用next指针指向，并且采用头插法，后面进来的数据放到表头，用来解决hash冲突】；value指向redisObject对象，存放具体的值</p>
