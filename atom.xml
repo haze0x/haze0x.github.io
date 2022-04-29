@@ -6,7 +6,7 @@
   <link href="https://haze0x.github.io/atom.xml" rel="self"/>
   
   <link href="https://haze0x.github.io/"/>
-  <updated>2022-04-28T16:41:10.226Z</updated>
+  <updated>2022-04-29T15:16:11.995Z</updated>
   <id>https://haze0x.github.io/</id>
   
   <author>
@@ -15,6 +15,37 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>并发编程之深入理解Java线程</title>
+    <link href="https://haze0x.github.io/2022/04/29/01-00-02-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B/"/>
+    <id>https://haze0x.github.io/2022/04/29/01-00-02-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B/</id>
+    <published>2022-04-29T15:05:52.000Z</published>
+    <updated>2022-04-29T15:16:11.995Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;\assets\css\APlayer.min.css&quot;&gt;&lt;script src=&quot;\assets\js\APlayer.min.js&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="Java" scheme="https://haze0x.github.io/categories/Java/"/>
+    
+    <category term="并发编程" scheme="https://haze0x.github.io/categories/Java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/"/>
+    
+    <category term="学习计划" scheme="https://haze0x.github.io/categories/Java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E5%AD%A6%E4%B9%A0%E8%AE%A1%E5%88%92/"/>
+    
+    
+    <category term="JMM" scheme="https://haze0x.github.io/tags/JMM/"/>
+    
+    <category term="线程" scheme="https://haze0x.github.io/tags/%E7%BA%BF%E7%A8%8B/"/>
+    
+  </entry>
   
   <entry>
     <title>CPU缓存架构&amp;缓存一致性协议</title>
@@ -612,39 +643,6 @@
     <category term="Java" scheme="https://haze0x.github.io/tags/Java/"/>
     
     <category term="链表" scheme="https://haze0x.github.io/tags/%E9%93%BE%E8%A1%A8/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>基础数据结构-数组</title>
-    <link href="https://haze0x.github.io/2022/04/06/06-00-01-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E6%95%B0%E7%BB%84/"/>
-    <id>https://haze0x.github.io/2022/04/06/06-00-01-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E6%95%B0%E7%BB%84/</id>
-    <published>2022-04-06T11:34:14.000Z</published>
-    <updated>2022-04-28T15:54:15.034Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;\assets\css\APlayer.min.css&quot;&gt;&lt;script src=&quot;\assets\js\APlayer.min.js&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="Java" scheme="https://haze0x.github.io/categories/Java/"/>
-    
-    <category term="数据结构" scheme="https://haze0x.github.io/categories/Java/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
-    
-    <category term="算法" scheme="https://haze0x.github.io/categories/Java/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%AE%97%E6%B3%95/"/>
-    
-    <category term="学习计划" scheme="https://haze0x.github.io/categories/Java/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%AE%97%E6%B3%95/%E5%AD%A6%E4%B9%A0%E8%AE%A1%E5%88%92/"/>
-    
-    
-    <category term="Java" scheme="https://haze0x.github.io/tags/Java/"/>
-    
-    <category term="数组" scheme="https://haze0x.github.io/tags/%E6%95%B0%E7%BB%84/"/>
     
   </entry>
   
