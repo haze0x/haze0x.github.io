@@ -86,7 +86,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">2.7k</span>
+            <span class="post-count">5.2k</span>
         </span>
     </span>
 
@@ -95,7 +95,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> Reading time≈</span>
-            <span class="post-count">9 min</span>
+            <span class="post-count">18 min</span>
         </span>
     </span>
 </div>
@@ -225,6 +225,141 @@
 <li>线程执行完或者出现异常就会进入终止状态，终止状态的线程不会切换到其他任何状态，进入终止状态也就意味着线程的生命周期结束了。</li>
 </ol>
 <p>这五种状态在不同编程语言里会有简化合并。例如，C 语言的 POSIX Threads 规范，就把初始状态和可运行状态合并了；Java 语言里则把可运行状态和运行状态合并了，这两个状态在操作系统调度层面有用，而 JVM 层面不关心这两个状态，因为 JVM 把线程调度交给操作系统处理了。</p>
+<p><strong>查看进程线程的方法</strong></p>
+<table>
+<thead>
+<tr>
+<th>环境</th>
+<th align="left">查看进程的方法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>windows</strong></td>
+<td align="left">任务管理器可以查看进程和线程数，也可以用来杀死进程  <br>tasklist 查看进程 <br>taskkill 杀死进程</td>
+</tr>
+<tr>
+<td><strong>linux</strong></td>
+<td align="left">ps -fe 查看所有进程<br>ps -fT -p <PID> 查看某个进程（PID）的所有线程 <br>kill 杀死进程 <br>top 按大写 H 切换是否显示线程<br>top -H -p <PID> 查看某个进程（PID）的所有线程</PID></PID></td>
+</tr>
+<tr>
+<td><strong>Java</strong></td>
+<td align="left">jps 命令查看所有 Java 进程 <br>jstack <PID> 查看某个 Java 进程（PID）的所有线程状态 <br>jconsole 来查看某个 Java 进程中线程的运行情况（图形界面）</PID></td>
+</tr>
+</tbody></table>
+<p> <strong>Linux系统中线程实现方式</strong></p>
+<ul>
+<li>LinuxThreads       linux/glibc包在2.3.2之前只实现了LinuxThreads</li>
+<li>NPTL(Native POSIX Thread Library)</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">可以通过以下命令查看系统是使用哪种线程实现 </span><br><span class="line">getconf GNU_LIBPTHREAD_VERSION </span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/04/29/01-00-02-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B/26557.png" alt="img"></p>
+<h3 id="2、Java线程详解"><a href="#2、Java线程详解" class="headerlink" title="2、Java线程详解"></a>2、Java线程详解</h3><p><code> Java线程的实现方式</code></p>
+<ul>
+<li><p><strong>方式1：使用 Thread类或继承Thread类</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建线程对象</span></span><br><span class="line">Thread t = <span class="keyword">new</span> Thread() &#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 要执行的任务</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 启动线程</span></span><br><span class="line">t.start();</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>方式2：实现 Runnable 接口配合Thread</strong></p>
+<p>把【线程】和【任务】（要执行的代码）分开</p>
+<ul>
+<li>Thread 代表线程</li>
+<li>Runnable 可运行的任务（线程要执行的代码）</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Runnable runnable = <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">// 要执行的任务</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 创建线程对象</span></span><br><span class="line">Thread t = <span class="keyword">new</span> Thread( runnable );</span><br><span class="line"><span class="comment">// 启动线程</span></span><br><span class="line">t.start();</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>方式3：使用有返回值的 Callable</strong> </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CallableTask</span> <span class="keyword">implements</span> <span class="title">Callable</span>&lt;<span class="title">Integer</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Random().nextInt();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//创建线程池</span></span><br><span class="line">ExecutorService service = Executors.newFixedThreadPool(<span class="number">10</span>);</span><br><span class="line"><span class="comment">//提交任务，并用 Future提交返回结果</span></span><br><span class="line">Future&lt;Integer&gt; future = service.submit(<span class="keyword">new</span> CallableTask());</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>方式4：使用 lambda</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> Thread(() -&gt; System.out.println(Thread.currentThread().getName())).start();</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>总结：</strong>本质上Java中实现线程只有一种方式【执行任务的方式有很多种】，都是通过new Thread()创建线程，调用Thread#start启动线程最终都会调用Thread#run方法</p>
+<p><code>Java线程实现原理</code></p>
+<p><strong>思考</strong>：Java线程执行为什么不能直接调用run()方法,而要调用start()方法？</p>
+<p>调用start()方法底层操作系统会创建线程，Java Thread-&gt;Jvm Thread-&gt;os Thread   Jvm Thread 到os Thread之间会有用户态到内核态的切换，java层面的线程对象会和内核态线程建立绑定关系；</p>
+<p>调用run()方法只是普通的方法调用。</p>
+<p><strong>两种线程</strong></p>
+<ul>
+<li><p><strong>内核级线程（Kernel Level Thread ，KLT</strong>）：它们是依赖于内核的，即无论是用户进程中的线程，还是系统进程中的线程，它们的创建、撤消、切换都由内核实现。</p>
+</li>
+<li><p><strong>用户级线程（User Level Thread，ULT）</strong>：操作系统内核不知道应用线程的存在。</p>
+</li>
+</ul>
+<p><strong>Java线程属于内核级线程</strong></p>
+<p><strong>Java中的协程框架：</strong> kilim  quasar</p>
+<p><img src="/2022/04/29/01-00-02-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B/26621.png" alt="img"></p>
+<p><strong>协程：</strong>英文Coroutines, 是一种基于线程之上，但又比线程更加轻量级的存在，协程不是被操作系统内核所管理，而完全是由程序所控制（也就是在用户态执行），具有对内核来说不可见的特性。这样带来的好处就是性能得到了很大的提升，不会像线程切换那样消耗资源。</p>
+<p><img src="/2022/04/29/01-00-02-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B/29203.png" alt="img"></p>
+<h3 id="3、Java线程的调度机制"><a href="#3、Java线程的调度机制" class="headerlink" title="3、Java线程的调度机制"></a>3、Java线程的调度机制</h3><p>线程调度是指系统为线程分配处理器使用权的过程，主要调度方式分两种，分别是协同式线程调度和抢占式线程调度</p>
+<ul>
+<li><strong>协同式线程调度</strong></li>
+</ul>
+<p><strong>线程执行时间由线程本身来控制</strong>，线程把自己的工作执行完之后，要主动通知系统切换到另外一个线程上。最大好处是实现简单，且切换操作对线程自己是可知的，没啥线程同步问题。坏处是线程执行时间不可控制，如果一个线程有问题，可能一直阻塞在那里。</p>
+<ul>
+<li><strong>抢占式线程调度</strong></li>
+</ul>
+<p><strong>每个线程将由系统来分配执行时间，线程的切换不由线程本身来决定</strong>（Java中，Thread.yield()可以让出执行时间，但无法获取执行时间）。线程执行时间系统可控，也不会有一个线程导致整个进程阻塞。</p>
+<ul>
+<li><strong>Java线程调度就是抢占式调度</strong></li>
+</ul>
+<p>希望系统能给某些线程多分配一些时间，给一些线程少分配一些时间，可以通过设置线程优先级来完成。Java语言一共10个级别的线程优先级（Thread.MIN_PRIORITY至Thread.MAX_PRIORITY），在两线程同时处于ready状态时，优先级越高的线程越容易被系统选择执行。但优先级并不是很靠谱，因为Java线程是通过映射到系统的原生线程上来实现的，所以线程调度最终还是取决于操作系统。</p>
+<h3 id="4、Java线程的生命周期"><a href="#4、Java线程的生命周期" class="headerlink" title="4、Java线程的生命周期"></a>4、Java线程的生命周期</h3><p>Java 语言中线程共有六种状态，分别是：</p>
+<ol>
+<li>NEW（初始化状态）</li>
+<li>RUNNABLE（可运行状态+运行状态）</li>
+<li>BLOCKED（阻塞状态、只针对synchorinzed）</li>
+<li>WAITING（无时限等待）</li>
+<li>TIMED_WAITING（有时限等待）</li>
+<li>TERMINATED（终止状态）</li>
+</ol>
+<p>在操作系统层面，Java 线程中的 BLOCKED、WAITING、TIMED_WAITING 是一种状态，即前面我们提到的休眠状态。也就是说只要 Java 线程处于这三种状态之一，那么这个线程就永远没有 CPU 的使用权。</p>
+<p><img src="/2022/04/29/01-00-02-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B/26544.png" alt="img"></p>
+<p><strong>从JavaThread的角度，JVM定义了一些针对Java Thread对象的状态（jvm.h）</strong></p>
+<p><img src="/2022/04/29/01-00-02-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B/27079.png" alt="img"></p>
+<p><strong>从OSThread的角度，JVM还定义了一些线程状态给外部使用，比如用jstack输出的线程堆栈信息中线程的状态（osThread.hpp）</strong></p>
+<p><img src="/2022/04/29/01-00-02-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B/27086.png" alt="img"></p>
+<h3 id="5、Thread常用方法"><a href="#5、Thread常用方法" class="headerlink" title="5、Thread常用方法"></a>5、<strong>Thread常用方法</strong></h3><p><strong>sleep方法</strong></p>
+<ul>
+<li>调用 sleep 会让当前线程从 <em>Running</em> 进入TIMED_WAITING状态，不会释放对象锁</li>
+<li>其它线程可以使用 interrupt 方法打断正在睡眠的线程，这时 sleep 方法会抛出 InterruptedException，并且会清除中断标志</li>
+<li>睡眠结束后的线程未必会立刻得到执行</li>
+<li>sleep当传入参数为0时，和yield相同</li>
+</ul>
+<p><strong>yield方法</strong></p>
+<ul>
+<li>yield会释放CPU资源，让当前线程从 Running 进入 Runnable状态，让优先级更高（至少是相同）的线程获得执行机会，不会释放对象锁；</li>
+<li>假设当前进程只有main线程，当调用yield之后，main线程会继续运行，因为没有比它优先级更高的线程；</li>
+<li>具体的实现依赖于操作系统的任务调度器</li>
+</ul>
+<p><strong>join方法</strong>    </p>
+<p>等待调用join方法的线程结束之后，程序再继续执行，一般用于等待异步线程执行完结果之后才能继续运行的场景。</p>
+<p><strong>stop方法</strong></p>
+<p>stop()方法已经被jdk废弃，原因就是stop()方法太过于暴力，强行把执行到一半的线程终止。</p>
+<h3 id="6、Java线程的中断机制"><a href="#6、Java线程的中断机制" class="headerlink" title="6、Java线程的中断机制"></a>6、<strong>Java线程的中断机制</strong></h3><p>Java没有提供一种安全、直接的方法来停止某个线程，而是提供了中断机制。中断机制是一种协作机制，也就是说通过中断并不能直接终止另一个线程，而需要被中断的线程自己处理。被中断的线程拥有完全的自主权，它既可以选择立即停止，也可以选择一段时间后停止，也可以选择压根不停止。</p>
+<p><strong>API的使用</strong></p>
+<ul>
+<li>interrupt()： 将线程的中断标志位设置为true，不会停止线程</li>
+<li>isInterrupted(): 判断当前线程的中断标志位是否为true，不会清除中断标志位</li>
+<li>Thread.interrupted()：判断当前线程的中断标志位是否为true，并清除中断标志位，重置为fasle</li>
+</ul>
+<p>Thread.sleep()能够响应中断，并清除中断标志位。</p>
+<p><strong>sleep 期间能否感受到中断</strong></p>
+<p>修改上面的代码，线程执行任务期间有休眠需求</p>
+<p>处于休眠中的线程被中断，线程是可以感受到中断信号的，并且会抛出一个 InterruptedException 异常，同时清除中断信号，将中断标记位设置成 false。这样就会导致while条件Thread.currentThread().isInterrupted()为false，程序会在不满足count &lt; 1000这个条件时退出。如果不在catch中重新手动添加中断信号，不做任何处理，就会屏蔽中断请求，有可能导致线程无法正确停止。</p>
+<h3 id="7、Java线程间通信"><a href="#7、Java线程间通信" class="headerlink" title="7、Java线程间通信"></a>7、<strong>Java线程间通信</strong></h3><ul>
+<li><strong>volatile</strong></li>
+</ul>
+<p>volatile有两大特性，一是可见性，二是有序性，禁止指令重排序，其中可见性就是可以让线程之间进行通信。</p>
+<ul>
+<li><strong>等待唤醒(等待通知)机制</strong></li>
+</ul>
+<p>等待唤醒机制可以基于wait和notify方法来实现，在一个线程内调用该线程锁对象的wait方法，线程将进入等待队列进行等待直到被唤醒。</p>
+<p>LockSupport是JDK中用来实现线程阻塞和唤醒的工具，线程调用park则等待“许可”，调用unpark则为指定线程提供“许可”。使用它可以在任何场合使线程阻塞，可以指定任何线程进行唤醒，并且不用担心阻塞和唤醒操作的顺序，但要注意连续多次唤醒的效果和一次唤醒是一样的。</p>
+<ul>
+<li><strong>管道输入输出流</strong></li>
+</ul>
+<p>管道输入/输出流和普通的文件输入/输出流或者网络输入/输出流不同之处在于，它主要用于线程之间的数据传输，而传输的媒介为内存。管道输入/输出流主要包括了如下4种具体实现：PipedOutputStream、PipedInputStream、PipedReader和PipedWriter，前两种面向字节，而后两种面向字符。</p>
+<ul>
+<li><strong>Thread.join</strong></li>
+</ul>
+<p>join可以理解成是线程合并，当在一个线程调用另一个线程的join方法时，当前线程阻塞等待被调用join方法的线程执行完毕才能继续执行，所以join的好处能够保证线程的执行顺序，但是如果调用线程的join方法其实已经失去了并行的意义，虽然存在多个线程，但是本质上还是串行的，最后join的实现其实是基于等待通知机制的。</p>
  
       <!-- reward -->
       
