@@ -3885,4 +3885,128 @@
         <tag>AQS</tag>
       </tags>
   </entry>
+  <entry>
+    <title>深入理解AQS之Semaphorer&amp;CountDownLatch&amp;CyclicBarrie详解</title>
+    <url>/2022/05/05/01-00-08-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3AQS%E4%B9%8BSemaphorer-CountDownLatch-CyclicBarrie%E8%AF%A6%E8%A7%A3/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="深入理解AQS之Semaphorer-amp-CountDownLatch-amp-CyclicBarrie详解"><a href="#深入理解AQS之Semaphorer-amp-CountDownLatch-amp-CyclicBarrie详解" class="headerlink" title="深入理解AQS之Semaphorer&amp;CountDownLatch&amp;CyclicBarrie详解"></a>深入理解AQS之Semaphorer&amp;CountDownLatch&amp;CyclicBarrie详解</h2><h3 id="1、Semaphore"><a href="#1、Semaphore" class="headerlink" title="1、Semaphore"></a>1、Semaphore</h3><p><strong>概念</strong></p>
+<p>Semaphore，俗称信号量，它是操作系统中PV操作的原语在java的实现，它也是基于AbstractQueuedSynchronizer实现的。</p>
+<p>Semaphore的功能非常强大，大小为1的信号量就类似于互斥锁，通过同时只能有一个线程获取信号量实现。大小为n（n&gt;0）的信号量可以实现限流的功能，它可以实现只能有n个线程同时获取信号量。</p>
+<p><img src="/2022/05/05/01-00-08-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3AQS%E4%B9%8BSemaphorer-CountDownLatch-CyclicBarrie%E8%AF%A6%E8%A7%A3/image-20220505225529143.png" alt="image-20220505225529143"></p>
+<blockquote>
+<p>PV操作是操作系统一种实现进程互斥与同步的有效方法。PV操作与信号量（S）的处理相关，P表示通过的意思，V表示释放的意思。用PV操作来管理共享资源时，首先要确保PV操作自身执行的正确性。</p>
+<p>P操作的主要动作是：</p>
+<p>①S减1；</p>
+<p>②若S减1后仍大于或等于0，则进程继续执行；</p>
+<p>③若S减1后小于0，则该进程被阻塞后放入等待该信号量的等待队列中，然后转进程调度。</p>
+<p>V操作的主要动作是：</p>
+<p>①S加1； </p>
+<p>②若相加后结果大于0，则进程继续执行；</p>
+<p>③若相加后结果小于或等于0，则从该信号的等待队列中释放一个等待进程，然后再返回原进程继续执行或转进程调度。</p>
+</blockquote>
+<p><strong>Semaphore 常用方法</strong></p>
+<p><strong>构造器</strong></p>
+<p><img src="/2022/05/05/01-00-08-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3AQS%E4%B9%8BSemaphorer-CountDownLatch-CyclicBarrie%E8%AF%A6%E8%A7%A3/image-20220505225700685.png" alt="image-20220505225700685"></p>
+<ul>
+<li>permits 表示许可证的数量（资源数）</li>
+<li>fair 表示公平性，如果这个设为 true 的话，下次执行的线程会是等待最久的线程</li>
+</ul>
+<p><strong>常用方法</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">acquire</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">tryAcquire</span><span class="params">()</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">release</span><span class="params">()</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">availablePermits</span><span class="params">()</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">getQueueLength</span><span class="params">()</span> </span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">hasQueuedThreads</span><span class="params">()</span></span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">reducePermits</span><span class="params">(<span class="keyword">int</span> reduction)</span></span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>acquire() 表示阻塞并获取许可</li>
+<li>tryAcquire() 方法在没有许可的情况下会立即返回 false，要获取许可的线程不会阻塞</li>
+<li>release() 表示释放许可</li>
+<li>int availablePermits()：返回此信号量中当前可用的许可证数。</li>
+<li>int getQueueLength()：返回正在等待获取许可证的线程数。</li>
+<li>boolean hasQueuedThreads()：是否有线程正在等待获取许可证。</li>
+<li>void reducePermit（int reduction）：减少 reduction 个许可证</li>
+<li>Collection getQueuedThreads()：返回所有等待获取许可证的线程集合</li>
+</ul>
+<p><strong>应用场景</strong></p>
+<p>可以用于做流量控制，特别是公用资源有限的应用场景</p>
+<p><strong>1、限流</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SemaphoneTest2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 实现一个同时只能处理5个请求的限流器</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Semaphore semaphore = <span class="keyword">new</span> Semaphore(<span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 定义一个线程池</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> ThreadPoolExecutor executor = <span class="keyword">new</span> ThreadPoolExecutor(<span class="number">10</span>, <span class="number">50</span>, <span class="number">60</span>, TimeUnit.SECONDS, <span class="keyword">new</span> LinkedBlockingDeque&lt;&gt;(<span class="number">200</span>));</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 模拟执行方法</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">exec</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            semaphore.acquire(<span class="number">1</span>);</span><br><span class="line">            <span class="comment">// 模拟真实方法执行</span></span><br><span class="line">            System.out.println(<span class="string">&quot;执行exec方法&quot;</span> );</span><br><span class="line">            Thread.sleep(<span class="number">2000</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            semaphore.release(<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">for</span> (; ; ) &#123;</span><br><span class="line">                Thread.sleep(<span class="number">100</span>);</span><br><span class="line">                <span class="comment">// 模拟请求以10个/s的速度</span></span><br><span class="line">                executor.execute(() -&gt; exec());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<h3 id="2、CountDownLatch"><a href="#2、CountDownLatch" class="headerlink" title="2、CountDownLatch"></a>2、CountDownLatch</h3><p>CountDownLatch（闭锁）是一个同步协助类，允许一个或多个线程等待，直到其他线程完成操作集。</p>
+<p>CountDownLatch使用给定的计数值（count）初始化。await方法会阻塞直到当前的计数值（count）由于countDown方法的调用达到0，count为0之后所有等待的线程都会被释放，并且随后对await方法的调用都会立即返回。这是一个一次性现象 —— count不会被重置。如果你需要一个重置count的版本，那么请考虑使用CyclicBarrier。</p>
+<p><img src="/2022/05/05/01-00-08-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3AQS%E4%B9%8BSemaphorer-CountDownLatch-CyclicBarrie%E8%AF%A6%E8%A7%A3/image-20220505225924474.png" alt="image-20220505225924474"></p>
+<p><strong>CountDownLatch的使用</strong></p>
+<p><strong>构造器</strong></p>
+<p><img src="/2022/05/05/01-00-08-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3AQS%E4%B9%8BSemaphorer-CountDownLatch-CyclicBarrie%E8%AF%A6%E8%A7%A3/image-20220505225941034.png" alt="image-20220505225941034"></p>
+<p><strong>常用方法</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"> <span class="comment">// 调用 await() 方法的线程会被挂起，它会等待直到 count 值为 0 才继续执行</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">await</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123; &#125;;  </span><br><span class="line"><span class="comment">// 和 await() 类似，若等待 timeout 时长后，count 值还是没有变为 0，不再等待，继续执行</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">await</span><span class="params">(<span class="keyword">long</span> timeout, TimeUnit unit)</span> <span class="keyword">throws</span> InterruptedException </span>&#123; &#125;;  </span><br><span class="line"><span class="comment">// 会将 count 减 1，直至为 0</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>CountDownLatch应用场景</strong></p>
+<p>CountDownLatch一般用作多线程倒计时计数器，强制它们等待其他一组（CountDownLatch的初始化决定）任务执行完成。</p>
+<p>CountDownLatch的两种使用场景：</p>
+<ul>
+<li>场景1：让多个线程等待</li>
+<li>场景2：让单个线程等待。</li>
+</ul>
+<p><strong>场景1 让多个线程等待：模拟并发，让并发线程一起执行</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CountDownLatchTest</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        CountDownLatch countDownLatch = <span class="keyword">new</span> CountDownLatch(<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">            <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="comment">//准备完毕……运动员都阻塞在这，等待号令</span></span><br><span class="line">                    countDownLatch.await();</span><br><span class="line">                    String parter = <span class="string">&quot;【&quot;</span> + Thread.currentThread().getName() + <span class="string">&quot;】&quot;</span>;</span><br><span class="line">                    System.out.println(parter + <span class="string">&quot;开始执行……&quot;</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;).start();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Thread.sleep(<span class="number">2000</span>);<span class="comment">// 裁判准备发令</span></span><br><span class="line">        countDownLatch.countDown();<span class="comment">// 发令枪：执行发令</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>场景2 让单个线程等待：多个线程(任务)完成后，进行汇总合并</strong></p>
+<p>很多时候，我们的并发任务，存在前后依赖关系；比如数据详情页需要同时调用多个接口获取数据，并发请求获取到数据后、需要进行结果合并；或者多个数据操作完成后，需要数据check；这其实都是：在多个线程(任务)完成后，进行汇总合并的场景。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CountDownLatchTest2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">        CountDownLatch countDownLatch = <span class="keyword">new</span> CountDownLatch(<span class="number">5</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">            <span class="keyword">final</span> <span class="keyword">int</span> index = i;</span><br><span class="line">            <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">1000</span> + ThreadLocalRandom.current().nextInt(<span class="number">1000</span>));</span><br><span class="line">                    System.out.println(Thread.currentThread().getName()+<span class="string">&quot; finish task&quot;</span> + index );</span><br><span class="line"></span><br><span class="line">                    countDownLatch.countDown();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;).start();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 主线程在阻塞，当计数器==0，就唤醒主线程往下执行。</span></span><br><span class="line">        countDownLatch.await();</span><br><span class="line">        System.out.println(<span class="string">&quot;主线程:在所有任务运行完成后，进行结果汇总&quot;</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>CountDownLatch实现原理</strong></p>
+<p>底层基于 AbstractQueuedSynchronizer 实现，CountDownLatch 构造函数中指定的count直接赋给AQS的state；每次countDown()则都是release(1)减1，最后减到0时unpark阻塞线程；这一步是由最后一个执行countdown方法的线程执行的。</p>
+<p>而调用await()方法时，当前线程就会判断state属性是否为0，如果为0，则继续往下执行，如果不为0，则使当前线程进入等待状态，直到某个线程将state属性置为0，其就会唤醒在await()方法中等待的线程。</p>
+<p><strong>CountDownLatch与Thread.join的区别</strong></p>
+<ul>
+<li>CountDownLatch的作用就是允许一个或多个线程等待其他线程完成操作，看起来有点类似join() 方法，但其提供了比 join() 更加灵活的API。</li>
+<li>CountDownLatch可以手动控制在n个线程里调用n次countDown()方法使计数器进行减一操作，也可以在一个线程里调用n次执行减一操作。</li>
+<li>而 join() 的实现原理是不停检查join线程是否存活，如果 join 线程存活则让当前线程永远等待。所以两者之间相对来说还是CountDownLatch使用起来较为灵活。</li>
+</ul>
+<p><strong>CountDownLatch与CyclicBarrier的区别</strong></p>
+<p>CountDownLatch和CyclicBarrier都能够实现线程之间的等待，只不过它们侧重点不同：</p>
+<ol>
+<li>CountDownLatch的计数器只能使用一次，而CyclicBarrier的计数器可以使用reset() 方法重置。所以CyclicBarrier能处理更为复杂的业务场景，比如如果计算发生错误，可以重置计数器，并让线程们重新执行一次</li>
+<li>CyclicBarrier还提供getNumberWaiting(可以获得CyclicBarrier阻塞的线程数量)、isBroken(用来知道阻塞的线程是否被中断)等方法。</li>
+<li>CountDownLatch会阻塞主线程，CyclicBarrier不会阻塞主线程，只会阻塞子线程。</li>
+<li>CountDownLatch和CyclicBarrier都能够实现线程之间的等待，只不过它们侧重点不同。CountDownLatch一般用于一个或多个线程，等待其他线程执行完任务后，再执行。CyclicBarrier一般用于一组线程互相等待至某个状态，然后这一组线程再同时执行。</li>
+<li>CyclicBarrier 还可以提供一个 barrierAction，合并多线程计算结果。</li>
+<li>CyclicBarrier是通过ReentrantLock的”独占锁”和Conditon来实现一组线程的阻塞唤醒的，而CountDownLatch则是通过AQS的“共享锁”实现</li>
+</ol>
+<h3 id="3、CyclicBarrier"><a href="#3、CyclicBarrier" class="headerlink" title="3、CyclicBarrier"></a>3、CyclicBarrier</h3><p>字面意思回环栅栏，通过它可以实现让一组线程等待至某个状态（屏障点）之后再全部同时执行。叫做回环是因为当所有等待线程都被释放以后，CyclicBarrier可以被重用。</p>
+<p><img src="/2022/05/05/01-00-08-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3AQS%E4%B9%8BSemaphorer-CountDownLatch-CyclicBarrie%E8%AF%A6%E8%A7%A3/image-20220505230110170.png" alt="image-20220505230110170"></p>
+<p><strong>CyclicBarrier的使用</strong></p>
+<p>构造方法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"> <span class="comment">// parties表示屏障拦截的线程数量，每个线程调用 await 方法告诉 CyclicBarrier 我已经到达了屏障，然后当前线程被阻塞。</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">CyclicBarrier</span><span class="params">(<span class="keyword">int</span> parties)</span></span></span><br><span class="line"><span class="function"><span class="comment">// 用于在线程到达屏障时，优先执行 barrierAction，方便处理更复杂的业务场景(该线程的执行时机是在到达屏障之后再执行)</span></span></span><br></pre></td></tr></table></figure>
+
+<p>重要方法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//屏障 指定数量的线程全部调用await()方法时，这些线程不再阻塞</span></span><br><span class="line"><span class="comment">// BrokenBarrierException 表示栅栏已经被破坏，破坏的原因可能是其中一个线程 await() 时被中断或者超时</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">await</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException, BrokenBarrierException</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">await</span><span class="params">(<span class="keyword">long</span> timeout, TimeUnit unit)</span> <span class="keyword">throws</span> InterruptedException, BrokenBarrierException, TimeoutException</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="comment">//循环  通过reset()方法可以进行重置</span></span></span><br></pre></td></tr></table></figure>
+
+<p><strong>CyclicBarrier应用场景</strong></p>
+<ul>
+<li><p>CyclicBarrier 可以用于多线程计算数据，最后合并计算结果的场景。</p>
+</li>
+<li><p>利用CyclicBarrier的计数器能够重置，屏障可以重复使用的特性，可以支持类似“人满发车”的场景</p>
+</li>
+</ul>
+<p><strong>CyclicBarrier与CountDownLatch的区别</strong></p>
+<ol>
+<li>CountDownLatch的计数器只能使用一次，而CyclicBarrier的计数器可以使用reset() 方法重置。所以CyclicBarrier能处理更为复杂的业务场景，比如如果计算发生错误，可以重置计数器，并让线程们重新执行一次</li>
+<li>CyclicBarrier还提供getNumberWaiting(可以获得CyclicBarrier阻塞的线程数量)、isBroken(用来知道阻塞的线程是否被中断)等方法。</li>
+<li>CountDownLatch会阻塞主线程，CyclicBarrier不会阻塞主线程，只会阻塞子线程。</li>
+<li>CountDownLatch和CyclicBarrier都能够实现线程之间的等待，只不过它们侧重点不同。CountDownLatch一般用于一个或多个线程，等待其他线程执行完任务后，再执行。CyclicBarrier一般用于一组线程互相等待至某个状态，然后这一组线程再同时执行。</li>
+<li>CyclicBarrier 还可以提供一个 barrierAction，合并多线程计算结果。</li>
+<li>CyclicBarrier是通过ReentrantLock的”独占锁”和Conditon来实现一组线程的阻塞唤醒的，而CountDownLatch则是通过AQS的“共享锁”实现</li>
+</ol>
+<h3 id="4、源码分析"><a href="#4、源码分析" class="headerlink" title="4、源码分析"></a>4、源码分析</h3><p><a href="https://www.processon.com/view/link/6273e75a0791290711f7b81b%E3%80%90%E5%BE%85%E8%A1%A5%E5%85%85%E3%80%91">https://www.processon.com/view/link/6273e75a0791290711f7b81b【待补充】</a></p>
+]]></content>
+      <categories>
+        <category>Java</category>
+        <category>并发编程</category>
+        <category>学习计划</category>
+      </categories>
+      <tags>
+        <tag>AQS</tag>
+        <tag>Semaphore</tag>
+      </tags>
+  </entry>
 </search>
