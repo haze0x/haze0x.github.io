@@ -2,6 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://haze0x.github.io/2022/05/06/01-00-09-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3AQS%E4%B9%8BCyclicBarrier-ReentrantReadWriteLock%E8%AF%A6%E8%A7%A3/</loc>
+    
+    <lastmod>2022-05-06</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://haze0x.github.io/2022/05/05/01-00-08-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3AQS%E4%B9%8BSemaphorer-CountDownLatch-CyclicBarrie%E8%AF%A6%E8%A7%A3/</loc>
     
     <lastmod>2022-05-06</lastmod>
@@ -657,6 +666,20 @@
   
   <url>
     <loc>https://haze0x.github.io/tags/Semaphore/</loc>
+    <lastmod>2022-05-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://haze0x.github.io/tags/CyclicBarrier/</loc>
+    <lastmod>2022-05-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://haze0x.github.io/tags/ReentrantReadWriteLock/</loc>
     <lastmod>2022-05-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
