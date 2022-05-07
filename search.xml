@@ -4065,7 +4065,80 @@
     <url>/2022/05/07/01-00-10-AQS%E4%B9%8BReentrantReadWriteLock/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
 
-<p>AQS之ReentrantReadWriteLock</p>
+<h2 id="AQS之ReentrantReadWriteLock"><a href="#AQS之ReentrantReadWriteLock" class="headerlink" title="AQS之ReentrantReadWriteLock"></a>AQS之ReentrantReadWriteLock</h2><h3 id="1、ReentrantReadWriteLock的基本使用"><a href="#1、ReentrantReadWriteLock的基本使用" class="headerlink" title="1、ReentrantReadWriteLock的基本使用"></a>1、ReentrantReadWriteLock的基本使用</h3><p>先看下下面这个例子</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> ReadWriteLock readWriteLock = <span class="keyword">new</span> ReentrantReadWriteLock();</span><br><span class="line"><span class="keyword">private</span> Lock r = readWriteLock.readLock();</span><br><span class="line"><span class="keyword">private</span> Lock w = readWriteLock.writeLock();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 读操作上读锁</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Data <span class="title">get</span><span class="params">(String key)</span> </span>&#123;</span><br><span class="line">  r.lock();</span><br><span class="line">  <span class="keyword">try</span> &#123; </span><br><span class="line">      <span class="comment">// TODO 业务逻辑</span></span><br><span class="line">  &#125;<span class="keyword">finally</span> &#123; </span><br><span class="line">       r.unlock(); </span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 写操作上写锁</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Data <span class="title">put</span><span class="params">(String key, Data value)</span> </span>&#123;</span><br><span class="line">  w.lock();</span><br><span class="line">  <span class="keyword">try</span> &#123; </span><br><span class="line">      <span class="comment">// TODO 业务逻辑</span></span><br><span class="line">  &#125;<span class="keyword">finally</span> &#123; </span><br><span class="line">       w.unlock(); </span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面例子演示了读写锁 ReentrantReadWriteLock的使用方式。总结如下：</p>
+<p>ReentrantReadWriteLock是可重入的读写锁实现类。在它内部，维护了一对相关的锁，一个用于只读操作，另一个用于写入操作。只要没有 Writer 线程，读锁可以由多个 Reader 线程同时持有。也就是说，写锁是独占的，读锁是共享的。</p>
+<p><strong>注意事项</strong></p>
+<ul>
+<li>读锁不支持条件变量</li>
+<li>重入时升级不支持：持有读锁的情况下去获取写锁，会导致获取永久等待</li>
+<li>重入时支持降级： 持有写锁的情况下可以去获取读锁</li>
+</ul>
+<h3 id="2、什么是读写锁"><a href="#2、什么是读写锁" class="headerlink" title="2、什么是读写锁"></a>2、什么是读写锁</h3><p>现实中有这样一种场景：对共享资源有读和写的操作，且写操作没有读操作那么频繁（读多写少）。在没有写操作的时候，多个线程同时读一个资源没有任何问题，所以应该允许多个线程同时读取共享资源（读读可以并发）；但是如果一个线程想去写这些共享资源，就不应该允许其他线程对该资源进行读和写操作了（读写，写读，写写互斥）。在读多于写的情况下，读写锁能够提供比排它锁更好的并发性和吞吐量。</p>
+<p>针对这种场景，JAVA的并发包提供了读写锁ReentrantReadWriteLock，它内部，维护了一对相关的锁，一个用于只读操作，称为读锁；一个用于写入操作，称为写锁，描述如下：</p>
+<p>线程进入读锁的前提条件：</p>
+<ul>
+<li>没有其他线程的写锁</li>
+<li>没有写请求或者有写请求，但调用线程和持有锁的线程是同一个。</li>
+</ul>
+<p>线程进入写锁的前提条件：</p>
+<ul>
+<li>没有其他线程的读锁</li>
+<li>没有其他线程的写锁</li>
+</ul>
+<p>而读写锁有以下三个重要的特性：</p>
+<ul>
+<li>公平选择性：支持非公平（默认）和公平的锁获取方式，吞吐量还是非公平优于公平。</li>
+<li>可重入：读锁和写锁都支持线程重入。以读写线程为例：读线程获取读锁后，能够再次获取读锁。写线程在获取写锁之后能够再次获取写锁，同时也可以获取读锁。</li>
+<li>锁降级：遵循获取写锁、再获取读锁最后释放写锁的次序，写锁能够降级成为读锁。</li>
+</ul>
+<h3 id="3、读写锁的使用场景"><a href="#3、读写锁的使用场景" class="headerlink" title="3、读写锁的使用场景"></a>3、读写锁的使用场景</h3><p>看下面这个例子</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Cache</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> Map&lt;String, Object&gt; map = <span class="keyword">new</span> HashMap&lt;String, Object&gt;();</span><br><span class="line">    <span class="keyword">static</span> ReentrantReadWriteLock rwl = <span class="keyword">new</span> ReentrantReadWriteLock();</span><br><span class="line">    <span class="keyword">static</span> Lock r = rwl.readLock();</span><br><span class="line">    <span class="keyword">static</span> Lock w = rwl.writeLock();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 获取一个key对应的value</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Object <span class="title">get</span><span class="params">(String key)</span> </span>&#123;</span><br><span class="line">        r.lock();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> map.get(key);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            r.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 设置key对应的value，并返回旧的value</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Object <span class="title">put</span><span class="params">(String key, Object value)</span> </span>&#123;</span><br><span class="line">        w.lock();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> map.put(key, value);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            w.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 清空所有的内容</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">clear</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        w.lock();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            map.clear();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            w.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">注：</span><br><span class="line">上述示例中，Cache组合一个非线程安全的HashMap作为缓存的实现，同时使用读写锁的读锁和写锁来保证Cache是线程安全的。在读操作get(String key)方法中，需要获取读锁，这使得并发访问该方法时不会被阻塞。写操作put(String key,Object value)方法和clear()方法，在更新 HashMap时必须提前获取写锁，当获取写锁后，其他线程对于读锁和写锁的获取均被阻塞，而 只有写锁被释放之后，其他读写操作才能继续。Cache使用读写锁提升读操作的并发性，也保证每次写操作对所有的读写操作的可见性，同时简化了编程方式</span><br></pre></td></tr></table></figure>
+
+<h3 id="4、锁降级"><a href="#4、锁降级" class="headerlink" title="4、锁降级"></a>4、锁降级</h3><p>示例：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> ReentrantReadWriteLock rwl = <span class="keyword">new</span> ReentrantReadWriteLock();</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Lock r = rwl.readLock();</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Lock w = rwl.writeLock();</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">boolean</span> update = <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">processData</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    readLock.lock();</span><br><span class="line">    <span class="keyword">if</span> (!update) &#123;</span><br><span class="line">        <span class="comment">// 必须先释放读锁</span></span><br><span class="line">        readLock.unlock();</span><br><span class="line">        <span class="comment">// 锁降级从写锁获取到开始</span></span><br><span class="line">        writeLock.lock();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (!update) &#123;</span><br><span class="line">                <span class="comment">// TODO 准备数据的流程（略）  </span></span><br><span class="line">                update = <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            readLock.lock();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            writeLock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 锁降级完成，写锁降级为读锁</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">//TODO  使用数据的流程（略）</span></span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        readLock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>锁降级指的是写锁降级成为读锁。如果当前线程拥有写锁，然后将其释放，最后再获取读锁，这种分段完成的过程不能称之为锁降级。锁降级是指把持住（当前拥有的）写锁，再获取到读锁，随后释放（先前拥有的）写锁的过程。锁降级可以帮助我们拿到当前线程修改后的结果而不被其他线程所破坏，防止更新丢失。</p>
+<p>锁降级中读锁的获取是否必要呢？答案是必要的。主要是为了保证数据的可见性，如果当前线程不获取读锁而是直接释放写锁，假设此刻另一个线程（记作线程T）获取了写锁并修改了数据，那么当前线程无法感知线程T的数据更新。如果当前线程获取读锁，即遵循锁降级的步骤，则线程T将会被阻塞，直到当前线程使用数据并释放读锁之后，线程T才能获取写锁进行数据更新。</p>
+<p>RentrantReadWriteLock不支持锁升级（把持读锁、获取写锁，最后释放读锁的过程）。目的也是保证数据可见性，如果读锁已被多个线程获取，其中任意线程成功获取了写锁并更新了数据，则其更新对其他获取到读锁的线程是不可见的。</p>
+<h3 id="5、RentrantReadWriteLock源码分析"><a href="#5、RentrantReadWriteLock源码分析" class="headerlink" title="5、RentrantReadWriteLock源码分析"></a>5、RentrantReadWriteLock源码分析</h3><p>图没画完，链接后面再补</p>
+<h3 id="6、读写锁设计的核心原理"><a href="#6、读写锁设计的核心原理" class="headerlink" title="6、读写锁设计的核心原理"></a>6、读写锁设计的核心原理</h3><ul>
+<li><strong>设计的精髓：用一个变量如何维护多种状态</strong></li>
+</ul>
+<p>在 ReentrantLock 中，使用 Sync ( 实际是 AQS )的 int 类型的 state 来表示同步状态，表示锁被一个线程重复获取的次数。但是，读写锁 ReentrantReadWriteLock 内部维护着一对读写锁，如果要用一个变量维护多种状态，需要采用“按位切割使用”的方式来维护这个变量，将其切分为两部分：高16为表示读，低16为表示写。</p>
+<p>分割之后，读写锁是如何迅速确定读锁和写锁的状态呢？通过位运算。假如当前同步状态为S，那么：</p>
+<ul>
+<li>写状态，等于 S &amp; 0x0000FFFF（将高 16 位全部抹去）。 当写状态加1，等于S+1.</li>
+<li>读状态，等于 S &gt;&gt;&gt; 16 (无符号补 0 右移 16 位)。当读状态加1，等于S+（1&lt;&lt;16）,也就是S+0x00010000</li>
+</ul>
+<p>根据状态的划分能得出一个推论：S不等于0时，当写状态（S&amp;0x0000FFFF）等于0时，则读状态（S&gt;&gt;&gt;16）大于0，即读锁已被获取。</p>
+<p><img src="/2022/05/07/01-00-10-AQS%E4%B9%8BReentrantReadWriteLock/image-20220508020238060.png" alt="image-20220508020238060"></p>
+<ul>
+<li><strong>HoldCounter 计数器</strong></li>
+</ul>
+<p>锁的内在机制其实就是一个共享锁。一次共享锁的操作就相当于对HoldCounter 计数器的操作。获取共享锁，则该计数器 + 1，释放共享锁，该计数器 - 1。只有当线程获取共享锁后才能对共享锁进行释放、重入操作。</p>
+<p>通过 ThreadLocalHoldCounter 类，HoldCounter 与线程进行绑定。HoldCounter 是绑定线程的一个计数器，而 ThreadLocalHoldCounter 则是线程绑定的 ThreadLocal。</p>
+<p>(1) HoldCounter是用来记录读锁重入数的对象</p>
+<p>(2) ThreadLocalHoldCounter是ThreadLocal变量，用来存放不是第一个获取读锁的线程的其他线程的读锁重入数对象</p>
+<ul>
+<li><strong>写锁的获取</strong></li>
+</ul>
+<p>写锁是一个支持重进入的排它锁。如果当前线程已经获取了写锁，则增加写状态。如果当前线程在获取写锁时，读锁已经被获取（读状态不为0）或者该线程不是已经获取写锁的线程， 则当前线程进入等待状态。</p>
+<p>写锁的获取是通过重写AQS中的tryAcquire方法实现的。</p>
+<ul>
+<li><p><strong>写锁的释放</strong></p>
+<p>写锁释放通过重写AQS的tryRelease方法实现</p>
+</li>
+<li><p><strong>读锁的获取</strong></p>
+</li>
+</ul>
+<p>实现共享式同步组件的同步语义需要通过重写AQS的tryAcquireShared方法和tryReleaseShared方法</p>
+<ul>
+<li><strong>读锁的释放</strong></li>
+</ul>
+<p>获取到读锁，执行完临界区后，要记得释放读锁（如果重入多次要释放对应的次数），不然会阻塞其他线程的写操作。</p>
 ]]></content>
       <categories>
         <category>Java</category>
