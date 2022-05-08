@@ -3745,6 +3745,7 @@
     <url>/2022/05/03/06-00-05-%E5%9F%BA%E7%A1%80%E7%AE%97%E6%B3%95%E6%80%9D%E6%83%B3/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
 
+<p><a href="https://programmercarl.com/">讲解算法比较好的博客</a></p>
 <h2 id="一、动态规划"><a href="#一、动态规划" class="headerlink" title="一、动态规划"></a>一、动态规划</h2><h3 id="1、动态规划定义"><a href="#1、动态规划定义" class="headerlink" title="1、动态规划定义"></a>1、动态规划定义</h3><p>​        如果一类活动过程可以分为若干个互相联系的阶段，在每一个阶段都需作出决策，每一个阶段都有若干个策略可供选择，一个阶段的策略确定以后，形成了本阶段的决策，常常影响到下一个阶段的决策，从而就完全确定了一个过程的活动路线，则称它为<strong>多阶段决策问题</strong>。</p>
 <p>当各个阶段决策确定后，就组成一个决策序列，因而也就确定了整个过程的一条活动路线。在多阶段决策问题中，决策依赖于当前状态，又随即引起状态的转移，一个决策序列就是在变化的状态中产生出来的，故有“动态”的含义，称这种解决多阶段决策最优化的过程为<strong>动态规划方法</strong>。</p>
 <p>​        动态规划算法通常用于求解具有某种最优性质的问题。在这类问题中，可能会有许多可行解。每一个解都对应于一个值，我们希望找到具有最优值的解。动态规划算法与分治法类似，分治法基本思想也是将待求解问题分解成若干个子问题，先求解子问题，然后从这些子问题的解得到原问题的解，但是分治法里子问题之间往往是互相独立的，可以并行求解。</p>
