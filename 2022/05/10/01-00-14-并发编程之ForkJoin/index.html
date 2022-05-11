@@ -219,7 +219,12 @@
 <p>ForkJoinTask最适合用于纯粹的计算任务，也就是纯函数计算，计算过程中的对象都是独立的，对外部没有依赖。提交到ForkJoinPool中的任务应避免执行阻塞I/O。</p>
 <p><strong>ForkJoinPool 的工作原理</strong></p>
 <p><img src="/2022/05/10/01-00-14-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8BForkJoin/image-20220511002538588.png" alt="image-20220511002538588"></p>
-<p><strong>ForkJoinPool 的工作原理源码待补充</strong></p>
+<p><strong>ForkJoinPool 的核心</strong></p>
+<ul>
+<li><strong>工作窃取</strong></li>
+<li><strong>工作队列WorkQueue</strong></li>
+<li><strong>ForkJoinWorkThread</strong></li>
+</ul>
  
       <!-- reward -->
       
@@ -296,6 +301,15 @@
 
    
   <nav class="article-nav">
+    
+      <a href="/2022/05/11/01-00-15-Future-CompletableFuture-Disruptor/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            Future&amp;CompletableFuture&amp;Disruptor
+          
+        </div>
+      </a>
     
     
       <a href="/2022/05/10/01-00-13-AQS%E6%80%BB%E7%BB%93/" class="article-nav-link">
