@@ -4578,7 +4578,143 @@
   <entry>
     <title>Future&amp;CompletableFuture&amp;Disruptor</title>
     <url>/2022/05/11/01-00-15-Future-CompletableFuture-Disruptor/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="1、Future"><a href="#1、Future" class="headerlink" title="1、Future"></a>1、Future</h2><p><code>Callable和Runnable的区别</code></p>
+<p>Runnable 的缺陷：</p>
+<ul>
+<li>不能返回一个返回值</li>
+<li>不能抛出 checked Exception</li>
+</ul>
+<p>Callable的call方法可以有返回值，可以声明抛出异常。和 Callable 配合的有一个 Future 类，通过 Future 可以了解任务执行情况，或者取消任务的执行，还可获取任务执行的结果，这些功能都是 Runnable 做不到的，Callable 的功能要比 Runnable 强大。</p>
+<p>参考如下例子：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;通过Runnable方式执行任务&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).start();</span><br><span class="line"></span><br><span class="line">FutureTask task = <span class="keyword">new</span> FutureTask(<span class="keyword">new</span> Callable() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;通过Callable方式执行任务&quot;</span>);</span><br><span class="line">        Thread.sleep(<span class="number">3000</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;返回任务结果&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="keyword">new</span> Thread(task).start();</span><br></pre></td></tr></table></figure>
+
+<p><code>Future 的主要功能</code></p>
+<p><strong>Future就是对于具体的Runnable或者Callable任务的执行结果进行取消、查询是否完成、获取结果。****必要时可以通过get方法获取执行结果，该方法会阻塞直到任务返回结果。</strong></p>
+<ul>
+<li>boolean cancel (boolean mayInterruptIfRunning) 取消任务的执行。参数指定是否立即中断任务执行，或者等等任务结束</li>
+<li>boolean isCancelled () 任务是否已经取消，任务正常完成前将其取消，则返回 true</li>
+<li>boolean isDone () 任务是否已经完成。需要注意的是如果任务正常终止、异常或取消，都将返回true</li>
+<li>V get () throws InterruptedException, ExecutionException  等待任务执行结束，然后获得V类型的结果。InterruptedException 线程被中断异常， ExecutionException任务执行异常，如果任务被取消，还会抛出CancellationException</li>
+<li>V get (long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException 同上面的get功能一样，多了设置超时时间。参数timeout指定超时时间，uint指定时间的单位，在枚举类TimeUnit中有相关的定义。如果计算超时，将抛出TimeoutException</li>
+</ul>
+<p>future例子如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FutureTaskDemo</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> ExecutionException, InterruptedException </span>&#123;</span><br><span class="line">        Task task = <span class="keyword">new</span> Task();</span><br><span class="line">        <span class="comment">//构建futureTask</span></span><br><span class="line">        FutureTask&lt;Integer&gt; futureTask = <span class="keyword">new</span> FutureTask&lt;&gt;(task);</span><br><span class="line">        <span class="comment">//作为Runnable入参</span></span><br><span class="line">        <span class="keyword">new</span> Thread(futureTask).start();</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;task运行结果：&quot;</span>+futureTask.get());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Task</span> <span class="keyword">implements</span> <span class="title">Callable</span>&lt;<span class="title">Integer</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Integer <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;子线程正在计算&quot;</span>);</span><br><span class="line">            <span class="keyword">int</span> sum = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>; i++) &#123;</span><br><span class="line">                sum += i;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> sum;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>future总结：</p>
+<p><strong>Future 注意事项</strong></p>
+<ul>
+<li>当 for 循环批量获取 Future 的结果时容易 block，get 方法调用时应使用 timeout 限制</li>
+<li>Future 的生命周期不能后退。一旦完成了任务，它就永久停在了“已完成”的状态，不能从头再来</li>
+</ul>
+<p>思考：  使用Callable 和Future 产生新的线程了吗？</p>
+<p>没有产生线程，它是任务相关的 </p>
+<p><strong>Future的局限性</strong></p>
+<p>从本质上说，<strong>Future表示一个异步计算的结果</strong>。它提供了isDone()来检测计算是否已经完成，并且在计算结束后，可以通过get()方法来获取计算结果。在异步计算中，Future确实是个非常优秀的接口。但是，它的本身也确实存在着许多限制：</p>
+<ul>
+<li><strong>并发执行多任务</strong>：Future只提供了get()方法来获取结果，并且是阻塞的。所以，除了等待你别无他法；</li>
+<li><strong>无法对多个任务进行链式调用</strong>：如果你希望在计算任务完成后执行特定动作，比如发邮件，但Future却没有提供这样的能力；</li>
+<li><strong>无法组合多个任务</strong>：如果你运行了10个任务，并期望在它们全部执行结束后执行特定动作，那么在Future中这是无能为力的；</li>
+<li><strong>没有异常处理</strong>：Future接口中没有关于异常处理的方法；</li>
+</ul>
+<p><code>CompletionService</code></p>
+<p>Callable+Future 可以实现多个task并行执行，但是如果遇到前面的task执行较慢时需要阻塞等待前面的task执行完后面task才能取得结果。而CompletionService的主要功能就是一边生成任务,一边获取任务的返回值。让两件事分开执行,任务之间不会互相阻塞，可以实现先执行完的先取结果，不再依赖任务顺序了。</p>
+<p><strong>CompletionService原理</strong></p>
+<p>内部通过阻塞队列+FutureTask，实现了任务先完成可优先获取到，即结果按照完成先后顺序排序，内部有一个先进先出的阻塞队列，用于保存已经执行完成的Future，通过调用它的take方法或poll方法可以获取到一个已经执行完成的Future，进而通过调用Future接口实现类的get方法获取最终的结果</p>
+<p>案例：</p>
+<p><strong>询价应用：向不同电商平台询价，并保存价格</strong></p>
+<p><strong>解决方案：</strong></p>
+<ul>
+<li><strong>采用“ThreadPoolExecutor+Future”的方案：异步执行询价然后再保存</strong></li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//    创建线程池 </span></span><br><span class="line">ExecutorService    executor = Executors.newFixedThreadPool(<span class="number">3</span>); </span><br><span class="line"><span class="comment">//    异步向电商S1询价 </span></span><br><span class="line">Future&lt;Integer&gt;    f1 = executor.submit(()-&gt;getPriceByS1()); </span><br><span class="line"><span class="comment">//    异步向电商S2询价 </span></span><br><span class="line">Future&lt;Integer&gt;    f2=    executor.submit(()-&gt;getPriceByS2());             </span><br><span class="line"><span class="comment">//    获取电商S1报价并异步保存 </span></span><br><span class="line">executor.execute(()-&gt;save(f1.get()));        </span><br><span class="line"><span class="comment">//    获取电商S2报价并异步保存 </span></span><br><span class="line">executor.execute(()-&gt;save(f2.get())   </span><br><span class="line"></span><br><span class="line">缺点：</span><br><span class="line">如果获取电商S1报价的耗时很长，那么即便获取电商S2报价的耗时很短，也无法让保存S2报价的操作先执行，因为这个主线程都阻塞 在了f1.get()操作上。</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>使用CompletionService实现先获取的报价先保存到数据库</strong></li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//创建线程池</span></span><br><span class="line">ExecutorService executor = Executors.newFixedThreadPool(<span class="number">10</span>);</span><br><span class="line"><span class="comment">//创建CompletionService</span></span><br><span class="line">CompletionService&lt;Integer&gt; cs = <span class="keyword">new</span> ExecutorCompletionService&lt;&gt;(executor);</span><br><span class="line"><span class="comment">//异步向电商S1询价</span></span><br><span class="line">cs.submit(() -&gt; getPriceByS1());</span><br><span class="line"><span class="comment">//异步向电商S2询价</span></span><br><span class="line">cs.submit(() -&gt; getPriceByS2());</span><br><span class="line"><span class="comment">//异步向电商S3询价</span></span><br><span class="line">cs.submit(() -&gt; getPriceByS3());</span><br><span class="line"><span class="comment">//将询价结果异步保存到数据库</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">3</span>; i++) &#123;</span><br><span class="line">    Integer r = cs.take().get();</span><br><span class="line">    executor.execute(() -&gt; save(r));</span><br></pre></td></tr></table></figure>
+
+<p><strong>应用场景总结</strong></p>
+<ul>
+<li>当需要批量提交异步任务的时候建议你使用CompletionService。CompletionService将线程池Executor和阻塞队列BlockingQueue的功能融合在了一起，能够让批量异步任务的管理更简单。</li>
+<li>CompletionService能够让异步任务的执行结果有序化。先执行完的先进入阻塞队列，利用这个特性，你可以轻松实现后续处理的有序性，避免无谓的等待，同时还可以快速实现诸如Forking Cluster这样的需求。</li>
+<li>线程池隔离。CompletionService支持自己创建线程池，这种隔离性能避免几个特别耗时的任务拖垮整个应用的风险。</li>
+</ul>
+<h2 id="2、CompletableFuture"><a href="#2、CompletableFuture" class="headerlink" title="2、CompletableFuture"></a>2、CompletableFuture</h2><p>适用示例：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">构造函数：</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> CompletableFuture&lt;Void&gt; <span class="title">runAsync</span><span class="params">(Runnable runnable)</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> CompletableFuture&lt;Void&gt; <span class="title">runAsync</span><span class="params">(Runnable runnable, Executor executor)</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> &lt;U&gt; CompletableFuture&lt;U&gt; <span class="title">supplyAsync</span><span class="params">(Supplier&lt;U&gt; supplier)</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> &lt;U&gt; CompletableFuture&lt;U&gt; <span class="title">supplyAsync</span><span class="params">(Supplier&lt;U&gt; supplier, Executor executor)</span></span></span><br><span class="line"><span class="function">    </span></span><br><span class="line"><span class="function">这四个方法区别在于：</span></span><br><span class="line"><span class="function">runAsync 方法以Runnable函数式接口类型为参数，没有返回结果，supplyAsync 方法Supplier函数式接口类型为参数，返回结果类型为U；Supplier 接口的 <span class="title">get</span><span class="params">()</span> 方法是有返回值的（会阻塞）</span></span><br><span class="line"><span class="function">没有指定Executor的方法会使用ForkJoinPool.<span class="title">commonPool</span><span class="params">()</span> 作为它的线程池执行异步代码。如果指定线程池，则使用指定的线程池运行。</span></span><br><span class="line"><span class="function">默认情况下 CompletableFuture 会使用公共的 ForkJoinPool 线程池，这个线程池默认创建的线程数是 CPU 的核数（也可以通过 JVM option:-Djava.util.concurrent.ForkJoinPool.common.parallelism 来设置 ForkJoinPool 线程池的线程数）。如果所有 CompletableFuture 共享一个线程池，那么一旦有任务执行一些很慢的 I/O 操作，就会导致线程池中所有线程都阻塞在 I/O 操作上，从而造成线程饥饿，进而影响整个系统的性能。所以，强烈建议你要根据不同的业务类型创建不同的线程池，以避免互相干扰</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>CompletableFuture使用详解</strong></p>
+<p>简单的任务，用Future获取结果还好，但我们并行提交的多个异步任务，往往并不是独立的，很多时候业务逻辑处理存在串行[依赖]、并行、聚合的关系。如果要我们手动用 Fueture 实现，是非常麻烦的。</p>
+<p><strong>CompletableFuture是Future接口的扩展和增强</strong>。CompletableFuture实现了Future接口，并在此基础上进行了丰富地扩展，完美地弥补了Future上述的种种问题。更为重要的是，<strong>CompletableFuture实现了对任务的编排能力</strong>。借助这项能力，我们可以轻松地组织不同任务的运行顺序、规则以及方式。从某种程度上说，这项能力是它的核心能力。而在以往，虽然通过CountDownLatch等工具类也可以实现任务的编排，但需要复杂的逻辑处理，不仅耗费精力且难以维护。</p>
+<p><strong>应用场景</strong></p>
+<p><strong>描述依赖关系：</strong></p>
+<ol>
+<li>thenApply() 把前面异步任务的结果，交给后面的Function</li>
+<li>thenCompose()用来连接两个有依赖关系的任务，结果由第二个任务返回</li>
+</ol>
+<p><strong>描述and聚合关系：</strong></p>
+<ol>
+<li>thenCombine:任务合并，有返回值</li>
+<li>thenAccepetBoth:两个任务执行完成后，将结果交给thenAccepetBoth消耗，无返回值。</li>
+<li>runAfterBoth:两个任务都执行完成后，执行下一步操作（Runnable）。</li>
+</ol>
+<p><strong>描述or聚合关系：</strong></p>
+<ol>
+<li>applyToEither:两个任务谁执行的快，就使用那一个结果，有返回值。</li>
+<li>acceptEither: 两个任务谁执行的快，就消耗那一个结果，无返回值。</li>
+<li>runAfterEither: 任意一个任务执行完成，进行下一步操作(Runnable)。</li>
+</ol>
+<p><strong>并行执行：</strong></p>
+<p>CompletableFuture类自己也提供了anyOf()和allOf()用于支持多个CompletableFuture并行执行</p>
+<p>适用总结：</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>创建异步操作</strong></td>
+<td><strong>runAsync&amp;supplyAsync</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>获取结果</strong></td>
+<td><strong>join&amp;get</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>结果处理</strong></td>
+<td><strong>whenComplete&amp;exceptionally</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>结果转换</strong></td>
+<td><strong>thenApply</strong>   <strong>thenCompose</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>结果消费</strong></td>
+<td><strong>thenAccept</strong>  <strong>thenAcceptBoth</strong>  <strong>thenRun</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>结果组合</strong></td>
+<td><strong>thenCombine</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>任务交互</strong></td>
+<td><strong>applyToEither</strong>  <strong>acceptEither</strong>  <strong>runAfterEither</strong>  <strong>runAfterBoth</strong>  <strong>anyOf</strong>  <strong>allOf</strong></td>
+<td></td>
+</tr>
+</tbody></table>
+<p><strong>CompletableFuture常用方法总结</strong></p>
+<p><img src="/2022/05/11/01-00-15-Future-CompletableFuture-Disruptor/image-20220512001353695.png" alt="image-20220512001353695"></p>
+]]></content>
       <categories>
         <category>Java</category>
         <category>并发编程</category>
