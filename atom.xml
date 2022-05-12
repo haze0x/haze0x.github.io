@@ -6,7 +6,7 @@
   <link href="https://haze0x.github.io/atom.xml" rel="self"/>
   
   <link href="https://haze0x.github.io/"/>
-  <updated>2022-05-11T16:24:37.696Z</updated>
+  <updated>2022-05-12T15:02:21.724Z</updated>
   <id>https://haze0x.github.io/</id>
   
   <author>
@@ -15,6 +15,37 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>ThreadPoolExecutor使用及源码分析</title>
+    <link href="https://haze0x.github.io/2022/05/12/01-00-16-ThreadPoolExecutor%E4%BD%BF%E7%94%A8%E5%8F%8A%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    <id>https://haze0x.github.io/2022/05/12/01-00-16-ThreadPoolExecutor%E4%BD%BF%E7%94%A8%E5%8F%8A%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</id>
+    <published>2022-05-12T14:40:24.000Z</published>
+    <updated>2022-05-12T15:02:21.724Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;\assets\css\APlayer.min.css&quot;&gt;&lt;script src=&quot;\assets\js\APlayer.min.js&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="Java" scheme="https://haze0x.github.io/categories/Java/"/>
+    
+    <category term="并发编程" scheme="https://haze0x.github.io/categories/Java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/"/>
+    
+    <category term="学习计划" scheme="https://haze0x.github.io/categories/Java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E5%AD%A6%E4%B9%A0%E8%AE%A1%E5%88%92/"/>
+    
+    
+    <category term="ThreadPoolExecutor" scheme="https://haze0x.github.io/tags/ThreadPoolExecutor/"/>
+    
+    <category term="线程池" scheme="https://haze0x.github.io/tags/%E7%BA%BF%E7%A8%8B%E6%B1%A0/"/>
+    
+  </entry>
   
   <entry>
     <title>Future&amp;CompletableFuture&amp;Disruptor</title>
@@ -608,35 +639,6 @@
     <category term="Jvm" scheme="https://haze0x.github.io/tags/Jvm/"/>
     
     <category term="ZGC" scheme="https://haze0x.github.io/tags/ZGC/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>hexo解决推送github ssh key过期问题</title>
-    <link href="https://haze0x.github.io/2022/04/25/10-00-00-hexo%E8%A7%A3%E5%86%B3%E6%8E%A8%E9%80%81github-ssh-key%E8%BF%87%E6%9C%9F%E9%97%AE%E9%A2%98/"/>
-    <id>https://haze0x.github.io/2022/04/25/10-00-00-hexo%E8%A7%A3%E5%86%B3%E6%8E%A8%E9%80%81github-ssh-key%E8%BF%87%E6%9C%9F%E9%97%AE%E9%A2%98/</id>
-    <published>2022-04-25T11:55:08.000Z</published>
-    <updated>2022-04-28T15:54:43.391Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;\assets\css\APlayer.min.css&quot;&gt;&lt;script src=&quot;\assets\js\APlayer.min.js&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="随笔" scheme="https://haze0x.github.io/categories/%E9%9A%8F%E7%AC%94/"/>
-    
-    <category term="hexo" scheme="https://haze0x.github.io/categories/%E9%9A%8F%E7%AC%94/hexo/"/>
-    
-    
-    <category term="随笔" scheme="https://haze0x.github.io/tags/%E9%9A%8F%E7%AC%94/"/>
-    
-    <category term="hexo" scheme="https://haze0x.github.io/tags/hexo/"/>
     
   </entry>
   

@@ -4726,4 +4726,108 @@
         <tag>Disruptor</tag>
       </tags>
   </entry>
+  <entry>
+    <title>ThreadPoolExecutor使用及源码分析</title>
+    <url>/2022/05/12/01-00-16-ThreadPoolExecutor%E4%BD%BF%E7%94%A8%E5%8F%8A%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="Executor线程池原理与源码解读"><a href="#Executor线程池原理与源码解读" class="headerlink" title="Executor线程池原理与源码解读"></a>Executor线程池原理与源码解读</h2><h3 id="1、线程池的使用"><a href="#1、线程池的使用" class="headerlink" title="1、线程池的使用"></a>1、线程池的使用</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ThreadPool</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        ThreadPoolExecutor threadPoolExecutor = <span class="keyword">new</span> ThreadPoolExecutor(<span class="number">1</span>, <span class="number">1</span>, <span class="number">5000</span>, TimeUnit.MILLISECONDS, <span class="keyword">new</span> ArrayBlockingQueue&lt;Runnable&gt;(<span class="number">5</span>));</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;<span class="number">6</span>;i++)&#123;</span><br><span class="line">            threadPoolExecutor.submit(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                    System.out.println(<span class="string">&quot;i m task ：&quot;</span>+Thread.currentThread().getName());</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,i);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">## 通过submit()方法提交任务</span><br></pre></td></tr></table></figure>
+
+<h3 id="2、线程的状态"><a href="#2、线程的状态" class="headerlink" title="2、线程的状态"></a>2、线程的状态</h3><blockquote>
+<p><strong>NEW</strong>,新建</p>
+<p><strong>RUNNABLE</strong>,运行</p>
+<p><strong>BLOCKED</strong>,阻塞</p>
+<p><strong>WAITING</strong>,等待</p>
+<p><strong>TIMED_WAITING</strong>,超时等待</p>
+<p><strong>TERMINATED</strong>，终结</p>
+</blockquote>
+<p>状态切换如下图所示：</p>
+<p><img src="/2022/05/12/01-00-16-ThreadPoolExecutor%E4%BD%BF%E7%94%A8%E5%8F%8A%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/image-20220512225300532.png" alt="image-20220512225300532"></p>
+<p><code>两种线程内核态线程KLT VS 用户态线程ULT</code></p>
+<p><img src="/2022/05/12/01-00-16-ThreadPoolExecutor%E4%BD%BF%E7%94%A8%E5%8F%8A%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/image-20220512225401430.png" alt="image-20220512225401430"></p>
+<p><code><strong>协程</strong></code></p>
+<p>协程    (纤程，用户级线程)，目的是为了追求最大力度的发挥硬件性能和提升软件的速度，协程基本原理是:在某个点挂起当前的任务，并且保存栈信息，去执行另一个任务；等完成或达到某个条件时，再还原原来的栈信息并继续执行(整个过程线程不需要上下文切换)。</p>
+<p>只有一个线程，但是虚拟出来了很多线程栈空间，是在一个cpu的一个核上执行。不需要上下文切换，也不需要内核态和用户态的切换，不会去调用操作系统库函数创建操作系统线程</p>
+<p>Java原生不支持协程，在纯java代码里需要使用协程的话需要引入第三方包,如：quasar</p>
+<h3 id="3、线程池的状态"><a href="#3、线程池的状态" class="headerlink" title="3、线程池的状态"></a>3、线程池的状态</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">RUNNING    = -<span class="number">1</span> &lt;&lt; COUNT_BITS; <span class="comment">//高3位为111</span></span><br><span class="line">SHUTDOWN   =  <span class="number">0</span> &lt;&lt; COUNT_BITS; <span class="comment">//高3位为000</span></span><br><span class="line">STOP       =  <span class="number">1</span> &lt;&lt; COUNT_BITS; <span class="comment">//高3位为001</span></span><br><span class="line">TIDYING    =  <span class="number">2</span> &lt;&lt; COUNT_BITS; <span class="comment">//高3位为010</span></span><br><span class="line">TERMINATED =  <span class="number">3</span> &lt;&lt; COUNT_BITS; <span class="comment">//高3位为011</span></span><br></pre></td></tr></table></figure>
+
+<p>1、RUNNING</p>
+<p>(1) 状态说明：线程池处在RUNNING状态时，能够接收新任务，以及对已添加的任务进行处理。 </p>
+<p>(02) 状态切换：线程池的初始化状态是RUNNING。换句话说，线程池被一旦被创建，就处于RUNNING状态，并且线程池中的任务数为0！</p>
+<p>2、 SHUTDOWN</p>
+<p>(1) 状态说明：线程池处在SHUTDOWN状态时，不接收新任务，但能处理已添加的任务。 </p>
+<p>(2) 状态切换：调用线程池的shutdown()接口时，线程池由RUNNING -&gt; SHUTDOWN。</p>
+<p>3、STOP</p>
+<p>(1) 状态说明：线程池处在STOP状态时，不接收新任务，不处理已添加的任务，并且会中断正在处理的任务。 </p>
+<p>(2) 状态切换：调用线程池的shutdownNow()接口时，线程池由(RUNNING or SHUTDOWN ) -&gt; STOP。</p>
+<p>4、TIDYING</p>
+<p>(1) 状态说明：当所有的任务已终止，ctl记录的”任务数量”为0，线程池会变为TIDYING状态。当线程池变为TIDYING状态时，会执行钩子函数terminated()。terminated()在ThreadPoolExecutor类中是空的，若用户想在线程池变为TIDYING时，进行相应的处理；可以通过重载terminated()函数来实现。 </p>
+<p>(2) 状态切换：当线程池在SHUTDOWN状态下，阻塞队列为空并且线程池中执行的任务也为空时，就会由 SHUTDOWN -&gt; TIDYING。 当线程池在STOP状态下，线程池中执行的任务为空时，就会由STOP -&gt; TIDYING。</p>
+<p>5、 TERMINATED</p>
+<p>(1) 状态说明：线程池彻底终止，就变成TERMINATED状态。 </p>
+<p>(2) 状态切换：线程池处在TIDYING状态时，执行完terminated()之后，就会由 TIDYING -&gt; TERMINATED。</p>
+<p>进入TERMINATED的条件如下：</p>
+<ul>
+<li>线程池不是RUNNING状态；</li>
+<li>线程池状态不是TIDYING状态或TERMINATED状态；</li>
+<li>如果线程池状态是SHUTDOWN并且workerQueue为空；</li>
+<li>workerCount为0；</li>
+<li>设置TIDYING状态成功。</li>
+</ul>
+<h3 id="4、线程池的重要属性"><a href="#4、线程池的重要属性" class="headerlink" title="4、线程池的重要属性"></a>4、线程池的重要属性</h3><p><code>线程池的状态转换</code></p>
+<p><img src="/2022/05/12/01-00-16-ThreadPoolExecutor%E4%BD%BF%E7%94%A8%E5%8F%8A%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/image-20220512225538077.png" alt="image-20220512225538077"></p>
+<p><code>线程池的重要方法</code></p>
+<p>1，<strong>execute</strong>（Runnable command）：履行Ruannable类型的任务,</p>
+<p>2，<strong>submit</strong>（task）：可用来提交Callable或Runnable任务，并返回代表此任务的Future对象</p>
+<p>3，<strong>shutdown</strong>（）：在完成已提交的任务后封闭办事，不再接管新任务,</p>
+<p>4，<strong>shutdownNow</strong>（）：停止所有正在履行的任务并封闭办事。</p>
+<p>5，<strong>isTerminated</strong>（）：测试是否所有任务都履行完毕了。</p>
+<p>6，<strong>isShutdown</strong>（）：测试是否该ExecutorService已被关闭。</p>
+<p><code>线程池的重要属性</code></p>
+<p><strong>参数解释</strong></p>
+<p><strong>corePoolSize</strong></p>
+<p>线程池中的核心线程数，当提交一个任务时，线程池创建一个新线程执行任务，直到当前线程数等于corePoolSize；如果当前线程数为corePoolSize，继续提交的任务被保存到阻塞队列中，等待被执行；如果执行了线程池的prestartAllCoreThreads()方法，线程池会提前创建并启动所有核心线程。</p>
+<p><strong>maximumPoolSize【核心线程数+非核心线程数】</strong></p>
+<p>线程池中允许的最大线程数。如果当前阻塞队列满了，且继续提交任务，则创建新的线程执行任务，前提是当前线程数小于maximumPoolSize；</p>
+<p><strong>keepAliveTime</strong></p>
+<p>线程池维护线程所允许的空闲时间。当线程池中的线程数量大于corePoolSize的时候，如果这时没有新的任务提交，核心线程外的线程不会立即销毁，而是会等待，直到等待的时间超过了keepAliveTime；</p>
+<p><strong>unit</strong></p>
+<p>keepAliveTime的单位；</p>
+<p><strong>workQueue</strong></p>
+<p>用来保存等待被执行的任务的阻塞队列，且任务必须实现Runable接口，在JDK中提供了如下阻塞队列：</p>
+<ul>
+<li>1、ArrayBlockingQueue：基于数组结构的有界阻塞队列，按FIFO排序任务；</li>
+<li>2、LinkedBlockingQuene：基于链表结构的阻塞队列，按FIFO排序任务，吞吐量通常要高于ArrayBlockingQuene；</li>
+<li>3、SynchronousQuene：一个不存储元素的阻塞队列，每个插入操作必须等到另一个线程调用移除操作，否则插入操作一直处于阻塞状态，吞吐量通常要高于LinkedBlockingQuene；</li>
+<li>4、priorityBlockingQuene：具有优先级的无界阻塞队列；</li>
+</ul>
+<p><strong>threadFactory</strong></p>
+<p>它是ThreadFactory类型的变量，用来创建新线程。默认使用Executors.defaultThreadFactory() 来创建线程。使用默认的ThreadFactory来创建线程时，会使新创建的线程具有相同的NORM_PRIORITY优先级并且是非守护线程，同时也设置了线程的名称。</p>
+<p><strong>handler</strong></p>
+<p>线程池的饱和策略，当阻塞队列满了，且没有空闲的工作线程，如果继续提交任务，必须采取一种策略处理该任务，线程池提供了4种策略：</p>
+<ul>
+<li>1、AbortPolicy：直接抛出异常，默认策略；</li>
+<li>2、CallerRunsPolicy：用调用者所在的线程来执行任务；</li>
+<li>3、DiscardOldestPolicy：丢弃阻塞队列中靠最前的任务，并执行当前任务；</li>
+<li>4、DiscardPolicy：直接丢弃任务；</li>
+</ul>
+<p>上面的4种策略都是ThreadPoolExecutor的内部类。</p>
+<p>当然也可以根据应用场景实现RejectedExecutionHandler接口，自定义饱和策略，如记录日志或持久化存储不能处理的任务。</p>
+<p>拒绝策略也可以自己制定，比如说任务是不能丢弃的，那么可以将任务放到redis中间间，然后在拒绝策略里面实现监控线程池的队列中任务个数，比如少于50%就从redis中取任务放入队列中</p>
+<p><img src="/2022/05/12/01-00-16-ThreadPoolExecutor%E4%BD%BF%E7%94%A8%E5%8F%8A%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/thread_pool.jpg" alt="thread_pool"></p>
+<h3 id="5、线程池的执行流程"><a href="#5、线程池的执行流程" class="headerlink" title="5、线程池的执行流程"></a>5、线程池的执行流程</h3><p><img src="/2022/05/12/01-00-16-ThreadPoolExecutor%E4%BD%BF%E7%94%A8%E5%8F%8A%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/image-20220512225937829.png" alt="image-20220512225937829"></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">简单来说，在执行execute()方法时如果状态一直是RUNNING时，的执行过程如下：</span><br><span class="line">如果workerCount &lt; corePoolSize，则创建并启动一个线程来执行新提交的任务；</span><br><span class="line">如果workerCount &gt;= corePoolSize，且线程池内的阻塞队列未满，则将任务添加到该阻塞队列中；</span><br><span class="line">如果workerCount &gt;= corePoolSize &amp;&amp; workerCount &lt; maximumPoolSize，且线程池内的阻塞队列已满，则创建并启动一个线程来执行新提交的任务；</span><br><span class="line">如果workerCount &gt;= maximumPoolSize，并且线程池内的阻塞队列已满, 则根据拒绝策略来处理该任务, 默认的处理方式是直接抛异常。</span><br><span class="line">这里要注意一下addWorker(<span class="keyword">null</span>, <span class="keyword">false</span>);，也就是创建一个线程，但并没有传入任务，因为任务已经被添加到workQueue中了，所以worker在执行的时候，会直接从workQueue中获取任务。所以，在workerCountOf(recheck) == <span class="number">0</span>时执行addWorker(<span class="keyword">null</span>, <span class="keyword">false</span>);也是为了保证线程池在RUNNING状态下必须要有一个线程来执行任务。</span><br></pre></td></tr></table></figure>
+
+<h3 id="6、线程池的源码跟踪"><a href="#6、线程池的源码跟踪" class="headerlink" title="6、线程池的源码跟踪"></a>6、线程池的源码跟踪</h3><p><a href="https://www.processon.com/view/link/627d2169e0b34d5ac4095b31">threadPool源码跟踪</a></p>
+]]></content>
+      <categories>
+        <category>Java</category>
+        <category>并发编程</category>
+        <category>学习计划</category>
+      </categories>
+      <tags>
+        <tag>ThreadPoolExecutor</tag>
+        <tag>线程池</tag>
+      </tags>
+  </entry>
 </search>
