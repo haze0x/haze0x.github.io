@@ -86,7 +86,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">583</span>
+            <span class="post-count">1.9k</span>
         </span>
     </span>
 
@@ -95,7 +95,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> Reading time≈</span>
-            <span class="post-count">2 min</span>
+            <span class="post-count">6 min</span>
         </span>
     </span>
 </div>
@@ -125,6 +125,30 @@
 
 
 
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">轻量级锁加锁过程：</span><br><span class="line"><span class="number">1</span>、无锁-&gt;轻量级锁过程</span><br><span class="line">-&gt;首先判断是不是无锁状态(锁标识是不是<span class="number">001</span>)</span><br><span class="line">-&gt;是<span class="number">001</span>，则将锁对象的mark word拷贝到线程栈的Log record（如图包含两部分obj和 displayed word ）中的displayed word【便于解锁时，将线程栈中logrecord中的mark word赋值回锁 对象的mark word】</span><br><span class="line">-&gt;cas尝试将mark word的指针ptr_to_lock_record指向Log Record，如果cas成功，那么就获取轻量级锁，失败继续后续步骤</span><br><span class="line">-&gt;如果失败，直接膨胀，即无锁状态经过一次cas失败，不进行自旋，直接升级膨胀为重量级锁</span><br><span class="line"><span class="number">2</span>、轻量级锁重入逻辑</span><br><span class="line">首先判断锁对象是不是处于轻量级锁状态（has_locker()方法），然后看线程栈是不是有这个锁记录，如果是则表示是重入操作，那么再次在线程栈（Log record保存在线程的一个栈结构中）压入一条锁记录（displaced word为空，即mark word 为空），只有再最后释放锁的时候才将栈底有效的mark word 复制回对象头</span><br><span class="line"><span class="number">3</span>、轻量级锁膨胀逻辑</span><br><span class="line">首先拿到monitor监视器对象，真正锁升级的方法实在ObjectMonitor::enter()方法</span><br><span class="line"><span class="keyword">for</span>(;;)&#123;</span><br><span class="line">-&gt;（<span class="number">1</span>）、<span class="keyword">if</span>(mark-&gt;has_monitor()) 首先判断mark word是否是<span class="number">10</span>（是否有monitor对象，即是否是重量级锁）如果有则表示是重量级锁，直接返回</span><br><span class="line">-&gt;（<span class="number">2</span>）、如果没有，则<span class="keyword">if</span>(mark == markOopDesc::INFLATING()) 判断是否正在膨胀，如果正在膨胀，则执行ReadStableMark(object)进行自旋(实际通过调用yield释放时间片，避免活锁，即防止线程空跑不干真正的活)（自旋逻辑是：如果自旋次数大于<span class="number">16</span>则进行park()阻塞，否则调用yield释放时间片）</span><br><span class="line">-&gt;（<span class="number">3</span>）、不是正在膨胀，则执行  <span class="keyword">if</span>(mark-&gt;has_locker()) 判断当前锁标志位是不是<span class="number">00</span>（即轻量级锁），是的话 初始化ObjectMonitor，cas设置状态为膨胀中，然后通过cas操作，修改mark word 指针指向monitor指针，如果改成功则获取锁，设置ObjectMonitor的_header,_owner和_object，设置mark word锁状态为重量级锁，</span><br><span class="line">-&gt;（<span class="number">4</span>）、如果不是轻量级锁，则判断是不是无锁</span><br><span class="line">-&gt;是无锁，调用omAlloc分配一个ObjectMonitor对象</span><br><span class="line">-&gt;初始化objectMontor对象</span><br><span class="line">-&gt;设置monitor的header字段为mark word ,owner为<span class="keyword">null</span>，obj字段为锁对象</span><br><span class="line">-&gt;设置锁对象的mark word 为重量级锁状态，指向第一步分配的monitor对象</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3、重量级锁加锁过程"><a href="#3、重量级锁加锁过程" class="headerlink" title="3、重量级锁加锁过程"></a>3、重量级锁加锁过程</h3>
+
+	<div class="row">
+    <embed src="Synchronized重量级锁加锁解锁执行逻辑.png" width="100%" height="550" type="application/pdf">
+	</div>
+
+
+
+
+<ol>
+<li>重量级锁ObjectMonitor::enter() 加锁逻辑：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-&gt;通过cas尝试获取锁，就是将monitor对象的_owner指针指向当前线程，cas成功直接即返回获取锁</span><br><span class="line">-&gt;cas失败判断是否是当前线程获取锁，是当前线程，则表示是重入锁，可重入次数加<span class="number">1</span>，直接获取锁</span><br><span class="line">-&gt;不是当前线程，则判断当前线程是否是之前持有轻量级锁的线程。由轻量级锁膨胀且则重入次数记为<span class="number">1</span></span><br><span class="line">-&gt;不是之前持有轻量级锁的线程，则先进行自适应自旋，自旋过程中会尝试获取锁，自旋终止条件：<span class="number">1</span>)成功获取锁<span class="number">2</span>)达到自旋次数（会自动调整自旋次数）<span class="number">3</span>)自旋的过程中会判断是否进入安全点，如果进入则终止自旋（每自旋<span class="number">256</span>次就会检查一次）</span><br><span class="line">-&gt;如果自旋结束，获取锁失败，会再尝试获取锁；如果获取锁失败，此时当前线程不甘心被挂起，再次尝试自旋，尝试获取锁</span><br><span class="line">-&gt;如果还获取锁失败，则准备在_cxq上排队</span><br><span class="line">-&gt;通过自旋保证当前线程一定能进入_cxq队列，进入循环，先还是通过自旋尝试获取锁，然后调用park()挂起当前线程，在park()之后在进行自旋尝试唤醒之后获取锁；最后在循环末尾增加内存屏障OrderAccess::fence()保证可见性</span><br><span class="line">-&gt;获取锁成功，跳出循环，_cxq出队</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>重量级锁ObjectMonitor::exit() 解锁唤醒逻辑：</li>
+</ol>
+<p><strong>1&gt;判断当前线程是不是持有锁的线程（即判断_owner是不是当前线程），如果是，如果重入计数器不为0，则重入计数器减1后返回，否则将对象头_ower设置为null，释放锁，然后加入一个内存屏障storeLoad，让修改生效（保证如果某个线程正在自旋抢占该锁，这种策略会优先保证通过自旋抢占锁的线程获取锁，而其它处于等待队列的线程则靠后）；根据QMODE的不同，执行不同的唤醒策略，策略如下</strong></p>
+<p><img src="/2022/05/17/01-00-20-synchronized%E9%94%81%E5%8D%87%E7%BA%A7%E6%80%BB%E7%BB%93/%E6%88%AA%E5%9B%BE.png" alt="截图"></p>
+<p>最后执行unpark唤醒线程</p>
+<p><strong>2&gt;如果_owner不是当前线程，判断当前线程是不是之前持有轻量级锁的线程，如果_owner位于当前线程调用栈帧，说明该锁是轻量级锁膨胀来的，修改_owner属性为当前线程；</strong></p>
+<p><strong>如果不是当前线程，直接返回</strong></p>
  
       <!-- reward -->
       
