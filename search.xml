@@ -5160,7 +5160,16 @@
 <h3 id="1、synchronized锁升级过程"><a href="#1、synchronized锁升级过程" class="headerlink" title="1、synchronized锁升级过程"></a>1、synchronized锁升级过程</h3><p><img src="/2022/05/17/01-00-20-synchronized%E9%94%81%E5%8D%87%E7%BA%A7%E6%80%BB%E7%BB%93/synchronized.png" alt="synchronized"></p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">（<span class="number">1</span>）、初始锁状态有两种，无锁：禁用偏向锁或不满足延迟偏向条件；偏向锁：开启了偏向锁</span><br><span class="line">（<span class="number">2</span>）、开启了偏向锁，jvm会延迟偏向（4s），之后创建的对象初始状态就是匿名偏向状态，即无偏向线程的偏向锁（threadId=<span class="number">0</span>）</span><br><span class="line">（<span class="number">3</span>）、当一个线程thread1访问同步代码块，会先通过cas修改mark word的ThreadId字段从<span class="number">0</span>改为当前线程地址，cas修改成功，锁状态就由匿名偏向状态改为偏向锁锁定状态。后续这个线程再多次访问这个锁对象，就不在有加锁/解锁的开销了。注：偏向锁解锁还是偏向锁</span><br><span class="line">（<span class="number">4</span>）、此时如果有另一个线程thread2与thread1竞争锁。分几种情况：<span class="number">1</span>&gt;当前锁对象已被锁定，偏向锁撤销，升级为轻量级锁：当前对象已锁定（被thread1锁定），此时进行偏向锁撤销，当前锁对象升级为轻量级锁，轻量级锁解锁之后会变为无锁；<span class="number">2</span>&gt;当前锁对象未被锁定，偏向锁撤销，变为无锁：比如一个对象初始状态为匿名偏向锁状态，调用了对象的hashCode()方法，则会发生偏向锁撤销，变为无锁状态（原因偏向锁状态无法存储hashCode）。<span class="number">3</span>&gt;如果当前对象锁定，且在同步代码块中调用hashcode或者wait方法，偏向锁撤销，变为重量级锁：</span><br><span class="line">注：</span><br><span class="line">无锁/偏向锁可以升级为轻量级锁；轻量级锁也可以升级为重量级锁；无锁也可以升级为重量级锁（无锁状态的对象多个线程cas修改mark work竞争升级为轻量级锁，竞争失败的就会升级为重量级锁）。</span><br><span class="line">无锁-&gt;轻量级锁过程：修改mark word为轻量级锁结构，拷贝mark word 到线程栈的Lock Record中，mark word中的ptr_to_log_record指向线程栈的logrecord</span><br><span class="line">轻量级锁-&gt;重量级锁过程：轻量级锁膨胀（创建对象的objectmonitor对象）、修改mark word结构</span><br></pre></td></tr></table></figure>
 
-<h3 id="2、synchronized轻量级锁升级过程"><a href="#2、synchronized轻量级锁升级过程" class="headerlink" title="2、synchronized轻量级锁升级过程"></a>2、synchronized轻量级锁升级过程</h3><h3 id><a href="#" class="headerlink" title></a><img src="/2022/05/17/01-00-20-synchronized%E9%94%81%E5%8D%87%E7%BA%A7%E6%80%BB%E7%BB%93/Synchronized%E8%BD%BB%E9%87%8F%E7%BA%A7%E9%94%81%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90.png" alt="Synchronized轻量级锁源码分析"></h3>]]></content>
+<h3 id="2、synchronized轻量级锁升级过程"><a href="#2、synchronized轻量级锁升级过程" class="headerlink" title="2、synchronized轻量级锁升级过程"></a>2、synchronized轻量级锁升级过程</h3>
+
+	<div class="row">
+    <embed src="Synchronized轻量级锁源码分析.png" width="100%" height="550" type="application/pdf">
+	</div>
+
+
+
+
+]]></content>
       <categories>
         <category>Java</category>
         <category>并发编程</category>
