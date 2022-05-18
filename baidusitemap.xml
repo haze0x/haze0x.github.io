@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://haze0x.github.io/2022/05/18/01-00-21-ThreadPoolExecutor-ForkJoin-CompletableFuture%E6%80%BB%E7%BB%93/</loc>
+    <lastmod>2022-05-18</lastmod>
+  </url>
+  <url>
     <loc>https://haze0x.github.io/2022/05/17/01-00-20-synchronized%E9%94%81%E5%8D%87%E7%BA%A7%E6%80%BB%E7%BB%93/</loc>
     <lastmod>2022-05-17</lastmod>
   </url>
