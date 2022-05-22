@@ -246,7 +246,7 @@
 </tbody></table>
 <p><strong>CompletableFuture常用方法总结</strong></p>
 <p><img src="/2022/05/11/01-00-15-Future-CompletableFuture-Disruptor/image-20220512001353695.png" alt="image-20220512001353695"></p>
-<h3 id="3、Disruptor"><a href="#3、Disruptor" class="headerlink" title="3、Disruptor"></a>3、Disruptor</h3><p>Disruptor实现了队列的功能并且是一个有界队列，可以用于生产者-消费者模型。基于Disruptor开发的系统单线程能支撑每秒600万订单。</p>
+<h2 id="3、Disruptor"><a href="#3、Disruptor" class="headerlink" title="3、Disruptor"></a>3、Disruptor</h2><p>Disruptor实现了队列的功能并且是一个有界队列，可以用于生产者-消费者模型。基于Disruptor开发的系统单线程能支撑每秒600万订单。</p>
 <p><code>传统juc下队列存在的问题</code></p>
 <ol>
 <li><p>juc下的队列大部分采用加ReentrantLock锁方式保证线程安全。在稳定性要求特别高的系统中，为了防止生产者速度过快，导致内存溢出，只能选择有界队列。</p>
