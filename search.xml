@@ -5971,4 +5971,18 @@
         <tag>MySQL</tag>
       </tags>
   </entry>
+  <entry>
+    <title>MySQL索引优化实战一</title>
+    <url>/2022/05/24/00-02-03-MySQL%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98%E4%B8%80/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
+      <categories>
+        <category>MySQL</category>
+        <category>性能调优</category>
+        <category>学习计划</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>索引优化</tag>
+      </tags>
+  </entry>
 </search>
