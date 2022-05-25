@@ -6084,4 +6084,101 @@
         <tag>索引优化</tag>
       </tags>
   </entry>
+  <entry>
+    <title>00_02_03_MySQL索引优化实战二</title>
+    <url>/2022/05/25/00-02-03-MySQL%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98%E4%BA%8C/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
+  </entry>
+  <entry>
+    <title>00_02_03_MySQL索引优化实战二</title>
+    <url>/2022/05/25/00-02-04-MySQL%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98%E4%BA%8C/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="MySQL索引优化实战二"><a href="#MySQL索引优化实战二" class="headerlink" title="MySQL索引优化实战二"></a>MySQL索引优化实战二</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">示例表：</span><br><span class="line">CREATE TABLE `employees` (</span><br><span class="line">  `id` int(11) NOT NULL AUTO_INCREMENT,</span><br><span class="line">  `name` varchar(24) NOT NULL DEFAULT &#x27;&#x27; COMMENT &#x27;姓名&#x27;,</span><br><span class="line">  `age` int(11) NOT NULL DEFAULT &#x27;0&#x27; COMMENT &#x27;年龄&#x27;,</span><br><span class="line">  `position` varchar(20) NOT NULL DEFAULT &#x27;&#x27; COMMENT &#x27;职位&#x27;,</span><br><span class="line">  `hire_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT &#x27;入职时间&#x27;,</span><br><span class="line">  PRIMARY KEY (`id`),</span><br><span class="line">  KEY `idx_name_age_position` (`name`,`age`,`position`) USING BTREE</span><br><span class="line">) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT=&#x27;员工记录表&#x27;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="1、分页查询优化"><a href="#1、分页查询优化" class="headerlink" title="1、分页查询优化"></a>1、分页查询优化</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mysql&gt; select * from employees limit 10000,10;</span><br></pre></td></tr></table></figure>
+
+<p>此句执行语义：</p>
+<p>从表 employees 中取出从 10001 行开始的 10 行记录。看似只查询了 10 条记录，实际这条 SQL 是先读取 10010 条记录，然后抛弃前 10000 条记录，然后读到后面 10 条想要的数据。因此要查询一张大表比较靠后的数据，执行效率是非常低的。</p>
+<p><code><strong>分页优化一</strong></code></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mysql&gt; select * from employees where id &gt; 90000 limit 5;</span><br></pre></td></tr></table></figure>
+
+<p><strong>结果：</strong></p>
+<p><img src="/2022/05/25/00-02-04-MySQL%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98%E4%BA%8C/image-20220525231814834.png" alt="image-20220525231814834"></p>
+<p><strong>执行计划</strong></p>
+<p><img src="/2022/05/25/00-02-04-MySQL%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98%E4%BA%8C/image-20220525231928709.png" alt="image-20220525231928709"></p>
+<p><strong>结论:</strong></p>
+<ul>
+<li><p>SQL 走了索引，而且扫描的行数大大减少，执行效率更高。</p>
+</li>
+<li><p>在很多场景并不实用，因为表中可能某些记录被删后，主键空缺，导致结果不一致</p>
+</li>
+</ul>
+<p><strong>此种方法使用条件</strong></p>
+<ul>
+<li>主键自增且连续</li>
+<li>结果是按照主键排序的</li>
+</ul>
+<p><code><strong>根据非主键字段排序的分页查询</strong></code></p>
+<p>根据非主键字段排序的分页查询：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mysql&gt;  select * from employees ORDER BY name limit 90000,5;</span><br></pre></td></tr></table></figure>
+
+<p>此SQL不会走索引 <strong>扫描整个索引并查找到没索引的行(可能要遍历多个索引树)的成本比扫描全表的成本更高，所以优化器放弃使用索引</strong>。</p>
+<p>优化如下===  ===&gt;</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mysql&gt; select * from employees e inner join (select id from employees order by name limit 90000,5) ed on e.id = ed.id;</span><br></pre></td></tr></table></figure>
+
+<p>需要的结果与原 SQL 一致，执行时间减少了一半以上</p>
+<h3 id="2、Join关联查询优化"><a href="#2、Join关联查询优化" class="headerlink" title="2、Join关联查询优化"></a>2、<strong>Join关联查询优化</strong></h3><p>驱动表与被驱动表</p>
+<p>一次一行循环地从第一张表（称为<strong>驱动表</strong>）中读取行，在这行数据中取到关联字段，根据关联字段在另一张表（<strong>被驱动表</strong>）里取出满足条件的行，然后取出两张表的结果合集。</p>
+<p>left join：坐标是驱动表，右表是被驱动表</p>
+<p>当使用join时，mysql会选择数据量比较小的表作为驱动表，大表作为被驱动表。</p>
+<p><strong>1、</strong> <strong>嵌套循环连接</strong> <strong>Nested-Loop Join(NLJ) 算法</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mysql&gt; EXPLAIN select * from t1 inner join t2 on t1.a= t2.a;</span><br></pre></td></tr></table></figure>
+
+<p>NLJ过程：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">从表 t2 中读取一行数据（如果t2表有查询过滤条件的，用先用条件过滤完，再从过滤结果里取出一行数据）；</span><br><span class="line">从第 1 步的数据中，取出关联字段 a，到表 t1 中查找；</span><br><span class="line">取出表 t1 中满足条件的行，跟 t2 中获取到的结果合并，作为结果返回给客户端；</span><br><span class="line">重复上面 3 步。</span><br><span class="line">整个过程会读取 t2 表的所有数据(扫描100行)，然后遍历这每行数据中字段 a 的值，根据 t2 表中 a 的值索引扫描 t1 表中的对应行(扫描100次 t1 表的索引，1次扫描可以认为最终只扫描 t1 表一行完整数据，也就是总共 t1 表也扫描了100行)。因此整个过程扫描了 200 行。</span><br><span class="line">如果被驱动表的关联字段没索引，使用NLJ算法性能会比较低(下面有详细解释)，mysql会选择Block Nested-Loop Join算法。</span><br></pre></td></tr></table></figure>
+
+<p><strong>2、</strong> <strong>基于块的嵌套循环连接</strong> <strong>Block Nested-Loop Join(BNL)算法</strong></p>
+<p>把<strong>驱动表</strong>的数据读入到 join_buffer 中，然后扫描<strong>被驱动表</strong>，把<strong>被驱动表</strong>每一行取出来跟 join_buffer 中的数据做对比。</p>
+<p>BNL过程：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">把 t2 的所有数据放入到 join_buffer 中</span><br><span class="line">把表 t1 中每一行取出来，跟 join_buffer 中的数据做对比</span><br><span class="line">返回满足 join 条件的数据</span><br><span class="line">整个过程对表 t1 和 t2 都做了一次全表扫描，因此扫描的总行数为10000(表 t1 的数据总量) + 100(表 t2 的数据总量) = 10100。并且 join_buffer 里的数据是无序的，因此对表 t1 中的每一行，都要做 100 次判断，所以内存中的判断次数是 100 * 10000= 100 万次。</span><br><span class="line">这个例子里表 t2 才 100 行，要是表 t2 是一个大表，join_buffer 放不下怎么办呢？·</span><br><span class="line">join_buffer 的大小是由参数 join_buffer_size 设定的，默认值是 256k。如果放不下表 t2 的所有数据话，策略很简单，就是分段放。</span><br><span class="line">比如 t2 表有1000行记录， join_buffer 一次只能放800行数据，那么执行过程就是先往 join_buffer 里放800行记录，然后从 t1 表里取数据跟 join_buffer 中数据对比得到部分结果，然后清空  join_buffer ，再放入 t2 表剩余200行记录，再次从 t1 表里取数据跟 join_buffer 中数据对比。所以就多扫了一次 t1 表。</span><br></pre></td></tr></table></figure>
+
+<p><strong>3、被驱动表的关联字段没索引为什么要选择使用 BNL 算法而不使用 Nested-Loop Join 呢？</strong></p>
+<p>如上面两种：</p>
+<p>如果在无索引情况下使用BNL，则扫描次数为100*10000次，显然次数比较多，使用BNL比较合理</p>
+<h3 id="3、重点优化点"><a href="#3、重点优化点" class="headerlink" title="3、重点优化点"></a>3、重点优化点</h3><p><strong>（1）、关联sql的优化</strong></p>
+<ul>
+<li><strong>关联字段加索引</strong></li>
+<li><strong>小表驱动大表</strong></li>
+</ul>
+<p>对于小表定义的明确：在决定哪个表做驱动表的时候，应该是两个表按照各自的条件过滤，<strong>过滤完成之后</strong>，计算参与 join 的各个字段的总数据量，<strong>数据量小的那个表，就是“小表”</strong>，应该作为驱动表。</p>
+<p><strong>（2）、in和exsits优化</strong></p>
+<p>原则：<strong>小表驱动大表</strong>，即小的数据集驱动大的数据集</p>
+<p>in后面跟小表数据</p>
+<p>exist后面跟大表数据</p>
+<p><strong>（3）、count优化</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-- 临时关闭mysql查询缓存，为了查看sql多次执行的真实时间</span><br><span class="line">mysql&gt; set global query_cache_size=0;</span><br><span class="line">mysql&gt; set global query_cache_type=0;</span><br><span class="line"></span><br><span class="line">mysql&gt; EXPLAIN select count(1) from employees;</span><br><span class="line">mysql&gt; EXPLAIN select count(id) from employees;</span><br><span class="line">mysql&gt; EXPLAIN select count(name) from employees;</span><br><span class="line">mysql&gt; EXPLAIN select count(*) from employees;</span><br></pre></td></tr></table></figure>
+
+<p>字段有索引：count(*)≈count(1)&gt;count(字段)&gt;count(主键 id)    //字段有索引，count(字段)统计走二级索引，二级索引存储数据比主键索引少，所以count(字段)&gt;count(主键 id)</p>
+<p>字段无索引：count(*)≈count(1)&gt;count(主键 id)&gt;count(字段)    //字段没有索引count(字段)统计走不了索引，count(主键 id)还可以走主键索引，所以count(主键 id)&gt;count(字段)</p>
+<p><strong>（4）、查询mysql自己维护的总行数</strong></p>
+<p>对于<strong>myisam存储引擎</strong>的表做不带where条件的count查询性能是很高的，因为myisam存储引擎的表的总行数会被mysql存储在磁盘上，查询不需要计算</p>
+<p>对于<strong>innodb存储引擎</strong>的表mysql不会存储表的总记录行数(因为有MVCC机制，后面会讲)，查询count需要实时计算</p>
+<p><strong>（5）、show table status</strong></p>
+<p>如果只需要知道表总行数的估计值可以用如下sql查询，性能很高</p>
+<p><strong>（6）、将总数维护到Redis里</strong></p>
+<p>插入或删除表数据行的时候同时维护redis里的表总行数key的计数值(用incr或decr命令)，但是这种方式可能不准，很难保证表操作和redis操作的事务一致性</p>
+<p><strong>（7）、增加数据库计数表</strong></p>
+<p>插入或删除表数据行的时候同时维护计数表，让他们在同一个事务里操作</p>
+]]></content>
+      <categories>
+        <category>MySQL</category>
+        <category>性能调优</category>
+        <category>学习计划</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>索引优化</tag>
+      </tags>
+  </entry>
 </search>
