@@ -6291,7 +6291,32 @@
 <p>（4）再次查询account表数据，结果没变</p>
 <p><img src="/2022/05/27/00-02-06-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3MVCC%E4%B8%8EBufferPool%E7%BC%93%E5%AD%98%E6%9C%BA%E5%88%B6/image-20220528135359550.png" alt="image-20220528135359550"></p>
 <p><a href="https://www.processon.com/view/link/6291a3ea637689545dd6d4ae">MVCC示例图</a></p>
-<h2 id="2、Innodb引擎SQL执行的BufferPool缓存机制"><a href="#2、Innodb引擎SQL执行的BufferPool缓存机制" class="headerlink" title="2、Innodb引擎SQL执行的BufferPool缓存机制"></a>2、<strong>Innodb引擎SQL执行的BufferPool缓存机制</strong></h2><p>待补充，mvcc反复理解中</p>
+<h2 id="2、Innodb引擎SQL执行的BufferPool缓存机制"><a href="#2、Innodb引擎SQL执行的BufferPool缓存机制" class="headerlink" title="2、Innodb引擎SQL执行的BufferPool缓存机制"></a>2、<strong>Innodb引擎SQL执行的BufferPool缓存机制</strong></h2><p><a href="https://www.processon.com/view/link/6291e2e57d9c085adb719a5f">Innodb引擎底层结构</a></p>
+<p><img src="/2022/05/27/00-02-06-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3MVCC%E4%B8%8EBufferPool%E7%BC%93%E5%AD%98%E6%9C%BA%E5%88%B6/image-20220528165311124.png" alt="image-20220528165311124"></p>
+<p><strong>注：</strong></p>
+<p><strong>上述步骤说明：</strong></p>
+<p><strong>（1）、先按页查出老的数据所在页数据，</strong></p>
+<p><strong>（2）、将老数据存储到undo 日志文件中，便于回滚</strong></p>
+<p><strong>（3）、将内存数据（缓存数据）更新为新值，即zhuge-&gt;zhuge666</strong></p>
+<p><strong>（4）、写Redo Log（重做日志），有缓存机制，批量写入</strong></p>
+<p><strong>（5）、准备提交事务，redo log日志写入磁盘</strong></p>
+<p><strong>（6）、准备提交事务，binlog日志写入磁盘</strong></p>
+<p><strong>（7）、binlog日志写入磁盘完毕后，写入commit标记到redo日志文件里面，然后真正的提交事务；此步目的是为了保证redo日志和binlog日志数据一致；此步做完，客户端任务事务已经执行成功了，实际上数据可能还没有写入磁盘</strong></p>
+<p><strong>（8）、随机写入磁盘，以page为单位写入，此步做完，磁盘里面的数据就变成了zhuge666。可能在执行此步前，mysql宕机了，可以通过redo log日志恢复数据</strong></p>
+<p><strong>redo Log是什么？</strong></p>
+<p><strong>是重做日志，用来恢复buffer pool里面的数据</strong></p>
+<p><strong>bin Log是什么？</strong></p>
+<p><strong>恢复磁盘数据</strong></p>
+<p><strong>为什么Mysql不能直接更新磁盘上的数据而且设置这么一套复杂的机制来执行SQL了？</strong></p>
+<p>因为来一个请求就直接对磁盘文件进行随机读写，然后更新磁盘文件里的数据性能可能相当差。</p>
+<p>因为磁盘随机读写的性能是非常差的，所以直接更新磁盘文件是不能让数据库抗住很高并发的。</p>
+<p>Mysql这套机制看起来复杂，但它可以保证每个更新请求都是<strong>更新内存BufferPool</strong>，然后<strong>顺序写日志文件</strong>，同时还能保证各种异常情况下的数据一致性。</p>
+<p>更新内存的性能是极高的，然后顺序写磁盘上的日志文件的性能也是非常高的，要远高于随机读写磁盘文件。</p>
+<p>正是通过这套机制，才能让我们的MySQL数据库在较高配置的机器上每秒可以抗下几干甚至上万的读写请求。</p>
+<p>通过这样一套机制，既能保证数据不丢失，也能保证高效率</p>
+<p>针对数据库磁盘数据的写是随机写，针对redo log是顺序写</p>
+<p>为什么数据库磁盘数据文件不能顺序io，而redo log日志文件可以顺序io?</p>
+<p>数据库磁盘文件会涉及到数据段额删除，可能一段顺序io中间一部分会被删除掉，插入其它的数据；而redo log文件只会顺序地在末尾新增，不会删除</p>
 ]]></content>
   </entry>
 </search>
