@@ -6323,10 +6323,31 @@
 <p>为什么数据库磁盘数据文件不能顺序io，而redo log日志文件可以顺序io?</p>
 <p>数据库磁盘文件会涉及到数据段额删除，可能一段顺序io中间一部分会被删除掉，插入其它的数据；而redo log文件只会顺序地在末尾新增，不会删除</p>
 ]]></content>
+      <categories>
+        <category>MySQL</category>
+        <category>性能调优</category>
+        <category>学习计划</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>事务</tag>
+        <tag>MVCC</tag>
+      </tags>
   </entry>
   <entry>
-    <title>00_02_07_MySQL总结</title>
+    <title>MySQL总结</title>
     <url>/2022/05/28/00-02-07-MySQL%E6%80%BB%E7%BB%93/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
+      <categories>
+        <category>MySQL</category>
+        <category>性能调优</category>
+        <category>学习计划</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>事务</tag>
+        <tag>隔离级别</tag>
+        <tag>锁</tag>
+      </tags>
   </entry>
 </search>
