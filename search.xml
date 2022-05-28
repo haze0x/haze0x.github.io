@@ -5188,6 +5188,12 @@
 <li>一直自旋到定位到节点位置为止。</li>
 </ol>
 <p>如果红黑树比较平衡的话，每次查找的次数就是树的深度。</p>
+<h3 id="4、JDK1-7HashMap和ConcurrentHashMap"><a href="#4、JDK1-7HashMap和ConcurrentHashMap" class="headerlink" title="4、JDK1.7HashMap和ConcurrentHashMap"></a>4、JDK1.7HashMap和ConcurrentHashMap</h3><p>HashMap:</p>
+<p>1、hashmap是怎么出现并发安全问题的</p>
+<p>2、hashmap快速失败，怎么迭代删除</p>
+<p>ConcurrentHashMap：</p>
+<p>1、初始大小、默认加载因子、数据结构</p>
+<p>2、</p>
 ]]></content>
       <categories>
         <category>Java</category>
@@ -6264,6 +6270,16 @@
   <entry>
     <title>深入理解MVCC与BufferPool缓存机制</title>
     <url>/2022/05/27/00-02-06-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3MVCC%E4%B8%8EBufferPool%E7%BC%93%E5%AD%98%E6%9C%BA%E5%88%B6/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="1、MVCC"><a href="#1、MVCC" class="headerlink" title="1、MVCC"></a>1、MVCC</h2><p><strong>概念：</strong></p>
+<p>MVCC：<strong>Multi-Version Concurrency Control</strong>，多版本并发控制</p>
+<p>作用：读已提交和可重复读隔离级别下，对一行数据的读和写两个操作默认是不会通过加锁互斥来保证隔离性，避免了频繁加锁互斥，保证并发事务的安全性。</p>
+<p><strong>undo日志版本链与read view机制</strong></p>
+<p>undo日志版本链是指一行数据被多个事务依次修改过后，在每个事务修改完后，Mysql会保留修改前的数据undo回滚日志，并且用两个隐藏字段trx_id和roll_pointer把这些undo日志串联起来形成一个历史记录版本链</p>
+<p>具体对于MVCC的理解，详见下图的示例</p>
+<p><a href="https://www.processon.com/view/link/6291a3ea637689545dd6d4ae">MVCC示例图</a></p>
+<h2 id="2、Innodb引擎SQL执行的BufferPool缓存机制"><a href="#2、Innodb引擎SQL执行的BufferPool缓存机制" class="headerlink" title="2、Innodb引擎SQL执行的BufferPool缓存机制"></a>2、<strong>Innodb引擎SQL执行的BufferPool缓存机制</strong></h2><p>待补充，mvcc反复理解中</p>
+]]></content>
   </entry>
 </search>
