@@ -86,7 +86,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">3.4k</span>
+            <span class="post-count">3.5k</span>
         </span>
     </span>
 
@@ -196,7 +196,12 @@
 <p>2、hashmap快速失败，怎么迭代删除</p>
 <p>ConcurrentHashMap：</p>
 <p>1、初始大小、默认加载因子、数据结构</p>
-<p>2、</p>
+<p>2、ConcurrentHashMap 的数据结构如下：    </p>
+<p>3、ConcurrentHashMap构造方法逻辑：</p>
+<p>​    （1）、确定Segment数组长度，2的幂次方</p>
+<p>​    （2）、确定每个segmentHahsEntyp数组的长度，2的幂次方【？？？待确定】</p>
+<p>​    （3）、ConcurrentHashMap扩容是局部扩容，Segment数组不会扩容（初始构造的时候就已经确定了），是每个Segment下的HashEntry[]数组扩容</p>
+<p><img src="/2022/05/16/01-00-19-HashMap%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20220528170535373.png" alt="image-20220528170535373"></p>
  
       <!-- reward -->
       

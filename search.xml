@@ -5193,7 +5193,12 @@
 <p>2、hashmap快速失败，怎么迭代删除</p>
 <p>ConcurrentHashMap：</p>
 <p>1、初始大小、默认加载因子、数据结构</p>
-<p>2、</p>
+<p>2、ConcurrentHashMap 的数据结构如下：    </p>
+<p>3、ConcurrentHashMap构造方法逻辑：</p>
+<p>​    （1）、确定Segment数组长度，2的幂次方</p>
+<p>​    （2）、确定每个segmentHahsEntyp数组的长度，2的幂次方【？？？待确定】</p>
+<p>​    （3）、ConcurrentHashMap扩容是局部扩容，Segment数组不会扩容（初始构造的时候就已经确定了），是每个Segment下的HashEntry[]数组扩容</p>
+<p><img src="/2022/05/16/01-00-19-HashMap%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20220528170535373.png" alt="image-20220528170535373"></p>
 ]]></content>
       <categories>
         <category>Java</category>
@@ -6318,5 +6323,10 @@
 <p>为什么数据库磁盘数据文件不能顺序io，而redo log日志文件可以顺序io?</p>
 <p>数据库磁盘文件会涉及到数据段额删除，可能一段顺序io中间一部分会被删除掉，插入其它的数据；而redo log文件只会顺序地在末尾新增，不会删除</p>
 ]]></content>
+  </entry>
+  <entry>
+    <title>00_02_07_MySQL总结</title>
+    <url>/2022/05/28/00-02-07-MySQL%E6%80%BB%E7%BB%93/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
   </entry>
 </search>
