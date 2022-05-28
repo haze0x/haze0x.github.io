@@ -6278,6 +6278,17 @@
 <p><strong>undo日志版本链与read view机制</strong></p>
 <p>undo日志版本链是指一行数据被多个事务依次修改过后，在每个事务修改完后，Mysql会保留修改前的数据undo回滚日志，并且用两个隐藏字段trx_id和roll_pointer把这些undo日志串联起来形成一个历史记录版本链</p>
 <p>具体对于MVCC的理解，详见下图的示例</p>
+<p><strong>需要注意的点</strong></p>
+<p>在可重复读隔离级别下，在一个事务中，一致性试图实在第一次执行select语句的时候生成的，除非有其它增删改操作，否则一致性试图不会变。同时无论第一次执行的是哪个表的select语句，其它表的一致性试图都不会变，即开始执行的select语句，会生成当前所有表的一致性视图；</p>
+<p>示例如下：</p>
+<p>（1）begin，执行actor表的select语句</p>
+<p><img src="/2022/05/27/00-02-06-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3MVCC%E4%B8%8EBufferPool%E7%BC%93%E5%AD%98%E6%9C%BA%E5%88%B6/image-20220528135240234.png" alt="image-20220528135240234"></p>
+<p>（2）查询account表：</p>
+<p><img src="/2022/05/27/00-02-06-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3MVCC%E4%B8%8EBufferPool%E7%BC%93%E5%AD%98%E6%9C%BA%E5%88%B6/image-20220528135303794.png" alt="image-20220528135303794"></p>
+<p>（3）更改account表的数据，添加一条</p>
+<p><img src="/2022/05/27/00-02-06-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3MVCC%E4%B8%8EBufferPool%E7%BC%93%E5%AD%98%E6%9C%BA%E5%88%B6/image-20220528135325995.png" alt="image-20220528135325995"></p>
+<p>（4）再次查询account表数据，结果没变</p>
+<p><img src="/2022/05/27/00-02-06-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3MVCC%E4%B8%8EBufferPool%E7%BC%93%E5%AD%98%E6%9C%BA%E5%88%B6/image-20220528135359550.png" alt="image-20220528135359550"></p>
 <p><a href="https://www.processon.com/view/link/6291a3ea637689545dd6d4ae">MVCC示例图</a></p>
 <h2 id="2、Innodb引擎SQL执行的BufferPool缓存机制"><a href="#2、Innodb引擎SQL执行的BufferPool缓存机制" class="headerlink" title="2、Innodb引擎SQL执行的BufferPool缓存机制"></a>2、<strong>Innodb引擎SQL执行的BufferPool缓存机制</strong></h2><p>待补充，mvcc反复理解中</p>
 ]]></content>
