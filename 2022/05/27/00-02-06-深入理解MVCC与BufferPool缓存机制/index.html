@@ -82,7 +82,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">373</span>
+            <span class="post-count">408</span>
         </span>
     </span>
 
@@ -115,6 +115,7 @@
 <p>undo日志版本链是指一行数据被多个事务依次修改过后，在每个事务修改完后，Mysql会保留修改前的数据undo回滚日志，并且用两个隐藏字段trx_id和roll_pointer把这些undo日志串联起来形成一个历史记录版本链</p>
 <p>具体对于MVCC的理解，详见下图的示例</p>
 <p><strong>需要注意的点</strong></p>
+<p>读已提交是每次执行select就生成一次一致性试图，可重复读只在第一次select的时候生成。</p>
 <p>在可重复读隔离级别下，在一个事务中，一致性试图实在第一次执行select语句的时候生成的，除非有其它增删改操作，否则一致性试图不会变。同时无论第一次执行的是哪个表的select语句，其它表的一致性试图都不会变，即开始执行的select语句，会生成当前所有表的一致性视图；</p>
 <p>示例如下：</p>
 <p>（1）begin，执行actor表的select语句</p>
