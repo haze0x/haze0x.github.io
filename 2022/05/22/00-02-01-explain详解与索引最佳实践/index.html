@@ -255,9 +255,9 @@
 <p><strong>10. Extra列</strong> </p>
 <p>这一列展示的是额外信息。常见的重要值如下： </p>
 <p>1）<strong>Using index</strong>：使用覆盖索引 </p>
-<p><strong>覆盖索引定义</strong>（查找sql的一种方式，查询的字段在key列索引中，不需要回表，速度较回表的方式要快）：mysql执行计划explain结果里的key有使用索引，如果select后面查询的字段都可以从这个索引的树中获取，这种情况一般可以说是用到了覆盖索</p>
-<p>引，extra里一般都有using index；覆盖索引一般针对的是辅助索引，整个查询结果只通过辅助索引就能拿到结果，不需要通过辅助索引树找到主键，再通过主键</p>
-<p>去主键索引树里获取其它字段值</p>
+<p><strong>覆盖索引定义</strong>（查找sql的一种方式，查询的字段在key列索引中，不需要回表，速度较回表的方式要快）：mysql执行计划explain结果里的key有使用索引，如果</p>
+<p>select后面查询的字段都可以从这个索引的树中获取，这种情况一般可以说是用到了覆盖索引，extra里一般都有using index；覆盖索引一般针对的是辅助索引，</p>
+<p>整个查询结果只通过辅助索引就能拿到结果，不需要通过辅助索引树找到主键，再通过主键去主键索引树里获取其它字段值</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; explain select film_id from film_actor where film_id = 1;</span><br></pre></td></tr></table></figure>
 
 <p><img src="/2022/05/22/00-02-01-explain%E8%AF%A6%E8%A7%A3%E4%B8%8E%E7%B4%A2%E5%BC%95%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/image-20220522201222232.png" alt="image-20220522201222232"></p>
@@ -269,8 +269,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; explain select * from film_actor where film_id &gt; 1;</span><br></pre></td></tr></table></figure>
 
 <p><img src="/2022/05/22/00-02-01-explain%E8%AF%A6%E8%A7%A3%E4%B8%8E%E7%B4%A2%E5%BC%95%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/image-20220522201417833.png" alt="image-20220522201417833"></p>
-<p>4）<strong>Using temporary</strong>（使用了临时表）：mysql需要创建一张临时表来处理查询。出现这种情况一般是要进行优化的，首先是想到用索 </p>
-<p>引来优化。 </p>
+<p>4）<strong>Using temporary</strong>（使用了临时表）：mysql需要创建一张临时表来处理查询。出现这种情况一般是要进行优化的，首先是想到用索引来优化。 </p>
 <ol>
 <li>actor.name没有索引，此时创建了张临时表来distinct </li>
 </ol>
@@ -283,8 +282,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; explain select distinct name from film;</span><br></pre></td></tr></table></figure>
 
 <p><img src="/2022/05/22/00-02-01-explain%E8%AF%A6%E8%A7%A3%E4%B8%8E%E7%B4%A2%E5%BC%95%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/image-20220522201655875.png" alt="image-20220522201655875"></p>
-<p>5）<strong>Using filesort</strong>：将用外部排序而不是索引排序，数据较小时从内存排序，否则需要在磁盘完成排序。这种情况下一 </p>
-<p>般也是要考虑使用索引来优化的。 </p>
+<p>5）<strong>Using filesort</strong>：将用外部排序而不是索引排序，数据较小时从内存排序，否则需要在磁盘完成排序。这种情况下一般也是要考虑使用索引来优化的。 </p>
 <ol>
 <li>actor.name未创建索引，会浏览actor整个表，保存排序关键字name和对应的id，然后排序name并检索行记录</li>
 </ol>
