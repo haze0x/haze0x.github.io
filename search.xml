@@ -6338,7 +6338,7 @@
       </tags>
   </entry>
   <entry>
-    <title>03_00_00_Redis核心数据结构实战</title>
+    <title>Redis核心数据结构实战</title>
     <url>/2022/05/30/03-00-00-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%AE%9E%E6%88%98/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
 
@@ -6389,8 +6389,114 @@
 <ul>
 <li><p>电商购物车</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="number">1</span>）以用户id为key</span><br><span class="line"><span class="number">2</span>）商品id为field</span><br><span class="line"><span class="number">3</span>）商品数量为value</span><br><span class="line"></span><br><span class="line">购物车操作</span><br><span class="line">添加商品-&gt;hset cart:<span class="number">1001</span> <span class="number">10088</span> <span class="number">1</span></span><br><span class="line">增加数量-&gt;hincrby cart:<span class="number">1001</span> <span class="number">10088</span> <span class="number">1</span></span><br><span class="line">商品总数-&gt;hlen cart:<span class="number">1001</span></span><br><span class="line">删除商品-&gt;hdel cart:<span class="number">1001</span> <span class="number">10088</span></span><br><span class="line">获取购物车所有商品-&gt;hgetall cart:<span class="number">1001</span></span><br></pre></td></tr></table></figure></li>
+<li><p>Hash结构优缺点</p>
+<ul>
+<li><p>优点</p>
+<p>1）同类数据归类整合储存，方便数据管理<br>2）相比string操作消耗内存与cpu更小<br>3）相比string储存更节省空间</p>
+</li>
+<li><p>缺点</p>
+<p>1）过期功能不能使用在field上，只能用在key上<br>2）Redis集群架构下不适合大规模使用</p>
+</li>
 </ul>
-<h3 id="2、Redis高性能原理"><a href="#2、Redis高性能原理" class="headerlink" title="2、Redis高性能原理"></a>2、Redis高性能原理</h3>]]></content>
+</li>
+</ul>
+<h4 id="1-5-List数据结构"><a href="#1-5-List数据结构" class="headerlink" title="1.5 List数据结构"></a>1.5 List数据结构</h4><ul>
+<li><p>List常用操作</p>
+<blockquote>
+<p>LPUSH  key  value [value …]         //将一个或多个值value插入到key列表的表头(最左边)<br>RPUSH  key  value [value …]         //将一个或多个值value插入到key列表的表尾(最右边)<br>LPOP  key            //移除并返回key列表的头元素<br>RPOP  key            //移除并返回key列表的尾元素<br>LRANGE  key  start  stop        //返回列表key中指定区间内的元素，区间以偏移量start和stop指定<br>BLPOP  key  [key …]  timeout    //从key列表表头弹出一个元素，若列表中没有元素，阻塞等待                    timeout秒,如果timeout=0,一直阻塞等待<br>BRPOP  key  [key …]  timeout     //从key列表表尾弹出一个元素，若列表中没有元素，阻塞等待                    timeout秒,如果timeout=0,一直阻塞等待</p>
+</blockquote>
+</li>
+<li><p>List应用场景</p>
+<blockquote>
+<p>Stack(栈) = LPUSH + LPOP<br>Queue(队列）= LPUSH + RPOP<br>Blocking MQ(阻塞队列）= LPUSH + BRPOP</p>
+<p>微博和微信公众号引流</p>
+</blockquote>
+</li>
+</ul>
+<h4 id="1-5-Set数据结构"><a href="#1-5-Set数据结构" class="headerlink" title="1.5 Set数据结构"></a>1.5 Set数据结构</h4><ul>
+<li><p>Set常用操作</p>
+<blockquote>
+<p>SADD  key  member  [member …]            //往集合key中存入元素，元素存在则忽略， 若key不存在则新建<br>SREM  key  member  [member …]            //从集合key中删除元素<br>SMEMBERS  key                    //获取集合key中所有元素<br>SCARD  key                    //获取集合key的元素个数<br>SISMEMBER  key  member            //判断member元素是否存在于集合key中<br>SRANDMEMBER  key  [count]            //从集合key中选出count个元素，元素不从key中删除<br>SPOP  key  [count]                //从集合key中选出count个元素，元素从key中删除</p>
+</blockquote>
+</li>
+<li><p>Set运算操作</p>
+<blockquote>
+<p>SINTER  key  [key …]                 //交集运算<br>SINTERSTORE  destination  key  [key ..]        //将交集结果存入新集合destination中<br>SUNION  key  [key ..]                 //并集运算<br>SUNIONSTORE  destination  key  [key …]        //将并集结果存入新集合destination中<br>SDIFF  key  [key …]                 //差集运算<br>SDIFFSTORE  destination  key  [key …]        //将差集结果存入新集合destination中</p>
+</blockquote>
+</li>
+<li><p>Set应用场景</p>
+<ul>
+<li><p>微信抽奖小程序</p>
+<blockquote>
+<p>1）点击参与抽奖加入集合<br>SADD key {userlD}<br>2）查看参与抽奖所有用户<br>SMEMBERS key<br>3）抽取count名中奖者<br>SRANDMEMBER key [count] / SPOP key [count]</p>
+</blockquote>
+</li>
+<li><p>微信微博点赞，收藏，标签</p>
+<blockquote>
+<ol>
+<li>点赞<br>SADD  like:{消息ID}  {用户ID}</li>
+<li>取消点赞<br>SREM like:{消息ID}  {用户ID}</li>
+<li>检查用户是否点过赞<br>SISMEMBER  like:{消息ID}  {用户ID}</li>
+<li>获取点赞的用户列表<br>SMEMBERS like:{消息ID}</li>
+<li>获取点赞用户数<br>SCARD like:{消息ID}</li>
+</ol>
+</blockquote>
+</li>
+<li><p>集合操作</p>
+<blockquote>
+<p>set1{a，b，c}     set2{b，c，d}    set3{c，d，e}</p>
+</blockquote>
+<blockquote>
+<p>SINTER set1 set2 set3  { c }<br>SUNION set1 set2 set3  { a,b,c,d,e }<br>SDIFF set1 set2 set3  { a }</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><p>微博/微信关注模型</p>
+<blockquote>
+<ol>
+<li>诸葛老师关注的人:<br>zhugeSet-&gt; {guojia, xushu}</li>
+<li>杨过老师关注的人:<br>yangguoSet–&gt; {zhuge, baiqi, guojia, xushu}</li>
+<li>郭嘉老师关注的人:<br>guojiaSet-&gt; {zhuge, yangguo, baiqi, xushu, xunyu)</li>
+<li>我和杨过老师共同关注:<br>SINTER zhugeSet yangguoSet–&gt; {guojia, xushu}</li>
+<li>我关注的人也关注他(杨过老师):<br>SISMEMBER guojiaSet yangguo<br>SISMEMBER xushuSet yangguo</li>
+<li>我可能认识的人:<br>SDIFF yangguoSet zhugeSet-&gt;(zhuge, baiqi}</li>
+</ol>
+</blockquote>
+</li>
+<li><p>集合操作实现电商商品筛选</p>
+<blockquote>
+<p>SADD  brand:huawei  P40<br>SADD  brand:xiaomi  mi-10<br>SADD  brand:iPhone iphone12<br>SADD os:android  P40  mi-10<br>SADD cpu:brand:intel  P40  mi-10<br>SADD ram:8G  P40  mi-10  iphone12<br>SINTER  os:android  cpu:brand:intel  ram:8G -&gt;  {P40，mi-10}</p>
+</blockquote>
+</li>
+</ul>
+<h4 id="1-6-ZSet数据结构"><a href="#1-6-ZSet数据结构" class="headerlink" title="1.6 ZSet数据结构"></a>1.6 ZSet数据结构</h4><ul>
+<li><p>ZSet常用操作</p>
+<blockquote>
+<p>ZADD key score member [[score member]…]    //往有序集合key中加入带分值元素<br>ZREM key member [member …]        //从有序集合key中删除元素<br>ZSCORE key member             //返回有序集合key中元素member的分值<br>ZINCRBY key increment member        //为有序集合key中元素member的分值加上increment<br>ZCARD key                //返回有序集合key中元素个数<br>ZRANGE key start stop [WITHSCORES]    //正序获取有序集合key从start下标到stop下标的元素<br>ZREVRANGE key start stop [WITHSCORES]    //倒序获取有序集合key从start下标到stop下标的元素</p>
+</blockquote>
+</li>
+<li><p>Zset集合操作</p>
+<p>ZUNIONSTORE destkey numkeys key [key …]     //并集计算<br>ZINTERSTORE destkey numkeys key [key …]    //交集计算</p>
+</li>
+<li><p>Zset集合操作实现排行榜</p>
+<blockquote>
+<p>1）点击新闻<br>ZINCRBY  hotNews:20190819  1  守护香港<br>2）展示当日排行前十<br>ZREVRANGE  hotNews:20190819  0  9  WITHSCORES<br>3）七日搜索榜单计算<br>ZUNIONSTORE  hotNews:20190813-20190819  7<br>hotNews:20190813  hotNews:20190814… hotNews:20190819<br>4）展示七日排行前十<br>ZREVRANGE hotNews:20190813-20190819  0  9  WITHSCORES</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="2、Redis高性能原理"><a href="#2、Redis高性能原理" class="headerlink" title="2、Redis高性能原理"></a>2、Redis高性能原理</h3><p>​    问题1：Redis是单线程的吗？</p>
+<p>​    Redis 的单线程主要是指 Redis 的网络 IO 和键值对读写是由一个线程来完成的，这也是 Redis 对外提供键值存储服务的主要流程。但 Redis 的其他功能，比如    持久化、异步删除、集群数据同步等，其实是由额外的线程执行的。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">src/redis-benchmark get <span class="comment">// 压测get指令 单机qps理论上可以达到10w</span></span><br></pre></td></tr></table></figure>
+
+<p>​    问题2：Redis为什么那么快？</p>
+<p>​    因为它所有的数据都在<strong>内存</strong>中，所有的运算都是内存级别的运算，而且单线程避免了多线程的切换性能损耗问题。正因为 Redis 是单线程，所以要小心使用     Redis 指令，对于那些耗时的指令(比如keys)，一定要谨慎使用，一不小心就可能会导致 Redis 卡顿。 </p>
+<p>​    问题3：<strong>Redis 单线程如何处理那么多的并发客户端连接？</strong></p>
+<p>​    Redis的<strong>IO多路复用</strong>：redis利用epoll来实现IO多路复用，将连接信息和事件放到队列中，依次放到文件事件分派器，事件分派器将事件分发给事件处理器。</p>
+<p>​    问题4：Redis如何正确遍历key</p>
+<p>​    1&gt;keys * 命令：<strong>全量遍历键</strong>，用来列出所有满足特定正则字符串规则的key，当redis数据量比较大时，性能比较差，要避免使用</p>
+<p>​    2&gt;<strong>scan：渐进式遍历键</strong></p>
+]]></content>
       <categories>
         <category>分布式</category>
         <category>中间件</category>
