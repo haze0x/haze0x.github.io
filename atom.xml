@@ -6,7 +6,7 @@
   <link href="https://haze0x.github.io/atom.xml" rel="self"/>
   
   <link href="https://haze0x.github.io/"/>
-  <updated>2022-05-30T17:34:35.234Z</updated>
+  <updated>2022-05-31T15:22:59.456Z</updated>
   <id>https://haze0x.github.io/</id>
   
   <author>
@@ -15,6 +15,37 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Redis持久化、主从与哨兵架构</title>
+    <link href="https://haze0x.github.io/2022/05/31/03-00-01-Redis%E6%8C%81%E4%B9%85%E5%8C%96%E3%80%81%E4%B8%BB%E4%BB%8E%E4%B8%8E%E5%93%A8%E5%85%B5%E6%9E%B6%E6%9E%84/"/>
+    <id>https://haze0x.github.io/2022/05/31/03-00-01-Redis%E6%8C%81%E4%B9%85%E5%8C%96%E3%80%81%E4%B8%BB%E4%BB%8E%E4%B8%8E%E5%93%A8%E5%85%B5%E6%9E%B6%E6%9E%84/</id>
+    <published>2022-05-31T15:22:34.000Z</published>
+    <updated>2022-05-31T15:22:59.456Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;\assets\css\APlayer.min.css&quot;&gt;&lt;script src=&quot;\assets\js\APlayer.min.js&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="分布式" scheme="https://haze0x.github.io/categories/%E5%88%86%E5%B8%83%E5%BC%8F/"/>
+    
+    <category term="中间件" scheme="https://haze0x.github.io/categories/%E5%88%86%E5%B8%83%E5%BC%8F/%E4%B8%AD%E9%97%B4%E4%BB%B6/"/>
+    
+    <category term="redis" scheme="https://haze0x.github.io/categories/%E5%88%86%E5%B8%83%E5%BC%8F/%E4%B8%AD%E9%97%B4%E4%BB%B6/redis/"/>
+    
+    
+    <category term="持久化" scheme="https://haze0x.github.io/tags/%E6%8C%81%E4%B9%85%E5%8C%96/"/>
+    
+    <category term="哨兵" scheme="https://haze0x.github.io/tags/%E5%93%A8%E5%85%B5/"/>
+    
+  </entry>
   
   <entry>
     <title>算法题复习</title>
@@ -602,45 +633,6 @@
     
     
     <category term="AQS" scheme="https://haze0x.github.io/tags/AQS/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>阻塞队列之SynchronousQueue</title>
-    <link href="https://haze0x.github.io/2022/05/09/01-00-12-%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97%E4%B9%8BSynchronousQueue/"/>
-    <id>https://haze0x.github.io/2022/05/09/01-00-12-%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97%E4%B9%8BSynchronousQueue/</id>
-    <published>2022-05-09T14:43:14.000Z</published>
-    <updated>2022-05-09T15:39:52.776Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;\assets\css\APlayer.min.css&quot;&gt;&lt;script src=&quot;\assets\js\APlayer.min.js&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="Java" scheme="https://haze0x.github.io/categories/Java/"/>
-    
-    <category term="并发编程" scheme="https://haze0x.github.io/categories/Java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/"/>
-    
-    <category term="学习计划" scheme="https://haze0x.github.io/categories/Java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E5%AD%A6%E4%B9%A0%E8%AE%A1%E5%88%92/"/>
-    
-    
-    <category term="AQS" scheme="https://haze0x.github.io/tags/AQS/"/>
-    
-    <category term="BlockingQueue" scheme="https://haze0x.github.io/tags/BlockingQueue/"/>
-    
-    <category term="阻塞队列" scheme="https://haze0x.github.io/tags/%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97/"/>
-    
-    <category term="SynchronousQueue" scheme="https://haze0x.github.io/tags/SynchronousQueue/"/>
-    
-    <category term="PriorityBlockingQueue" scheme="https://haze0x.github.io/tags/PriorityBlockingQueue/"/>
-    
-    <category term="DelayQueue" scheme="https://haze0x.github.io/tags/DelayQueue/"/>
     
   </entry>
   

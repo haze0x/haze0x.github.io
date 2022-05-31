@@ -6521,4 +6521,18 @@
         <category>算法</category>
       </categories>
   </entry>
+  <entry>
+    <title>Redis持久化、主从与哨兵架构</title>
+    <url>/2022/05/31/03-00-01-Redis%E6%8C%81%E4%B9%85%E5%8C%96%E3%80%81%E4%B8%BB%E4%BB%8E%E4%B8%8E%E5%93%A8%E5%85%B5%E6%9E%B6%E6%9E%84/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
+      <categories>
+        <category>分布式</category>
+        <category>中间件</category>
+        <category>redis</category>
+      </categories>
+      <tags>
+        <tag>持久化</tag>
+        <tag>哨兵</tag>
+      </tags>
+  </entry>
 </search>
