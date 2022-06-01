@@ -6642,6 +6642,122 @@
   <entry>
     <title>Redis高可用集群</title>
     <url>/2022/06/01/03-00-06-Redis%E9%AB%98%E5%8F%AF%E7%94%A8%E9%9B%86%E7%BE%A4/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="一、Redis高可用集群"><a href="#一、Redis高可用集群" class="headerlink" title="一、Redis高可用集群"></a>一、Redis高可用集群</h2><h3 id="1-1-几种集群方案比较"><a href="#1-1-几种集群方案比较" class="headerlink" title="1.1 几种集群方案比较"></a>1.1 几种集群方案比较</h3><ul>
+<li><strong>哨兵模式</strong></li>
+</ul>
+<p>示意图：</p>
+<p><img src="/2022/06/01/03-00-06-Redis%E9%AB%98%E5%8F%AF%E7%94%A8%E9%9B%86%E7%BE%A4/image-20220602004453441.png" alt="image-20220602004453441"></p>
+<p>优缺点:</p>
+<blockquote>
+<p>在redis3.0以前的版本要实现集群一般是借助哨兵sentinel工具来监控master节点的状态，如果master节点异常，则会做主从切换，将某一台slave作为master，哨兵的配置略微复杂，并且性能和高可用性等各方面表现一般，特别是在主从切换的瞬间存在访问瞬断的情况，而且哨兵模式只有一个主节点对外提供服务，没法支持很高的并发，且单个主节点内存也不宜设置得过大，否则会导致持久化文件过大，影响数据恢复或主从同步的效率</p>
+</blockquote>
+<ul>
+<li><strong>高可用集群模式</strong></li>
+</ul>
+<p>示意图：</p>
+<p><img src="/2022/06/01/03-00-06-Redis%E9%AB%98%E5%8F%AF%E7%94%A8%E9%9B%86%E7%BE%A4/image-20220602004545445.png" alt="image-20220602004545445"></p>
+<p>优缺点：</p>
+<blockquote>
+<p>redis集群是一个由多个主从节点群组成的分布式服务器群，它具有复制、高可用和分片特性。Redis集群不需要sentinel哨兵·也能完成节点移除和故障转移的功能。需要将每个节点设置成集群模式，这种集群模式没有中心节点，可水平扩展，据官方文档称可以线性扩展到上万个节点(<strong>官方推荐不超过1000个节点</strong>)。redis集群的性能和高可用性均优于之前版本的哨兵模式，且集群配置非常简单 </p>
+</blockquote>
+<h3 id="1-2Redis集群原理分析"><a href="#1-2Redis集群原理分析" class="headerlink" title="1.2Redis集群原理分析"></a>1.2<strong>Redis集群原理分析</strong></h3><blockquote>
+<p>Redis Cluster通过分片技术，将所有数据划分为 16384 个 slots(槽位)，每个节点负责其中一部分槽位。槽位的信息存储于每个节点中。当 Redis Cluster 的客户端来连接集群时，它也会得到一份集群的槽位配置信息并将其缓存在客户端本地。这样当客户端要查找某个 key 时，可以直接定位到目标节点。同时因为槽位的信息可能会存在客户端与服务器不一致的情况，还需要纠正机制来实现槽位信息的校验调整</p>
+</blockquote>
+<p><strong>槽位定位算法</strong></p>
+<blockquote>
+<p>crc16 算法算出hash值</p>
+<p>在对16384取模</p>
+</blockquote>
+<p><strong>跳转重定位</strong></p>
+<blockquote>
+<p>当客户端向一个错误的节点发出了指令，该节点会发现指令的 key 所在的槽位并不归自己管理，这时它会向客户端发送一个特殊的跳转指令携带目标操作的节点地址，告诉客户端去连这个节点去获取数据。客户端收到指令后除了跳转到正确的节点上去操作，还会同步更新纠正本地的槽位映射表缓存，后续所有 key 将使用新的槽位映射表。</p>
+</blockquote>
+<h3 id="1-3-Redis集群节点间的通信机制（采取gossip协议进行通信）"><a href="#1-3-Redis集群节点间的通信机制（采取gossip协议进行通信）" class="headerlink" title="1.3 Redis集群节点间的通信机制（采取gossip协议进行通信）"></a>1.3 Redis集群节点间的通信机制（采取gossip协议进行通信）</h3><p><strong>通信方式：</strong></p>
+<ul>
+<li><p>集中式</p>
+<blockquote>
+<p>优点在于元数据的更新和读取，时效性非常好，一旦元数据出现变更立即就会更新到集中式的存储中，其他节点读取的时候立即就可以立即感知到；不足在于所有的元数据的更新压力全部集中在一个地方，可能导致元数据的存储压力。 很多中间件都会借助zookeeper集中式存储元数据。</p>
+</blockquote>
+</li>
+<li><p>gossip</p>
+<blockquote>
+<p>gossip协议包含多种消息，包括ping，pong，meet，fail等等。 </p>
+<p>meet：某个节点发送meet给新加入的节点，让新节点加入集群中，然后新节点就会开始与其他节点进行通信；</p>
+<p>ping：每个节点都会频繁给其他节点发送ping，其中包含自己的状态还有自己维护的集群元数据，互相通过ping交换元数据(类似自己感知到的集群节点增加和移除，hash slot信息等)； </p>
+<p>pong: 对ping和meet消息的返回，包含自己的状态和其他信息，也可以用于信息广播和更新； </p>
+<p>fail: 某个节点判断另一个节点fail之后，就发送fail给其他节点，通知其他节点，指定的节点宕机了。</p>
+<p>gossip通信的10000端口(自己提供服务的端口号+10000)</p>
+</blockquote>
+</li>
+</ul>
+<p><strong>网络抖动</strong></p>
+<blockquote>
+<p>Redis Cluster 提供了一种选项cluster-node-timeout【节点超时时间】，表示当某个节点持续 timeout 的时间失联时，才可以认定该节点出现故障，需要进行主从切换。如果没有这个选项，网络抖动会导致主从频繁切换 (数据的重新复制)。</p>
+</blockquote>
+<h3 id="1-4-Redis集群选举原理分析"><a href="#1-4-Redis集群选举原理分析" class="headerlink" title="1.4 Redis集群选举原理分析"></a>1.4 Redis集群选举原理分析</h3><p><strong>过程：</strong></p>
+<blockquote>
+<p>当slave发现自己的master变为FAIL状态时，便尝试进行Failover，以期成为新的master。由于挂掉的master可能会有多个slave，从而存在多个slave竞争成为master节点的过程， 其过程如下：</p>
+<p>1.slave发现自己的master变为FAIL【可能所有的从节点都会向主节点发送消息】</p>
+<p>2.将自己记录的集群currentEpoch（选举周期）加1，并广播FAILOVER_AUTH_REQUEST（错误转移请求） 信息</p>
+<p>3.其他节点收到该信息，只有master响应，判断请求者的合法性（是否是选主信息），并发送FAILOVER_AUTH_ACK，对每一个epoch只发送一次ack</p>
+<p>【在一个选举周期内，master只响应第一个发起选主请求的slave】</p>
+<p>4.尝试failover的slave收集master返回的FAILOVER_AUTH_ACK</p>
+<p>5.slave收到超过半数master的ack后变成新Master(这里解释了集群为什么至少需要三个主节点，如果只有两个，当其中一个挂了，只剩一个主节点是不能选举成功的)</p>
+<p>【如果真有巧合，几个从节点收到的master的ack数目相等，则会重新发起选举】</p>
+<p>6.slave广播Ping消息通知其他集群节点。</p>
+</blockquote>
+<p><strong>选举的延迟机制</strong></p>
+<ul>
+<li>延迟计算公式：</li>
+</ul>
+<p> DELAY = 500ms + random(0 ~ 500ms) + SLAVE_RANK * 1000ms</p>
+<p>【这个公式可以达到包含最新的数据的slave节点，优先发起选举】</p>
+<ul>
+<li>SLAVE_RANK表示此slave已经从master复制数据的总量的rank。Rank越小代表已复制的数据越新。这种方式下，持有最新数据的slave将会首先发起选举（理论上）。</li>
+</ul>
+<p><strong>集群脑裂数据丢失问题</strong></p>
+<blockquote>
+<p>【集群脑裂，网络恢复，数据丢失】</p>
+<p>redis集群没有过半机制会有脑裂问题，网络分区导致脑裂后多个主节点对外提供写服务，一旦网络分区恢复，会将其中一个主节点变为从节点，这时会有大量数据丢失。</p>
+<p><strong>举例说明：</strong></p>
+<p><strong>一个小主从集群：A（master）、B（slave）、C（slave）</strong></p>
+<p><strong>当A、B、C出现网络分区，从节点会选举为主节点，比如C当选主节点；在网络恢复前，A和C都可以写入数据，相当于有多个主节点；那么当A网络恢复，A会成为C的从节点，A的数据会被抹去，那么会有部分写入A中的数据（B、C没有写入的）会被抹除，从而出现数据丢失；</strong></p>
+<p><strong>如果配置了以下参数，A出现分区时，连接不上B和C，所以数据无法写入A，但是能写入C，因为C有一个从节点B</strong></p>
+</blockquote>
+<p>规避方法可以在redis配置里加上参数(这种方法不可能百分百避免数据丢失，参考集群leader选举机制)：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">min-replicas-to-write <span class="number">1</span>  <span class="comment">//写数据成功最少同步的slave数量，这个数量可以模仿大于半数机制配置，比如集群总共三个节点可以配置1，加上leader就是2，超过了半数</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>这个配置值需满足：这个配置值 + 1（leader数量）&gt;（节点数量）/2 + 1</strong></p>
+<p><strong>上面参数的具体意思是：主节点写入了数据，至少同步了一个从节点，才会返回给客户端写入成功</strong></p>
+<p>如果没有从节点可以，写入主节点数据就会提示</p>
+<p><img src="/2022/06/01/03-00-06-Redis%E9%AB%98%E5%8F%AF%E7%94%A8%E9%9B%86%E7%BE%A4/image-20220602005337110.png" alt="image-20220602005337110"></p>
+<h3 id="1-6-Redis的几个参数"><a href="#1-6-Redis的几个参数" class="headerlink" title="1.6 Redis的几个参数"></a>1.6 Redis的几个参数</h3><ul>
+<li><p>cluster-require-full-coverage</p>
+<blockquote>
+<p>当redis.conf的配置cluster-require-full-coverage为no时，表示当负责一个插槽的主库下线且没有相应的从库进行故障恢复时，集群仍然可用，如果为yes则集群不可用。</p>
+<p>【当三个主从小集群，有一个没有主节点时，整个集群不可用】</p>
+</blockquote>
+</li>
+<li><p><strong>Redis集群为什么至少需要三个master节点，并且推荐节点数为奇数</strong></p>
+<blockquote>
+<p>因为新master的选举需要大于半数的集群master节点同意才能选举成功，如果只有两个master节点，当其中一个挂了，是达不到选举新master的条件的。</p>
+<p>奇数个master节点可以在满足选举该条件的基础上节省一个节点，比如三个master节点和四个master节点的集群相比，大家如果都挂了一个master节点都能选举新master节点，如果都挂了两个master节点都没法选举新master节点了，所以奇数的master节点更多的是<strong>从节省机器资源角度出发</strong>说的。</p>
+<p>【如果只有两个master，则一个master挂了，这个master在做选举的时候，因为不满足半数，无法选举主节点；</p>
+<p>并且如果有三个节点，那么最多允许挂一个主节点；如果有四个节点，最多也是允许挂一个节点，从资源节省角度来看，奇数个更合适】</p>
+</blockquote>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Java</category>
+        <category>分布式</category>
+        <category>中间件</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>Redis</tag>
+      </tags>
   </entry>
 </search>
