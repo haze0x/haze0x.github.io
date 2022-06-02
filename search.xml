@@ -6761,8 +6761,22 @@
       </tags>
   </entry>
   <entry>
-    <title>03_00_07_Redis分布式锁</title>
+    <title>Redis分布式锁</title>
     <url>/2022/06/02/03-00-07-Redis%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
+  </entry>
+  <entry>
+    <title>解决maven jar包下载源码问题</title>
+    <url>/2022/06/02/10-00-01-%E8%A7%A3%E5%86%B3maven-jar%E5%8C%85%E4%B8%8B%E8%BD%BD%E6%BA%90%E7%A0%81%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<p><a href="https://www.dandelioncloud.cn/article/details/1510888921704812546">解决maven jar包源码下载问题</a></p>
+]]></content>
+      <categories>
+        <category>maven</category>
+      </categories>
+      <tags>
+        <tag>jar包</tag>
+      </tags>
   </entry>
 </search>
