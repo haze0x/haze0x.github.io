@@ -6,7 +6,7 @@
   <link href="https://haze0x.github.io/atom.xml" rel="self"/>
   
   <link href="https://haze0x.github.io/"/>
-  <updated>2022-06-02T16:05:14.607Z</updated>
+  <updated>2022-06-03T13:42:50.264Z</updated>
   <id>https://haze0x.github.io/</id>
   
   <author>
@@ -15,6 +15,37 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Redis高并发缓存架构实战</title>
+    <link href="https://haze0x.github.io/2022/06/03/03-00-08-Redis%E9%AB%98%E5%B9%B6%E5%8F%91%E7%BC%93%E5%AD%98%E6%9E%B6%E6%9E%84%E5%AE%9E%E6%88%98/"/>
+    <id>https://haze0x.github.io/2022/06/03/03-00-08-Redis%E9%AB%98%E5%B9%B6%E5%8F%91%E7%BC%93%E5%AD%98%E6%9E%B6%E6%9E%84%E5%AE%9E%E6%88%98/</id>
+    <published>2022-06-03T13:37:44.000Z</published>
+    <updated>2022-06-03T13:42:50.264Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;\assets\css\APlayer.min.css&quot;&gt;&lt;script src=&quot;\assets\js\APlayer.min.js&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="中间件" scheme="https://haze0x.github.io/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/"/>
+    
+    <category term="分布式" scheme="https://haze0x.github.io/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/"/>
+    
+    <category term="redis" scheme="https://haze0x.github.io/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/redis/"/>
+    
+    
+    <category term="redis" scheme="https://haze0x.github.io/tags/redis/"/>
+    
+    <category term="缓存" scheme="https://haze0x.github.io/tags/%E7%BC%93%E5%AD%98/"/>
+    
+  </entry>
   
   <entry>
     <title>解决maven jar包下载源码问题</title>
@@ -46,7 +77,7 @@
     <link href="https://haze0x.github.io/2022/06/02/03-00-07-Redis%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/"/>
     <id>https://haze0x.github.io/2022/06/02/03-00-07-Redis%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/</id>
     <published>2022-06-02T14:40:02.000Z</published>
-    <updated>2022-06-02T17:34:05.402Z</updated>
+    <updated>2022-06-02T17:39:07.393Z</updated>
     
     
       
@@ -598,37 +629,6 @@
     <category term="线程池" scheme="https://haze0x.github.io/tags/%E7%BA%BF%E7%A8%8B%E6%B1%A0/"/>
     
     <category term="并发总结" scheme="https://haze0x.github.io/tags/%E5%B9%B6%E5%8F%91%E6%80%BB%E7%BB%93/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>ThreadPoolExecutor使用及源码分析</title>
-    <link href="https://haze0x.github.io/2022/05/12/01-00-16-ThreadPoolExecutor%E4%BD%BF%E7%94%A8%E5%8F%8A%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
-    <id>https://haze0x.github.io/2022/05/12/01-00-16-ThreadPoolExecutor%E4%BD%BF%E7%94%A8%E5%8F%8A%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</id>
-    <published>2022-05-12T14:40:24.000Z</published>
-    <updated>2022-05-28T15:06:38.806Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;\assets\css\APlayer.min.css&quot;&gt;&lt;script src=&quot;\assets\js\APlayer.min.js&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="Java" scheme="https://haze0x.github.io/categories/Java/"/>
-    
-    <category term="并发编程" scheme="https://haze0x.github.io/categories/Java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/"/>
-    
-    <category term="学习计划" scheme="https://haze0x.github.io/categories/Java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E5%AD%A6%E4%B9%A0%E8%AE%A1%E5%88%92/"/>
-    
-    
-    <category term="ThreadPoolExecutor" scheme="https://haze0x.github.io/tags/ThreadPoolExecutor/"/>
-    
-    <category term="线程池" scheme="https://haze0x.github.io/tags/%E7%BA%BF%E7%A8%8B%E6%B1%A0/"/>
     
   </entry>
   
