@@ -2,6 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://haze0x.github.io/2022/04/05/06-00-00-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95%E5%85%A5%E9%97%A8%E5%9F%BA%E7%A1%80/</loc>
+    
+    <lastmod>2022-06-05</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://haze0x.github.io/2022/05/31/03-00-01-Redis%E6%8C%81%E4%B9%85%E5%8C%96%E3%80%81%E4%B8%BB%E4%BB%8E%E4%B8%8E%E5%93%A8%E5%85%B5%E6%9E%B6%E6%9E%84/</loc>
     
     <lastmod>2022-06-05</lastmod>
@@ -426,15 +435,6 @@
   
   <url>
     <loc>https://haze0x.github.io/2022/04/06/06-00-01-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E6%95%B0%E7%BB%84/</loc>
-    
-    <lastmod>2022-04-28</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://haze0x.github.io/2022/04/05/06-00-00-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95%E5%85%A5%E9%97%A8%E5%9F%BA%E7%A1%80/</loc>
     
     <lastmod>2022-04-28</lastmod>
     
