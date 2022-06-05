@@ -1175,7 +1175,7 @@
       </categories>
       <tags>
         <tag>Java</tag>
-        <tag>Redis</tag>
+        <tag>redis</tag>
       </tags>
   </entry>
   <entry>
@@ -6664,6 +6664,7 @@
         <category>redis</category>
       </categories>
       <tags>
+        <tag>redis</tag>
         <tag>持久化</tag>
         <tag>哨兵</tag>
       </tags>
@@ -6786,7 +6787,7 @@
       </categories>
       <tags>
         <tag>Java</tag>
-        <tag>Redis</tag>
+        <tag>redis</tag>
       </tags>
   </entry>
   <entry>
