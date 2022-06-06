@@ -2069,8 +2069,48 @@
 <p>同一层的数据通过forward指针指向【从前往后遍历】，同时每个节点通过回退指针backword指向【便于从后往前遍历】。</p>
 <p>遍历数据时从最高的层高往下遍历。</p>
 <p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/image-20220606220124338.png" alt="image-20220606220124338"></p>
-<h3 id="6、GeoHash算法"><a href="#6、GeoHash算法" class="headerlink" title="6、GeoHash算法"></a>6、GeoHash算法</h3><p>GeoHash是一种地理位置编码方法。 由Gustavo Niemeyer 和 G.M. Morton于2008年发明，它将地理位置编码为一串简短的字母和数字。它是一种分层的空间数据结构，将空间细分为网格形状的桶，这是所谓的z顺序曲线的众多应用之一，通常是空间填充曲线。
- </p>
+<h3 id="6、GeoHash算法"><a href="#6、GeoHash算法" class="headerlink" title="6、GeoHash算法"></a>6、GeoHash算法</h3><p>GeoHash是一种地理位置编码方法。 由Gustavo Niemeyer 和 G.M. Morton于2008年发明，它将地理位置编码为一串简短的字母和数字。它是一种分层的空间数据结构，将空间细分为网格形状的桶，这是所谓的z顺序曲线的众多应用之一，通常是空间填充曲线。</p>
+<blockquote>
+<p>Redis GEO 主要用于存储地理位置信息，并对存储的信息进行操作，该功能在 Redis 3.2 版本新增。</p>
+<p>Redis GEO 操作方法有：</p>
+<ul>
+<li>geoadd：添加地理位置的坐标。</li>
+<li>geopos：获取地理位置的坐标。</li>
+<li>geodist：计算两个位置之间的距离。</li>
+<li>georadius：根据用户给定的经纬度坐标来获取指定范围内的地理位置集合。</li>
+<li>georadiusbymember：根据储存在位置集合里面的某个地点获取指定范围内的地理位置集合。</li>
+<li>geohash：返回一个或多个位置对象的 geohash 值。</li>
+</ul>
+</blockquote>
+<p>geo底层基于zset</p>
+<h3 id="7、Redis-6-0新特性"><a href="#7、Redis-6-0新特性" class="headerlink" title="7、Redis 6.0新特性"></a>7、Redis 6.0新特性</h3><ol>
+<li><p><strong>多线程</strong></p>
+<p>redis 6.0 提供了多线程的支持，redis 6 以前的版本，严格来说也是多线程，只不过执行用户命令的请求时单线程模型，还有一些线程用来执行后台任务， 比如 unlink 删除 大key，rdb持久化等。</p>
+<p>redis 6.0 提供了多线程的读写IO, 但是最终执行用户命令的线程依然是单线程的，这样，就没有多线程数据的竞争关系，依然很高效。</p>
+</li>
+<li><p><strong>Client Side Cache</strong></p>
+<p>客户端缓存：redis 6 提供了服务端追踪key的变化，客户端缓存数据的特性，这需要客户端实现</p>
+<p>执行流程为， 当客户端访问某个key时，服务端将记录key 和 client ，客户端拿到数据后，进行客户端缓存，这时，当key再次被访问时，key将被直接返回，避免了与redis 服务器的再次交互，节省服务端资源，当数据被其他请求修改时，服务端将主动通知客户端失效的key，客户端进行本地失效，下次请求时，重新获取最新数据。</p>
+</li>
+<li><p><strong>Acls</strong></p>
+<p>ACL 是对于命令的访问和执行权限的控制，默认情况下，可以有执行任意的指令，兼容以前版本</p>
+<p>ACL设置有两种方式：</p>
+<ol>
+<li>命令方式</li>
+</ol>
+<p>​    ACL SETUSER + 具体的权限规则， 通过 ACL SAVE 进行持久化</p>
+<ol start="2">
+<li>对 ACL 配置文件进行编写，并且执行 ACL LOAD 进行加载</li>
+</ol>
+<p>ACL存储有两种方式，但是两种方式不能同时配置，否则直接报错退出进程</p>
+<ol>
+<li><p>redis 配置文件： redis.conf</p>
+</li>
+<li><p>ACL配置文件, 在redis.conf 中通过 aclfile  /path  配置acl文件的路径</p>
+</li>
+</ol>
+</li>
+</ol>
 ]]></content>
       <categories>
         <category>Java</category>
