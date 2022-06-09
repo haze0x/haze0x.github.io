@@ -7243,8 +7243,252 @@
       </tags>
   </entry>
   <entry>
-    <title>03_02_00_Zookeeper特性与节点数据类型</title>
+    <title>Zookeeper特性与节点数据类型</title>
     <url>/2022/06/09/03-02-00-Zookeeper%E7%89%B9%E6%80%A7%E4%B8%8E%E8%8A%82%E7%82%B9%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="一、Zookeeper特性与节点数据类型"><a href="#一、Zookeeper特性与节点数据类型" class="headerlink" title="一、Zookeeper特性与节点数据类型"></a>一、Zookeeper特性与节点数据类型</h2><h3 id="1、什么是Zookeeper"><a href="#1、什么是Zookeeper" class="headerlink" title="1、什么是Zookeeper"></a>1、什么是Zookeeper</h3><blockquote>
+<p>zookeeper，它是一个分布式协调框架，是Apache Hadoop 的一个子项目，它主要是用来解决分布式应用中经常遇到的一些数据管理问题，如：统一命名服务、状态同步服务、集群管理、分布式应用配置项的管理等。</p>
+</blockquote>
+<h3 id="2、Zookeeper核心概念"><a href="#2、Zookeeper核心概念" class="headerlink" title="2、Zookeeper核心概念"></a>2、Zookeeper核心概念</h3><ul>
+<li><p><strong>文件系统数据结构</strong></p>
+<blockquote>
+<p>Zookeeper维护一个类似文件系统的数据结构：                                                          </p>
+<p><img src="/2022/06/09/03-02-00-Zookeeper%E7%89%B9%E6%80%A7%E4%B8%8E%E8%8A%82%E7%82%B9%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/image-20220610001322544.png" alt="image-20220610001322544"></p>
+<p>每个子目录项都被称作为 **znode(目录节点)**，和文件系统类似，我们能够自由的增加、删除znode，在一个znode下增加、删除子znode。</p>
+<p>有六种类型的znode：</p>
+<ul>
+<li><p>PERSISTENT-持久化目录节点</p>
+<blockquote>
+<p>客户端与zookeeper断开连接后，该节点依旧存在，只要不手动删除该节点，他将永远存在</p>
+</blockquote>
+</li>
+<li><p>PERSISTENT_SEQUENTIAL-持久化顺序编号目录节点</p>
+<blockquote>
+<p>客户端与zookeeper断开连接后，该节点依旧存在，只是Zookeeper给该节点名称进行顺序编号</p>
+</blockquote>
+</li>
+<li><p>EPHEMERAL-临时目录节点</p>
+<blockquote>
+<p>客户端与zookeeper断开连接后，该节点被删除</p>
+</blockquote>
+</li>
+<li><p>EPHEMERAL_SEQUENTIAL-临时顺序编号目录节点</p>
+<blockquote>
+<p>客户端与zookeeper断开连接后，该节点被删除，只是Zookeeper给该节点名称进行顺序编号</p>
+</blockquote>
+</li>
+<li><p>Container 节点</p>
+<blockquote>
+<p>3.5.3 版本新增，如果Container节点下面没有子节点，则Container节点在未来会被Zookeeper自动清除,定时任务默认60s 检查一次</p>
+</blockquote>
+</li>
+<li><p>TTL 节点</p>
+<blockquote>
+<p>通过后台线程进行轮询，过期时间不是很精准</p>
+<p>好处：不需要维护节点被删除的时间段，服务端可以自动清除</p>
+</blockquote>
+</li>
+</ul>
+</blockquote>
+</li>
+<li><p><strong>监听通知机制</strong></p>
+<blockquote>
+<p>所有的通知都是一次性的，及无论是对节点还是对目录进行的监听，一旦触发，对应的监听即被移除。递归子节点，监听是对所有子节点的，所以，每个子节点下面的事件同样只会被触发一次。</p>
+</blockquote>
+<ul>
+<li><p>对节点的监听</p>
+<blockquote>
+<p>如果注册的是对某个节点的监听，则当这个节点被删除，或者被修改时，对应的客户端将被通知</p>
+</blockquote>
+</li>
+<li><p>对目录的监听</p>
+<blockquote>
+<p>如果注册的是对某个目录的监听，则当这个目录有子节点被创建，或者有子节点被删除，对应的客户端将被通知</p>
+</blockquote>
+</li>
+<li><p>对某个目录的递归子节点监听</p>
+<blockquote>
+<p>如果注册的是对某个目录的递归子节点进行监听，则当这个目录下面的任意子节点有目录结构的变化（有子节点被创建，或被删除）或者根节点有数据变化时，对应的客户端将被通知。</p>
+</blockquote>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="3、应用场景"><a href="#3、应用场景" class="headerlink" title="3、应用场景"></a>3、应用场景</h3><ul>
+<li><p>分布式配置中心</p>
+</li>
+<li><p>分布式注册中心</p>
+</li>
+<li><p>分布式锁</p>
+</li>
+<li><p>分布式队列</p>
+</li>
+<li><p>集群选举</p>
+</li>
+<li><p>分布式屏障</p>
+</li>
+<li><p>发布/订阅</p>
+</li>
+</ul>
+<h3 id="4、Zookeeper实操"><a href="#4、Zookeeper实操" class="headerlink" title="4、Zookeeper实操"></a>4、Zookeeper实操</h3><p><strong>操作节点</strong></p>
+<ul>
+<li><p>zookeeper常用操作</p>
+<blockquote>
+<p>[zk: localhost:2181(CONNECTED) 80] help<br>ZooKeeper -server host:port cmd args</p>
+<pre><code>addauth scheme auth
+close 
+config [-c] [-w] [-s]
+connect host:port
+create [-s] [-e] [-c] [-t ttl] path [data] [acl]
+delete [-v version] path
+deleteall path
+delquota [-n|-b] path
+get [-s] [-w] path
+getAcl [-s] path
+history 
+listquota path
+ls [-s] [-w] [-R] path
+ls2 path [watch]
+printwatches on|off
+quit 
+reconfig [-s] [-v version] [[-file path] | [-members serverID=host:port1:port2;port3[,...]*]] | [-add serverId=host:port1:port2;port3[,...]]* [-remove serverId[,...]*]
+redo cmdno
+removewatches path [-c|-d|-a] [-l]
+rmr path
+set [-s] [-v version] path data
+setAcl [-s] [-v version] [-R] path acl
+setquota -n|-b val path
+stat [-w] path
+sync path
+</code></pre>
+</blockquote>
+</li>
+<li><p>创建zookeeper 节点命令</p>
+<blockquote>
+<p>create [-s] [-e] [-c] [-t ttl] path [data] [acl]          </p>
+<p>中括号为可选项，没有则默认创建持久化节点</p>
+<p>-s: 顺序节点</p>
+<p>-e: 临时节点</p>
+<p>-c: 容器节点</p>
+<p>-t:  可以给节点添加过期时间，默认禁用，需要通过系统参数启用    </p>
+<p>例：</p>
+<p>create  /test-node some-data              【如上，没有加任何可选参数，创建的就是持久化节点】</p>
+</blockquote>
+</li>
+<li><p>查看节点：</p>
+<blockquote>
+<p>get  /test-node              </p>
+</blockquote>
+</li>
+<li><p>修改数据</p>
+<blockquote>
+<p>set /test-node some-data-changed</p>
+</blockquote>
+</li>
+<li><p>查看节点状态信息：</p>
+<blockquote>
+<p>stat /test-node </p>
+<p><strong>Stat</strong></p>
+<ul>
+<li>cZxid：创建znode的事务ID（Zxid的值）。</li>
+<li>mZxid：最后修改znode的事务ID。</li>
+<li>pZxid：最后添加或删除子节点的事务ID（子节点列表发生变化才会发生改变）。</li>
+<li>ctime：znode创建时间。</li>
+<li>mtime：znode最近修改时间。</li>
+<li>dataVersion：znode的当前数据版本。</li>
+<li>cversion：znode的子节点结果集版本（一个节点的子节点增加、删除都会影响这个版本）。</li>
+<li>aclVersion：表示对此znode的acl版本。</li>
+<li>ephemeralOwner：znode是临时znode时，表示znode所有者的 session ID。 如果znode不是临时znode，则该字段设置为零。</li>
+<li>dataLength：znode数据字段的长度。</li>
+<li>numChildren：znode的子znode的数量。</li>
+</ul>
+<p>查看节点状态信息同时查看数据:</p>
+<p><strong>get -s node-name</strong></p>
+<p>根据状态数据中的版本号有并发修改数据实现乐观锁的功能:</p>
+<p>get -s /node-name</p>
+</blockquote>
+</li>
+<li><p>创建子节点</p>
+<blockquote>
+<p>create /test-node/test-sub-node              </p>
+</blockquote>
+</li>
+<li><p>查看子节点信息，比如根节点下面的所有子节点， 加一个大写 R  可以查看递归子节点列表</p>
+<blockquote>
+<p>ls /<br>ls -R node-name</p>
+</blockquote>
+</li>
+<li><p>创建临时节点</p>
+<blockquote>
+<p>create -e /ephemeral data               【create 后跟一个 -e 创建临时节点 ， 临时节点不能创建子节点】</p>
+</blockquote>
+</li>
+<li><p>创建序号节点，加参数 -s</p>
+<blockquote>
+<p>create    /seq-parent  data // 创建父目录，单纯为了分类，非必须 create -s /seq-parent/  data // 创建顺序节点。顺序节点将再seq-parent 目录下面，顺序递增 序号是十进制的10位，最大2的32次方              </p>
+</blockquote>
+</li>
+<li><p>创建临时顺序节点,其它增删查改和其他节点无异</p>
+<blockquote>
+<p>create -s -e  /ephemeral-node/前缀-              </p>
+</blockquote>
+</li>
+<li><p>创建容器节点</p>
+<blockquote>
+<p>容器节点主要用来容纳字节点，如果没有给其创建子节点，容器节点表现和持久化节点一样，如果给容器节点创建了子节点，后续又把子节点清空，容器节点也会被zookeeper删除。</p>
+<p>create -c /container              </p>
+</blockquote>
+</li>
+</ul>
+<p><strong>事件监听机制：</strong></p>
+<p>但是<strong>每个目录下</strong>的目录监听也是一次性的【每个子目录最多能够触发一次】</p>
+<ul>
+<li><p>针对节点的监听：一定事件触发，对应的注册立刻被移除，所以事件监听是一次性的</p>
+<blockquote>
+<p>get  -w  /path   // 注册监听的同时获取数据  服务端主动推送变化给客户端，客户端实时感知 【无论数据是否真的有变动，比如你set 的值跟原值一样，也会推送给客户端】 stat -w /path   // 对节点进行监听，且获取元数据信息              </p>
+</blockquote>
+</li>
+<li><p>针对目录的监听，如下图，目录的变化，会触发事件，且一旦触发，对应的监听也会被移除，后续对节点的创建没有触发监听事件</p>
+<blockquote>
+<p>ls -w /path  【只有当目录下面有节点加入或删除时，才会有通知，修改节点下面的内容 不会通知  目的：简单 降低复杂性】              </p>
+</blockquote>
+</li>
+<li><p>针对递归子目录的监听</p>
+<blockquote>
+<p>ls -R -w /path ： -R 区分大小写，一定用大写               </p>
+</blockquote>
+</li>
+</ul>
+<h3 id="5、Zookeeper-的-ACL-权限控制-Access-Control-List"><a href="#5、Zookeeper-的-ACL-权限控制-Access-Control-List" class="headerlink" title="5、Zookeeper 的 ACL 权限控制( Access Control   List )"></a>5、<strong>Zookeeper 的 ACL 权限控制( Access Control   List )</strong></h3><blockquote>
+<p>Zookeeper 的ACL 权限控制,可以控制节点的读写操作,保证数据的安全性，Zookeeper ACL 权限设置分为 3 部分组成，分别是：<strong>权限模式</strong>（Scheme）、<strong>授权对象</strong>（ID）、<strong>权限信息</strong>（Permission）</p>
+</blockquote>
+<ul>
+<li><strong>Scheme（权限模式）</strong></li>
+<li><strong>授权对象（ID）</strong></li>
+<li><strong>权限信息（Permission）</strong></li>
+</ul>
+<h3 id="6、ZooKeeper-内存数据和持久化"><a href="#6、ZooKeeper-内存数据和持久化" class="headerlink" title="6、ZooKeeper 内存数据和持久化"></a>6、<strong>ZooKeeper 内存数据和持久化</strong></h3><ul>
+<li><p><strong>事务日志</strong></p>
+<blockquote>
+<p>针对每一次客户端的事务操作，Zookeeper都会将他们记录到事务日志中，当然，Zookeeper也会将数据变更应用到内存数据库中</p>
+</blockquote>
+</li>
+<li><p><strong>数据快照</strong></p>
+<blockquote>
+<p>数据快照用于记录Zookeeper服务器上某一时刻的全量数据，并将其写入到指定的磁盘文件中。</p>
+</blockquote>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>中间件</category>
+        <category>分布式</category>
+        <category>Zookeeper</category>
+      </categories>
+      <tags>
+        <tag>zookeeper</tag>
+        <tag>分布式</tag>
+      </tags>
   </entry>
 </search>
