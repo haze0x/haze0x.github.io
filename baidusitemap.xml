@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://haze0x.github.io/2022/06/10/03-02-01-Zookeeper%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8%E4%B8%8E%E9%9B%86%E7%BE%A4%E7%89%B9%E6%80%A7/</loc>
+    <lastmod>2022-06-10</lastmod>
+  </url>
+  <url>
     <loc>https://haze0x.github.io/2022/06/09/03-02-00-Zookeeper%E7%89%B9%E6%80%A7%E4%B8%8E%E8%8A%82%E7%82%B9%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/</loc>
     <lastmod>2022-06-09</lastmod>
   </url>

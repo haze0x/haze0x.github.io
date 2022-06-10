@@ -7491,4 +7491,9 @@ sync path
         <tag>分布式</tag>
       </tags>
   </entry>
+  <entry>
+    <title>03_02_01_Zookeeper客户端使用与集群特性</title>
+    <url>/2022/06/10/03-02-01-Zookeeper%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8%E4%B8%8E%E9%9B%86%E7%BE%A4%E7%89%B9%E6%80%A7/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
+  </entry>
 </search>
