@@ -3290,7 +3290,7 @@
 
 <p>3、复制到github</p>
 <p>而后在GitHub的setting中，找到SSH keys的设置选项，点击New SSH key把你的id_rsa.pub里面的信息复制进去。</p>
-<p><a href="https://blog.csdn.net/Leo_Franklin/article/details/108858285">解决github ssh key 过期问题–待尝试</a></p>
+<p><a href="https://blog.csdn.net/Leo_Franklin/article/details/108858285">解决github ssh key 过期问题–有效果</a></p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">ssh-agent bash</span><br><span class="line">ssh-add ~/.ssh/id_rsa</span><br><span class="line">ssh-add ~/.ssh/id_ed25519</span><br></pre></td></tr></table></figure>
 
 
