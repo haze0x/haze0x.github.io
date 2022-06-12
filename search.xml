@@ -3342,6 +3342,7 @@
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
 
 <p><a href="https://www.dandelioncloud.cn/article/details/1510888921704812546">解决maven jar包源码下载问题</a></p>
+<p><a href="https://www.likecs.com/show-204662226.html">idea关闭重复代码提示</a></p>
 <p>首先打开Idea中的 然后输入mvn dependency:resolve -Dclassifier=sources 最后成功…</p>
 ]]></content>
       <categories>
@@ -7677,6 +7678,22 @@ sync path
       <tags>
         <tag>zookeeper</tag>
         <tag>分布式</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Zookeeper集群Leader选举源码</title>
+    <url>/2022/06/12/03-02-03-Zookeeper%E9%9B%86%E7%BE%A4Leader%E9%80%89%E4%B8%BE%E6%BA%90%E7%A0%81/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="Zookeeper集群Leader选举源码"><a href="#Zookeeper集群Leader选举源码" class="headerlink" title="Zookeeper集群Leader选举源码"></a>Zookeeper集群Leader选举源码</h2>]]></content>
+      <categories>
+        <category>中间件</category>
+        <category>分布式</category>
+        <category>Zookeeper</category>
+      </categories>
+      <tags>
+        <tag>zookeeper</tag>
+        <tag>集群Leader选举</tag>
       </tags>
   </entry>
 </search>
