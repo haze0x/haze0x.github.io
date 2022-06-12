@@ -7685,7 +7685,27 @@ sync path
     <url>/2022/06/12/03-02-03-Zookeeper%E9%9B%86%E7%BE%A4Leader%E9%80%89%E4%B8%BE%E6%BA%90%E7%A0%81/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
 
-<h2 id="Zookeeper集群Leader选举源码"><a href="#Zookeeper集群Leader选举源码" class="headerlink" title="Zookeeper集群Leader选举源码"></a>Zookeeper集群Leader选举源码</h2>]]></content>
+<h2 id="Zookeeper集群Leader选举源码"><a href="#Zookeeper集群Leader选举源码" class="headerlink" title="Zookeeper集群Leader选举源码"></a>Zookeeper集群Leader选举源码</h2><h3 id="1、单机启动遇到的问题"><a href="#1、单机启动遇到的问题" class="headerlink" title="1、单机启动遇到的问题"></a>1、单机启动遇到的问题</h3><ul>
+<li><p><strong>客户端启动报错：java.lang.ClassNotFoundException: org.apache.commons.cli.ParseException</strong></p>
+<p>解决方法：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">## 修改pom文件 该注释的注释 该增加的增加</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">  &lt;groupId&gt;commons-cli&lt;/groupId&gt;</span><br><span class="line">  &lt;artifactId&gt;commons-cli&lt;/artifactId&gt;</span><br><span class="line">  &lt;!--&lt;scope&gt;provided&lt;/scope&gt;--&gt;</span><br><span class="line">  &lt;version&gt;<span class="number">1.2</span>&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="2、启动或leader宕机选举leader流程"><a href="#2、启动或leader宕机选举leader流程" class="headerlink" title="2、启动或leader宕机选举leader流程"></a>2、启动或leader宕机选举leader流程</h3><p><img src="/2022/06/12/03-02-03-Zookeeper%E9%9B%86%E7%BE%A4Leader%E9%80%89%E4%B8%BE%E6%BA%90%E7%A0%81/image-20220612191051125.png" alt="image-20220612191051125"></p>
+<blockquote>
+<p>myid：每台机器的标识，自己配置的</p>
+<p>zxid：这台机器对应的最大的事务id</p>
+<p>举例分析：</p>
+<p>场景：有三台机器myid分别为1，2，3；启动顺序1、2、3</p>
+<p>投票的过程：就是将自己选则的leader节点发送给集群中的其它机器</p>
+<p>1&gt;myid为1的先启动，会先投给自己一票，将这一票的信息发送给其它机器（假设此时myid为2的已经启动）【投票会将自己的投票发送给集群的其它节点】</p>
+<p>2&gt;myid为2的启动，也会先投自己一票，并且将选票发送给其它节点</p>
+<p>3&gt;第一轮投票完了；<strong>myid为1的</strong>将自己投的票和收到的票做对比，优先选择zxid大的作为leader【如图左上角备注】，zxid越大，收到的数据越多。第一轮投票，因为机器都是刚启动，zxid都是一样的，当zxid一样，还会根据myid大小，优先选择myid大的为leader，所以myid为1的选择myid为2的作为leader，但是因为没有超过半数机制（因为有三台机器，至少需要2台选myid为2的，才能选举成功，此时myid为3的还未启动，并且myid为1 的投的是它自己），因此第一次投票作废。</p>
+<p>4&gt;开始第二轮投票，每个节点会将自己第一轮的投票结果发送给其它节点。<strong>第一轮的结果是：myid为1的选择myid为2的作为leader，myid为2的也选自己作为leader。</strong>所以第二轮myid为1的和myid为2的都是投myid为2的，超过半数，所以myid为2的选为了leader节点</p>
+<p>5&gt;myid为3的启动，发现leader已经选出来的，就把自己设置为follower节点。</p>
+</blockquote>
+<h3 id="3、流程图"><a href="#3、流程图" class="headerlink" title="3、流程图"></a>3、流程图</h3><p><a href="https://www.processon.com/view/link/62a5ca09e0b34d29446d6d7b">zookeeper选举leader源码流程图–待补充完整</a></p>
+<p>zookeeper选举leader算法本身不难，复杂在节点间的通信和高性能优化上，发送选举内容和接收其它节点选票内容都是通过阻塞队列实现的。</p>
+]]></content>
       <categories>
         <category>中间件</category>
         <category>分布式</category>
