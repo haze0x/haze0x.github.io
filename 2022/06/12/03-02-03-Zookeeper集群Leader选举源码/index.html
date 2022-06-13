@@ -86,7 +86,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">622</span>
+            <span class="post-count">769</span>
         </span>
     </span>
 
@@ -130,8 +130,11 @@
 <p>4&gt;开始第二轮投票，每个节点会将自己第一轮的投票结果发送给其它节点。<strong>第一轮的结果是：myid为1的选择myid为2的作为leader，myid为2的也选自己作为leader。</strong>所以第二轮myid为1的和myid为2的都是投myid为2的，超过半数，所以myid为2的选为了leader节点</p>
 <p>5&gt;myid为3的启动，发现leader已经选出来的，就把自己设置为follower节点。</p>
 </blockquote>
+<h3 id="3、leader选举多层队列架构"><a href="#3、leader选举多层队列架构" class="headerlink" title="3、leader选举多层队列架构"></a>3、<strong>leader选举多层队列架构</strong></h3><p>整个zookeeper选举底层可以分为选举应用层和消息传输层，应用层有自己的队列统一接收和发送选票，传输层也设计了自己的队列，但是按发送的机器分了队列，避免给每台机器发送消息时相互影响，比如某台机器如果出问题发送不成功则不会影响对正常机器的消息发送。</p>
+<p><img src="/2022/06/12/03-02-03-Zookeeper%E9%9B%86%E7%BE%A4Leader%E9%80%89%E4%B8%BE%E6%BA%90%E7%A0%81/image-20220614004652576.png" alt="image-20220614004652576"></p>
 <h3 id="3、流程图"><a href="#3、流程图" class="headerlink" title="3、流程图"></a>3、流程图</h3><p><a target="_blank" rel="noopener" href="https://www.processon.com/view/link/62a5ca09e0b34d29446d6d7b">zookeeper选举leader源码流程图–待补充完整</a></p>
 <p>zookeeper选举leader算法本身不难，复杂在节点间的通信和高性能优化上，发送选举内容和接收其它节点选票内容都是通过阻塞队列实现的。</p>
+<p>补充了流程图，源码通信那块太绕了，先看第一遍，后面再看第二遍</p>
  
       <!-- reward -->
       
