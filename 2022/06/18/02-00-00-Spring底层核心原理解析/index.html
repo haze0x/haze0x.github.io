@@ -155,7 +155,7 @@
 <p>所以，我们就可以分析出来，在调用AnnotationConfigApplicationContext的构造方法时，也就是第一行代码，会去做一些事情：</p>
 <ol>
 <li>解析AppConfig.class，得到扫描路径</li>
-<li>遍历扫描路径下的所有Java类，如果发现某个类上存在@Component、@Service等注解，那么Spring就把这个类记录下来，存在一个Map中，比如Map。（<strong>实际上，Spring源码中确实存在类似的这么一个Map，叫做BeanDefinitionMap，后续课程会讲到</strong>）</li>
+<li>遍历扫描路径下的所有Java类，如果发现某个类上存在@Component、@Service等注解，那么Spring就把这个类记录下来，存在一个Map中，比如Map。（实际上，Spring源码中确实存在类似的这么一个Map，叫做BeanDefinitionMap）</li>
 <li>Spring会根据某个规则生成当前类对应的beanName，作为key存入Map，当前类作为value</li>
 </ol>
 <p>这样，但调用context.getBean(“userService”)时，就可以根据”userService”找到UserService类，从而就可以去创建对象了。</p>
@@ -235,7 +235,7 @@
 <p>当我们从Spring容器得到UserService的Bean对象时，拿到的就是UserServiceProxy所生成的对象，也就是代理对象。</p>
 <p>UserService代理对象.test()—&gt;执行切面逻辑—&gt;target.test()，注意target对象不是代理对象，而是被代理对象。</p>
 <p>如下图：</p>
-<p>![](02-00-00-Spring底层核心原理解析/截图 (1).png)</p>
+<p>![11](02-00-00-Spring底层核心原理解析/截图 (1).png)</p>
 <p><strong>Aop  cglib代理过程如下：</strong></p>
 <p>举例：</p>
 <p>比如类UserService</p>
