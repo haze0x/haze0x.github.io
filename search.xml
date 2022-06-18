@@ -3346,6 +3346,25 @@
 <p>首先打开Idea中的 然后输入mvn dependency:resolve -Dclassifier=sources 最后成功…</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">待加强的点</span><br><span class="line"><span class="number">1</span>、zookeeper源码  leader选举 和 zab</span><br><span class="line"><span class="number">2</span>、HashMap <span class="number">6</span>节课</span><br><span class="line"><span class="number">3</span>、jvm 底层字节码</span><br><span class="line"><span class="number">4</span>、</span><br></pre></td></tr></table></figure>
 
+
+
+
+
+<p>推荐博客：</p>
+<p><a href="https://www.yuque.com/kazike-pgsbs/sgv726">博客</a></p>
+<p><a href="https://www.yuque.com/books/share/5f19528d-d89b-4b69-a7bd-9f436a2dd734/bs9d13">Spring 源码</a></p>
+<p><a href="https://www.yuque.com/kazike-pgsbs/lcdhkb/aircwf">学习方法</a></p>
+<p>目标 + 平台</p>
+<p>目标+习惯+执行（要有反馈，正向反馈）</p>
+<p>定好目标+养成习惯</p>
+<p>简历是测试用例，checklist，专业度+价值观+能力测试+压力面试</p>
+<p>学习：</p>
+<p>自己给自己定时间：固定时间或碎片化时间，全身心投入，笔记图文结合（以图为主）</p>
+<p>阶段性的：ppt演讲稿+视频</p>
+<p>架构思维：</p>
+<p>编程思维：</p>
+<p>开发架构+业务架构</p>
+<p><img src="/2022/06/02/10-00-01-%E8%A7%A3%E5%86%B3maven-jar%E5%8C%85%E4%B8%8B%E8%BD%BD%E6%BA%90%E7%A0%81%E9%97%AE%E9%A2%98/image-20220618212704506.png" alt="image-20220618212704506"></p>
 ]]></content>
       <categories>
         <category>maven</category>
