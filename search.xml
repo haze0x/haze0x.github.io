@@ -95,7 +95,6 @@
         <category>Java</category>
         <category>性能调优</category>
         <category>Jvm</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>Jvm</tag>
@@ -118,7 +117,6 @@
         <category>Java</category>
         <category>性能调优</category>
         <category>Jvm</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>Jvm</tag>
@@ -143,7 +141,6 @@
         <category>Java</category>
         <category>性能调优</category>
         <category>Jvm</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>Jvm</tag>
@@ -226,7 +223,6 @@
       <categories>
         <category>MySQL</category>
         <category>性能调优</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>MySQL</tag>
@@ -333,7 +329,6 @@
       <categories>
         <category>MySQL</category>
         <category>性能调优</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>MySQL</tag>
@@ -442,7 +437,6 @@
       <categories>
         <category>MySQL</category>
         <category>性能调优</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>MySQL</tag>
@@ -534,7 +528,6 @@
       <categories>
         <category>MySQL</category>
         <category>性能调优</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>MySQL</tag>
@@ -595,7 +588,6 @@
       <categories>
         <category>MySQL</category>
         <category>性能调优</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>MySQL</tag>
@@ -703,7 +695,6 @@
       <categories>
         <category>MySQL</category>
         <category>性能调优</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>MySQL</tag>
@@ -724,7 +715,6 @@
       <categories>
         <category>MySQL</category>
         <category>性能调优</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>MySQL</tag>
@@ -838,7 +828,6 @@
       <categories>
         <category>Java</category>
         <category>并发编程</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>JMM</tag>
@@ -939,7 +928,6 @@
       <categories>
         <category>Java</category>
         <category>并发编程</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>CAS</tag>
@@ -1002,7 +990,6 @@
       <categories>
         <category>Java</category>
         <category>并发编程</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>synchronized</tag>
@@ -1019,7 +1006,6 @@
       <categories>
         <category>Java</category>
         <category>并发编程</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>Java并发</tag>
@@ -1128,7 +1114,6 @@
       <categories>
         <category>Java</category>
         <category>并发编程</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>ReentrantLock</tag>
@@ -1254,7 +1239,6 @@
       <categories>
         <category>Java</category>
         <category>并发编程</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>AQS</tag>
@@ -1302,7 +1286,6 @@
       <categories>
         <category>Java</category>
         <category>并发编程</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>AQS</tag>
@@ -1398,7 +1381,6 @@
       <categories>
         <category>Java</category>
         <category>并发编程</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>AQS</tag>
@@ -1499,7 +1481,6 @@
       <categories>
         <category>Java</category>
         <category>并发编程</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>AQS</tag>
@@ -1519,7 +1500,6 @@
       <categories>
         <category>Java</category>
         <category>并发编程</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>AQS</tag>
@@ -1647,7 +1627,6 @@
       <categories>
         <category>Java</category>
         <category>并发编程</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>ForkJoin</tag>
@@ -1750,7 +1729,6 @@
       <categories>
         <category>Java</category>
         <category>并发编程</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>ThreadPoolExecutor</tag>
@@ -1767,7 +1745,6 @@
       <categories>
         <category>Java</category>
         <category>并发编程</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>线程池</tag>
@@ -1873,7 +1850,6 @@
       <categories>
         <category>Java</category>
         <category>并发编程</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>HashMap</tag>
@@ -1933,7 +1909,6 @@
       <categories>
         <category>Java</category>
         <category>并发编程</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>synchronized</tag>
@@ -2096,7 +2071,6 @@
       <categories>
         <category>Java</category>
         <category>Spring</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>Spring原理</tag>
@@ -3490,7 +3464,6 @@ sync path
         <category>Java</category>
         <category>数据结构</category>
         <category>算法</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>Java</tag>
@@ -3569,7 +3542,6 @@ sync path
         <category>Java</category>
         <category>数据结构</category>
         <category>算法</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>Java</tag>
@@ -3632,7 +3604,6 @@ sync path
         <category>Java</category>
         <category>数据结构</category>
         <category>算法</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>Java</tag>
@@ -3708,7 +3679,6 @@ sync path
         <category>Java</category>
         <category>数据结构</category>
         <category>算法</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>Java</tag>
@@ -3955,7 +3925,6 @@ sync path
       <categories>
         <category>Java</category>
         <category>操作系统</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>Java</tag>
@@ -3980,7 +3949,6 @@ sync path
       <categories>
         <category>Java</category>
         <category>操作系统</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>Java</tag>
@@ -4345,7 +4313,6 @@ sync path
         <category>Java</category>
         <category>性能调优</category>
         <category>Jvm</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>Jvm</tag>
@@ -4554,7 +4521,6 @@ sync path
         <category>Java</category>
         <category>性能调优</category>
         <category>Jvm</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>Jvm</tag>
@@ -4830,7 +4796,6 @@ sync path
         <category>Java</category>
         <category>性能调优</category>
         <category>Jvm</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>Jvm</tag>
@@ -5050,7 +5015,6 @@ sync path
         <category>Java</category>
         <category>性能调优</category>
         <category>Jvm</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>Jvm</tag>
@@ -5248,7 +5212,6 @@ sync path
         <category>Java</category>
         <category>性能调优</category>
         <category>Jvm</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>Jvm</tag>
@@ -5538,7 +5501,6 @@ sync path
       <categories>
         <category>MySQL</category>
         <category>性能调优</category>
-        <category>学习计划</category>
         <category>Explain</category>
       </categories>
       <tags>
@@ -5682,7 +5644,6 @@ sync path
       <categories>
         <category>Java</category>
         <category>并发编程</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>JMM</tag>
@@ -5945,7 +5906,6 @@ sync path
       <categories>
         <category>Java</category>
         <category>并发编程</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>JMM</tag>
@@ -6153,7 +6113,6 @@ sync path
       <categories>
         <category>Java</category>
         <category>并发编程</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>synchronized</tag>
@@ -6322,7 +6281,6 @@ sync path
       <categories>
         <category>Java</category>
         <category>并发编程</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>AQS</tag>
@@ -6541,7 +6499,6 @@ sync path
       <categories>
         <category>Java</category>
         <category>并发编程</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>Future</tag>
@@ -6695,7 +6652,6 @@ sync path
       <categories>
         <category>Java</category>
         <category>并发编程</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>并发设计模式</tag>
@@ -6901,7 +6857,6 @@ sync path
       <categories>
         <category>Java</category>
         <category>并发编程</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>ForkJoin</tag>
@@ -7221,7 +7176,6 @@ sync path
         <category>Java</category>
         <category>数据结构</category>
         <category>算法</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>Java</tag>
@@ -7654,7 +7608,6 @@ sync path
       <categories>
         <category>Java</category>
         <category>计算机网络</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>Java</tag>
@@ -7803,7 +7756,6 @@ sync path
         <category>Java</category>
         <category>性能调优</category>
         <category>Jvm</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>Jvm</tag>
@@ -7981,7 +7933,6 @@ sync path
         <category>Java</category>
         <category>性能调优</category>
         <category>Jvm</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>Jvm</tag>
@@ -7992,11 +7943,34 @@ sync path
     <url>/2022/06/18/02-00-01-Spring%E4%B9%8B%E5%BA%95%E5%B1%82%E6%9E%B6%E6%9E%84%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
 
-<h2 id="Spring核心概念"><a href="#Spring核心概念" class="headerlink" title="Spring核心概念"></a>Spring核心概念</h2><h3 id="1、BeanDefinition"><a href="#1、BeanDefinition" class="headerlink" title="1、BeanDefinition"></a>1、BeanDefinition</h3>]]></content>
+<h2 id="Spring核心概念"><a href="#Spring核心概念" class="headerlink" title="Spring核心概念"></a>Spring核心概念</h2><h3 id="1、BeanDefinition"><a href="#1、BeanDefinition" class="headerlink" title="1、BeanDefinition"></a>1、BeanDefinition</h3><blockquote>
+<p>BeanDefinition即bean定义，相当于bean的元数据，其地位类比如下：BeanDefinition之于bean就像java  Class类至于java对象。【个人理解】</p>
+<p>BeanDefinition表示Bean定义，BeanDefinition中存在很多属性用来描述一个Bean的特点。比如：</p>
+<ul>
+<li>class，表示Bean类型</li>
+<li>scope，表示Bean作用域，单例或原型等</li>
+<li>lazyInit：表示Bean是否是懒加载</li>
+<li>initMethodName：表示Bean初始化时要执行的方法</li>
+<li>destroyMethodName：表示Bean销毁时要执行的方法</li>
+<li>还有很多…</li>
+</ul>
+<p><strong>声明式的bean</strong>:</p>
+<ol>
+<li><bean></bean></li>
+<li>@Bean</li>
+<li>@Component(@Service,@Controller)</li>
+</ol>
+<p><strong>编程式的bean:</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">AnnotationConfigApplicationContext context = <span class="keyword">new</span> AnnotationConfigApplicationContext(AppConfig.class);</span><br><span class="line"><span class="comment">// 生成一个BeanDefinition对象，并设置beanClass为User.class，并注册到ApplicationContext中</span></span><br><span class="line">AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition().getBeanDefinition();</span><br><span class="line">beanDefinition.setBeanClass(User.class);</span><br><span class="line">context.registerBeanDefinition(<span class="string">&quot;user&quot;</span>, beanDefinition);</span><br><span class="line">System.out.println(context.getBean(<span class="string">&quot;user&quot;</span>));</span><br></pre></td></tr></table></figure>
+
+<p>给BeanDefinition设置bean属性：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">beanDefinition.setScope(<span class="string">&quot;prototype&quot;</span>); <span class="comment">// 设置作用域</span></span><br><span class="line">beanDefinition.setInitMethodName(<span class="string">&quot;init&quot;</span>); <span class="comment">// 设置初始化方法</span></span><br><span class="line">beanDefinition.setLazyInit(<span class="keyword">true</span>); <span class="comment">// 设置懒加载</span></span><br></pre></td></tr></table></figure>
+
+</blockquote>
+]]></content>
       <categories>
         <category>Java</category>
         <category>Spring</category>
-        <category>学习计划</category>
       </categories>
       <tags>
         <tag>Spring核心概念</tag>
