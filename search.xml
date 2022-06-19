@@ -8153,4 +8153,16 @@ sync path
         <tag>Spring核心概念</tag>
       </tags>
   </entry>
+  <entry>
+    <title>Spring之Bean生命周期源码解析上</title>
+    <url>/2022/06/19/02-00-02-Spring%E4%B9%8BBean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90%E4%B8%8A/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
+      <categories>
+        <category>Java</category>
+        <category>Spring</category>
+      </categories>
+      <tags>
+        <tag>Spring生命周期</tag>
+      </tags>
+  </entry>
 </search>
