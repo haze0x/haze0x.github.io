@@ -8156,7 +8156,57 @@ sync path
   <entry>
     <title>Spring之Bean生命周期源码解析上</title>
     <url>/2022/06/19/02-00-02-Spring%E4%B9%8BBean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90%E4%B8%8A/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="一、Bean生命周期"><a href="#一、Bean生命周期" class="headerlink" title="一、Bean生命周期"></a>一、Bean生命周期</h2><h3 id="1、生成BeanDefinition"><a href="#1、生成BeanDefinition" class="headerlink" title="1、生成BeanDefinition"></a>1、生成BeanDefinition</h3><p><a href="https://www.processon.com/view/link/62af491e5653bb5256e05be7">spring底层类扫描流程图</a></p>
+<blockquote>
+<ol>
+<li>首先，通过ResourcePatternResolver获得指定包路径下的所有</li>
+</ol>
+<p>.class文件（Spring源码中将此文件包装成了Resource对象）</p>
+<ol>
+<li>遍历每个Resource对象</li>
+<li>利用MetadataReaderFactory解析Resource对象得到MetadataReader（在Spring源码中MetadataReaderFactory具体的实现类为CachingMetadataReaderFactory，MetadataReader的具体实现类为SimpleMetadataReader）</li>
+<li>利用MetadataReader进行excludeFilters和includeFilters，以及条件注解@Conditional的筛选（条件注解并不能理解：某个类上是否存在@Conditional注解，如果存在则调用注解中所指定的类的match方法进行匹配，匹配成功则通过筛选，匹配失败则pass掉。）</li>
+<li>筛选通过后，基于metadataReader生成ScannedGenericBeanDefinition</li>
+<li>再基于metadataReader判断是不是对应的类是不是接口或抽象类</li>
+<li>如果筛选通过，那么就表示扫描到了一个Bean，将ScannedGenericBeanDefinition加入结果集</li>
+</ol>
+</blockquote>
+<p>BeanDefinition最终扫面放入了beanDefinitionMap 和合并之后的mergedBeanDefinitions  map中。</p>
+<h3 id="2、合并BeanDefinition"><a href="#2、合并BeanDefinition" class="headerlink" title="2、合并BeanDefinition"></a>2、合并BeanDefinition</h3><p>基于如下情况，需要对BeanDefinition做合并</p>
+<blockquote>
+<p>通过扫描得到所有BeanDefinition之后，就可以根据BeanDefinition创建Bean对象了，但是在Spring中支持父子BeanDefinition，和Java父子类类似，但是完全不是一回事。父子BeanDefinition实际用的比较少，使用是这样的。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&lt;bean id=<span class="string">&quot;parent&quot;</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;com.zhouyu.service.Parent&quot;</span> scope=<span class="string">&quot;prototype&quot;</span>/&gt;</span><br><span class="line">&lt;bean id=<span class="string">&quot;child&quot;</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;com.zhouyu.service.Child&quot;</span>/&gt;</span><br><span class="line">    </span><br><span class="line">##结果：这么定义的情况下，child是单例Bean。</span><br><span class="line"></span><br><span class="line">&lt;bean id=<span class="string">&quot;parent&quot;</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;com.zhouyu.service.Parent&quot;</span> scope=<span class="string">&quot;prototype&quot;</span>/&gt;</span><br><span class="line">&lt;bean id=<span class="string">&quot;child&quot;</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;com.zhouyu.service.Child&quot;</span> parent=<span class="string">&quot;parent&quot;</span>/&gt;    </span><br><span class="line">##结果：</span><br><span class="line">但是这么定义的情况下，child就是原型Bean了。</span><br><span class="line">因为child的父BeanDefinition是parent，所以会继承parent上所定义的scope属性。</span><br><span class="line">而在根据child来生成Bean对象之前，需要进行BeanDefinition的合并，得到完整的child的BeanDefinition。</span><br></pre></td></tr></table></figure>
+
+<h3 id="3、加载类"><a href="#3、加载类" class="headerlink" title="3、加载类"></a>3、加载类</h3><p>Class&lt;?&gt; resolvedClass = resolveBeanClass(mbd, beanName); 方法进行类的加载。</p>
+<p><strong>ClassUtils.getDefaultClassLoader()</strong></p>
+<ol>
+<li>优先返回当前线程中的ClassLoader</li>
+<li>线程中类加载器为null的情况下，返回ClassUtils类的类加载器</li>
+<li>如果ClassUtils类的类加载器为空，那么则表示是Bootstrap类加载器加载的ClassUtils类，那么则返回系统类加载器</li>
+</ol>
+<h3 id="4、实例化前"><a href="#4、实例化前" class="headerlink" title="4、实例化前"></a>4、实例化前</h3><p>**InstantiationAwareBeanPostProcessor.postProcessBeforeInstantiation()**：完成实例化前的扩展。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ZhouyuBeanPostProcessor</span> <span class="keyword">implements</span> <span class="title">InstantiationAwareBeanPostProcessor</span> </span>&#123;</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Object <span class="title">postProcessBeforeInstantiation</span><span class="params">(Class&lt;?&gt; beanClass, String beanName)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (<span class="string">&quot;userService&quot;</span>.equals(beanName)) &#123;</span><br><span class="line">			System.out.println(<span class="string">&quot;实例化前&quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">## 结果</span><br><span class="line">userService这个Bean，在实例化前会直接返回一个由我们所定义的UserService对象。如果是这样，表示不需要Spring来实例化了，并且后续的Spring依赖注入也不会进行了，会跳过一些步骤，直接执行初始化后这一步。</span><br></pre></td></tr></table></figure>
+
+<h3 id="5、实例化"><a href="#5、实例化" class="headerlink" title="5、实例化"></a>5、实例化</h3><p><strong>5.1 Supplier创建对象</strong></p>
+<blockquote>
+<p>首先判断BeanDefinition中是否设置了Supplier，如果设置了则调用Supplier的get()得到对象。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition().getBeanDefinition();</span><br><span class="line">beanDefinition.setInstanceSupplier(<span class="keyword">new</span> Supplier&lt;Object&gt;() &#123;</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Object <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">new</span> UserService();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;);</span><br><span class="line">context.registerBeanDefinition(<span class="string">&quot;userService&quot;</span>, beanDefinition);</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p><strong>5.2 工厂方法创建对象</strong></p>
+<blockquote>
+<p>如果没有设置Supplier，则检查BeanDefinition中是否设置了factoryMethod，也就是工厂方法，有两种方式可以设置factoryMethod。</p>
+<p>Spring发现当前BeanDefinition方法设置了工厂方法后，就会区分这两种方式，然后调用工厂方法得到对象。</p>
+<p>值得注意的是，我们通过@Bean所定义的BeanDefinition，是存在factoryMethod和factoryBean的，也就是和上面的方式二非常类似，@Bean所注解的方法就是factoryMethod，AppConfig对象就是factoryBean。如果@Bean所注解的方法是static的，那么对应的就是方式一。</p>
+</blockquote>
+<p><strong>5.3 推断构造方法</strong></p>
+<h3 id="6、BeanDefinition的后置处理"><a href="#6、BeanDefinition的后置处理" class="headerlink" title="6、BeanDefinition的后置处理"></a>6、BeanDefinition的后置处理</h3><p>**MergedBeanDefinitionPostProcessor.postProcessMergedBeanDefinition()**：在真正给属性赋值之前，可以对此时的BeanDefinition进行加工。</p>
+<h3 id="7、实例化后"><a href="#7、实例化后" class="headerlink" title="7、实例化后"></a>7、实例化后</h3><p>**InstantiationAwareBeanPostProcessor.postProcessAfterInstantiation()**：实例化后调用</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ZhouyuInstantiationAwareBeanPostProcessor</span> <span class="keyword">implements</span> <span class="title">InstantiationAwareBeanPostProcessor</span> </span>&#123;</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">postProcessAfterInstantiation</span><span class="params">(Object bean, String beanName)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (<span class="string">&quot;userService&quot;</span>.equals(beanName)) &#123;</span><br><span class="line">			UserService userService = (UserService) bean;</span><br><span class="line">			userService.test();</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="8、自动注入"><a href="#8、自动注入" class="headerlink" title="8、自动注入"></a>8、自动注入</h3><h3 id="9、-处理属性"><a href="#9、-处理属性" class="headerlink" title="9、 处理属性"></a>9、 处理属性</h3><h3 id="10、执行Aware"><a href="#10、执行Aware" class="headerlink" title="10、执行Aware"></a>10、执行Aware</h3><h3 id="11、初始化前"><a href="#11、初始化前" class="headerlink" title="11、初始化前"></a>11、初始化前</h3><h3 id="12、初始化"><a href="#12、初始化" class="headerlink" title="12、初始化"></a>12、初始化</h3><h3 id="13、初始化后"><a href="#13、初始化后" class="headerlink" title="13、初始化后"></a>13、初始化后</h3>]]></content>
       <categories>
         <category>Java</category>
         <category>Spring</category>
