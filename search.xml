@@ -8248,6 +8248,7 @@ sync path
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
 
 <p><a href="https://www.processon.com/view/link/62b34904637689074ac6d48a">Spring整体流程图</a></p>
+<p><a href="https://www.processon.com/view/link/62af491e5653bb5256e05be7">Spring启动扫描逻辑</a></p>
 ]]></content>
       <categories>
         <category>Java</category>
