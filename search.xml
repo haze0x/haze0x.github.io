@@ -8258,4 +8258,202 @@ sync path
         <tag>Spring生命周期</tag>
       </tags>
   </entry>
+  <entry>
+    <title>Spring之依赖注入源码解析</title>
+    <url>/2022/06/25/02-00-04-Spring%E4%B9%8B%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<p>依赖注入底层原理流程图：<br><a href="https://www.processon.com/view/link/5f899fa5f346fb06e1d8f570">https://www.processon.com/view/link/5f899fa5f346fb06e1d8f570</a></p>
+<h2 id="一、-Spring中到底有几种依赖注入的方式？"><a href="#一、-Spring中到底有几种依赖注入的方式？" class="headerlink" title="一、 Spring中到底有几种依赖注入的方式？"></a>一、 Spring中到底有几种依赖注入的方式？</h2><blockquote>
+<p>首先分两种：</p>
+<ol>
+<li>手动注入</li>
+<li>自动注入</li>
+</ol>
+</blockquote>
+<h3 id="1、手动注入"><a href="#1、手动注入" class="headerlink" title="1、手动注入"></a>1、手动注入</h3><p>在XML中定义Bean时，就是手动注入，因为是<strong>程序员手动给某个属性指定了值</strong>。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&lt;bean name=<span class="string">&quot;userService&quot;</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;com.luban.service.UserService&quot;</span>&gt;</span><br><span class="line">	&lt;property name=<span class="string">&quot;orderService&quot;</span> ref=<span class="string">&quot;orderService&quot;</span>/&gt;</span><br><span class="line">&lt;/bean&gt;</span><br></pre></td></tr></table></figure>
+<p>上面这种底层是通过<strong>set方法</strong>进行注入。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&lt;bean name=<span class="string">&quot;userService&quot;</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;com.luban.service.UserService&quot;</span>&gt;</span><br><span class="line">	&lt;constructor-arg index=<span class="string">&quot;0&quot;</span> ref=<span class="string">&quot;orderService&quot;</span>/&gt;</span><br><span class="line">&lt;/bean&gt;</span><br></pre></td></tr></table></figure>
+<p>上面这种底层是通过<strong>构造方法</strong>进行注入。</p>
+<p>所以手动注入的底层也就是分为两种：</p>
+<ol>
+<li>set方法注入</li>
+<li>构造方法注入</li>
+</ol>
+<h3 id="2、自动注入"><a href="#2、自动注入" class="headerlink" title="2、自动注入"></a>2、自动注入</h3><p>自动注入又分为两种：</p>
+<ol>
+<li>XML的autowire自动注入</li>
+<li>@Autowired注解的自动注入</li>
+</ol>
+<h4 id="2-1-XML的autowire自动注入"><a href="#2-1-XML的autowire自动注入" class="headerlink" title="2.1 XML的autowire自动注入"></a>2.1 XML的autowire自动注入</h4><p>在XML中，我们可以在定义一个Bean时去指定这个Bean的自动注入模式：</p>
+<ol>
+<li>byType</li>
+<li>byName</li>
+<li>constructor</li>
+<li>default</li>
+<li>no</li>
+</ol>
+<p>比如：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&lt;bean id=<span class="string">&quot;userService&quot;</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;com.luban.service.UserService&quot;</span> autowire=<span class="string">&quot;byType&quot;</span>/&gt;</span><br></pre></td></tr></table></figure>
+<p>这么写，表示Spring会自动的给userService中所有的属性自动赋值（<strong>不需要</strong>这个属性上有@Autowired注解，但需要这个属性有对应的<strong>set方法</strong>）。</p>
+<p>在创建Bean的过程中，在填充属性时，Spring会去解析当前类，把<strong>当前类的所有方法</strong>都解析出来，Spring会去解析每个方法得到对应的PropertyDescriptor对象，PropertyDescriptor中有几个属性：</p>
+<ol>
+<li><strong>name：这个name并不是方法的名字，而是拿方法名字进过处理后的名字</strong><ol>
+<li><strong>如果方法名字以“get”开头，比如“getXXX”,那么name=XXX</strong></li>
+<li><strong>如果方法名字以“is”开头，比如“isXXX”,那么name=XXX</strong></li>
+<li><strong>如果方法名字以“set”开头，比如“setXXX”,那么name=XXX</strong></li>
+</ol>
+</li>
+<li><strong>readMethodRef：表示get方法的Method对象的引用</strong></li>
+<li><strong>readMethodName：表示get方法的名字</strong></li>
+<li><strong>writeMethodRef：表示set方法的Method对象的引用</strong></li>
+<li><strong>writeMethodName：表示set方法的名字</strong></li>
+<li><strong>propertyTypeRef：如果有get方法那么对应的就是返回值的类型，如果是set方法那么对应的就是set方法中唯一参数的类型</strong></li>
+</ol>
+<blockquote>
+<p><strong>get方法的定义是：</strong> 方法参数个数为0个，并且 （方法名字以”get”开头 或者 方法名字以”is”开头并且方法的返回类型为boolean）</p>
+<p><strong>set方法的定义是：</strong>方法参数个数为1个，并且 （方法名字以”set”开头并且方法返回类型为void）</p>
+<p>所以，Spring在通过byName的自动填充属性时流程是：</p>
+<ol>
+<li>找到所有set方法所对应的XXX部分的名字</li>
+<li>根据XXX部分的名字去获取bean</li>
+</ol>
+<p>Spring在通过byType的自动填充属性时流程是：</p>
+<ol>
+<li>获取到set方法中的唯一参数的参数类型，并且根据该类型去容器中获取bean</li>
+<li>如果找到多个，会报错。</li>
+</ol>
+</blockquote>
+<p>以上，分析了autowire的byType和byName情况，那么接下来分析constructor，constructor表示通过构造方法注入，其实这种情况就比较简单了，没有byType和byName那么复杂。</p>
+<p>如果是constructor，那么就可以不写set方法了，当某个bean是通过构造方法来注入时，spring利用构造方法的参数信息从Spring容器中去找bean，找到bean之后作为参数传给构造方法，从而实例化得到一个bean对象，并完成属性赋值（属性赋值的代码得程序员来写）。</p>
+<p>我们这里先不考虑一个类有多个构造方法的情况，后面单独讲<strong>推断构造方法</strong>。我们这里只考虑只有一个有参构造方法。</p>
+<p>其实构造方法注入相当于byType+byName，普通的byType是根据set方法中的参数类型去找bean，找到多个会报错，而constructor就是通过构造方法中的参数类型去找bean，如果找到多个会根据参数名确定。</p>
+<p>另外两个：</p>
+<ol>
+<li>no，表示关闭autowire</li>
+<li>default，表示默认值，我们一直演示的某个bean的autowire，而也可以直接在<beans>标签中设置autowire，如果设置了，那么<bean>标签中设置的autowire如果为default，那么则会用<beans>标签中设置的autowire。</beans></bean></beans></li>
+</ol>
+<p>可以发现XML中的自动注入是挺强大的，那么问题来了，<strong>为什么我们平时都是用的@Autowired注解呢？而没有用上文说的这种自动注入方式呢？</strong></p>
+<p>@Autowired注解相当于XML中的autowire属性的<strong>注解方式的替代</strong>。这是在官网上有提到的。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Essentially, the <span class="meta">@Autowired</span> annotation provides the same capabilities as described in Autowiring Collaborators but with more fine-grained control and wider applicability</span><br></pre></td></tr></table></figure>
+
+
+<p>翻译一下：<br>从本质上讲，@Autowired注解提供了与autowire相同的功能，但是拥有更细粒度的控制和更广泛的适用性。</p>
+<p>注意：<strong>更细粒度的控制</strong>。</p>
+<p>XML中的autowire控制的是整个bean的所有属性，而@Autowired注解是直接写在某个属性、某个set方法、某个构造方法上的。</p>
+<p>再举个例子，如果一个类有多个构造方法，那么如果用XML的autowire=constructor，你无法控制到底用哪个构造方法，而你可以用@Autowired注解来直接指定你想用哪个构造方法。</p>
+<p>同时，用@Autowired注解，还可以控制，哪些属性想被自动注入，哪些属性不想，这也是细粒度的控制。</p>
+<p>但是@Autowired无法区分byType和byName，@Autowired是先byType，如果找到多个则byName。</p>
+<p>那么XML的自动注入底层其实也就是:</p>
+<ol>
+<li>set方法注入</li>
+<li>构造方法注入</li>
+</ol>
+<h4 id="2-2-Autowired注解的自动注入"><a href="#2-2-Autowired注解的自动注入" class="headerlink" title="2.2 @Autowired注解的自动注入"></a>2.2 @Autowired注解的自动注入</h4><blockquote>
+<p>上文说了@Autowired注解，是byType和byName的结合。</p>
+<p>@Autowired注解可以写在：</p>
+<ol>
+<li>属性上：先根据<strong>属性类型</strong>去找Bean，如果找到多个再根据<strong>属性名</strong>确定一个</li>
+<li>构造方法上：先根据方法<strong>参数类型</strong>去找Bean，如果找到多个再根据<strong>参数名</strong>确定一个</li>
+<li>set方法上：先根据方法<strong>参数类型</strong>去找Bean，如果找到多个再根据<strong>参数名</strong>确定一个</li>
+</ol>
+</blockquote>
+<blockquote>
+<p>而这种底层到了：</p>
+<ol>
+<li>属性注入</li>
+<li>set方法注入</li>
+<li>构造方法注入</li>
+</ol>
+</blockquote>
+<ul>
+<li><strong>寻找注入点</strong></li>
+</ul>
+<p>在创建一个Bean的过程中，Spring会利用AutowiredAnnotationBeanPostProcessor的**postProcessMergedBeanDefinition()**找出注入点并缓存，找注入点的流程为：</p>
+<ol>
+<li>遍历当前类的所有的属性字段Field</li>
+<li>查看字段上是否存在@Autowired、@Value、@Inject中的其中任意一个，存在则认为该字段是一个注入点</li>
+<li>如果字段是static的，则不进行注入</li>
+<li>获取@Autowired中的required属性的值</li>
+<li>将字段信息构造成一个<strong>AutowiredFieldElement对象</strong>，作为一个<strong>注入点对象</strong>添加到currElements集合中。</li>
+<li>遍历当前类的所有方法Method</li>
+<li>判断当前Method是否是<strong>桥接方法</strong>，如果是找到原方法</li>
+<li>查看方法上是否存在@Autowired、@Value、@Inject中的其中任意一个，存在则认为该方法是一个注入点</li>
+<li>如果方法是static的，则不进行注入</li>
+<li>获取@Autowired中的required属性的值</li>
+<li>将方法信息构造成一个<strong>AutowiredMethodElement对象</strong>，作为一个<strong>注入点对象</strong>添加到currElements集合中。</li>
+<li>遍历完当前类的字段和方法后，将<strong>遍历父类</strong>的，直到没有父类。</li>
+<li>最后将currElements集合封装成一个InjectionMetadata对象，作为当前Bean对于的注入点集合对象，并缓存。</li>
+</ol>
+<ul>
+<li>static的字段或方法为什么不支持</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Scope(&quot;prototype&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Scope(&quot;prototype&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserService</span>  </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Autowired</span></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> OrderService orderService;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;test123&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>看上面代码，UserService和OrderService都是原型Bean，假设Spring支持static字段进行自动注入，那么现在调用两次</p>
+<ol>
+<li>UserService userService1 = context.getBean(“userService”)</li>
+<li>UserService userService2 = context.getBean(“userService”)</li>
+</ol>
+<p>问此时，userService1的orderService值是什么？还是它自己注入的值吗？</p>
+<p>答案是不是，一旦userService2 创建好了之后，static orderService字段的值就发生了修改了，从而出现bug。</p>
+<ul>
+<li><strong>桥接方法</strong></li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">UserInterface</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">setOrderService</span><span class="params">(T t)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserService</span> <span class="keyword">implements</span> <span class="title">UserInterface</span>&lt;<span class="title">OrderService</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> OrderService orderService;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="meta">@Autowired</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setOrderService</span><span class="params">(OrderService orderService)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.orderService = orderService;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;test123&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>UserService对应的字节码为：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// class version 52.0 (52)</span></span><br><span class="line"><span class="comment">// access flags 0x21</span></span><br><span class="line"><span class="comment">// signature Ljava/lang/Object;Lcom/zhouyu/service/UserInterface&lt;Lcom/zhouyu/service/OrderService;&gt;;</span></span><br><span class="line"><span class="comment">// declaration: com/zhouyu/service/UserService implements com.zhouyu.service.UserInterface&lt;com.zhouyu.service.OrderService&gt;</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">com</span>/<span class="title">zhouyu</span>/<span class="title">service</span>/<span class="title">UserService</span> <span class="keyword">implements</span> <span class="title">com</span>/<span class="title">zhouyu</span>/<span class="title">service</span>/<span class="title">UserInterface</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// compiled from: UserService.java</span></span><br><span class="line"></span><br><span class="line">  <span class="meta">@Lorg</span>/springframework/stereotype/Component;()</span><br><span class="line"></span><br><span class="line">  <span class="comment">// access flags 0x2</span></span><br><span class="line">  <span class="keyword">private</span> Lcom/zhouyu/service/OrderService; orderService</span><br><span class="line"></span><br><span class="line">  <span class="comment">// access flags 0x1</span></span><br><span class="line">  <span class="keyword">public</span> &lt;init&gt;()V</span><br><span class="line">   L0</span><br><span class="line">    LINENUMBER <span class="number">12</span> L0</span><br><span class="line">    ALOAD <span class="number">0</span></span><br><span class="line">    INVOKESPECIAL java/lang/Object.&lt;init&gt; ()V</span><br><span class="line">    RETURN</span><br><span class="line">   L1</span><br><span class="line">    LOCALVARIABLE <span class="keyword">this</span> Lcom/zhouyu/service/UserService; L0 L1 <span class="number">0</span></span><br><span class="line">    MAXSTACK = <span class="number">1</span></span><br><span class="line">    MAXLOCALS = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// access flags 0x1</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="title">setOrderService</span><span class="params">(Lcom/zhouyu/service/OrderService;)</span>V</span></span><br><span class="line"><span class="function">  @Lorg/springframework/beans/factory/annotation/Autowired</span>;()</span><br><span class="line">   L0</span><br><span class="line">    LINENUMBER <span class="number">19</span> L0</span><br><span class="line">    ALOAD <span class="number">0</span></span><br><span class="line">    ALOAD <span class="number">1</span></span><br><span class="line">    PUTFIELD com/zhouyu/service/UserService.orderService : Lcom/zhouyu/service/OrderService;</span><br><span class="line">   L1</span><br><span class="line">    LINENUMBER <span class="number">20</span> L1</span><br><span class="line">    RETURN</span><br><span class="line">   L2</span><br><span class="line">    LOCALVARIABLE <span class="keyword">this</span> Lcom/zhouyu/service/UserService; L0 L2 <span class="number">0</span></span><br><span class="line">    LOCALVARIABLE orderService Lcom/zhouyu/service/OrderService; L0 L2 <span class="number">1</span></span><br><span class="line">    MAXSTACK = <span class="number">2</span></span><br><span class="line">    MAXLOCALS = <span class="number">2</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// access flags 0x1</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="title">test</span><span class="params">()</span>V</span></span><br><span class="line"><span class="function">   L0</span></span><br><span class="line"><span class="function">    LINENUMBER 23 L0</span></span><br><span class="line"><span class="function">    GETSTATIC java/lang/System.out : Ljava/io/PrintStream</span>;</span><br><span class="line">    LDC <span class="string">&quot;test123&quot;</span></span><br><span class="line">    INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/String;)V</span><br><span class="line">   L1</span><br><span class="line">    LINENUMBER <span class="number">24</span> L1</span><br><span class="line">    RETURN</span><br><span class="line">   L2</span><br><span class="line">    LOCALVARIABLE <span class="keyword">this</span> Lcom/zhouyu/service/UserService; L0 L2 <span class="number">0</span></span><br><span class="line">    MAXSTACK = <span class="number">2</span></span><br><span class="line">    MAXLOCALS = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// access flags 0x1041</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> synthetic bridge <span class="title">setOrderService</span><span class="params">(Ljava/lang/Object;)</span>V</span></span><br><span class="line"><span class="function">  @Lorg/springframework/beans/factory/annotation/Autowired</span>;()</span><br><span class="line">   L0</span><br><span class="line">    LINENUMBER <span class="number">11</span> L0</span><br><span class="line">    ALOAD <span class="number">0</span></span><br><span class="line">    ALOAD <span class="number">1</span></span><br><span class="line">    CHECKCAST com/zhouyu/service/OrderService</span><br><span class="line">    INVOKEVIRTUAL com/zhouyu/service/UserService.setOrderService (Lcom/zhouyu/service/OrderService;)V</span><br><span class="line">    RETURN</span><br><span class="line">   L1</span><br><span class="line">    LOCALVARIABLE <span class="keyword">this</span> Lcom/zhouyu/service/UserService; L0 L1 <span class="number">0</span></span><br><span class="line">    MAXSTACK = <span class="number">2</span></span><br><span class="line">    MAXLOCALS = <span class="number">2</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>可以看到在UserSerivce的字节码中有两个setOrderService方法：</p>
+<ol>
+<li> public setOrderService(Lcom/zhouyu/service/OrderService;)V</li>
+<li> public synthetic bridge setOrderService(Ljava/lang/Object;)V</li>
+</ol>
+<p>并且都是存在@Autowired注解的。</p>
+<p>所以在Spring中需要处理这种情况，当遍历到桥接方法时，得找到原方法。</p>
+<ul>
+<li><strong>注入点进行注入</strong></li>
+</ul>
+<blockquote>
+<p>Spring在AutowiredAnnotationBeanPostProcessor的**postProcessProperties()**方法中，会遍历所找到的注入点依次进行注入。</p>
+</blockquote>
+<p><strong>字段注入</strong></p>
+<blockquote>
+<ol>
+<li>遍历所有的<strong>AutowiredFieldElement对象。</strong></li>
+<li>将对应的字段封装为<strong>DependencyDescriptor对象</strong>。</li>
+<li>调用BeanFactory的resolveDependency()方法，传入<strong>DependencyDescriptor对象</strong>，进行依赖查找，找到当前字段所匹配的Bean对象。</li>
+<li>将<strong>DependencyDescriptor对象</strong>和所找到的<strong>结果对象beanName</strong>封装成一个<strong>ShortcutDependencyDescriptor对象</strong>作为缓存，比如如果当前Bean是原型Bean，那么下次再来创建该Bean时，就可以直接拿缓存的结果对象beanName去BeanFactory中去那bean对象了，不用再次进行查找了</li>
+<li>利用反射将结果对象赋值给字段。</li>
+</ol>
+</blockquote>
+<p> <strong>Set方法注入</strong></p>
+<blockquote>
+<ol>
+<li>遍历所有的<strong>AutowiredMethodElement对象</strong></li>
+<li>遍历将对应的方法的参数，将每个参数封装成<strong>MethodParameter对象</strong></li>
+<li>将<strong>MethodParameter对象</strong>封装为<strong>DependencyDescriptor对象</strong></li>
+<li>调用BeanFactory的resolveDependency()方法，传入<strong>DependencyDescriptor对象</strong>，进行依赖查找，找到当前方法参数所匹配的Bean对象。</li>
+<li>将<strong>DependencyDescriptor对象</strong>和所找到的<strong>结果对象beanName</strong>封装成一个<strong>ShortcutDependencyDescriptor对象</strong>作为缓存，比如如果当前Bean是原型Bean，那么下次再来创建该Bean时，就可以直接拿缓存的结果对象beanName去BeanFactory中去那bean对象了，不用再次进行查找了</li>
+<li>利用反射将找到的所有结果对象传给当前方法，并执行。</li>
+</ol>
+</blockquote>
+]]></content>
+      <categories>
+        <category>Java</category>
+        <category>Spring</category>
+      </categories>
+      <tags>
+        <tag>Spring依赖注入</tag>
+      </tags>
+  </entry>
 </search>
