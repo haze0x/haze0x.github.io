@@ -143,7 +143,7 @@
 <li>singletonFactories中缓存的是ObjectFactory，表示对象工厂，表示用来创建早期bean对象的工厂。</li>
 </ul>
 </blockquote>
-<h2 id="1-4解决循环依赖流程"><a href="#1-4解决循环依赖流程" class="headerlink" title="1.4解决循环依赖流程"></a>1.4解决循环依赖流程</h2><p>![stickPicture (1)](02-00-05-Spring之循环依赖底层源码解析/stickPicture (1).png)</p>
+<h2 id="1-4解决循环依赖流程"><a href="#1-4解决循环依赖流程" class="headerlink" title="1.4解决循环依赖流程"></a>1.4解决循环依赖流程</h2><p><img src="/2022/06/26/02-00-05-Spring%E4%B9%8B%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E5%BA%95%E5%B1%82%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/stickPicture.png" alt="stickPicture"></p>
 <blockquote>
 <ul>
 <li><p>这个ObjectFactory就是上文说的labmda表达式，中间有getEarlyBeanReference方法，注意存入singletonFactories时并不会执行lambda表达式，也就是不会执行getEarlyBeanReference方法</p>
