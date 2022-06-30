@@ -11,7 +11,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title>02_00_07_Spring之配置类解析源码解析 |  Sword Heart</title>
+      <title>Spring之配置类解析源码解析 |  Sword Heart</title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/favicon.ico" />
@@ -66,7 +66,7 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  02_00_07_Spring之配置类解析源码解析
+  Spring之配置类解析源码解析
 </h1>
  
 
@@ -76,13 +76,17 @@
     <div class="article-meta">
       <a href="/2022/06/30/02-00-07-Spring%E4%B9%8B%E9%85%8D%E7%BD%AE%E7%B1%BB%E8%A7%A3%E6%9E%90%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" class="article-date">
   <time datetime="2022-06-30T15:23:50.000Z" itemprop="datePublished">2022-06-30</time>
-</a>   
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/Spring/">Spring</a>
+  </div>
+  
 <div class="word_count">
     <span class="post-time">
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">6</span>
+            <span class="post-count">739</span>
         </span>
     </span>
 
@@ -91,20 +95,58 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> Reading time≈</span>
-            <span class="post-count">1 min</span>
+            <span class="post-count">2 min</span>
         </span>
     </span>
 </div>
  
     </div>
       
+    <div class="tocbot"></div>
+
 
 
 
   
     <div class="article-entry" itemprop="articleBody">
        
-  <p id="hitokoto">正在加载一言...</p> 
+  <p id="hitokoto">正在加载一言...</p>
+
+<h1 id="Spring之配置类解析源码解析过程"><a href="#Spring之配置类解析源码解析过程" class="headerlink" title="Spring之配置类解析源码解析过程"></a>Spring之配置类解析源码解析过程</h1><blockquote>
+<ol>
+<li>在启动Spring时，需要传入一个AppConfig.class给ApplicationContext，ApplicationContext会根据AppConfig类封装为一个BeanDefinition，这种BeanDefinition我们把它称为配置类BeanDefinition。</li>
+<li>ConfigurationClassPostProcessor中会把配置类BeanDefinition取出来</li>
+<li>构造一个ConfigurationClassParser用来解析配置类BeanDefinition，并且会生成一个配置类对象ConfigurationClass</li>
+<li>如果配置类上存在@Component注解，那么<strong>解析配置类中的内部类（这里有递归，如果内部类也是配置类的话）</strong></li>
+<li>如果配置类上存在@PropertySource注解，那么则解析该注解，并得到PropertySource对象，并添加到environment中去</li>
+<li>如果配置类上存在@ComponentScan注解，那么则解析该注解，进行扫描，扫描得到一系列的BeanDefinition对象，然后判断这些BeanDefinition是不是也是配置类BeanDefinition（只要存在@Component注解就是配置类，所以基本上扫描出来的都是配置类），如果是则继续解析该配置类，<strong>（也有递归）</strong>，并且会生成对应的ConfigurationClass</li>
+<li>如果配置类上存在@Import注解，那么则判断Import的类的类型：<ol>
+<li>如果是ImportSelector，那么调用执行selectImports方法得到类名，然后在把这个类当做配置类进行解析<strong>（也是递归）</strong></li>
+<li>如果是ImportBeanDefinitionRegistrar，那么则生成一个ImportBeanDefinitionRegistrar实例对象，并添加到配置类对象中（ConfigurationClass）的<strong>importBeanDefinitionRegistrars</strong>属性中。</li>
+</ol>
+</li>
+<li>如果配置类上存在@ImportResource注解，那么则把导入进来的资源路径存在配置类对象中的<strong>importedResources</strong>属性中。</li>
+<li>如果配置类中存在@Bean的方法，那么则把这些方法封装为BeanMethod对象，并添加到配置类对象中的<strong>beanMethods</strong>属性中。</li>
+<li>如果配置类实现了某些接口，则看这些接口内是否定义了@Bean的默认方法</li>
+<li>如果配置类有父类，则把父类当做配置类进行解析</li>
+<li>AppConfig这个配置类会对应一个ConfigurationClass，同时在解析的过程中也会生成另外的一些ConfigurationClass，接下来就利用reader来进一步解析ConfigurationClass<ol>
+<li>如果ConfigurationClass是通过@Import注解导入进来的，则把这个类生成一个BeanDefinition，同时解析这个类上@Scope,@Lazy等注解信息，并注册BeanDefinition</li>
+<li>如果ConfigurationClass中存在一些BeanMethod，也就是定义了一些@Bean，那么则解析这些@Bean，并生成对应的BeanDefinition，并注册</li>
+<li>如果ConfigurationClass中导入了一些资源文件，比如xx.xml，那么则解析这些xx.xml文件，得到并注册BeanDefinition</li>
+<li>如果ConfigurationClass中导入了一些ImportBeanDefinitionRegistrar，那么则执行对应的registerBeanDefinitions进行BeanDefinition的注册</li>
+</ol>
+</li>
+</ol>
+</blockquote>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><blockquote>
+<ol>
+<li>解析AppConfig类，生成对应的ConfigurationClass</li>
+<li>再扫描，扫描到的类都会生成对应的BeanDefinition，并且同时这些类也是ConfigurationClass</li>
+<li>再解析ConfigurationClass的其他信息，比如@ImportResource注解的处理，@Import注解的处理，@Bean注解的处理</li>
+</ol>
+</blockquote>
+<h1 id="整体流程图"><a href="#整体流程图" class="headerlink" title="整体流程图"></a>整体流程图</h1><p><a target="_blank" rel="noopener" href="https://www.processon.com/view/link/62b34904637689074ac6d48a">Spring整体流程图</a></p>
+ 
       <!-- reward -->
       
     </div>
@@ -173,6 +215,8 @@
 </div>
 
 <div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring%E5%90%AF%E5%8A%A8/" rel="tag">Spring启动</a></li></ul>
+
     </footer>
   </div>
 
