@@ -86,7 +86,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">3.2k</span>
+            <span class="post-count">3.4k</span>
         </span>
     </span>
 
@@ -95,7 +95,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> Reading time≈</span>
-            <span class="post-count">12 min</span>
+            <span class="post-count">13 min</span>
         </span>
     </span>
 </div>
@@ -130,11 +130,16 @@
 <li><p>RedisDB：redis 数据库，select db</p>
 </li>
 <li><p>Dict：字典，所有的k,v都是存在于字典里面；字典里面包含两个dictht【两个dictht原因是扩容使用，redis的渐进式rehash扩容，当需要扩容时不是一次性将数据迁移过去，而是分多次】，扩容是主线程进行的。</p>
-<p>dictht：就是一个数组，里面存储的是dictEntity指针，指向dictEntity，dictht默认大小4。当dictht使用的长度达到dictht长度时，则进行扩容。当扩容没有结束时，查询数据会去dictht[0]、doctht[1]中分别查找。</p>
-<p>dictEntity：dictht里面存储的数据，包含 key、value、next【当键发生hash冲突的时候将冲突的值使用next指针指向，并且采用头插法，后面进来的数据放到表头，用来解决hash冲突】；value指向redisObject对象，存放具体的值</p>
-<p>redisObject：封装redis 键值对的值数据的，type：指定用什么类型【string、list、hash、set、zset】，encoding用来表示编码类型【raw、int、embstr、ziplist】、*ptr指向真实存储的位置</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">## redis数据结构<span class="comment">// 字典【其它不重要的略过】</span></span><br><span class="line">ReidsDb:</span><br><span class="line">	dict *dict; ---&gt;dict:</span><br><span class="line">						dictht ht[<span class="number">2</span>]; ---&gt;dictEntry:</span><br><span class="line">										  	*key <span class="comment">// sds</span></span><br><span class="line">                                            *val  <span class="comment">// 存储数据 -------&gt;redisObject:</span></span><br><span class="line">                                            *next <span class="comment">// 解决hash冲突   	type</span></span><br><span class="line">                                                					  encoding</span><br><span class="line">                                                					  *ptr <span class="comment">// 真正指向真实数据-----&gt;	</span></span><br></pre></td></tr></table></figure></li>
+<blockquote>
+<p>1.Redis扩容并不是一次性把数据全部迁移到新数组。当然首先会去帮你扩容，扩容完之后，挨个hash桶位进行迁移，这就是渐进式的rehash。<br>2.动态扩容是指新增的数据会放入新的hashtable中，如果是老数据则先从旧的hashtable中迁移到新的hashtable，会操作两个DB。<br>老DB是用ht[0]指向的，新DB使用ht[1]指向的。如果没有rehash，ht[1]是指向null的。<br>如果有新数据插入，会先在老DB中判断，ht[0]没有就会放入ht[1]里面，ht[0]存在就迁移到ht[1]。</p>
+</blockquote>
+</li>
 </ul>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/358366217">渐进式rehash</a></p>
+<p>  dictht：就是一个数组，里面存储的是dictEntity指针，指向dictEntity，dictht默认大小4。当dictht使用的长度达到dictht长度时，则进行扩容。当扩容没有结束时，查询数据会去dictht[0]、doctht[1]中分别查找。</p>
+<p>  dictEntity：dictht里面存储的数据，包含 key、value、next【当键发生hash冲突的时候将冲突的值使用next指针指向，并且采用头插法，后面进来的数据放到表头，用来解决hash冲突】；value指向redisObject对象，存放具体的值</p>
+<p>  redisObject：封装redis 键值对的值数据的，type：指定用什么类型【string、list、hash、set、zset】，encoding用来表示编码类型【raw、int、embstr、ziplist】、*ptr指向真实存储的位置</p>
+  <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">## redis数据结构<span class="comment">// 字典【其它不重要的略过】</span></span><br><span class="line">ReidsDb:</span><br><span class="line">	dict *dict; ---&gt;dict:</span><br><span class="line">				dictht ht[<span class="number">2</span>]; ---&gt;dictEntry:</span><br><span class="line">										  	*key <span class="comment">// sds</span></span><br><span class="line">                                            *val  <span class="comment">// 存储数据 -------&gt;redisObject:</span></span><br><span class="line">                                            *next <span class="comment">// 解决hash冲突   	type</span></span><br><span class="line">                                                					  encoding</span><br><span class="line">                                                					  *ptr <span class="comment">// 真正指向真实数据-----&gt;	</span></span><br></pre></td></tr></table></figure>
 <h3 id><a href="#" class="headerlink" title></a><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/RedisDB%E4%B8%BB%E4%BD%93%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.png" alt="RedisDB主体数据结构"></h3><p>redis数据类型</p>
 <p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/image-20220605183209350.png" alt="image-20220605183209350"></p>
 <ul>
