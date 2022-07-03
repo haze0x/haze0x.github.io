@@ -78,7 +78,7 @@
   <time datetime="2022-07-02T02:34:48.000Z" itemprop="datePublished">2022-07-02</time>
 </a> 
   <div class="article-category">
-    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/Spring/">Spring</a>
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6/">源码框架</a> / <a class="article-category-link" href="/categories/Java/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6/Spring/">Spring</a>
   </div>
   
 <div class="word_count">
@@ -86,7 +86,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">2.5k</span>
+            <span class="post-count">3.6k</span>
         </span>
     </span>
 
@@ -95,7 +95,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> Reading time≈</span>
-            <span class="post-count">11 min</span>
+            <span class="post-count">16 min</span>
         </span>
     </span>
 </div>
@@ -207,6 +207,66 @@
 <p>通过DefaultAdvisorAutoProxyCreator会直接去找所有Advisor类型的Bean，根据Advisor中的PointCut和Advice信息，确定要代理的Bean以及代理逻辑。</p>
 <p>但是，我们发现，通过这种方式，我们得依靠某一个类来实现定义我们的Advisor，或者Advise，或者Pointcut，那么这个步骤能不能更加简化一点呢？</p>
 </blockquote>
+<h2 id="8、注解方式"><a href="#8、注解方式" class="headerlink" title="8、注解方式"></a>8、注解方式</h2><blockquote>
+<p>比如我们能不能只定义一个类，然后通过在类中的方法上通过某些注解，来定义PointCut以及Advice，可以的，比如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Aspect</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ZhouyuAspect</span> </span>&#123;</span><br><span class="line">	<span class="meta">@Before(&quot;execution(public void com.zhouyu.service.UserService.test())&quot;)</span> <span class="comment">// pointcut ---&gt;表面代理逻辑生效的地方 @Before是advice</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">zhouyuBefore</span><span class="params">(JoinPoint joinPoint)</span> </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;zhouyuBefore&quot;</span>); <span class="comment">// ---&gt;代理逻辑</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过上面这个类，我们就直接定义好了所要代理的方法(通过一个表达式)，以及代理逻辑（被@Before修饰的方法），简单明了，这样对于Spring来说，它要做的就是来解析这些注解了，解析之后得到对应的Pointcut对象、Advice对象，生成Advisor对象，扔进ProxyFactory中，进而产生对应的代理对象，具体怎么解析这些注解就是**@EnableAspectJAutoProxy注解**所要做的事情了，后面详细分析。</p>
+</blockquote>
+<h2 id="9、AOP中的概念"><a href="#9、AOP中的概念" class="headerlink" title="9、AOP中的概念"></a>9、<strong>AOP中的概念</strong></h2><ul>
+<li>基本概念</li>
+</ul>
+<blockquote>
+<ol>
+<li>Aspect：表示切面，比如被@Aspect注解的类就是切面，可以在切面中去定义Pointcut、Advice等等</li>
+<li>Join point：表示连接点，表示一个程序在执行过程中的一个点，比如一个方法的执行，比如一个异常的处理，在Spring AOP中，一个连接点通常表示一个方法的执行。【当前被代理的方法】</li>
+<li>Advice：表示通知，表示在一个特定连接点上所采取的动作。Advice分为不同的类型，后面详细讨论，在很多AOP框架中，包括Spring，会用Interceptor拦截器来实现Advice，并且在连接点周围维护一个Interceptor链</li>
+<li>Pointcut：表示切点，用来匹配一个或多个连接点，Advice与切点表达式是关联在一起的，Advice将会执行在和切点表达式所匹配的连接点上</li>
+<li>Introduction：可以使用@DeclareParents来给所匹配的类添加一个接口，并指定一个默认实现</li>
+<li>Target object：目标对象，被代理对象</li>
+<li>AOP proxy：表示代理工厂，用来创建代理对象的，在Spring Framework中，要么是JDK动态代理，要么是CGLIB代理</li>
+<li>Weaving：表示织入，表示创建代理对象的动作，这个动作可以发生在编译时期（比如Aspejctj），或者运行时，比如Spring AOP</li>
+</ol>
+</blockquote>
+<ul>
+<li><p><strong>Advice在Spring AOP中对应API</strong></p>
+<p>上面说到的Aspject中的注解，其中有五个是用来定义Advice的，表示代理逻辑，以及执行时机：</p>
+<ol>
+<li>@Before</li>
+<li>@AfterReturning</li>
+<li>@AfterThrowing</li>
+<li>@After</li>
+<li>@Around</li>
+</ol>
+<p>我们前面也提到过，Spring自己也提供了类似的执行实际的实现类：</p>
+<ol>
+<li>接口MethodBeforeAdvice，继承了接口BeforeAdvice</li>
+<li>接口AfterReturningAdvice</li>
+<li>接口ThrowsAdvice</li>
+<li>接口AfterAdvice</li>
+<li>接口MethodInterceptor</li>
+</ol>
+<p>Spring会把五个注解解析为对应的Advice类：</p>
+<ol>
+<li>@Before：AspectJMethodBeforeAdvice，实际上就是一个MethodBeforeAdvice</li>
+<li>@AfterReturning：AspectJAfterReturningAdvice，实际上就是一个AfterReturningAdvice</li>
+<li>@AfterThrowing：AspectJAfterThrowingAdvice，实际上就是一个MethodInterceptor</li>
+<li>@After：AspectJAfterAdvice，实际上就是一个MethodInterceptor</li>
+<li>@Around：AspectJAroundAdvice，实际上就是一个MethodInterceptor</li>
+</ol>
+</li>
+<li><p><strong>TargetSource的使用</strong></p>
+<blockquote>
+<p>在我们日常的AOP中，被代理对象就是Bean对象，是由BeanFactory给我们创建出来的，但是Spring AOP中提供了TargetSource机制，可以让我们用来自定义逻辑来创建<strong>被代理对象</strong>。</p>
+<p>比如之前所提到的@Lazy注解，当加在属性上时，会产生一个代理对象赋值给这个属性，产生代理对象的代码为：</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> Object <span class="title">buildLazyResolutionProxy</span><span class="params">(<span class="keyword">final</span> DependencyDescriptor descriptor, <span class="keyword">final</span> <span class="meta">@Nullable</span> String beanName)</span> </span>&#123;</span><br><span class="line">		BeanFactory beanFactory = getBeanFactory();</span><br><span class="line">		Assert.state(beanFactory <span class="keyword">instanceof</span> DefaultListableBeanFactory,</span><br><span class="line">				<span class="string">&quot;BeanFactory needs to be a DefaultListableBeanFactory&quot;</span>);</span><br><span class="line">		<span class="keyword">final</span> DefaultListableBeanFactory dlbf = (DefaultListableBeanFactory) beanFactory;</span><br><span class="line">		TargetSource ts = <span class="keyword">new</span> TargetSource() &#123;</span><br><span class="line">			<span class="meta">@Override</span></span><br><span class="line">			<span class="keyword">public</span> Class&lt;?&gt; getTargetClass() &#123;</span><br><span class="line">				<span class="keyword">return</span> descriptor.getDependencyType();</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="meta">@Override</span></span><br><span class="line">			<span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isStatic</span><span class="params">()</span> </span>&#123;</span><br><span class="line">				<span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="meta">@Override</span></span><br><span class="line">			<span class="function"><span class="keyword">public</span> Object <span class="title">getTarget</span><span class="params">()</span> </span>&#123;</span><br><span class="line">				Set&lt;String&gt; autowiredBeanNames = (beanName != <span class="keyword">null</span> ? <span class="keyword">new</span> LinkedHashSet&lt;&gt;(<span class="number">1</span>) : <span class="keyword">null</span>);</span><br><span class="line">				Object target = dlbf.doResolveDependency(descriptor, beanName, autowiredBeanNames, <span class="keyword">null</span>);</span><br><span class="line">				<span class="keyword">if</span> (target == <span class="keyword">null</span>) &#123;</span><br><span class="line">					Class&lt;?&gt; type = getTargetClass();</span><br><span class="line">					<span class="keyword">if</span> (Map.class == type) &#123;</span><br><span class="line">						<span class="keyword">return</span> Collections.emptyMap();</span><br><span class="line">					&#125;</span><br><span class="line">					<span class="keyword">else</span> <span class="keyword">if</span> (List.class == type) &#123;</span><br><span class="line">						<span class="keyword">return</span> Collections.emptyList();</span><br><span class="line">					&#125;</span><br><span class="line">					<span class="keyword">else</span> <span class="keyword">if</span> (Set.class == type || Collection.class == type) &#123;</span><br><span class="line">						<span class="keyword">return</span> Collections.emptySet();</span><br><span class="line">					&#125;</span><br><span class="line">					<span class="keyword">throw</span> <span class="keyword">new</span> NoSuchBeanDefinitionException(descriptor.getResolvableType(),</span><br><span class="line">							<span class="string">&quot;Optional dependency not present for lazy injection point&quot;</span>);</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">if</span> (autowiredBeanNames != <span class="keyword">null</span>) &#123;</span><br><span class="line">					<span class="keyword">for</span> (String autowiredBeanName : autowiredBeanNames) &#123;</span><br><span class="line">						<span class="keyword">if</span> (dlbf.containsBean(autowiredBeanName)) &#123;</span><br><span class="line">							dlbf.registerDependentBean(autowiredBeanName, beanName);</span><br><span class="line">						&#125;</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">return</span> target;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="meta">@Override</span></span><br><span class="line">			<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">releaseTarget</span><span class="params">(Object target)</span> </span>&#123;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;;</span><br><span class="line">		ProxyFactory pf = <span class="keyword">new</span> ProxyFactory();</span><br><span class="line">		pf.setTargetSource(ts);</span><br><span class="line">		Class&lt;?&gt; dependencyType = descriptor.getDependencyType();</span><br><span class="line">		<span class="keyword">if</span> (dependencyType.isInterface()) &#123;</span><br><span class="line">			pf.addInterface(dependencyType);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> pf.getProxy(dlbf.getBeanClassLoader());</span><br><span class="line">	&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这段代码就利用了ProxyFactory来生成代理对象，以及使用了TargetSource，以达到代理对象在执行某个方法时，调用TargetSource的getTarget()方法实时得到一个<strong>被代理对象</strong>。</p>
+</blockquote>
+</li>
+</ul>
  
       <!-- reward -->
       
@@ -276,7 +336,7 @@
 </div>
 
 <div id="share-mask"></div>  
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-AOP/" rel="tag">Spring AOP</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-AOP/" rel="tag">Spring AOP</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6/" rel="tag">源码框架</a></li></ul>
 
     </footer>
   </div>
@@ -426,15 +486,23 @@
     </li>
     
     <li class="nav-item">
-      <a class="nav-item-link" href="/tags/%E6%97%85%E8%A1%8C/">旅行</a>
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
     </li>
     
     <li class="nav-item">
-      <a class="nav-item-link" href="/tags/%E6%91%84%E5%BD%B1/">摄影</a>
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
     </li>
     
     <li class="nav-item">
-      <a class="nav-item-link" href="/friends">友链</a>
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
     </li>
     
     <li class="nav-item">
@@ -443,10 +511,6 @@
     
     <li class="nav-item">
       <a class="nav-item-link" href="/player">播放器</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/pdf">文件预览</a>
     </li>
     
   </ul>

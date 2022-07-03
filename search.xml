@@ -98,6 +98,7 @@
       </categories>
       <tags>
         <tag>Jvm</tag>
+        <tag>性能调优</tag>
       </tags>
   </entry>
   <entry>
@@ -120,6 +121,7 @@
       </categories>
       <tags>
         <tag>Jvm</tag>
+        <tag>性能调优</tag>
       </tags>
   </entry>
   <entry>
@@ -145,6 +147,7 @@
       <tags>
         <tag>Jvm</tag>
         <tag>ZGC</tag>
+        <tag>性能调优</tag>
       </tags>
   </entry>
   <entry>
@@ -227,6 +230,7 @@
       <tags>
         <tag>MySQL</tag>
         <tag>索引</tag>
+        <tag>性能调优</tag>
       </tags>
   </entry>
   <entry>
@@ -332,6 +336,7 @@
       </categories>
       <tags>
         <tag>MySQL</tag>
+        <tag>性能调优</tag>
       </tags>
   </entry>
   <entry>
@@ -441,6 +446,7 @@
       <tags>
         <tag>MySQL</tag>
         <tag>索引优化</tag>
+        <tag>性能调优</tag>
       </tags>
   </entry>
   <entry>
@@ -532,6 +538,7 @@
       <tags>
         <tag>MySQL</tag>
         <tag>索引优化</tag>
+        <tag>性能调优</tag>
       </tags>
   </entry>
   <entry>
@@ -593,6 +600,7 @@
         <tag>MySQL</tag>
         <tag>事务</tag>
         <tag>MVCC</tag>
+        <tag>性能调优</tag>
       </tags>
   </entry>
   <entry>
@@ -701,6 +709,7 @@
         <tag>事务</tag>
         <tag>隔离级别</tag>
         <tag>锁</tag>
+        <tag>性能调优</tag>
       </tags>
   </entry>
   <entry>
@@ -721,6 +730,7 @@
         <tag>事务</tag>
         <tag>隔离级别</tag>
         <tag>锁</tag>
+        <tag>性能调优</tag>
       </tags>
   </entry>
   <entry>
@@ -736,8 +746,7 @@
       </categories>
       <tags>
         <tag>Jvm</tag>
-        <tag>旅行</tag>
-        <tag>摄影</tag>
+        <tag>性能调优</tag>
       </tags>
   </entry>
   <entry>
@@ -831,6 +840,7 @@
       </categories>
       <tags>
         <tag>JMM</tag>
+        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
@@ -931,6 +941,7 @@
       </categories>
       <tags>
         <tag>CAS</tag>
+        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
@@ -993,6 +1004,7 @@
       </categories>
       <tags>
         <tag>synchronized</tag>
+        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
@@ -1009,6 +1021,7 @@
       </categories>
       <tags>
         <tag>Java并发</tag>
+        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
@@ -1118,6 +1131,7 @@
       <tags>
         <tag>ReentrantLock</tag>
         <tag>AQS</tag>
+        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
@@ -1243,6 +1257,7 @@
       <tags>
         <tag>AQS</tag>
         <tag>Semaphore</tag>
+        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
@@ -1291,6 +1306,7 @@
         <tag>AQS</tag>
         <tag>CyclicBarrier</tag>
         <tag>ReentrantReadWriteLock</tag>
+        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
@@ -1386,6 +1402,7 @@
         <tag>AQS</tag>
         <tag>CyclicBarrier</tag>
         <tag>ReentrantReadWriteLock</tag>
+        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
@@ -1489,6 +1506,7 @@
         <tag>SynchronousQueue</tag>
         <tag>PriorityBlockingQueue</tag>
         <tag>DelayQueue</tag>
+        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
@@ -1503,6 +1521,7 @@
       </categories>
       <tags>
         <tag>AQS</tag>
+        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
@@ -1630,6 +1649,7 @@
       </categories>
       <tags>
         <tag>ForkJoin</tag>
+        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
@@ -1733,6 +1753,7 @@
       <tags>
         <tag>ThreadPoolExecutor</tag>
         <tag>线程池</tag>
+        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
@@ -1749,6 +1770,7 @@
       <tags>
         <tag>线程池</tag>
         <tag>并发总结</tag>
+        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
@@ -1853,6 +1875,7 @@
       </categories>
       <tags>
         <tag>HashMap</tag>
+        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
@@ -1912,6 +1935,7 @@
       </categories>
       <tags>
         <tag>synchronized</tag>
+        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
@@ -2068,10 +2092,12 @@
 ]]></content>
       <categories>
         <category>Java</category>
+        <category>源码框架</category>
         <category>Spring</category>
       </categories>
       <tags>
         <tag>Spring原理</tag>
+        <tag>源码框架</tag>
       </tags>
   </entry>
   <entry>
@@ -2242,6 +2268,7 @@
       <tags>
         <tag>redis</tag>
         <tag>数据结构</tag>
+        <tag>分布式</tag>
       </tags>
   </entry>
   <entry>
@@ -2359,6 +2386,7 @@
         <tag>redis</tag>
         <tag>持久化</tag>
         <tag>哨兵</tag>
+        <tag>分布式</tag>
       </tags>
   </entry>
   <entry>
@@ -2367,6 +2395,9 @@
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
 
 <h2 id="Redis底层核心数据结构-amp-Redis6新特性"><a href="#Redis底层核心数据结构-amp-Redis6新特性" class="headerlink" title="Redis底层核心数据结构&amp;Redis6新特性"></a>Redis底层核心数据结构&amp;Redis6新特性</h2><h3 id="1、List底层数据结构"><a href="#1、List底层数据结构" class="headerlink" title="1、List底层数据结构"></a>1、List底层数据结构</h3>]]></content>
+      <tags>
+        <tag>分布式</tag>
+      </tags>
   </entry>
   <entry>
     <title>Redis底层核心数据结构&amp;Redis6新特性【上】</title>
@@ -2401,6 +2432,7 @@
 <p>  dictEntity：dictht里面存储的数据，包含 key、value、next【当键发生hash冲突的时候将冲突的值使用next指针指向，并且采用头插法，后面进来的数据放到表头，用来解决hash冲突】；value指向redisObject对象，存放具体的值</p>
 <p>  redisObject：封装redis 键值对的值数据的，type：指定用什么类型【string、list、hash、set、zset】，encoding用来表示编码类型【raw、int、embstr、ziplist】、*ptr指向真实存储的位置</p>
   <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">## redis数据结构<span class="comment">// 字典【其它不重要的略过】</span></span><br><span class="line">ReidsDb:</span><br><span class="line">	dict *dict; ---&gt;dict:</span><br><span class="line">				dictht ht[<span class="number">2</span>]; ---&gt;dictEntry:</span><br><span class="line">										  	*key <span class="comment">// sds</span></span><br><span class="line">                                            *val  <span class="comment">// 存储数据 -------&gt;redisObject:</span></span><br><span class="line">                                            *next <span class="comment">// 解决hash冲突   	type</span></span><br><span class="line">                                                					  encoding</span><br><span class="line">                                                					  *ptr <span class="comment">// 真正指向真实数据-----&gt;	</span></span><br></pre></td></tr></table></figure>
+
 <h3 id><a href="#" class="headerlink" title></a><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/RedisDB%E4%B8%BB%E4%BD%93%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.png" alt="RedisDB主体数据结构"></h3><p>redis数据类型</p>
 <p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/image-20220605183209350.png" alt="image-20220605183209350"></p>
 <ul>
@@ -2536,6 +2568,7 @@
       <tags>
         <tag>redis</tag>
         <tag>Java</tag>
+        <tag>分布式</tag>
       </tags>
   </entry>
   <entry>
@@ -2657,6 +2690,7 @@
       <tags>
         <tag>redis</tag>
         <tag>Java</tag>
+        <tag>分布式</tag>
       </tags>
   </entry>
   <entry>
@@ -2712,6 +2746,7 @@
       <tags>
         <tag>redis</tag>
         <tag>分布式锁</tag>
+        <tag>分布式</tag>
       </tags>
   </entry>
   <entry>
@@ -2838,6 +2873,7 @@
       <tags>
         <tag>redis</tag>
         <tag>缓存</tag>
+        <tag>分布式</tag>
       </tags>
   </entry>
   <entry>
@@ -2855,6 +2891,7 @@
       <tags>
         <tag>redis</tag>
         <tag>总结</tag>
+        <tag>分布式</tag>
       </tags>
   </entry>
   <entry>
@@ -3258,6 +3295,7 @@ sync path
       </categories>
       <tags>
         <tag>zookeeper</tag>
+        <tag>分布式</tag>
         <tag>集群Leader选举</tag>
       </tags>
   </entry>
@@ -3276,6 +3314,7 @@ sync path
       <tags>
         <tag>总结</tag>
         <tag>zookeeper</tag>
+        <tag>分布式</tag>
       </tags>
   </entry>
   <entry>
@@ -3342,6 +3381,7 @@ sync path
       </categories>
       <tags>
         <tag>zookeeper</tag>
+        <tag>分布式</tag>
         <tag>ZAB</tag>
       </tags>
   </entry>
@@ -3471,6 +3511,7 @@ sync path
       <tags>
         <tag>Java</tag>
         <tag>数组</tag>
+        <tag>算法</tag>
       </tags>
   </entry>
   <entry>
@@ -3549,6 +3590,7 @@ sync path
       <tags>
         <tag>Java</tag>
         <tag>链表</tag>
+        <tag>算法</tag>
       </tags>
   </entry>
   <entry>
@@ -3611,6 +3653,7 @@ sync path
       <tags>
         <tag>Java</tag>
         <tag>栈</tag>
+        <tag>算法</tag>
       </tags>
   </entry>
   <entry>
@@ -3686,6 +3729,7 @@ sync path
       <tags>
         <tag>Java</tag>
         <tag>队列</tag>
+        <tag>算法</tag>
       </tags>
   </entry>
   <entry>
@@ -3780,6 +3824,7 @@ sync path
         <tag>贪心算法</tag>
         <tag>回溯算法</tag>
         <tag>分治算法</tag>
+        <tag>算法</tag>
       </tags>
   </entry>
   <entry>
@@ -3802,6 +3847,9 @@ sync path
       <categories>
         <category>算法</category>
       </categories>
+      <tags>
+        <tag>算法</tag>
+      </tags>
   </entry>
   <entry>
     <title>操作系统原理</title>
@@ -4036,7 +4084,19 @@ sync path
   <entry>
     <title>About Me</title>
     <url>/2021/12/11/about/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<blockquote>
+<p>A developer, live in SZ, China.</p>
+</blockquote>
+<span id="more"></span>
+
+<!-- <img src="" alt="avatar" width="300" style="border-radius:50%"/> -->
+
+]]></content>
+      <tags>
+        <tag>随笔</tag>
+      </tags>
   </entry>
   <entry>
     <title>Hello World</title>
@@ -4319,6 +4379,7 @@ sync path
       </categories>
       <tags>
         <tag>Jvm</tag>
+        <tag>性能调优</tag>
       </tags>
   </entry>
   <entry>
@@ -4527,6 +4588,7 @@ sync path
       </categories>
       <tags>
         <tag>Jvm</tag>
+        <tag>性能调优</tag>
       </tags>
   </entry>
   <entry>
@@ -4802,6 +4864,7 @@ sync path
       </categories>
       <tags>
         <tag>Jvm</tag>
+        <tag>性能调优</tag>
       </tags>
   </entry>
   <entry>
@@ -5021,6 +5084,7 @@ sync path
       </categories>
       <tags>
         <tag>Jvm</tag>
+        <tag>性能调优</tag>
       </tags>
   </entry>
   <entry>
@@ -5219,6 +5283,7 @@ sync path
       <tags>
         <tag>Jvm</tag>
         <tag>ZGC</tag>
+        <tag>性能调优</tag>
       </tags>
   </entry>
   <entry>
@@ -5511,6 +5576,7 @@ sync path
         <tag>索引</tag>
         <tag>Explain</tag>
         <tag>执行计划</tag>
+        <tag>性能调优</tag>
       </tags>
   </entry>
   <entry>
@@ -5650,6 +5716,7 @@ sync path
       </categories>
       <tags>
         <tag>JMM</tag>
+        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
@@ -5913,6 +5980,7 @@ sync path
       <tags>
         <tag>JMM</tag>
         <tag>线程</tag>
+        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
@@ -6119,6 +6187,7 @@ sync path
       </categories>
       <tags>
         <tag>synchronized</tag>
+        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
@@ -6289,6 +6358,7 @@ sync path
         <tag>AQS</tag>
         <tag>BlockingQueue</tag>
         <tag>阻塞队列</tag>
+        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
@@ -6507,6 +6577,7 @@ sync path
         <tag>Future</tag>
         <tag>CompletableFuture</tag>
         <tag>Disruptor</tag>
+        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
@@ -6658,6 +6729,7 @@ sync path
       </categories>
       <tags>
         <tag>并发设计模式</tag>
+        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
@@ -6865,6 +6937,7 @@ sync path
         <tag>ForkJoin</tag>
         <tag>ThreadPoolExecutor</tag>
         <tag>CompletableFuture</tag>
+        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
@@ -7005,6 +7078,7 @@ sync path
       <tags>
         <tag>redis</tag>
         <tag>缓存</tag>
+        <tag>分布式</tag>
       </tags>
   </entry>
   <entry>
@@ -7182,6 +7256,7 @@ sync path
       </categories>
       <tags>
         <tag>Java</tag>
+        <tag>算法</tag>
       </tags>
   </entry>
   <entry>
@@ -7762,6 +7837,7 @@ sync path
       </categories>
       <tags>
         <tag>Jvm</tag>
+        <tag>性能调优</tag>
       </tags>
   </entry>
   <entry>
@@ -7939,6 +8015,7 @@ sync path
       </categories>
       <tags>
         <tag>Jvm</tag>
+        <tag>性能调优</tag>
       </tags>
   </entry>
   <entry>
@@ -8152,10 +8229,12 @@ sync path
 ]]></content>
       <categories>
         <category>Java</category>
+        <category>源码框架</category>
         <category>Spring</category>
       </categories>
       <tags>
         <tag>Spring核心概念</tag>
+        <tag>源码框架</tag>
       </tags>
   </entry>
   <entry>
@@ -8241,10 +8320,12 @@ sync path
 <h3 id="12、初始化"><a href="#12、初始化" class="headerlink" title="12、初始化"></a>12、初始化</h3><h3 id="13、初始化后"><a href="#13、初始化后" class="headerlink" title="13、初始化后"></a>13、初始化后</h3>]]></content>
       <categories>
         <category>Java</category>
+        <category>源码框架</category>
         <category>Spring</category>
       </categories>
       <tags>
         <tag>Spring生命周期</tag>
+        <tag>源码框架</tag>
       </tags>
   </entry>
   <entry>
@@ -8257,10 +8338,12 @@ sync path
 ]]></content>
       <categories>
         <category>Java</category>
+        <category>源码框架</category>
         <category>Spring</category>
       </categories>
       <tags>
         <tag>Spring生命周期</tag>
+        <tag>源码框架</tag>
       </tags>
   </entry>
   <entry>
@@ -8454,10 +8537,12 @@ sync path
 ]]></content>
       <categories>
         <category>Java</category>
+        <category>源码框架</category>
         <category>Spring</category>
       </categories>
       <tags>
         <tag>Spring依赖注入</tag>
+        <tag>源码框架</tag>
       </tags>
   </entry>
   <entry>
@@ -8526,10 +8611,12 @@ sync path
 ]]></content>
       <categories>
         <category>Java</category>
+        <category>源码框架</category>
         <category>Spring</category>
       </categories>
       <tags>
         <tag>Spring循环依赖</tag>
+        <tag>源码框架</tag>
       </tags>
   </entry>
   <entry>
@@ -8774,10 +8861,12 @@ sync path
 ]]></content>
       <categories>
         <category>Java</category>
+        <category>源码框架</category>
         <category>Spring</category>
       </categories>
       <tags>
         <tag>Spring启动</tag>
+        <tag>源码框架</tag>
       </tags>
   </entry>
   <entry>
@@ -8822,10 +8911,12 @@ sync path
 ]]></content>
       <categories>
         <category>Java</category>
+        <category>源码框架</category>
         <category>Spring</category>
       </categories>
       <tags>
         <tag>Spring启动</tag>
+        <tag>源码框架</tag>
       </tags>
   </entry>
   <entry>
@@ -8928,13 +9019,75 @@ sync path
 <p>通过DefaultAdvisorAutoProxyCreator会直接去找所有Advisor类型的Bean，根据Advisor中的PointCut和Advice信息，确定要代理的Bean以及代理逻辑。</p>
 <p>但是，我们发现，通过这种方式，我们得依靠某一个类来实现定义我们的Advisor，或者Advise，或者Pointcut，那么这个步骤能不能更加简化一点呢？</p>
 </blockquote>
+<h2 id="8、注解方式"><a href="#8、注解方式" class="headerlink" title="8、注解方式"></a>8、注解方式</h2><blockquote>
+<p>比如我们能不能只定义一个类，然后通过在类中的方法上通过某些注解，来定义PointCut以及Advice，可以的，比如：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Aspect</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ZhouyuAspect</span> </span>&#123;</span><br><span class="line">	<span class="meta">@Before(&quot;execution(public void com.zhouyu.service.UserService.test())&quot;)</span> <span class="comment">// pointcut ---&gt;表面代理逻辑生效的地方 @Before是advice</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">zhouyuBefore</span><span class="params">(JoinPoint joinPoint)</span> </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;zhouyuBefore&quot;</span>); <span class="comment">// ---&gt;代理逻辑</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过上面这个类，我们就直接定义好了所要代理的方法(通过一个表达式)，以及代理逻辑（被@Before修饰的方法），简单明了，这样对于Spring来说，它要做的就是来解析这些注解了，解析之后得到对应的Pointcut对象、Advice对象，生成Advisor对象，扔进ProxyFactory中，进而产生对应的代理对象，具体怎么解析这些注解就是**@EnableAspectJAutoProxy注解**所要做的事情了，后面详细分析。</p>
+</blockquote>
+<h2 id="9、AOP中的概念"><a href="#9、AOP中的概念" class="headerlink" title="9、AOP中的概念"></a>9、<strong>AOP中的概念</strong></h2><ul>
+<li>基本概念</li>
+</ul>
+<blockquote>
+<ol>
+<li>Aspect：表示切面，比如被@Aspect注解的类就是切面，可以在切面中去定义Pointcut、Advice等等</li>
+<li>Join point：表示连接点，表示一个程序在执行过程中的一个点，比如一个方法的执行，比如一个异常的处理，在Spring AOP中，一个连接点通常表示一个方法的执行。【当前被代理的方法】</li>
+<li>Advice：表示通知，表示在一个特定连接点上所采取的动作。Advice分为不同的类型，后面详细讨论，在很多AOP框架中，包括Spring，会用Interceptor拦截器来实现Advice，并且在连接点周围维护一个Interceptor链</li>
+<li>Pointcut：表示切点，用来匹配一个或多个连接点，Advice与切点表达式是关联在一起的，Advice将会执行在和切点表达式所匹配的连接点上</li>
+<li>Introduction：可以使用@DeclareParents来给所匹配的类添加一个接口，并指定一个默认实现</li>
+<li>Target object：目标对象，被代理对象</li>
+<li>AOP proxy：表示代理工厂，用来创建代理对象的，在Spring Framework中，要么是JDK动态代理，要么是CGLIB代理</li>
+<li>Weaving：表示织入，表示创建代理对象的动作，这个动作可以发生在编译时期（比如Aspejctj），或者运行时，比如Spring AOP</li>
+</ol>
+</blockquote>
+<ul>
+<li><p><strong>Advice在Spring AOP中对应API</strong></p>
+<p>上面说到的Aspject中的注解，其中有五个是用来定义Advice的，表示代理逻辑，以及执行时机：</p>
+<ol>
+<li>@Before</li>
+<li>@AfterReturning</li>
+<li>@AfterThrowing</li>
+<li>@After</li>
+<li>@Around</li>
+</ol>
+<p>我们前面也提到过，Spring自己也提供了类似的执行实际的实现类：</p>
+<ol>
+<li>接口MethodBeforeAdvice，继承了接口BeforeAdvice</li>
+<li>接口AfterReturningAdvice</li>
+<li>接口ThrowsAdvice</li>
+<li>接口AfterAdvice</li>
+<li>接口MethodInterceptor</li>
+</ol>
+<p>Spring会把五个注解解析为对应的Advice类：</p>
+<ol>
+<li>@Before：AspectJMethodBeforeAdvice，实际上就是一个MethodBeforeAdvice</li>
+<li>@AfterReturning：AspectJAfterReturningAdvice，实际上就是一个AfterReturningAdvice</li>
+<li>@AfterThrowing：AspectJAfterThrowingAdvice，实际上就是一个MethodInterceptor</li>
+<li>@After：AspectJAfterAdvice，实际上就是一个MethodInterceptor</li>
+<li>@Around：AspectJAroundAdvice，实际上就是一个MethodInterceptor</li>
+</ol>
+</li>
+<li><p><strong>TargetSource的使用</strong></p>
+<blockquote>
+<p>在我们日常的AOP中，被代理对象就是Bean对象，是由BeanFactory给我们创建出来的，但是Spring AOP中提供了TargetSource机制，可以让我们用来自定义逻辑来创建<strong>被代理对象</strong>。</p>
+<p>比如之前所提到的@Lazy注解，当加在属性上时，会产生一个代理对象赋值给这个属性，产生代理对象的代码为：</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> Object <span class="title">buildLazyResolutionProxy</span><span class="params">(<span class="keyword">final</span> DependencyDescriptor descriptor, <span class="keyword">final</span> <span class="meta">@Nullable</span> String beanName)</span> </span>&#123;</span><br><span class="line">		BeanFactory beanFactory = getBeanFactory();</span><br><span class="line">		Assert.state(beanFactory <span class="keyword">instanceof</span> DefaultListableBeanFactory,</span><br><span class="line">				<span class="string">&quot;BeanFactory needs to be a DefaultListableBeanFactory&quot;</span>);</span><br><span class="line">		<span class="keyword">final</span> DefaultListableBeanFactory dlbf = (DefaultListableBeanFactory) beanFactory;</span><br><span class="line">		TargetSource ts = <span class="keyword">new</span> TargetSource() &#123;</span><br><span class="line">			<span class="meta">@Override</span></span><br><span class="line">			<span class="keyword">public</span> Class&lt;?&gt; getTargetClass() &#123;</span><br><span class="line">				<span class="keyword">return</span> descriptor.getDependencyType();</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="meta">@Override</span></span><br><span class="line">			<span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isStatic</span><span class="params">()</span> </span>&#123;</span><br><span class="line">				<span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="meta">@Override</span></span><br><span class="line">			<span class="function"><span class="keyword">public</span> Object <span class="title">getTarget</span><span class="params">()</span> </span>&#123;</span><br><span class="line">				Set&lt;String&gt; autowiredBeanNames = (beanName != <span class="keyword">null</span> ? <span class="keyword">new</span> LinkedHashSet&lt;&gt;(<span class="number">1</span>) : <span class="keyword">null</span>);</span><br><span class="line">				Object target = dlbf.doResolveDependency(descriptor, beanName, autowiredBeanNames, <span class="keyword">null</span>);</span><br><span class="line">				<span class="keyword">if</span> (target == <span class="keyword">null</span>) &#123;</span><br><span class="line">					Class&lt;?&gt; type = getTargetClass();</span><br><span class="line">					<span class="keyword">if</span> (Map.class == type) &#123;</span><br><span class="line">						<span class="keyword">return</span> Collections.emptyMap();</span><br><span class="line">					&#125;</span><br><span class="line">					<span class="keyword">else</span> <span class="keyword">if</span> (List.class == type) &#123;</span><br><span class="line">						<span class="keyword">return</span> Collections.emptyList();</span><br><span class="line">					&#125;</span><br><span class="line">					<span class="keyword">else</span> <span class="keyword">if</span> (Set.class == type || Collection.class == type) &#123;</span><br><span class="line">						<span class="keyword">return</span> Collections.emptySet();</span><br><span class="line">					&#125;</span><br><span class="line">					<span class="keyword">throw</span> <span class="keyword">new</span> NoSuchBeanDefinitionException(descriptor.getResolvableType(),</span><br><span class="line">							<span class="string">&quot;Optional dependency not present for lazy injection point&quot;</span>);</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">if</span> (autowiredBeanNames != <span class="keyword">null</span>) &#123;</span><br><span class="line">					<span class="keyword">for</span> (String autowiredBeanName : autowiredBeanNames) &#123;</span><br><span class="line">						<span class="keyword">if</span> (dlbf.containsBean(autowiredBeanName)) &#123;</span><br><span class="line">							dlbf.registerDependentBean(autowiredBeanName, beanName);</span><br><span class="line">						&#125;</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">return</span> target;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="meta">@Override</span></span><br><span class="line">			<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">releaseTarget</span><span class="params">(Object target)</span> </span>&#123;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;;</span><br><span class="line">		ProxyFactory pf = <span class="keyword">new</span> ProxyFactory();</span><br><span class="line">		pf.setTargetSource(ts);</span><br><span class="line">		Class&lt;?&gt; dependencyType = descriptor.getDependencyType();</span><br><span class="line">		<span class="keyword">if</span> (dependencyType.isInterface()) &#123;</span><br><span class="line">			pf.addInterface(dependencyType);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> pf.getProxy(dlbf.getBeanClassLoader());</span><br><span class="line">	&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这段代码就利用了ProxyFactory来生成代理对象，以及使用了TargetSource，以达到代理对象在执行某个方法时，调用TargetSource的getTarget()方法实时得到一个<strong>被代理对象</strong>。</p>
+</blockquote>
+</li>
+</ul>
 ]]></content>
       <categories>
         <category>Java</category>
+        <category>源码框架</category>
         <category>Spring</category>
       </categories>
       <tags>
         <tag>Spring AOP</tag>
+        <tag>源码框架</tag>
       </tags>
   </entry>
 </search>
