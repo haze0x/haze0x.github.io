@@ -9166,4 +9166,71 @@ sync path
         <tag>源码框架</tag>
       </tags>
   </entry>
+  <entry>
+    <title>Spring之事务底层源码解析</title>
+    <url>/2022/07/05/02-00-10-Spring%E4%B9%8B%E4%BA%8B%E5%8A%A1%E5%BA%95%E5%B1%82%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h1 id="Spring之事务底层源码解析"><a href="#Spring之事务底层源码解析" class="headerlink" title="Spring之事务底层源码解析"></a>Spring之事务底层源码解析</h1><h2 id="1、-EnableTransactionManagement工作原理"><a href="#1、-EnableTransactionManagement工作原理" class="headerlink" title="1、 @EnableTransactionManagement工作原理"></a>1、 @EnableTransactionManagement工作原理</h2><p>开启Spring事务本质上就是增加了一个Advisor，但我们使用@EnableTransactionManagement注解来开启Spring事务是，该注解代理的功能就是向Spring容器中添加了两个Bean：</p>
+<ol>
+<li>AutoProxyRegistrar</li>
+<li>ProxyTransactionManagementConfiguration</li>
+</ol>
+<p>AutoProxyRegistrar主要的作用是向Spring容器中注册了一个<strong>InfrastructureAdvisorAutoProxyCreator</strong>的Bean。<br>而InfrastructureAdvisorAutoProxyCreator继承了<strong>AbstractAdvisorAutoProxyCreator</strong>，所以这个类的主要作用就是<strong>开启自动代理</strong>的作用，也就是一个BeanPostProcessor，会在初始化后步骤中去寻找Advisor类型的Bean，并判断当前某个Bean是否有匹配的Advisor，是否需要利用动态代理产生一个代理对象。</p>
+<p>ProxyTransactionManagementConfiguration是一个配置类，它又定义了另外三个bean：</p>
+<ol>
+<li>BeanFactoryTransactionAttributeSourceAdvisor：一个Advisor</li>
+<li>AnnotationTransactionAttributeSource：相当于BeanFactoryTransactionAttributeSourceAdvisor中的Pointcut</li>
+<li>TransactionInterceptor：相当于BeanFactoryTransactionAttributeSourceAdvisor中的Advice</li>
+</ol>
+<p><strong>AnnotationTransactionAttributeSource</strong>就是用来判断某个类上是否存在@Transactional注解，或者判断某个方法上是否存在@Transactional注解的。</p>
+<p><strong>TransactionInterceptor</strong>就是代理逻辑，当某个类中存在@Transactional注解时，到时就产生一个代理对象作为Bean，代理对象在执行某个方法时，最终就会进入到TransactionInterceptor的invoke()方法。</p>
+<h2 id="2、Spring事务基本执行原理"><a href="#2、Spring事务基本执行原理" class="headerlink" title="2、Spring事务基本执行原理"></a>2、Spring事务基本执行原理</h2><p>一个Bean在执行Bean的创建生命周期时，会经过InfrastructureAdvisorAutoProxyCreator的初始化后的方法，会判断当前当前Bean对象是否和BeanFactoryTransactionAttributeSourceAdvisor匹配，匹配逻辑为判断该Bean的类上是否存在@Transactional注解，或者类中的某个方法上是否存在@Transactional注解，如果存在则表示该Bean需要进行动态代理产生一个代理对象作为Bean对象。</p>
+<p>该代理对象在执行某个方法时，会再次判断当前执行的方法是否和BeanFactoryTransactionAttributeSourceAdvisor匹配，如果匹配则执行该Advisor中的TransactionInterceptor的invoke()方法，执行基本流程为：</p>
+<ol>
+<li>利用所配置的PlatformTransactionManager事务管理器新建一个数据库连接</li>
+<li>修改数据库连接的autocommit为false</li>
+<li>执行MethodInvocation.proceed()方法，简单理解就是执行业务方法，其中就会执行sql</li>
+<li>如果没有抛异常，则提交</li>
+<li>如果抛了异常，则回滚</li>
+</ol>
+<h2 id="3、Spring事务传播机制"><a href="#3、Spring事务传播机制" class="headerlink" title="3、Spring事务传播机制"></a>3、Spring事务传播机制</h2><p>在开发过程中，经常会出现一个方法调用另外一个方法，那么这里就涉及到了多种场景，比如a()调用b()：</p>
+<ol>
+<li>a()和b()方法中的所有sql需要在同一个事务中吗？</li>
+<li>a()和b()方法需要单独的事务吗？</li>
+<li>a()需要在事务中执行，b()还需要在事务中执行吗？</li>
+<li>等等情况…</li>
+</ol>
+<p>所以，这就要求Spring事务能支持上面各种场景，这就是Spring事务传播机制的由来。那Spring事务传播机制是如何实现的呢?</p>
+<p>先来看上述几种场景中的一种情况，a()在一个事务中执行，调用b()方法时需要新开一个事务执行：</p>
+<ol>
+<li>首先，代理对象执行a()方法前，先利用事务管理器新建一个数据库连接a</li>
+<li>将数据库连接a的autocommit改为false</li>
+<li>把数据库连接a设置到ThreadLocal中</li>
+<li>执行a()方法中的sql</li>
+<li>执行a()方法过程中，调用了b()方法（注意用代理对象调用b()方法）<ol>
+<li>代理对象执行b()方法前，判断出来了当前线程中已经存在一个数据库连接a了，表示当前线程其实已经拥有一个Spring事务了，则进行<strong>挂起</strong></li>
+<li>挂起就是把ThreadLocal中的数据库连接a从ThreadLocal中移除，并放入一个<strong>挂起资源对象</strong>中</li>
+<li>挂起完成后，再次利用事务管理器新建一个数据库连接b</li>
+<li>将数据库连接b的autocommit改为false</li>
+<li>把数据库连接b设置到ThreadLocal中</li>
+<li>执行b()方法中的sql</li>
+<li>b()方法正常执行完，则从ThreadLocal中拿到数据库连接b进行提交</li>
+<li>提交之后会恢复所挂起的数据库连接a，这里的恢复，其实只是把在<strong>挂起资源对象</strong>中所保存的数据库连接a再次设置到ThreadLocal中</li>
+</ol>
+</li>
+<li>a()方法正常执行完，则从ThreadLocal中拿到数据库连接a进行提交</li>
+</ol>
+<p>这个过程中最为核心的是：<strong>在执行某个方法时，判断当前是否已经存在一个事务，就是判断当前线程的ThreadLocal中是否存在一个数据库连接对象，如果存在则表示已经存在一个事务了。</strong></p>
+]]></content>
+      <categories>
+        <category>Java</category>
+        <category>源码框架</category>
+        <category>Spring</category>
+      </categories>
+      <tags>
+        <tag>源码框架</tag>
+        <tag>Spring 事务</tag>
+      </tags>
+  </entry>
 </search>
