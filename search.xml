@@ -9285,4 +9285,109 @@ sync path
         <tag>Spring 事务</tag>
       </tags>
   </entry>
+  <entry>
+    <title>SpringMVC 请求源码流程</title>
+    <url>/2022/07/08/02-00-11-SpringMVC-%E8%AF%B7%E6%B1%82%E6%BA%90%E7%A0%81%E6%B5%81%E7%A8%8B/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h1 id="一、SpringMVC-—请求源码流程"><a href="#一、SpringMVC-—请求源码流程" class="headerlink" title="一、SpringMVC —请求源码流程"></a>一、SpringMVC —请求源码流程</h1><h2 id="1-1传统Servlet："><a href="#1-1传统Servlet：" class="headerlink" title="1.1传统Servlet："></a>1.1<strong>传统Servlet：</strong></h2><p><img src="/2022/07/08/02-00-11-SpringMVC-%E8%AF%B7%E6%B1%82%E6%BA%90%E7%A0%81%E6%B5%81%E7%A8%8B/image-20220708003727958.png" alt="image-20220708003727958"></p>
+<blockquote>
+<p><strong>弊端：</strong></p>
+<p>1.xml下配置servlet的映射非常麻烦 <strong>开发效率低</strong></p>
+<p>2.必须要继承父类、重写方法  <strong>侵入性强</strong></p>
+<p>2.如果想在一个Servlet中处理同一业务模块的的功能<strong>分发给不同方法进行处理非常麻烦</strong></p>
+<p>3.<strong>参数解析麻烦</strong>:单个参数（转换类型）—&gt;pojo对象   Json文本—&gt;pojo对象</p>
+<p>4.**数据响应麻烦:**pojo对象—&gt;json  … Content-type</p>
+<p>5.跳转页面麻烦,  对path的控制、 如果使用其他模板也很麻烦 、设置编码麻烦…等等…</p>
+</blockquote>
+<h2 id="1-2-SpringMVC"><a href="#1-2-SpringMVC" class="headerlink" title="1.2 SpringMVC"></a>1.2 <strong>SpringMVC</strong></h2><ul>
+<li><p><strong>基于xml的实现方式：</strong></p>
+<blockquote>
+<p>1.给Servlet容器配置一个DispatcherServlet（web.xml )</p>
+<p>2.添加SpringMVC的配置信息</p>
+<ul>
+<li>继承类/实现接口 方式：</li>
+</ul>
+<p> implements HttpRequestHandler  implements Controller</p>
+<p>  不同的<em>HandlerMapping</em></p>
+<p>​       simpleController        </p>
+</blockquote>
+</li>
+<li><p><strong>注解方式：</strong></p>
+<p>配置控制器@Controller和处理方法的映射—@RequstMapping 即可</p>
+<p>其实SpringMVC请求原理很简单：说白了就是用一个DispatcherServlet 封装了一个Servlet的调度中心， 由调度中心帮我们调用我们的处理方法：</p>
+<p>在这个过程中调度中心委托给各个组件执行具体工作 ，比如帮我们映射方法请求、帮我解析参数、调用处理方法、响应数据和页面 等</p>
+<p>这就相当于你在家自己做饭和去饭店吃饭的区别了， 在家你买菜、洗菜、蒸饭、炒菜、洗碗都得自己来.</p>
+<p>饭店都给你做好了， 你只要分服务员说你吃什么、就能得到响应.   殊不知呢， 你只是说了吃什么（请求）， 后厨（DispatcherServlet）就有配菜员你给找到菜单-对应的食材（映射） 、切菜员切菜（解析参数）、  厨师给你炒菜（调用处理方法）、装盘（处理返回值)、 抄完给你端出来（响应）</p>
+</li>
+</ul>
+<h2 id="1-3-SpringMVC的具体执行流程："><a href="#1-3-SpringMVC的具体执行流程：" class="headerlink" title="1.3 SpringMVC的具体执行流程："></a>1.3 <strong>SpringMVC的具体执行流程：</strong></h2><blockquote>
+<p>Spring MVC 是围绕前端控制器模式设计的，其中：中央 Servlet DispatcherServlet 为请求处理流程提供统一调度，实际工作则交给可配置组件执行。这个模型是灵活的且开放的，我们可以通过自己去定制这些组件从而进行定制自己的工作流。</p>
+</blockquote>
+<p><img src="/2022/07/08/02-00-11-SpringMVC-%E8%AF%B7%E6%B1%82%E6%BA%90%E7%A0%81%E6%B5%81%E7%A8%8B/image-20220708003908626.png" alt="image-20220708003908626"></p>
+<blockquote>
+<p>DispatcherServlet： 前端调度器 ， 负责将请求拦截下来分发到各控制器方法中</p>
+<p>HandlerMapping: 负责根据请求的URL和配置@RequestMapping映射去匹配， 匹配到会返回Handler（具体控制器的方法）</p>
+<p>HandlerAdaper: 负责调用Handler-具体的方法- 返回视图的名字 Handler将它封装到ModelAndView(封装视图名，request域的数据）</p>
+<p>ViewReslover: 根据ModelAndView里面的视图名地址去找到具体的jsp封装在View对象中</p>
+<p>View：进行视图渲染（将jsp转换成html内容 –这是Servlet容器的事情了） 最终response到的客户端</p>
+<ol>
+<li>用户发送请求至前端控制器DispatcherServlet</li>
+<li>DispatcherServlet收到请求调用处理器映射器HandlerMapping。</li>
+</ol>
+<ul>
+<li><ol>
+<li>处理器映射器根据请求url找到具体的处理器，生成处理器执行链HandlerExecutionChain(包括处理器对象和处理器拦截器)一并返回给DispatcherServlet。</li>
+</ol>
+</li>
+</ul>
+<ol>
+<li>DispatcherServlet根据处理器Handler获取处理器适配器HandlerAdapter,执行HandlerAdapter处理一系列的操作，如：参数封装，数据格式转换，数据验证等操作</li>
+<li>执行处理器Handler(Controller，也叫页面控制器)。</li>
+</ol>
+<ul>
+<li><ol>
+<li>Handler执行完成返回ModelAndView</li>
+<li>HandlerAdapter将Handler执行结果ModelAndView返回到DispatcherServlet</li>
+</ol>
+</li>
+</ul>
+<ol>
+<li>DispatcherServlet将ModelAndView传给ViewReslover视图解析器</li>
+</ol>
+<ul>
+<li><ol>
+<li>ViewReslover解析后返回具体View</li>
+</ol>
+</li>
+</ul>
+<ol>
+<li>DispatcherServlet对View进行渲染视图（即将模型数据model填充至视图中）。</li>
+<li>DispatcherServlet响应用户。</li>
+</ol>
+</blockquote>
+<h2 id="1-4-核心流程"><a href="#1-4-核心流程" class="headerlink" title="1.4 核心流程"></a>1.4 核心流程</h2><blockquote>
+<ol>
+<li>用户发送请求至前端控制器DispatcherServlet</li>
+</ol>
+<ul>
+<li>​    由于它是个Servlet会先进入service方法——&gt;doGet/doPost——&gt;processRequestdoService——&gt;doDispatch ↓</li>
+<li>​    这个doDispatch非常重要–体现了整个请求流程</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doDispatch</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">   </span><br><span class="line">   <span class="keyword">try</span> &#123;</span><br><span class="line">      </span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">          <span class="comment">// 文件上传相关</span></span><br><span class="line">         processedRequest = checkMultipart(request);</span><br><span class="line">         multipartRequestParsed = (processedRequest != request);</span><br><span class="line">         </span><br><span class="line">        <span class="comment">// DispatcherServlet收到请求调用处理器映射器HandlerMapping。</span></span><br><span class="line">        <span class="comment">// 处理器映射器根据请求url找到具体的处理器，生成处理器执行链HandlerExecutionChain(包括处理器对象和处理器拦截器)一并返回给DispatcherServlet。</span></span><br><span class="line">         mappedHandler = getHandler(processedRequest);</span><br><span class="line">         <span class="keyword">if</span> (mappedHandler == <span class="keyword">null</span>) &#123;</span><br><span class="line">            noHandlerFound(processedRequest, response);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">         <span class="number">4.</span>DispatcherServlet根据处理器Handler获取处理器适配器HandlerAdapter,</span><br><span class="line">         HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());</span><br><span class="line"></span><br><span class="line">         <span class="comment">// Process last-modified header, if supported by the handler.  HTTP缓存相关</span></span><br><span class="line">         String method = request.getMethod();</span><br><span class="line">         <span class="keyword">boolean</span> isGet = HttpMethod.GET.matches(method);</span><br><span class="line">         <span class="keyword">if</span> (isGet || HttpMethod.HEAD.matches(method)) &#123;</span><br><span class="line">            <span class="keyword">long</span> lastModified = ha.getLastModified(request, mappedHandler.getHandler());</span><br><span class="line">            <span class="keyword">if</span> (<span class="keyword">new</span> ServletWebRequest(request, response).checkNotModified(lastModified) &amp;&amp; isGet) &#123;</span><br><span class="line">               <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">         &#125;</span><br><span class="line">         <span class="comment">// 前置拦截器</span></span><br><span class="line">         <span class="keyword">if</span> (!mappedHandler.applyPreHandle(processedRequest, response)) &#123;</span><br><span class="line">            <span class="comment">// 返回false就不进行后续处理了</span></span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">         <span class="comment">// 执行HandlerAdapter处理一系列的操作，如：参数封装，数据格式转换，数据验证等操作</span></span><br><span class="line">         <span class="comment">// 执行处理器Handler(Controller，也叫页面控制器)。</span></span><br><span class="line">         <span class="comment">// Handler执行完成返回ModelAndView</span></span><br><span class="line">         <span class="comment">// HandlerAdapter将Handler执行结果ModelAndView返回到DispatcherServlet</span></span><br><span class="line">         mv = ha.handle(processedRequest, response, mappedHandler.getHandler());</span><br><span class="line"></span><br><span class="line">         <span class="keyword">if</span> (asyncManager.isConcurrentHandlingStarted()) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">         &#125;</span><br><span class="line">         <span class="comment">// 如果没有视图，给你设置默认视图  json忽略</span></span><br><span class="line">         applyDefaultViewName(processedRequest, mv);</span><br><span class="line">         <span class="comment">//后置拦截器</span></span><br><span class="line">         mappedHandler.applyPostHandle(processedRequest, response, mv);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">catch</span> (Exception ex) &#123;</span><br><span class="line">         dispatchException = ex;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">catch</span> (Throwable err) &#123;</span><br><span class="line">         <span class="comment">// As of 4.3, we&#x27;re processing Errors thrown from handler methods as well,</span></span><br><span class="line">         <span class="comment">// making them available for @ExceptionHandler methods and other scenarios.</span></span><br><span class="line">         dispatchException = <span class="keyword">new</span> NestedServletException(<span class="string">&quot;Handler dispatch failed&quot;</span>, err);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// DispatcherServlet将ModelAndView传给ViewReslover视图解析器</span></span><br><span class="line">      <span class="comment">// ViewReslover解析后返回具体View</span></span><br><span class="line">      <span class="comment">// DispatcherServlet对View进行渲染视图（即将模型数据model填充至视图中）。</span></span><br><span class="line">      <span class="comment">// DispatcherServlet响应用户。</span></span><br><span class="line">      processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">catch</span> (Exception ex) &#123;</span><br><span class="line">      triggerAfterCompletion(processedRequest, response, mappedHandler, ex);</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">catch</span> (Throwable err) &#123;</span><br><span class="line">      triggerAfterCompletion(processedRequest, response, mappedHandler,</span><br><span class="line">            <span class="keyword">new</span> NestedServletException(<span class="string">&quot;Handler processing failed&quot;</span>, err));</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">finally</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> (asyncManager.isConcurrentHandlingStarted()) &#123;</span><br><span class="line">         <span class="comment">// Instead of postHandle and afterCompletion</span></span><br><span class="line">         <span class="keyword">if</span> (mappedHandler != <span class="keyword">null</span>) &#123;</span><br><span class="line">            mappedHandler.applyAfterConcurrentHandlingStarted(processedRequest, response);</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span> &#123;</span><br><span class="line">         <span class="comment">// Clean up any resources used by a multipart request.</span></span><br><span class="line">         <span class="keyword">if</span> (multipartRequestParsed) &#123;</span><br><span class="line">            cleanupMultipart(processedRequest);</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>HandlerMapping</strong></p>
+<p>在整个过程中，涉及到非常多的组件，每个组件解析各个环节，其中<strong>HandlerMapping最为重要它是用来映射请求的</strong>，我们就着重介绍下HandlerMapping的解析过程和请求映射过程：</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>Java</category>
+        <category>源码框架</category>
+        <category>Spring</category>
+      </categories>
+      <tags>
+        <tag>源码框架</tag>
+        <tag>Spring MVC</tag>
+      </tags>
+  </entry>
 </search>
