@@ -355,8 +355,7 @@
 <p>此方法的执行时机是在控制器方法执行之后，结果视图创建生成之前。所以通常是使用此方法对响应部分进行增强。因为结果视图没有生成，所以我们此时仍然可以控制响应结果。</p>
 <p><strong>2.2.8.3 afterCompletion</strong></p>
 <p>此方法的执行时机是在结果视图创建生成之后，展示到浏览器之前。所以此方法执行时，本次请求要准备的数据具已生成完毕，且结果视图也已创建完成，所以我们可以利用此方法进行清理操作。同时，我们也无法控制响应结果集内容。</p>
-<p><strong>2.3</strong> <strong>为什么不使用</strong> <strong>XML</strong> <strong>配置</strong> <strong>SpringMVC</strong></p>
-<p><strong>2.3.1我们先来看基于</strong> <strong>XML</strong> <strong>的</strong> <strong>SpringMVC</strong> <strong>配置：</strong></p>
+<h3 id="2-3-为什么不使用-XML-配置-SpringMVC"><a href="#2-3-为什么不使用-XML-配置-SpringMVC" class="headerlink" title="2.3 为什么不使用 XML 配置 SpringMVC"></a><strong>2.3</strong> <strong>为什么不使用</strong> <strong>XML</strong> <strong>配置</strong> <strong>SpringMVC</strong></h3><p><strong>2.3.1我们先来看基于</strong> <strong>XML</strong> <strong>的</strong> <strong>SpringMVC</strong> <strong>配置：</strong></p>
 <p>第一步：配置 web.xml</p>
 <p>第二步：编写控制器</p>
 <p>第三步：编写 springmvc.xml</p>
