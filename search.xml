@@ -9689,4 +9689,41 @@ sync path
         <tag>Spring MVC</tag>
       </tags>
   </entry>
+  <entry>
+    <title>线程池调优总结</title>
+    <url>/2022/07/10/01-00-22-%E7%BA%BF%E7%A8%8B%E6%B1%A0%E8%B0%83%E4%BC%98%E6%80%BB%E7%BB%93/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h1 id="线程池优化实战"><a href="#线程池优化实战" class="headerlink" title="线程池优化实战"></a>线程池优化实战</h1><h2 id="1-1概念"><a href="#1-1概念" class="headerlink" title="1.1概念"></a>1.1概念</h2><p><strong>QPS：</strong>Queries Per Second，顾名思义：“每秒查询率”，是一台服务器每秒能够相应的查询次数，是对一个特定的查询服务器在规定时间内所处理流量多少的衡量标准。<strong>QPM*：</strong>每分查询率。</p>
+<p><strong>TPS：</strong>是TransactionsPerSecond的缩写，也就是事务数/秒。它是软件测试结果的测量单位。一个事务是指一个客户机向服务器发送请求然后服务器做出反应的过程。客户机在发送请求时开始计时，收到服务器响应后结束计时，以此来计算使用的时间和完成的事务个数。</p>
+<p><strong>TP99：</strong>TP99指的是比如1000个请求进来，第990个大的请求时间，几称为TP99</p>
+<p><strong>水位值：</strong>不是一个经验值，它类似于水库的水位线，需要监控巡检</p>
+<p><strong>TPS处理流程：</strong></p>
+<p>Tps即每秒处理事务数，包括了</p>
+<p>1、用户请求服务器</p>
+<p>2、服务器自己的内部查询等处理</p>
+<p>3、服务器返回给用户</p>
+<p>这三个过程，每秒能够完成N个这三个过程，Tps也就是N；</p>
+<p>QPS基本类似于TPS，但是不同的是，对于一个页面的一次访问，形成一个TPS；但一次页面请求，可能产生多次对服务器的请求，服务器对这些请求，就可计入QPS之中。每秒查询率QPS是对一个特定的查询服务器在规定时间内所处理流量多少的衡量标准</p>
+<p>一个事务是指一个客户机向服务器发送请求然后服务器做出反应的过程。客户机在发送请求时开始计时，收到服务器响应后结束计时，以此来计算使用的时间和完成的事务个数。</p>
+<p>如果是对一个接口（单场景）压测，且这个接口内部不会再去请求其它接口，那么TPS等于QPS，否则，TPS不等于QPS</p>
+<p> <strong>区别</strong></p>
+<p>一次完成的请求可产生一个TPS，却可能对服务器请求多次，产生多个QPS。</p>
+<h2 id="1-2-线程池选择原则"><a href="#1-2-线程池选择原则" class="headerlink" title="1.2 线程池选择原则"></a>1.2 线程池选择原则</h2><p>具体要根据业务场景来，比如：</p>
+<ul>
+<li><p>C端请求</p>
+<p>这种情况一般是响应时间敏感型，</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Java</category>
+        <category>并发编程</category>
+      </categories>
+      <tags>
+        <tag>ThreadPoolExecutor</tag>
+        <tag>并发编程</tag>
+        <tag>线程池调优</tag>
+      </tags>
+  </entry>
 </search>
