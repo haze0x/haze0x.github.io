@@ -10004,4 +10004,19 @@ sync path
         <tag>RocketMQ</tag>
       </tags>
   </entry>
+  <entry>
+    <title>RocketMQ实战</title>
+    <url>/2022/07/19/03-04-02-RocketMQ%E5%AE%9E%E6%88%98/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
+      <categories>
+        <category>中间件</category>
+        <category>分布式</category>
+        <category>RocketMQ</category>
+      </categories>
+      <tags>
+        <tag>分布式</tag>
+        <tag>消息队列</tag>
+        <tag>RocketMQ</tag>
+      </tags>
+  </entry>
 </search>
