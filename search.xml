@@ -10007,7 +10007,12 @@ sync path
   <entry>
     <title>RocketMQ实战</title>
     <url>/2022/07/19/03-04-02-RocketMQ%E5%AE%9E%E6%88%98/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h1 id="一、RocketMQ的使用"><a href="#一、RocketMQ的使用" class="headerlink" title="一、RocketMQ的使用"></a>一、RocketMQ的使用</h1><h2 id="1-1环境搭建"><a href="#1-1环境搭建" class="headerlink" title="1.1环境搭建"></a>1.1环境搭建</h2><p>新建maven项目，引入如下依赖</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">        &lt;groupId&gt;org.apache.rocketmq&lt;/groupId&gt;</span><br><span class="line">        &lt;artifactId&gt;rocketmq-client&lt;/artifactId&gt;</span><br><span class="line">        &lt;version&gt;<span class="number">4.7</span><span class="number">.1</span>&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-2"><a href="#1-2" class="headerlink" title="1.2"></a>1.2</h2>]]></content>
       <categories>
         <category>中间件</category>
         <category>分布式</category>
