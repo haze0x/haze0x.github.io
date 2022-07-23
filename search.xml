@@ -10466,6 +10466,254 @@ sync path
 <p><img src="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Producer%E9%80%89%E6%8B%A9Queue.png" alt="Producer选择Queue"></p>
 <p><strong>然后</strong> 在发送Netty请求时，实际上是指定的MessageQueue，而不是Topic。Topic只是用来找MessageQueue。</p>
 <p>然后根据MessageQueue再找所在的Broker，往Broker发送请求。</p>
+<h1 id="六、消息存储"><a href="#六、消息存储" class="headerlink" title="六、消息存储"></a>六、消息存储</h1><h2 id="1、功能回顾"><a href="#1、功能回顾" class="headerlink" title="1、功能回顾"></a>1、功能回顾</h2><p>我们接着上面的流程，Producer把消息发到了Broker，接下来就关注下Broker接收到消息后是如何把消息进行存储的。最终存储的文件有哪些？</p>
+<ul>
+<li>commitLog：消息存储目录</li>
+<li>config：运行期间一些配置信息</li>
+<li>consumerqueue：消息消费队列存储目录</li>
+<li>index：消息索引文件存储目录</li>
+<li>abort：如果存在改文件寿命Broker非正常关闭</li>
+<li>checkpoint：文件检查点，存储CommitLog文件最后一次刷盘时间戳、consumerquueue最后一次刷盘时间，index索引文件最后一次刷盘时间戳。</li>
+</ul>
+<p>还记得我们之前看到的Broker的核心组件吗？其中messageStore就是负责消息存储的核心组件。</p>
+<h2 id="2、源码重点："><a href="#2、源码重点：" class="headerlink" title="2、源码重点："></a>2、源码重点：</h2><p>消息存储的入口在：DefaultMessageStore.putMessage</p>
+<p><strong>1-commitLog写入</strong></p>
+<p>CommitLog的doAppend方法就是Broker写入消息的实际入口。这个方法最终会把消息追加到MappedFile映射的一块内存里，并没有直接写入磁盘。写入消息的过程是串行的，一次只会允许一个线程写入。</p>
+<p><strong>2-分发ConsumeQueue和IndexFile</strong></p>
+<pre><code>当CommitLog写入一条消息后，在DefaultMessageStore的start方法中，会启动一个后台线程reputMessageService每隔1毫秒就会去拉取CommitLog中最新更新的一批消息，然后分别转发到ComsumeQueue和IndexFile里去，这就是他底层的实现逻辑。
+
+并且，如果服务异常宕机，会造成CommitLog和ConsumeQueue、IndexFile文件不一致，有消息写入CommitLog后，没有分发到索引文件，这样消息就丢失了。DefaultMappedStore的load方法提供了恢复索引文件的方法，入口在load方法。
+</code></pre>
+<p><strong>3、文件同步刷盘与异步刷盘</strong></p>
+<pre><code>入口：CommitLog.putMessage -&gt; CommitLog.handleDiskFlush
+
+其中主要涉及到是否开启了对外内存。TransientStorePoolEnable。如果开启了堆外内存，会在启动时申请一个跟CommitLog文件大小一致的堆外内存，这部分内存就可以确保不会被交换到虚拟内存中。
+</code></pre>
+<p><strong>4、过期文件删除</strong></p>
+<pre><code>入口： DefaultMessageStore.addScheduleTask -&gt; DefaultMessageStore.this.cleanFilesPeriodically()
+
+默认情况下， Broker会启动后台线程，每60秒，检查CommitLog、ConsumeQueue文件。然后对超过72小时的数据进行删除。也就是说，默认情况下， RocketMQ只会保存3天内的数据。这个时间可以通过fileReservedTime来配置。注意他删除时，并不会检查消息是否被消费了。
+</code></pre>
+<p>整个文件存储的核心入口入口在DefaultMessageStore的start方法中。</p>
+<p><img src="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/image-20220723221300813.png" alt="image-20220723221300813"></p>
+<p><strong>5文件存储部分的总结</strong>：</p>
+<p>RocketMQ的存储文件包括消息文件（Commitlog）、消息消费队列文件（ConsumerQueue）、Hash索引文件（IndexFile）、监测点文件（checkPoint）、abort（关闭异常文件）。单个消息存储文件、消息消费队列文件、Hash索引文件长度固定以便使用内存映射机制进行文件的读写操作。RocketMQ组织文件以文件的起始偏移量来命令文件，这样根据偏移量能快速定位到真实的物理文件。RocketMQ基于内存映射文件机制提供了同步刷盘和异步刷盘两种机制，异步刷盘是指在消息存储时先追加到内存映射文件，然后启动专门的刷盘线程定时将内存中的文件数据刷写到磁盘。</p>
+<p>CommitLog，消息存储文件，RocketMQ为了保证消息发送的高吞吐量，采用单一文件存储所有主题消息，保证消息存储是完全的顺序写，但这样给文件读取带来了不便，为此RocketMQ为了方便消息消费构建了消息消费队列文件，基于主题与队列进行组织，同时RocketMQ为消息实现了Hash索引，可以为消息设置索引键，根据所以能够快速从CommitLog文件中检索消息。</p>
+<p>当消息达到CommitLog后，会通过ReputMessageService线程接近实时地将消息转发给消息消费队列文件与索引文件。为了安全起见，RocketMQ引入abort文件，记录Broker的停机是否是正常关闭还是异常关闭，在重启Broker时为了保证CommitLog文件，消息消费队列文件与Hash索引文件的正确性，分别采用不同策略来恢复文件。</p>
+<p>RocketMQ不会永久存储消息文件、消息消费队列文件，而是启动文件过期机制并在磁盘空间不足或者默认凌晨4点删除过期文件，文件保存72小时并且在删除文件时并不会判断该消息文件上的消息是否被消费。</p>
+<h1 id="七、消费者"><a href="#七、消费者" class="headerlink" title="七、消费者"></a>七、消费者</h1><h2 id="1、功能回顾-1"><a href="#1、功能回顾-1" class="headerlink" title="1、功能回顾"></a>1、功能回顾</h2><p>结合我们之前的示例，回顾下消费者这一块的几个重点：</p>
+<ul>
+<li><p>消费者也是有两种，推模式消费者和拉模式消费者。消费者的使用过程也跟生产者差不多，都是先start()然后再开始消费。</p>
+</li>
+<li><p>消费者以消费者组的模式开展。消费者组之间有集群模式和广播模式两种消费模式。我们就要了解下这两种集群模式是如何做的逻辑封装。</p>
+</li>
+<li><p>然后我们关注下消费者端的负载均衡的原理。即消费者是如何绑定消费队列的。</p>
+</li>
+<li><p>最后我们来关注下在推模式的消费者中，MessageListenerConcurrently 和MessageListenerOrderly这两种消息监听器的处理逻辑到底有什么不同，为什么后者能保持消息顺序。</p>
+</li>
+</ul>
+<p>我们接下来就通过这几个问题来把RocketMQ的消费者部分源码串起来。</p>
+<h2 id="2、源码重点：-1"><a href="#2、源码重点：-1" class="headerlink" title="2、源码重点："></a>2、源码重点：</h2><p><strong>1、启动</strong></p>
+<pre><code>DefaultMQPushConsumer.start方法
+
+启动过程不用太过关注，有个概念就行，然后客户端启动的核心是mQClientFactory 主要是启动了一大堆的服务。
+
+这些服务可以结合具体场景再进行深入。例如pullMessageService主要处理拉取消息服务，rebalanceService主要处理客户端的负载均衡。
+</code></pre>
+<p><strong>2、消息拉取：</strong></p>
+<pre><code>拉模式： PullMessageService
+</code></pre>
+<p>PullRequest里有messageQueue和processQueue，其中messageQueue负责拉取消息，拉取到后，将消息存入processQueue，进行处理。 存入后就可以清空messageQueue，继续拉取了。</p>
+<p><img src="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/image-20220723221432079.png" alt="image-20220723221432079"></p>
+<p><strong>3 客户端负载均衡策略</strong></p>
+<p>在消费者示例的start方法中，启动RebalanceService，这个是客户端进行负载均衡策略的启动服务。他只负责根据负载均衡策略获取当前客户端分配到的MessageQueue示例。</p>
+<p>五种负载策略，可以由Consumer的allocateMessageQueueStrategy属性来选择。</p>
+<p>最常用的是AllocateMessageQueueAveragely平均分配和AllocateMessageQueueAveragelyByCircle平均轮询分配。    </p>
+<p>平均分配是把MessageQueue按组内的消费者个数平均分配。</p>
+<p>而平均轮询分配就是把MessageQueue按组内的消费者一个一个轮询分配。</p>
+<blockquote>
+<p> 例如，六个队列q1,q2,q3,q4,q5,q6，分配给三个消费者c1,c2,c3</p>
+<p> 平均分配的结果就是:  c1:{q1,q2},c2:{q3,q4},c3{q5,q6}</p>
+<p> 平均轮询分配的结果就是： c1:{q1,q4},c2:{q2,q5},c3:{q3,q6}</p>
+</blockquote>
+<p><strong>4 并发消费与顺序消费的过程</strong></p>
+<p>消费的过程依然是在DefaultMQPushConsumerImpl的 consumeMessageService中。他有两个子类ConsumeMessageConcurrentlyService和ConsumeMessageOrderlyService。其中最主要的差别是ConsumeMessageOrderlyService会在消费前把队列锁起来，优先保证拉取同一个队列里的消息。</p>
+<p>消费过程的入口在DefaultMQPushConsumerImpl的pullMessage中定义的PullCallback中。</p>
+<h1 id="八、延迟消息"><a href="#八、延迟消息" class="headerlink" title="八、延迟消息"></a>八、延迟消息</h1><h2 id="1、功能回顾-2"><a href="#1、功能回顾-2" class="headerlink" title="1、功能回顾"></a>1、功能回顾</h2><p>我们这里，就用一个典型的延迟消息的流程，来把上面看到的各个组件，结合一下。</p>
+<p>延迟消息的核心使用方法就是在Message中设定一个MessageDelayLevel参数，对应18个延迟级别。然后Broker中会创建一个默认的Schedule_Topic主题，这个主题下有18个队列，对应18个延迟级别。消息发过来之后，会先把消息存入Schedule_Topic主题中对应的队列。然后等延迟时间到了，再转发到目标队列，推送给消费者进行消费。</p>
+<p>整个延迟消息的实现方式是这样的：</p>
+<p><img src="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/image-20220723221513122.png" alt="image-20220723221513122"></p>
+<h2 id="2、源码重点"><a href="#2、源码重点" class="headerlink" title="2、源码重点"></a>2、源码重点</h2><p>延迟消息的处理入口在scheduleMessageService这个组件中。 他会在broker启动时也一起加载。</p>
+<p><strong>1、消息写入：</strong></p>
+<p>代码见CommitLog.putMessage方法。</p>
+<p>在CommitLog写入消息时，会判断消息的延迟级别，然后修改Message的Topic和Queue，达到转储Message的目的。</p>
+<p><strong>2、消息转储到目标Topic</strong></p>
+<p>这个转储的核心服务是scheduleMessageService，他也是Broker启动过程中的一个功能组件、</p>
+<p>然后ScheduleMessageService会每隔1秒钟执行一个executeOnTimeup任务，将消息从延迟队列中写入正常Topic中。 代码见ScheduleMessageService中的DeliverDelayedMessageTimerTask.executeOnTimeup方法。</p>
+<p>这个其中有个需要注意的点就是在ScheduleMessageService的start方法中。有一个很关键的CAS操作：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (started.compareAndSet(<span class="keyword">false</span>, <span class="keyword">true</span>)) &#123;</span><br></pre></td></tr></table></figure>
+
+<p>这个CAS操作保证了同一时间只会有一个DeliverDelayedMessageTimerTask执行。保证了消息安全的同时也限制了消息进行回传的效率。所以，这也是很多互联网公司在使用RocketMQ时，对源码进行定制的一个重点。</p>
+<h2 id="3-消费者部分小结："><a href="#3-消费者部分小结：" class="headerlink" title="3 消费者部分小结："></a>3 消费者部分小结：</h2><p>RocketMQ消息消费方式分别为集群模式、广播模式。</p>
+<p>消息队列负载由RebalanceService线程默认每隔20s进行一次消息队列负载，根据当前消费者组内消费者个数与主题队列数量按照某一种负载算法进行队列分配，分配原则为同一个消费者可以分配多个消息消费队列，同一个消息消费队列同一个时间只会分配给一个消费者。</p>
+<p>消息拉取由PullMessageService线程根据RebalanceService线程创建的拉取任务进行拉取，默认每次拉取32条消息，提交给消费者消费线程后继续下一次消息拉取。如果消息消费过慢产生消息堆积会触发消息消费拉取流控。 </p>
+<p>并发消息消费指消费线程池中的线程可以并发对同一个消息队列的消息进行消费，消费成功后，取出消息队列中最小的消息偏移量作为消息消费进度偏移量存储在于消息消费进度存储文件中，集群模式消息消费进度存储在Broker（消息服务器），广播模式消息消费进度存储在消费者端。</p>
+<p>RocketMQ不支持任意精度的定时调度消息，只支持自定义的消息延迟级别，例如1s、2s、5s等，可通过在broker配置文件中设置messageDelayLevel。</p>
+<p>顺序消息一般使用集群模式，是指对消息消费者内的线程池中的线程对消息消费队列只能串行消费。与并发消息消费最本质的区别是消息消费时必须成功锁定消息消费队列，在Broker端会存储消息消费队列的锁占用情况。</p>
+<h1 id="源码解读小结"><a href="#源码解读小结" class="headerlink" title="源码解读小结"></a>源码解读小结</h1><p>关于RocketMQ的源码部分，我们就带大家解读到这里。到目前为止，几个核心的流程我们已经解读完成了，我们按照由大到小，由粗到细的方式对几条主线进行了解读。通过解读源码，我们可以对之前提到的各种高级特性有更深入的理解。对有些有争议的问题，带着问题来源码中找答案是最好的。例如我们经常有人讨论NameServer全部挂了之后，生产者和消费者是否能够用他本地的缓存继续工作一段时间？ 这样的一些问题，看过源码之后是不是有更清晰的了解？</p>
+<p>至于其他的代码，大家也可以按照自己的关注点，以业务线的方式来逐步解读。</p>
+<p><img src="https://note.youdao.com/yws/res/267174/8C06BD7D32624201A2F7558CEC37A53A" alt="image"></p>
+]]></content>
+      <categories>
+        <category>中间件</category>
+        <category>分布式</category>
+        <category>RocketMQ</category>
+      </categories>
+      <tags>
+        <tag>分布式</tag>
+        <tag>消息队列</tag>
+        <tag>RocketMQ</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>RocketMQ实践问题总结</title>
+    <url>/2022/07/23/03-04-06-RocketMQ%E5%AE%9E%E8%B7%B5%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h1 id="RocketMQ-常见问题总结"><a href="#RocketMQ-常见问题总结" class="headerlink" title="RocketMQ 常见问题总结"></a>RocketMQ 常见问题总结</h1><h2 id="一、使用RocketMQ如何保证消息不丢失？"><a href="#一、使用RocketMQ如何保证消息不丢失？" class="headerlink" title="一、使用RocketMQ如何保证消息不丢失？"></a>一、使用RocketMQ如何保证消息不丢失？</h2><blockquote>
+<p>面试高频问题</p>
+</blockquote>
+<h3 id="1-1哪些环节会有丢消息的可能？"><a href="#1-1哪些环节会有丢消息的可能？" class="headerlink" title="1.1哪些环节会有丢消息的可能？"></a>1.1哪些环节会有丢消息的可能？</h3><p>我们考虑一个通用的MQ场景：</p>
+<p><img src="/2022/07/23/03-04-06-RocketMQ%E5%AE%9E%E8%B7%B5%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/image-20220723223418102.png" alt="image-20220723223418102"></p>
+<p>其中，1（生产者发送消息），2（mq主从消息同步），4（消息消费）三个场景都是跨网络的，而跨网络就肯定会有丢消息的可能。</p>
+<p>然后关于3这个环节，通常MQ存盘时都会先写入操作系统的缓存page cache中，然后再由操作系统异步的将消息写入硬盘。这个中间有个时间差，就可能会造成消息丢失。如果服务挂了，缓存中还没有来得及写入硬盘的消息就会丢失。这个是MQ场景都会面对的通用的丢消息问题。</p>
+<h3 id="1-2RocketMQ消息零丢失方案"><a href="#1-2RocketMQ消息零丢失方案" class="headerlink" title="1.2RocketMQ消息零丢失方案"></a>1.2<strong>RocketMQ消息零丢失方案</strong></h3><ul>
+<li><p><strong>生产者使用事务消息机制保证消息零丢失</strong></p>
+<blockquote>
+<p>这个结论比较容易理解，因为RocketMQ的事务消息机制就是为了保证零丢失来设计的，并且经过阿里的验证，肯定是非常靠谱的。</p>
+<p>但是如果深入一点的话，我们还是要理解下这个事务消息到底是不是靠谱。我们以最常见的电商订单场景为例，来简单分析下事务消息机制如何保证消息不丢失。我们看下下面这个流程图：</p>
+<p><img src="/2022/07/23/03-04-06-RocketMQ%E5%AE%9E%E8%B7%B5%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/image-20220723223826513.png" alt="image-20220723223826513"></p>
+<p><strong>1、为什么要发送个half消息？有什么用？</strong></p>
+<p>这个half消息是在订单系统进行下单操作前发送，并且对下游服务的消费者是不可见的。那这个消息的作用更多的体现在确认RocketMQ的服务是否正常。相当于嗅探下RocketMQ服务是否正常，并且通知RocketMQ，我马上就要发一个很重要的消息了，你做好准备。</p>
+<p><strong>2.half消息如果写入失败了怎么办？</strong></p>
+<p>如果没有half消息这个流程，那我们通常是会在订单系统中先完成下单，再发送消息给MQ。这时候写入消息到MQ如果失败就会非常尴尬了。而half消息如果写入失败，我们就可以认为MQ的服务是有问题的，这时，就不能通知下游服务了。我们可以在下单时给订单一个状态标记，然后等待MQ服务正常后再进行补偿操作，等MQ服务正常后重新下单通知下游服务。</p>
+<p><strong>3.订单系统写数据库失败了怎么办？</strong></p>
+<p>这个问题我们同样比较下没有使用事务消息机制时会怎么办？如果没有使用事务消息，我们只能判断下单失败，抛出了异常，那就不往MQ发消息了，这样至少保证不会对下游服务进行错误的通知。但是这样的话，如果过一段时间数据库恢复过来了，这个消息就无法再次发送了。当然，也可以设计另外的补偿机制，例如将订单数据缓存起来，再启动一个线程定时尝试往数据库写。而如果使用事务消息机制，就可以有一种更优雅的方案。</p>
+<p>如果下单时，写数据库失败(可能是数据库崩了，需要等一段时间才能恢复)。那我们可以另外找个地方把订单消息先缓存起来(Redis、文本或者其他方式)，然后给RocketMQ返回一个UNKNOWN状态。这样RocketMQ就会过一段时间来回查事务状态。我们就可以在回查事务状态时再尝试把订单数据写入数据库，如果数据库这时候已经恢复了，那就能完整正常的下单，再继续后面的业务。这样这个订单的消息就不会因为数据库临时崩了而丢失。</p>
+<p><strong>4.half消息写入成功后RocketMQ挂了怎么办？</strong></p>
+<p>我们需要注意下，在事务消息的处理机制中，未知状态的事务状态回查是由RocketMQ的Broker主动发起的。也就是说如果出现了这种情况，那RocketMQ就不会回调到事务消息中回查事务状态的服务。这时，我们就可以将订单一直标记为”新下单”的状态。而等RocketMQ恢复后，只要存储的消息没有丢失，RocketMQ就会再次继续状态回查的流程。</p>
+<p><strong>5.下单成功后如何优雅的等待支付成功？</strong></p>
+<p>在订单场景下，通常会要求下单完成后，客户在一定时间内，例如10分钟，内完成订单支付，支付完成后才会通知下游服务进行进一步的营销补偿。</p>
+<p>如果不用事务消息，那通常会怎么办？</p>
+<p>最简单的方式是启动一个定时任务，每隔一段时间扫描订单表，比对未支付的订单的下单时间，将超过时间的订单回收。这种方式显然是有很大问题的，需要定时扫描很庞大的一个订单信息，这对系统是个不小的压力。</p>
+<p>那更进一步的方案是什么呢？是不是就可以使用RocketMQ提供的延迟消息机制。往MQ发一个延迟1分钟的消息，消费到这个消息后去检查订单的支付状态，如果订单已经支付，就往下游发送下单的通知。而如果没有支付，就再发一个延迟1分钟的消息。最终在第十个消息时把订单回收。这个方案就不用对全部的订单表进行扫描，而只需要每次处理一个单独的订单消息。</p>
+<p>那如果使用上了事务消息呢？我们就可以用事务消息的状态回查机制来替代定时的任务。在下单时，给Broker返回一个UNKNOWN的未知状态。而在状态回查的方法中去查询订单的支付状态。这样整个业务逻辑就会简单很多。我们只需要配置RocketMQ中的事务消息回查次数(默认15次)和事务回查间隔时间(messageDelayLevel)，就可以更优雅的完成这个支付状态检查的需求。</p>
+<p><strong>6、事务消息机制的作用</strong></p>
+<p>整体来说，在订单这个场景下，消息不丢失的问题实际上就还是转化成了下单这个业务与下游服务的业务的分布式事务一致性问题。而事务一致性问题一直以来都是一个非常复杂的问题。而RocketMQ的事务消息机制，实际上只保证了整个事务消息的一半，他保证的是订单系统下单和发消息这两个事件的事务一致性，而对下游服务的事务并没有保证。但是即便如此，也是分布式事务的一个很好的降级方案。目前来看，也是业内最好的降级方案。</p>
+</blockquote>
+</li>
+<li><p><strong>1.3、RocketMQ配置同步刷盘+Dledger主从架构保证MQ自身不会丢消息</strong></p>
+<p><strong>1、同步刷盘</strong></p>
+<p>这个从我们之前的分析，就很好理解了。我们可以简单的把RocketMQ的刷盘方式 flushDiskType配置成同步刷盘就可以保证消息在刷盘过程中不会丢失了。</p>
+<p><strong>2、Dledger的文件同步</strong></p>
+<p><img src="/2022/07/23/03-04-06-RocketMQ%E5%AE%9E%E8%B7%B5%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/image-20220723223946088.png" alt="image-20220723223946088"></p>
+</li>
+</ul>
+<p>在使用Dledger技术搭建的RocketMQ集群中，Dledger会通过两阶段提交的方式保证文件在主从之间成功同步。</p>
+<blockquote>
+<p>简单来说，数据同步会通过两个阶段，一个是uncommitted阶段，一个是commited阶段。 Leader Broker上的Dledger收到一条数据后，会标记为uncommitted状态，然后他通过自己的DledgerServer组件把这个uncommitted数据发给Follower Broker的DledgerServer组件。         接着Follower Broker的DledgerServer收到uncommitted消息之后，必须返回一个ack给Leader Broker的Dledger。然后如果Leader Broker收到超过半数的Follower Broker返回的ack之后，就会把消息标记为committed状态。         再接下来， Leader Broker上的DledgerServer就会发送committed消息给Follower Broker上的DledgerServer，让他们把消息也标记为committed状态。这样，就基于Raft协议完成了两阶段的数据同步。</p>
+</blockquote>
+<ul>
+<li><p><strong>1.4、RocketMQ特有的问题，NameServer挂了如何保证消息不丢失？</strong></p>
+<p>NameServer在RocketMQ中，是扮演的一个路由中心的角色，提供到Broker的路由功能。但是其实路由中心这样的功能，在所有的MQ中都是需要的。kafka是用zookeeper和一个作为Controller的Broker一起来提供路由服务，整个功能是相当复杂纠结的。而RabbitMQ是由每一个Broker来提供路由服务。而只有RocketMQ把这个路由中心单独抽取了出来，并独立部署。</p>
+<p>这个NameServer之前都了解过，集群中任意多的节点挂掉，都不会影响他提供的路由功能。那<strong>如果集群中所有的NameServer节点都挂了呢？</strong></p>
+<p>有很多人就会认为在生产者和消费者中都会有全部路由信息的缓存副本，那整个服务可以正常工作一段时间。其实这个问题大家可以做一下实验，当NameServer全部挂了后，生产者和消费者是立即就无法工作了的。至于为什么，可以回顾一下我们之前的源码课程去源码中找找答案。</p>
+<p><strong>那再回到我们的消息不丢失的问题</strong>，在这种情况下，RocketMQ相当于整个服务都不可用了，那他本身肯定无法给我们保证消息不丢失了。我们只能自己设计一个降级方案来处理这个问题了。例如在订单系统中，如果多次尝试发送RocketMQ不成功，那就只能另外找给地方(Redis、文件或者内存等)把订单消息缓存下来，然后起一个线程定时的扫描这些失败的订单消息，尝试往RocketMQ发送。这样等RocketMQ的服务恢复过来后，就能第一时间把这些消息重新发送出去。整个这套降级的机制，在大型互联网项目中，都是必须要有的。</p>
+</li>
+<li><p><strong>1.5RocketMQ消息零丢失方案总结</strong></p>
+<p>完整分析过后，整个RocketMQ消息零丢失的方案其实挺简单</p>
+<ul>
+<li>生产者使用事务消息机制。</li>
+<li>Broker配置同步刷盘+Dledger主从架构</li>
+<li>消费者不要使用异步消费。</li>
+<li>整个MQ挂了之后准备降级方案</li>
+</ul>
+<p>那这套方案是不是就很完美呢？其实很明显，这整套的消息零丢失方案，在各个环节都大量的降低了系统的处理性能以及吞吐量。在很多场景下，这套方案带来的性能损失的代价可能远远大于部分消息丢失的代价。所以，我们在设计RocketMQ使用方案时，要根据实际的业务情况来考虑。例如，如果针对所有服务器都在同一个机房的场景，完全可以把Broker配置成异步刷盘来提升吞吐量。而在有些对消息可靠性要求没有那么高的场景，在生产者端就可以采用其他一些更简单的方案来提升吞吐，而采用定时对账、补偿的机制来提高消息的可靠性。而如果消费者不需要进行消息存盘，那使用异步消费的机制带来的性能提升也是非常显著的。</p>
+<p>总之，这套消息零丢失方案的总结是为了在设计RocketMQ使用方案时的一个很好的参考。</p>
+</li>
+</ul>
+<h2 id="二、使用RocketMQ如何保证消息顺序"><a href="#二、使用RocketMQ如何保证消息顺序" class="headerlink" title="二、使用RocketMQ如何保证消息顺序"></a><strong>二、使用RocketMQ如何保证消息顺序</strong></h2><h3 id="2-1为什么要保证消息有序？"><a href="#2-1为什么要保证消息有序？" class="headerlink" title="2.1为什么要保证消息有序？"></a>2.1<strong>为什么要保证消息有序？</strong></h3><p>这个也是面试时最常见的问题，需要对MQ场景有一定的深入理解。例如如果我们有个大数据系统，需要对业务系统的日志进行收集分析，这时候为了减少对业务系统的影响，通常都会通过MQ来做消息中转。而这时候，对消息的顺序就有一定的要求了。例如我们考虑下面这一系列的操作。</p>
+<ol>
+<li>用户的积分默认是0分，而新注册用户设置为默认的10分。</li>
+<li>用户有奖励行为，积分+2分。</li>
+<li>用户有不正当行为，积分-3分。</li>
+</ol>
+<p>这样一组操作，正常用户积分要变成9分。但是如果顺序乱了，这个结果就全部对不了。这时，就需要对这一组操作，保证消息都是有序的。</p>
+<h3 id="2-2如何保证消息有序？"><a href="#2-2如何保证消息有序？" class="headerlink" title="2.2如何保证消息有序？"></a>2.2<strong>如何保证消息有序？</strong></h3><p>MQ的顺序问题分为全局有序和局部有序。</p>
+<ul>
+<li>全局有序：整个MQ系统的所有消息严格按照队列先入先出顺序进行消费。</li>
+<li>局部有序：只保证一部分关键消息的消费顺序。</li>
+</ul>
+<p>​    <strong>首先</strong> 我们需要分析下这个问题，在通常的业务场景中，全局有序和局部有序哪个更重要？其实在大部分的MQ业务场景，我们只需要能够保证局部有序就可以了。例如我们用QQ聊天，只需要保证一个聊天窗口里的消息有序就可以了。而对于电商订单场景，也只要保证一个订单的所有消息是有序的就可以了。至于全局消息的顺序，并不会太关心。而通常意义下，全局有序都可以压缩成局部有序的问题。例如以前我们常用的聊天室，就是个典型的需要保证消息全局有序的场景。但是这种场景，通常可以压缩成只有一个聊天窗口的QQ来理解。即整个系统只有一个聊天通道，这样就可以用QQ那种保证一个聊天窗口消息有序的方式来保证整个系统的全局消息有序。</p>
+<p>​    <strong>然后</strong> 落地到RocketMQ。通常情况下，发送者发送消息时，会通过MessageQueue轮询的方式保证消息尽量均匀的分布到所有的MessageQueue上，而消费者也就同样需要从多个MessageQueue上消费消息。而MessageQueue是RocketMQ存储消息的最小单元，他们之间的消息都是互相隔离的，在这种情况下，是无法保证消息全局有序的。</p>
+<p>​    而对于局部有序的要求，只需要将有序的一组消息都存入同一个MessageQueue里，这样MessageQueue的FIFO设计天生就可以保证这一组消息的有序。RocketMQ中，可以在发送者发送消息时指定一个MessageSelector对象，让这个对象来决定消息发入哪一个MessageQueue。这样就可以保证一组有序的消息能够发到同一个MessageQueue里。</p>
+<p>​    另外，通常所谓的保证Topic全局消息有序的方式，就是将Topic配置成只有一个MessageQueue队列(默认是4个)。这样天生就能保证消息全局有序了。这个说法其实就是我们将聊天室场景压缩成只有一个聊天窗口的QQ一样的理解方式。而这种方式对整个Topic的消息吞吐影响是非常大的，如果这样用，基本上就没有用MQ的必要了。</p>
+<h2 id="三、使用RocketMQ如何快速处理积压消息？"><a href="#三、使用RocketMQ如何快速处理积压消息？" class="headerlink" title="三、使用RocketMQ如何快速处理积压消息？"></a><strong>三、使用RocketMQ如何快速处理积压消息？</strong></h2><h3 id="3-1如何确定RocketMQ有大量的消息积压？"><a href="#3-1如何确定RocketMQ有大量的消息积压？" class="headerlink" title="3.1如何确定RocketMQ有大量的消息积压？"></a>3.1<strong>如何确定RocketMQ有大量的消息积压？</strong></h3><p>​    在正常情况下，使用MQ都会要尽量保证他的消息生产速度和消费速度整体上是平衡的，但是如果部分消费者系统出现故障，就会造成大量的消息积累。这类问题通常在实际工作中会出现得比较隐蔽。例如某一天一个数据库突然挂了，大家大概率就会集中处理数据库的问题。等好不容易把数据库恢复过来了，这时基于这个数据库服务的消费者程序就会积累大量的消息。或者网络波动等情况，也会导致消息大量的积累。这在一些大型的互联网项目中，消息积压的速度是相当恐怖的。所以消息积压是个需要时时关注的问题。</p>
+<p>​    对于消息积压，如果是RocketMQ或者kafka还好，他们的消息积压不会对性能造成很大的影响。而如果是RabbitMQ的话，那就惨了，大量的消息积压可以瞬间造成性能直线下滑。</p>
+<p>​    对于RocketMQ来说，有个最简单的方式来确定消息是否有积压。那就是使用web控制台，就能直接看到消息的积压情况。</p>
+<p>​    在Web控制台的主题页面，可以通过 Consumer管理 按钮实时看到消息的积压情况。</p>
+<p><img src="/2022/07/23/03-04-06-RocketMQ%E5%AE%9E%E8%B7%B5%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/image-20220723224322757.png" alt="image-20220723224322757"></p>
+<p>另外，也可以通过mqadmin指令在后台检查各个Topic的消息延迟情况。</p>
+<p>还有RocketMQ也会在他的 ${storePathRootDir}/config 目录下落地一系列的json文件，也可以用来跟踪消息积压情况。</p>
+<h3 id="3-2如何处理大量积压的消息？"><a href="#3-2如何处理大量积压的消息？" class="headerlink" title="3.2如何处理大量积压的消息？"></a>3.2<strong>如何处理大量积压的消息？</strong></h3><p>队列不可用动态扩容，创建topic的时候就已经指定好了队列。</p>
+<p>其实我们回顾下RocketMQ的负载均衡的内容就不难想到解决方案。</p>
+<p>如果Topic下的MessageQueue配置得是足够多的，那每个Consumer实际上会分配多个MessageQueue来进行消费。这个时候，就可以简单的通过增加Consumer的服务节点数量来加快消息的消费，等积压消息消费完了，再恢复成正常情况。最极限的情况是把Consumer的节点个数设置成跟MessageQueue的个数相同。但是如果此时再继续增加Consumer的服务节点就没有用了。</p>
+<p>而如果Topic下的MessageQueue配置得不够多的话，那就不能用上面这种增加Consumer节点个数的方法了。这时怎么办呢？ 这时如果要快速处理积压的消息，可以创建一个新的Topic，配置足够多的MessageQueue。然后把所有消费者节点的目标Topic转向新的Topic，并紧急上线一组新的消费者，只负责消费旧Topic中的消息，并转储到新的Topic中，这个速度是可以很快的。然后在新的Topic上，就可以通过增加消费者个数来提高消费速度了。之后再根据情况恢复成正常情况。</p>
+<blockquote>
+<p>在官网中，还分析了一个特殊的情况。就是如果RocketMQ原本是采用的普通方式搭建主从架构，而现在想要中途改为使用Dledger高可用集群，这时候如果不想历史消息丢失，就需要先将消息进行对齐，也就是要消费者把所有的消息都消费完，再来切换主从架构。因为Dledger集群会接管RocketMQ原有的CommitLog日志，所以切换主从架构时，如果有消息没有消费完，这些消息是存在旧的CommitLog中的，就无法再进行消费了。这个场景下也是需要尽快的处理掉积压的消息。</p>
+</blockquote>
+<h2 id="四、RocketMQ的消息轨迹"><a href="#四、RocketMQ的消息轨迹" class="headerlink" title="四、RocketMQ的消息轨迹"></a>四、<strong>RocketMQ的消息轨迹</strong></h2><p>RocketMQ默认提供了消息轨迹的功能：</p>
+<h3 id="4-1RocketMQ消息轨迹数据的关键属性："><a href="#4-1RocketMQ消息轨迹数据的关键属性：" class="headerlink" title="4.1RocketMQ消息轨迹数据的关键属性："></a>4.1<strong>RocketMQ消息轨迹数据的关键属性：</strong></h3><table>
+<thead>
+<tr>
+<th>Producer端</th>
+<th>Consumer端</th>
+<th>Broker端</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>生产实例信息</td>
+<td>消费实例信息</td>
+<td>消息的Topic</td>
+</tr>
+<tr>
+<td>发送消息时间</td>
+<td>投递时间,投递轮次</td>
+<td>消息存储位置</td>
+</tr>
+<tr>
+<td>消息是否发送成功</td>
+<td>消息是否消费成功</td>
+<td>消息的Key值</td>
+</tr>
+<tr>
+<td>发送耗时</td>
+<td>消费耗时</td>
+<td>消息的Tag值</td>
+</tr>
+</tbody></table>
+<h3 id="4-2、消息轨迹配置"><a href="#4-2、消息轨迹配置" class="headerlink" title="4.2、消息轨迹配置"></a><strong>4.2、消息轨迹配置</strong></h3><p>打开消息轨迹功能，需要在broker.conf中打开一个关键配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">traceTopicEnable=true</span><br></pre></td></tr></table></figure>
+
+<p>这个配置的默认值是false。也就是说默认是关闭的。</p>
+<h3 id="4-3消息轨迹数据存储"><a href="#4-3消息轨迹数据存储" class="headerlink" title="4.3消息轨迹数据存储"></a>4.3<strong>消息轨迹数据存储</strong></h3><p>默认情况下，消息轨迹数据是存于一个系统级别的Topic ,RMQ_SYS_TRACE_TOPIC。这个Topic在Broker节点启动时，会自动创建出来。</p>
+<p><img src="/2022/07/23/03-04-06-RocketMQ%E5%AE%9E%E8%B7%B5%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/image-20220723224605560.png" alt="image-20220723224605560"></p>
+<p>另外，也支持客户端自定义轨迹数据存储的Topic。</p>
+<p>在客户端的两个核心对象 DefaultMQProducer和DefaultMQPushConsumer，他们的构造函数中，都有两个可选的参数来打开消息轨迹存储</p>
+<ul>
+<li>enableMsgTrace：是否打开消息轨迹。默认是false。</li>
+<li>customizedTraceTopic：配置将消息轨迹数据存储到用户指定的Topic 。</li>
+</ul>
 ]]></content>
       <categories>
         <category>中间件</category>

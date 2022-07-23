@@ -89,7 +89,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">1.6k</span>
+            <span class="post-count">4.5k</span>
         </span>
     </span>
 
@@ -98,7 +98,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> Reading time≈</span>
-            <span class="post-count">5 min</span>
+            <span class="post-count">16 min</span>
         </span>
     </span>
 </div>
@@ -210,6 +210,103 @@
 <p><img src="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Producer%E9%80%89%E6%8B%A9Queue.png" alt="Producer选择Queue"></p>
 <p><strong>然后</strong> 在发送Netty请求时，实际上是指定的MessageQueue，而不是Topic。Topic只是用来找MessageQueue。</p>
 <p>然后根据MessageQueue再找所在的Broker，往Broker发送请求。</p>
+<h1 id="六、消息存储"><a href="#六、消息存储" class="headerlink" title="六、消息存储"></a>六、消息存储</h1><h2 id="1、功能回顾"><a href="#1、功能回顾" class="headerlink" title="1、功能回顾"></a>1、功能回顾</h2><p>我们接着上面的流程，Producer把消息发到了Broker，接下来就关注下Broker接收到消息后是如何把消息进行存储的。最终存储的文件有哪些？</p>
+<ul>
+<li>commitLog：消息存储目录</li>
+<li>config：运行期间一些配置信息</li>
+<li>consumerqueue：消息消费队列存储目录</li>
+<li>index：消息索引文件存储目录</li>
+<li>abort：如果存在改文件寿命Broker非正常关闭</li>
+<li>checkpoint：文件检查点，存储CommitLog文件最后一次刷盘时间戳、consumerquueue最后一次刷盘时间，index索引文件最后一次刷盘时间戳。</li>
+</ul>
+<p>还记得我们之前看到的Broker的核心组件吗？其中messageStore就是负责消息存储的核心组件。</p>
+<h2 id="2、源码重点："><a href="#2、源码重点：" class="headerlink" title="2、源码重点："></a>2、源码重点：</h2><p>消息存储的入口在：DefaultMessageStore.putMessage</p>
+<p><strong>1-commitLog写入</strong></p>
+<p>CommitLog的doAppend方法就是Broker写入消息的实际入口。这个方法最终会把消息追加到MappedFile映射的一块内存里，并没有直接写入磁盘。写入消息的过程是串行的，一次只会允许一个线程写入。</p>
+<p><strong>2-分发ConsumeQueue和IndexFile</strong></p>
+<pre><code>当CommitLog写入一条消息后，在DefaultMessageStore的start方法中，会启动一个后台线程reputMessageService每隔1毫秒就会去拉取CommitLog中最新更新的一批消息，然后分别转发到ComsumeQueue和IndexFile里去，这就是他底层的实现逻辑。
+
+并且，如果服务异常宕机，会造成CommitLog和ConsumeQueue、IndexFile文件不一致，有消息写入CommitLog后，没有分发到索引文件，这样消息就丢失了。DefaultMappedStore的load方法提供了恢复索引文件的方法，入口在load方法。
+</code></pre>
+<p><strong>3、文件同步刷盘与异步刷盘</strong></p>
+<pre><code>入口：CommitLog.putMessage -&gt; CommitLog.handleDiskFlush
+
+其中主要涉及到是否开启了对外内存。TransientStorePoolEnable。如果开启了堆外内存，会在启动时申请一个跟CommitLog文件大小一致的堆外内存，这部分内存就可以确保不会被交换到虚拟内存中。
+</code></pre>
+<p><strong>4、过期文件删除</strong></p>
+<pre><code>入口： DefaultMessageStore.addScheduleTask -&gt; DefaultMessageStore.this.cleanFilesPeriodically()
+
+默认情况下， Broker会启动后台线程，每60秒，检查CommitLog、ConsumeQueue文件。然后对超过72小时的数据进行删除。也就是说，默认情况下， RocketMQ只会保存3天内的数据。这个时间可以通过fileReservedTime来配置。注意他删除时，并不会检查消息是否被消费了。
+</code></pre>
+<p>整个文件存储的核心入口入口在DefaultMessageStore的start方法中。</p>
+<p><img src="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/image-20220723221300813.png" alt="image-20220723221300813"></p>
+<p><strong>5文件存储部分的总结</strong>：</p>
+<p>RocketMQ的存储文件包括消息文件（Commitlog）、消息消费队列文件（ConsumerQueue）、Hash索引文件（IndexFile）、监测点文件（checkPoint）、abort（关闭异常文件）。单个消息存储文件、消息消费队列文件、Hash索引文件长度固定以便使用内存映射机制进行文件的读写操作。RocketMQ组织文件以文件的起始偏移量来命令文件，这样根据偏移量能快速定位到真实的物理文件。RocketMQ基于内存映射文件机制提供了同步刷盘和异步刷盘两种机制，异步刷盘是指在消息存储时先追加到内存映射文件，然后启动专门的刷盘线程定时将内存中的文件数据刷写到磁盘。</p>
+<p>CommitLog，消息存储文件，RocketMQ为了保证消息发送的高吞吐量，采用单一文件存储所有主题消息，保证消息存储是完全的顺序写，但这样给文件读取带来了不便，为此RocketMQ为了方便消息消费构建了消息消费队列文件，基于主题与队列进行组织，同时RocketMQ为消息实现了Hash索引，可以为消息设置索引键，根据所以能够快速从CommitLog文件中检索消息。</p>
+<p>当消息达到CommitLog后，会通过ReputMessageService线程接近实时地将消息转发给消息消费队列文件与索引文件。为了安全起见，RocketMQ引入abort文件，记录Broker的停机是否是正常关闭还是异常关闭，在重启Broker时为了保证CommitLog文件，消息消费队列文件与Hash索引文件的正确性，分别采用不同策略来恢复文件。</p>
+<p>RocketMQ不会永久存储消息文件、消息消费队列文件，而是启动文件过期机制并在磁盘空间不足或者默认凌晨4点删除过期文件，文件保存72小时并且在删除文件时并不会判断该消息文件上的消息是否被消费。</p>
+<h1 id="七、消费者"><a href="#七、消费者" class="headerlink" title="七、消费者"></a>七、消费者</h1><h2 id="1、功能回顾-1"><a href="#1、功能回顾-1" class="headerlink" title="1、功能回顾"></a>1、功能回顾</h2><p>结合我们之前的示例，回顾下消费者这一块的几个重点：</p>
+<ul>
+<li><p>消费者也是有两种，推模式消费者和拉模式消费者。消费者的使用过程也跟生产者差不多，都是先start()然后再开始消费。</p>
+</li>
+<li><p>消费者以消费者组的模式开展。消费者组之间有集群模式和广播模式两种消费模式。我们就要了解下这两种集群模式是如何做的逻辑封装。</p>
+</li>
+<li><p>然后我们关注下消费者端的负载均衡的原理。即消费者是如何绑定消费队列的。</p>
+</li>
+<li><p>最后我们来关注下在推模式的消费者中，MessageListenerConcurrently 和MessageListenerOrderly这两种消息监听器的处理逻辑到底有什么不同，为什么后者能保持消息顺序。</p>
+</li>
+</ul>
+<p>我们接下来就通过这几个问题来把RocketMQ的消费者部分源码串起来。</p>
+<h2 id="2、源码重点：-1"><a href="#2、源码重点：-1" class="headerlink" title="2、源码重点："></a>2、源码重点：</h2><p><strong>1、启动</strong></p>
+<pre><code>DefaultMQPushConsumer.start方法
+
+启动过程不用太过关注，有个概念就行，然后客户端启动的核心是mQClientFactory 主要是启动了一大堆的服务。
+
+这些服务可以结合具体场景再进行深入。例如pullMessageService主要处理拉取消息服务，rebalanceService主要处理客户端的负载均衡。
+</code></pre>
+<p><strong>2、消息拉取：</strong></p>
+<pre><code>拉模式： PullMessageService
+</code></pre>
+<p>PullRequest里有messageQueue和processQueue，其中messageQueue负责拉取消息，拉取到后，将消息存入processQueue，进行处理。 存入后就可以清空messageQueue，继续拉取了。</p>
+<p><img src="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/image-20220723221432079.png" alt="image-20220723221432079"></p>
+<p><strong>3 客户端负载均衡策略</strong></p>
+<p>在消费者示例的start方法中，启动RebalanceService，这个是客户端进行负载均衡策略的启动服务。他只负责根据负载均衡策略获取当前客户端分配到的MessageQueue示例。</p>
+<p>五种负载策略，可以由Consumer的allocateMessageQueueStrategy属性来选择。</p>
+<p>最常用的是AllocateMessageQueueAveragely平均分配和AllocateMessageQueueAveragelyByCircle平均轮询分配。    </p>
+<p>平均分配是把MessageQueue按组内的消费者个数平均分配。</p>
+<p>而平均轮询分配就是把MessageQueue按组内的消费者一个一个轮询分配。</p>
+<blockquote>
+<p> 例如，六个队列q1,q2,q3,q4,q5,q6，分配给三个消费者c1,c2,c3</p>
+<p> 平均分配的结果就是:  c1:{q1,q2},c2:{q3,q4},c3{q5,q6}</p>
+<p> 平均轮询分配的结果就是： c1:{q1,q4},c2:{q2,q5},c3:{q3,q6}</p>
+</blockquote>
+<p><strong>4 并发消费与顺序消费的过程</strong></p>
+<p>消费的过程依然是在DefaultMQPushConsumerImpl的 consumeMessageService中。他有两个子类ConsumeMessageConcurrentlyService和ConsumeMessageOrderlyService。其中最主要的差别是ConsumeMessageOrderlyService会在消费前把队列锁起来，优先保证拉取同一个队列里的消息。</p>
+<p>消费过程的入口在DefaultMQPushConsumerImpl的pullMessage中定义的PullCallback中。</p>
+<h1 id="八、延迟消息"><a href="#八、延迟消息" class="headerlink" title="八、延迟消息"></a>八、延迟消息</h1><h2 id="1、功能回顾-2"><a href="#1、功能回顾-2" class="headerlink" title="1、功能回顾"></a>1、功能回顾</h2><p>我们这里，就用一个典型的延迟消息的流程，来把上面看到的各个组件，结合一下。</p>
+<p>延迟消息的核心使用方法就是在Message中设定一个MessageDelayLevel参数，对应18个延迟级别。然后Broker中会创建一个默认的Schedule_Topic主题，这个主题下有18个队列，对应18个延迟级别。消息发过来之后，会先把消息存入Schedule_Topic主题中对应的队列。然后等延迟时间到了，再转发到目标队列，推送给消费者进行消费。</p>
+<p>整个延迟消息的实现方式是这样的：</p>
+<p><img src="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/image-20220723221513122.png" alt="image-20220723221513122"></p>
+<h2 id="2、源码重点"><a href="#2、源码重点" class="headerlink" title="2、源码重点"></a>2、源码重点</h2><p>延迟消息的处理入口在scheduleMessageService这个组件中。 他会在broker启动时也一起加载。</p>
+<p><strong>1、消息写入：</strong></p>
+<p>代码见CommitLog.putMessage方法。</p>
+<p>在CommitLog写入消息时，会判断消息的延迟级别，然后修改Message的Topic和Queue，达到转储Message的目的。</p>
+<p><strong>2、消息转储到目标Topic</strong></p>
+<p>这个转储的核心服务是scheduleMessageService，他也是Broker启动过程中的一个功能组件、</p>
+<p>然后ScheduleMessageService会每隔1秒钟执行一个executeOnTimeup任务，将消息从延迟队列中写入正常Topic中。 代码见ScheduleMessageService中的DeliverDelayedMessageTimerTask.executeOnTimeup方法。</p>
+<p>这个其中有个需要注意的点就是在ScheduleMessageService的start方法中。有一个很关键的CAS操作：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (started.compareAndSet(<span class="keyword">false</span>, <span class="keyword">true</span>)) &#123;</span><br></pre></td></tr></table></figure>
+
+<p>这个CAS操作保证了同一时间只会有一个DeliverDelayedMessageTimerTask执行。保证了消息安全的同时也限制了消息进行回传的效率。所以，这也是很多互联网公司在使用RocketMQ时，对源码进行定制的一个重点。</p>
+<h2 id="3-消费者部分小结："><a href="#3-消费者部分小结：" class="headerlink" title="3 消费者部分小结："></a>3 消费者部分小结：</h2><p>RocketMQ消息消费方式分别为集群模式、广播模式。</p>
+<p>消息队列负载由RebalanceService线程默认每隔20s进行一次消息队列负载，根据当前消费者组内消费者个数与主题队列数量按照某一种负载算法进行队列分配，分配原则为同一个消费者可以分配多个消息消费队列，同一个消息消费队列同一个时间只会分配给一个消费者。</p>
+<p>消息拉取由PullMessageService线程根据RebalanceService线程创建的拉取任务进行拉取，默认每次拉取32条消息，提交给消费者消费线程后继续下一次消息拉取。如果消息消费过慢产生消息堆积会触发消息消费拉取流控。 </p>
+<p>并发消息消费指消费线程池中的线程可以并发对同一个消息队列的消息进行消费，消费成功后，取出消息队列中最小的消息偏移量作为消息消费进度偏移量存储在于消息消费进度存储文件中，集群模式消息消费进度存储在Broker（消息服务器），广播模式消息消费进度存储在消费者端。</p>
+<p>RocketMQ不支持任意精度的定时调度消息，只支持自定义的消息延迟级别，例如1s、2s、5s等，可通过在broker配置文件中设置messageDelayLevel。</p>
+<p>顺序消息一般使用集群模式，是指对消息消费者内的线程池中的线程对消息消费队列只能串行消费。与并发消息消费最本质的区别是消息消费时必须成功锁定消息消费队列，在Broker端会存储消息消费队列的锁占用情况。</p>
+<h1 id="源码解读小结"><a href="#源码解读小结" class="headerlink" title="源码解读小结"></a>源码解读小结</h1><p>关于RocketMQ的源码部分，我们就带大家解读到这里。到目前为止，几个核心的流程我们已经解读完成了，我们按照由大到小，由粗到细的方式对几条主线进行了解读。通过解读源码，我们可以对之前提到的各种高级特性有更深入的理解。对有些有争议的问题，带着问题来源码中找答案是最好的。例如我们经常有人讨论NameServer全部挂了之后，生产者和消费者是否能够用他本地的缓存继续工作一段时间？ 这样的一些问题，看过源码之后是不是有更清晰的了解？</p>
+<p>至于其他的代码，大家也可以按照自己的关注点，以业务线的方式来逐步解读。</p>
+<p><img src="https://note.youdao.com/yws/res/267174/8C06BD7D32624201A2F7558CEC37A53A" alt="image"></p>
  
       <!-- reward -->
       
@@ -286,6 +383,15 @@
 
    
   <nav class="article-nav">
+    
+      <a href="/2022/07/23/03-04-06-RocketMQ%E5%AE%9E%E8%B7%B5%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            RocketMQ实践问题总结
+          
+        </div>
+      </a>
     
     
       <a href="/2022/07/21/03-04-04-RocketMQ%E6%80%BB%E7%BB%93/" class="article-nav-link">
