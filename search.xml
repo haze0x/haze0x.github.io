@@ -10366,4 +10366,116 @@ sync path
         <tag>RocketMQ</tag>
       </tags>
   </entry>
+  <entry>
+    <title>RoketMQ源码分析</title>
+    <url>/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h1 id="RocketMQ源码分析"><a href="#RocketMQ源码分析" class="headerlink" title="RocketMQ源码分析"></a>RocketMQ源码分析</h1><h2 id="1、源码环境搭建"><a href="#1、源码环境搭建" class="headerlink" title="1、源码环境搭建"></a>1、源码环境搭建</h2><blockquote>
+<p>RocketMQ官方仓库：<a href="https://github.com/apache/rocketmq">https://github.com/apache/rocketmq</a> ，选用4.7.1版本</p>
+<p>几个模块：</p>
+<ul>
+<li>broker: broker 模块（broke 启动进程）</li>
+<li>client ：消息客户端，包含消息生产者、消息消费者相关类</li>
+<li>example: RocketMQ 例代码</li>
+<li>namesrv：NameServer实现相关类（NameServer启动进程）</li>
+<li>store：消息存储实现相关类</li>
+</ul>
+</blockquote>
+<h2 id="2、-启动nameServer"><a href="#2、-启动nameServer" class="headerlink" title="2、 启动nameServer"></a>2、 启动nameServer</h2><blockquote>
+<p>源码路径：namesrv-&gt;NamesrvStartup-&gt;main()方法</p>
+<p>nameserver作用：</p>
+<ul>
+<li>维护Broker的服务地址并进行及时的更新</li>
+<li>给Producer和Consumer提供服务获取Broker列表</li>
+</ul>
+</blockquote>
+<h3 id="2-1、启动流程"><a href="#2-1、启动流程" class="headerlink" title="2.1、启动流程"></a>2.1、启动流程</h3><p><img src="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/NameServer%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B.png" alt="NameServer启动流程"></p>
+<h3 id="2-2、源码核心"><a href="#2-2、源码核心" class="headerlink" title="2.2、源码核心"></a>2.2、源码核心</h3><p>整个NameServer的核心就是一个NamesrvController对象。这个controller对象就跟java Web开发中的Controller功能类似，都是响应客户端请求的。</p>
+<p>在创建NamesrvController对象时，有两个关键的配置</p>
+<ul>
+<li>NamesrvConfig 这个是NameServer自己运行需要的配置信息。</li>
+<li>NettyServerConfig 包含Netty服务端的配置参数，默认占用了9876端口。可以在配置文件中覆盖。</li>
+</ul>
+<p>然后在启动服务时，启动几个重要组件：</p>
+<ul>
+<li>RemotingServer 这个就是用来响应请求的。</li>
+<li>还有一个定时任务会定时扫描不活动的Broker。这个Broker管理是通过routeInfoManager这个功能组件。</li>
+</ul>
+<p>在关闭服务时，关闭了四个东西</p>
+<ul>
+<li>RemotingServer</li>
+<li>remotingExecutor Netty服务线程池;</li>
+<li>scheduledExecutorService 定时任务;</li>
+<li>fileWatchService 这个是用来跟踪TLS配置的。这是跟权限相关的，我们暂不关注。</li>
+<li>从启动和关闭这两个关键步骤，我们可以总结出NameServer的组件其实并不是很多，整个NameServer的结构是这样：</li>
+</ul>
+<p><img src="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E6%BA%90%E7%A0%81Nameserver1.png" alt="源码Nameserver1"></p>
+<h2 id="3、启动Broker"><a href="#3、启动Broker" class="headerlink" title="3、启动Broker"></a>3、启动Broker</h2><blockquote>
+<p>源码路径：</p>
+<p>Broker是整个RocketMQ的业务核心，所有消息存储、转发这些最为重要的业务都是在Broker中进行处理的。</p>
+<p>而Broker的内部架构，有点类似于JavaWeb开发的MVC架构。有Controller负责响应请求，各种Service组件负责具体业务，然后还有负责消息存盘的功能模块则类似于Dao。</p>
+<p>所以我们这一段的重点，是通过Broker的启动过程，观察总结出Broker的内部结构。</p>
+</blockquote>
+<p>Broker启动的入口在BrokerStartup这个类，可以从他的main方法开始调试。</p>
+<p>启动过程关键点：</p>
+<p>重点也是围绕一个BrokerController对象，先创建，然后再启动。</p>
+<p><strong>首先：</strong> 在BrokerStartup.createBrokerController方法中可以看到Broker的几个核心配置：</p>
+<p> BrokerConfig</p>
+<p> NettyServerConfig ：Netty服务端占用了10911端口。同样也可以在配置文件中覆盖。</p>
+<p> NettyClientConfig</p>
+<p> MessageStoreConfig</p>
+<p><strong>然后：</strong> 在BrokerController.start方法可以看到启动了一大堆Broker的核心服务，我们挑一些重要的</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">this.messageStore.start();启动核心的消息存储组件</span><br><span class="line"></span><br><span class="line">this.remotingServer.start();</span><br><span class="line">this.fastRemotingServer.start(); 启动两个Netty服务</span><br><span class="line"></span><br><span class="line">this.brokerOuterAPI.start();启动客户端，往外发请求</span><br><span class="line"></span><br><span class="line">BrokerController.this.registerBrokerAll： 向NameServer注册心跳。</span><br><span class="line"></span><br><span class="line">this.brokerStatsManager.start();</span><br><span class="line">this.brokerFastFailure.start();这也是一些负责具体业务的功能组件</span><br></pre></td></tr></table></figure>
+
+<p>我们现在不需要了解这些核心组件的具体功能，只要有个大概，Broker中有一大堆的功能组件负责具体的业务。后面等到分析具体业务时再去深入每个服务的细节。</p>
+<p>我们需要抽象出Broker的一个整体结构：</p>
+<p><img src="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Broker%E6%A0%B8%E5%BF%83%E7%BB%84%E6%88%90.png" alt="Broker核心组成"></p>
+<h2 id="4、Broker注册"><a href="#4、Broker注册" class="headerlink" title="4、Broker注册"></a>4、Broker注册</h2><blockquote>
+<p> 在之前我们已经介绍到了。Broker会在启动时向NameServer注册自己的服务信息，并且会定时的往NameServer发送心跳信息。而NameServer会维护Broker的路由列表，并对路由列表进行实时更新。</p>
+</blockquote>
+<h3 id="4-1-源码重点"><a href="#4-1-源码重点" class="headerlink" title="4.1 源码重点"></a>4.1 源码重点</h3><p>BrokerController.this.registerBrokerAll方法会发起向NameServer注册心跳。启动时会立即注册，同时也会启动一个线程池，以10秒延迟，默认30秒的间隔 持续向NameServer发送心跳。</p>
+<p>BrokerController.this.registerBrokerAll这个方法就是注册心跳的入口。</p>
+<p><img src="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Broker%E6%B3%A8%E5%86%8C%E6%B5%81%E7%A8%8B.png" alt="Broker注册流程"></p>
+<p>然后，在NameServer中也会启动一个定时任务，扫描不活动的Broker。具体观察NamesrvController.initialize方法</p>
+<h2 id="5、Producer"><a href="#5、Producer" class="headerlink" title="5、Producer"></a>5、Producer</h2><blockquote>
+<p>Producer有两种</p>
+<ul>
+<li>一种是普通发送者：DefaultMQProducer。这个只需要构建一个Netty客户端，往Broker发送消息就行了。注意，异步回调只是在Producer接收到Broker的响应后自行调整流程，不需要提供Netty服务。</li>
+<li>另一种是事务消息发送者： TransactionMQProducer。这个需要构建一个Netty客户端，往Broker发送消息。同时也要构建Netty服务端，供Broker回查本地事务状态。</li>
+</ul>
+<p>由于整个Producer的流程，其实还是挺复杂的，我们这里只关注DefaultMQProducer的整个过程。TransactionMQProducer就不在课上带大家看了。</p>
+</blockquote>
+<h3 id="5-1-源码重点"><a href="#5-1-源码重点" class="headerlink" title="5.1 源码重点"></a>5.1 源码重点</h3><p>整个Producer的流程，大致分两个步骤</p>
+<ul>
+<li>start方法，进行一大堆的准备工作</li>
+<li>各种各样的send方法，进行消息发送。</li>
+</ul>
+<p>那我们重点关注以下几个问题：</p>
+<p><strong>首先</strong> 我们关注下Broker的核心启动流程：</p>
+<p>在mQClientFactory的start方法中，启动了生产者的一大堆重要服务。</p>
+<p>然后在DefaultMQProducerImpl的start方法中，又回到了生产者的mqClientFactory的启动过程，这中间有服务状态的管理。</p>
+<p><strong>其次：</strong>关于Borker路由信息的管理： Producer需要拉取Broker列表，然后跟Broker建立连接等等很多核心的流程，其实都是在发送消息时建立的。因为在启动时，还不知道要拉取哪个Topic的Broker列表呢。所以对于这个问题，我们关注的重点，不应该是start方法，而是send方法。</p>
+<p>而对NameServer的地址管理，则是散布在启动和发送的多个过程当中，并且NameServer地址可以通过一个Http服务来获取。</p>
+<p>Send方法中，首先需要获得Topic的路由信息。这会从本地缓存中获取，如果本地缓存中没有，就从NameServer中去申请。</p>
+<p>核心在 org.apache.rocketmq.client.impl.producer.DefaultMQProducerImpl#tryToFindTopicPublishInfo方法</p>
+<p>路由信息大致的管理流程：</p>
+<p><img src="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E8%B7%AF%E7%94%B1%E7%AE%A1%E7%90%86.png" alt="路由管理"></p>
+<p><strong>然后</strong> 关于Producer的负载均衡。</p>
+<p>在之前介绍RocketMQ的顺序消息时，讲到了Producer的负载均衡策略，默认会把消息平均的发送到所有MessageQueue里的。那到底是怎么进行负载均衡的呢？</p>
+<p><img src="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Producer%E9%80%89%E6%8B%A9Queue.png" alt="Producer选择Queue"></p>
+<p><strong>然后</strong> 在发送Netty请求时，实际上是指定的MessageQueue，而不是Topic。Topic只是用来找MessageQueue。</p>
+<p>然后根据MessageQueue再找所在的Broker，往Broker发送请求。</p>
+]]></content>
+      <categories>
+        <category>中间件</category>
+        <category>分布式</category>
+        <category>RocketMQ</category>
+      </categories>
+      <tags>
+        <tag>分布式</tag>
+        <tag>消息队列</tag>
+        <tag>RocketMQ</tag>
+      </tags>
+  </entry>
 </search>
