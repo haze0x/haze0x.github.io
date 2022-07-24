@@ -10350,7 +10350,7 @@ sync path
   </entry>
   <entry>
     <title>RocketMQ总结</title>
-    <url>/2022/07/21/03-04-04-RocketMQ%E6%80%BB%E7%BB%93/</url>
+    <url>/2022/07/24/03-04-04-RocketMQ%E6%80%BB%E7%BB%93/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
 
 <p><a href="https://www.processon.com/view/link/62d96be7f346fb1ede177e68">RocketMQ总结脑图</a></p>
@@ -10725,5 +10725,10 @@ sync path
         <tag>消息队列</tag>
         <tag>RocketMQ</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>05_00_01_企业级IM系统后端架构实战</title>
+    <url>/2022/07/24/05-00-01-%E4%BC%81%E4%B8%9A%E7%BA%A7IM%E7%B3%BB%E7%BB%9F%E5%90%8E%E7%AB%AF%E6%9E%B6%E6%9E%84%E5%AE%9E%E6%88%98/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
   </entry>
 </search>
