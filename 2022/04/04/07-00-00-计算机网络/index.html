@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>计算机网络 |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-07-00-00-计算机网络"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  计算机网络
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" class="article-date">
+  <time datetime="2022-04-04T00:46:54.000Z" itemprop="datePublished">2022-04-04</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">计算机网络</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">7.4k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">26 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p id="hitokoto">正在加载一言...</p>
+
+<h2 id="一、网络分层原理"><a href="#一、网络分层原理" class="headerlink" title="一、网络分层原理"></a>一、网络分层原理</h2><h3 id="1、复杂的网络"><a href="#1、复杂的网络" class="headerlink" title="1、复杂的网络"></a>1、复杂的网络</h3><p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404090937050.png" alt="网络传输过程"></p>
+<h3 id="2、网络分层"><a href="#2、网络分层" class="headerlink" title="2、网络分层"></a>2、网络分层</h3><p><strong>为了简化网络的复杂度，网络通信的不同方面被分解为多层次结构，每一层只与紧挨着的上一层或下一层进行交互，将网络分层，这样就可以修改，甚至替换某一层的软件，只要层与层之间的接口保持不变，就不会影响到其它层。</strong></p>
+<ul>
+<li><p><code>OSI（Open System Interconnection Reference Model）:开放系统互连参考模型</code></p>
+</li>
+<li><p><code>TCP/IP协议族</code></p>
+<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404091034519.png" alt="网络分层"></p>
+</li>
+</ul>
+<h3 id="3、一个HTTP请求的分层解析流程"><a href="#3、一个HTTP请求的分层解析流程" class="headerlink" title="3、一个HTTP请求的分层解析流程"></a>3、一个HTTP请求的分层解析流程</h3><p>  <img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404091130168.png" alt="一个Http请求的分层解析流程"></p>
+<h2 id="二、HTTP协议"><a href="#二、HTTP协议" class="headerlink" title="二、HTTP协议"></a>二、HTTP协议</h2><p><strong>超文本传输协议(HyperText Transfer Protocol，HTTP)：</strong> 一种无状态的（本身不会存储用户的信息），以请求/应答方式运行的协议，它使用可扩展的语义和自描述消息格式，与 基于网络的超文本信息系统灵活的互动。</p>
+<h3 id="1、HTTP报文格式"><a href="#1、HTTP报文格式" class="headerlink" title="1、HTTP报文格式"></a>1、HTTP报文格式</h3><p>HTTP 协议的请求报文和响应报文的结构基本相同，由三大部分组成： </p>
+<ul>
+<li><code>起始行（start line）</code>：描述请求或响应的基本信息 </li>
+<li><code>头部字段集合（header）</code>：使用 key-value 形式更详细地说明报文 </li>
+<li><code>消息正文（entity）</code>：实际传输的数据，它不一定是纯文本，可以是图片、视频 等二进制数据</li>
+</ul>
+<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404092725026.png" alt="HTTP报文格式"></p>
+<h3 id="2、请求行报文格式"><a href="#2、请求行报文格式" class="headerlink" title="2、请求行报文格式"></a>2、请求行报文格式</h3><p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404092555777.png" alt="请求行报文格式"></p>
+<h3 id="3、响应行报文格式"><a href="#3、响应行报文格式" class="headerlink" title="3、响应行报文格式"></a>3、响应行报文格式</h3><p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404092929856.png" alt="响应行报文格式"></p>
+<ul>
+<li>版本号：表示报文使用的 HTTP 协议版本； </li>
+<li>状态码：一个三位数，用代码的形式表示处理的结果，比如 200 是成功，500 是服务器错误；</li>
+<li>原因：作为数字状态码补充，是更详细的解释文字，帮助人理解原因 </li>
+</ul>
+<h3 id="4、HTTP-头字段"><a href="#4、HTTP-头字段" class="headerlink" title="4、HTTP 头字段"></a>4、HTTP 头字段</h3><p>头部字段是 key-value 的形式，key 和 value 之间用“:”分隔，最后用 CRLF 换行表示字 段结束。比如前后分离时经常遇到的要与后端协商传输数据的类型“Content-type: application/json”，这里 key 就是“Content-type”，value 就 是“application/json”。HTTP 头字段非常灵活，不仅可以使用标准里的 Host、 Connection 等已有头，也可以任意添加自定义头，这就给 HTTP 协议带来了无限的扩展可能。</p>
+<p>头字段注意事项 </p>
+<ul>
+<li>字段名不区分大小写，字段名里不允许出现空格，可以使用连字符“-”，但不 能使用下划线“_”（有的服务器不会解析带“_”的头字段）。字段名后面必须紧接 着“:”，不能有空格，而“:”后的字段值前可以有多个空格；</li>
+<li> 字段的顺序是没有意义的，可以任意排列不影响语义；</li>
+<li> 字段原则上不能重复，除非这个字段本身的语义允许，例如 Set-Cookie。</li>
+</ul>
+<h3 id="5、常用头字段"><a href="#5、常用头字段" class="headerlink" title="5、常用头字段"></a>5、常用头字段</h3><p>HTTP 协议中有非常多的头字段，但基本上可以分为四大类： </p>
+<ul>
+<li><code>请求字段</code>：请求头中的头字段；如Host，Referer（防盗链会用到）。 </li>
+<li><code>响应字段</code>：响应头中的头字段，如：Server（标识哪种类型的服务器 nginx、apache）、Date（请求字段/响应字段都会存在）； </li>
+<li><code>通用字段</code>：在请求头和响应头里都可以出现，如 Content-type（数据传输到服务器用的什么格式）， Connection ；</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">HTTP 400 – 请求无效</span><br><span class="line"></span><br><span class="line">HTTP 404- 无法找到文件或目录</span><br><span class="line"></span><br><span class="line">HTTP 500 – 内部服务器错误</span><br><span class="line"></span><br><span class="line">HTTP 502 – 网关错误</span><br><span class="line"></span><br><span class="line">HTTP 400 – 请求无效</span><br><span class="line">HTTP 401.1 – 未授权：登录失败</span><br><span class="line">HTTP 401.2 – 未授权：服务器配置问题导致登录失败</span><br><span class="line">HTTP 401.3 – ACL 禁止访问资源</span><br><span class="line">HTTP 401.4 – 未授权：授权被筛选器拒绝</span><br><span class="line">HTTP 401.5 – 未授权：ISAPI 或 CGI 授权失败</span><br><span class="line"></span><br><span class="line">HTTP 403 – 禁止访问</span><br><span class="line">HTTP 403 – 对 Internet 服务管理器 的访问仅限于 Localhost</span><br><span class="line">HTTP 403.1 禁止访问：禁止可执行访问</span><br><span class="line">HTTP 403.2 – 禁止访问：禁止读访问</span><br><span class="line">HTTP 403.3 – 禁止访问：禁止写访问</span><br><span class="line">HTTP 403.4 – 禁止访问：要求 SSL</span><br><span class="line">HTTP 403.5 – 禁止访问：要求 SSL 128</span><br><span class="line">HTTP 403.6 – 禁止访问：IP 地址被拒绝</span><br><span class="line">HTTP 403.7 – 禁止访问：要求客户证书</span><br><span class="line">HTTP 403.8 – 禁止访问：禁止站点访问</span><br><span class="line">HTTP 403.9 – 禁止访问：连接的用户过多</span><br><span class="line">HTTP 403.10 – 禁止访问：配置无效</span><br><span class="line">HTTP 403.11 – 禁止访问：密码更改</span><br><span class="line">HTTP 403.12 – 禁止访问：映射器拒绝访问</span><br><span class="line">HTTP 403.13 – 禁止访问：客户证书已被吊销</span><br><span class="line">HTTP 403.15 – 禁止访问：客户访问许可过多</span><br><span class="line">HTTP 403.16 – 禁止访问：客户证书不可信或者无效</span><br><span class="line">HTTP 403.17 – 禁止访问：客户证书已经到期或者尚未生效 HTTP 404.1 -</span><br><span class="line"></span><br><span class="line">无法找到 Web 站点</span><br><span class="line">HTTP 404- 无法找到文件</span><br><span class="line">HTTP 405 – 资源被禁止</span><br><span class="line">HTTP 406 – 无法接受</span><br><span class="line">HTTP 407 – 要求代理身份验证</span><br><span class="line">HTTP 410 – 永远不可用</span><br><span class="line">HTTP 412 – 先决条件失败</span><br><span class="line">HTTP 414 – 请求 – URI 太长</span><br><span class="line"></span><br><span class="line">HTTP 500 – 内部服务器错误</span><br><span class="line">HTTP 500.100 – 内部服务器错误 – ASP 错误</span><br><span class="line">HTTP 500-11 服务器关闭</span><br><span class="line">HTTP 500-12 应用程序重新启动</span><br><span class="line">HTTP 500-13 – 服务器太忙</span><br><span class="line">HTTP 500-14 – 应用程序无效</span><br><span class="line">HTTP 500-15 – 不允许请求 global.asa</span><br><span class="line">Error 501 – 未实现</span><br><span class="line">HTTP 502 – 网关错误</span><br></pre></td></tr></table></figure>
+
+<h2 id="三、HTTP请求的完整过程"><a href="#三、HTTP请求的完整过程" class="headerlink" title="三、HTTP请求的完整过程"></a>三、HTTP请求的完整过程</h2><h3 id="1、当用户在浏览器输入网址回车之后，网络协议都做了哪些工作呢？"><a href="#1、当用户在浏览器输入网址回车之后，网络协议都做了哪些工作呢？" class="headerlink" title="1、当用户在浏览器输入网址回车之后，网络协议都做了哪些工作呢？"></a>1、当用户在浏览器输入网址回车之后，网络协议都做了哪些工作呢？</h3><ol>
+<li><code>首先干活的是 浏览器应用程序，他要解析出 URL中的域名 </code></li>
+<li><code>根据域名获取对应的ip地址，首先从浏览器缓存中查看，如下可以查看浏览器中域名对应 </code></li>
+</ol>
+<p>ip的解析</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chrome://net‐internals/#events</span><br></pre></td></tr></table></figure>
+
+<p>如果没有则从本机域名解析文件hosts（/etc/hosts）中查看，还没有则从 LDNS（Localdnsserver）、Rootserver域名服务器、国际顶级域名服务商的DNS 的层层解析</p>
+<ol start="3">
+<li><code>拿到IP地址后，浏览器就可以发起 与服务器的三次握手</code></li>
+<li><code>握手建立之后，就开始组装http请求报文，发送报文 </code></li>
+<li><code>服务器收到请求报文之后开始，请求报文解析，生成响应数据，发送响应数据 </code></li>
+<li><code>浏览器收到响应之后，开始渲染页面</code></li>
+</ol>
+<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404094446754.png" alt="HTTP请求完整过程"></p>
+<h2 id="四、TCP协议"><a href="#四、TCP协议" class="headerlink" title="四、TCP协议"></a>四、TCP协议</h2><h3 id="1、TCP协议"><a href="#1、TCP协议" class="headerlink" title="1、TCP协议"></a>1、TCP协议</h3><p>TCP（Transmission Control Protocol）： 面向连接的，可靠的，基于字节流的传输层通信协议 </p>
+<p>特点： </p>
+<ul>
+<li>基于连接的 ：数据传输之前需要建立连接 </li>
+<li>全双工的：双向传输 </li>
+<li>字节流：不限制数据大小，打包成报文段，保证有序接收，重复报文自动丢弃 </li>
+<li>流量缓冲：解决双方处理能力的不匹配 ，三次握手的时候双方会建立缓冲区</li>
+<li>可靠的传输服务：保证可达，丢包时通过重发机制实现可靠性 </li>
+<li>拥塞控制：防止网络出现恶性拥塞</li>
+</ul>
+<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404095635761.png" alt="TCP报文"></p>
+<p>报文标识：</p>
+<ul>
+<li>SYN:为1，标识同步序列号的报文，建立连接的报文</li>
+<li>ACK：响应报文，握手/数据传输中确认数据已经收到</li>
+<li>FIN：关闭连接的报文</li>
+</ul>
+<h3 id="2、TCP连接管理"><a href="#2、TCP连接管理" class="headerlink" title="2、TCP连接管理"></a>2、TCP连接管理</h3><ol>
+<li><p>TCP连接：四元组[ 源地址， 源端口， 目的地址， 目的端口 ] </p>
+</li>
+<li><p>确立连接：TCP三次握手 </p>
+<ol>
+<li><p>同步通信双方初始序列号( ISN, initial sequence number ) </p>
+</li>
+<li><p>协商TCP通信参数（MSS, 窗口信息，指定校验和算法） </p>
+</li>
+</ol>
+</li>
+</ol>
+<p>如何进行握手 ？</p>
+<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404100145862.png" alt="三次握手"></p>
+<p>连接状态查看: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">netstat ‐ntp ‐c 1</span><br></pre></td></tr></table></figure>
+
+<p><code>三次握手补充:</code></p>
+<p><code>三次握手的本质是确认通信双方收发数据的能力</code></p>
+<p>首先，我让信使运输一份信件给对方，<strong>对方收到了，那么他就知道了我的发件能力和他的收件能力是可以的</strong>。</p>
+<p>于是他给我回信，<strong>我若收到了，我便知我的发件能力和他的收件能力是可以的，并且他的发件能力和我的收件能力是可以</strong>。</p>
+<p>然而此时他还不知道他的发件能力和我的收件能力到底可不可以，于是我最后回馈一次，<strong>他若收到了，他便清楚了他的发件能力和我的收件能力是可以的</strong>。</p>
+<p>这，就是三次握手。</p>
+<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/82a87c962f5c40249781b88f9af5019f.png" alt="三次握手.png"></p>
+<ul>
+<li>第一次握手：客户端要向服务端发起连接请求，首先客户端随机生成一个起始序列号ISN(比如是100)，那客户端向服务端发送的报文段包含SYN标志位(也就是SYN=1)，序列号seq=100。</li>
+<li>第二次握手：服务端收到客户端发过来的报文后，发现SYN=1，知道这是一个连接请求，于是将客户端的起始序列号100存起来，并且随机生成一个服务端的起始序列号(比如是300)。然后给客户端回复一段报文，回复报文包含SYN和ACK标志(也就是SYN=1,ACK=1)、序列号seq=300、确认号ack=101(客户端发过来的序列号+1)。</li>
+<li>第三次握手：客户端收到服务端的回复后发现ACK=1并且ack=101,于是知道服务端已经收到了序列号为100的那段报文；同时发现SYN=1，知道了服务端同意了这次连接，于是就将服务端的序列号300给存下来。然后客户端再回复一段报文给服务端，报文包含ACK标志位(ACK=1)、ack=301(服务端序列号+1)、seq=101(第一次握手时发送报文是占据一个序列号的，所以这次seq就从101开始，需要注意的是不携带数据的ACK报文是不占据序列号的，所以后面第一次正式发送数据时seq还是101)。当服务端收到报文后发现ACK=1并且ack=301，就知道客户端收到序列号为300的报文了，就这样客户端和服务端通过TCP建立了连接。</li>
+</ul>
+<h3 id="3、TCP四次挥手"><a href="#3、TCP四次挥手" class="headerlink" title="3、TCP四次挥手"></a>3、TCP四次挥手</h3><p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404102719024.png" alt="四次挥手"></p>
+<p>A：发送FIN数据包，代表A不在发送数据 </p>
+<p>B：收到请求，开始应答 ，避免了A重新发送FIN重试（应答机制） </p>
+<p>B： 处理完数据之后关闭，关闭连接,及发送FIN请求 </p>
+<p>A：收到请求后发送ACK应答，B服务可以释放连接 </p>
+<p><strong>等待 2MSL【MSL:最大报文生成时间，一个msl即客户端和服务端一个请求来回的时间】后释放连接</strong> </p>
+<ol>
+<li>防止报文丢失，导致B重复发送FIN ，服务端没有收到第四次握手响应，会重发第三次握手信息，如果这个时候客户端关闭，那么服务端会一直重试，造成资源不会释放</li>
+<li>防止滞留在网络中的报文，对新建立的连接造成数据扰乱</li>
+</ol>
+<p><code>四次挥手补充：</code></p>
+<p><code>四次挥手的目的是关闭一个连接</code></p>
+<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/ea60825747b44584915c144b4d16f5a7.jpeg" alt="四次挥手.jpeg"></p>
+<p>比如客户端初始化的序列号ISA=100，服务端初始化的序列号ISA=300。TCP连接成功后客户端总共发送了1000个字节的数据，服务端在客户端发FIN报文前总共回复了2000个字节的数据。</p>
+<ul>
+<li>第一次挥手：当客户端的数据都传输完成后，客户端向服务端发出连接释放报文(当然数据没发完时也可以发送连接释放报文并停止发送数据)，释放连接报文包含FIN标志位(FIN=1)、序列号seq=1101(100+1+1000，其中的1是建立连接时占的一个序列号)。需要注意的是客户端发出FIN报文段后只是不能发数据了，但是还可以正常收数据；另外FIN报文段即使不携带数据也要占据一个序列号。</li>
+<li>第二次挥手：服务端收到客户端发的FIN报文后给客户端回复确认报文，确认报文包含ACK标志位(ACK=1)、确认号ack=1102(客户端FIN报文序列号1101+1)、序列号seq=2300(300+2000)。此时服务端处于关闭等待状态，而不是立马给客户端发FIN报文，这个状态还要持续一段时间，因为服务端可能还有数据没发完。</li>
+<li>第三次挥手：服务端将最后数据(比如50个字节)发送完毕后就向客户端发出连接释放报文，报文包含FIN和ACK标志位(FIN=1,ACK=1)、确认号和第二次挥手一样ack=1102、序列号seq=2350(2300+50)。</li>
+<li>第四次挥手：客户端收到服务端发的FIN报文后，向服务端发出确认报文，确认报文包含ACK标志位(ACK=1)、确认号ack=2351、序列号seq=1102。注意客户端发出确认报文后不是立马释放TCP连接，而是要经过2MSL(最长报文段寿命的2倍时长)后才释放TCP连接。而服务端一旦收到客户端发出的确认报文就会立马释放TCP连接，所以服务端结束TCP连接的时间要比客户端早一些。</li>
+</ul>
+<h3 id="4、字节流的协议"><a href="#4、字节流的协议" class="headerlink" title="4、字节流的协议"></a>4、字节流的协议</h3><p>TCP把应用交付的数据仅仅看成是一连串的无结构的字节流，TCP并不知道字节流的含义，TCP并不关心应用程序一次将多大的报文发送到TCP的缓存中，而是根据对方给出的窗口值和当前网络拥堵的程度来决 定一个报文段应该包含多少个字节。 </p>
+<p><strong>MSS: Max Segment Size, 默认 536byte 实际数据</strong></p>
+<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404103821430.png" alt="TCP数据传输"></p>
+<h3 id="5、数据可靠性传输"><a href="#5、数据可靠性传输" class="headerlink" title="5、数据可靠性传输"></a>5、数据可靠性传输</h3><ol>
+<li><strong>停止等待协议：</strong></li>
+</ol>
+<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404105438069.png" alt="停止等待协议"></p>
+<ol start="2">
+<li><p><strong>重传机制</strong> </p>
+<ul>
+<li><p><strong>ack报文丢失</strong></p>
+<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404105654955.png" alt="ac报文丢失"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">在一定时长的等待中，客户端没有收到服务端给其的ack，客户端认为报文丢失了，客户端就进行重传，直到收到服务端的ack.</span><br><span class="line">效率低下</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>请求报文丢失</strong></p>
+<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404105709386.png" alt="请求报文丢失"></p>
+</li>
+</ul>
+</li>
+</ol>
+<p><strong>3、 滑动窗口协议与累计确认（延时ack）</strong> </p>
+<p>滑动窗口大小同通过 tcp三次握手和对端协商，且受网络状况影响</p>
+<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404105741286.png" alt="滑动窗口协议"></p>
+<h2 id="五、HTTPS协议"><a href="#五、HTTPS协议" class="headerlink" title="五、HTTPS协议"></a>五、HTTPS协议</h2><h3 id="1、HTTPS"><a href="#1、HTTPS" class="headerlink" title="1、HTTPS"></a>1、HTTPS</h3><p>由于 HTTP 天生“明文”的特点，整个传输过程完全透明，任何人都能 够在链路中截获、修改或者伪造请求 / 响应报文，数据不具有可信性。 因此就诞生了为安全而生的HTTPS协议。 使用HTTPS时，所有的HTTP请求和响应在发送到网络之前，都要进行加密。</p>
+<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404112521803.png" alt="HTTPS"></p>
+<h3 id="2、SSL-TLS"><a href="#2、SSL-TLS" class="headerlink" title="2、SSL/TLS"></a>2、SSL/TLS</h3><p>SSL 即安全套接层（Secure Sockets Layer），由网景公司于 1994 年 发明，IETF 在 1999 年把它改名为 TLS（传输层安全，Transport Layer Security），正式标准化，到今天 TLS 已经发展出了主流的三个 版本，分别是 2006 年的 1.1、2008 年的 1.2 ，2018的 1.3，每个新 版本都紧跟密码学的发展和互联网的现状，持续强化安全和性能，已经 成为了信息安全领域中的权威标准。 </p>
+<p><strong>摘要算法</strong> </p>
+<p>摘要算法能够把任意长度的数据“压缩”成固定长度、而且独一无二 的“摘要”字符串，就好像是给这段数据生成了一个数字“指纹”。任意微小的数据差异，都可以生成完全不同的摘要。所以可以通过把明文 信息的摘要和明文一起加密进行传输，数据传输到对方之后再进行解密，重新对数据进行摘要，再比对就能发现数据有没有被篡改。这样就保证了数据的完整性。</p>
+<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404112631820.png" alt="摘要算法"></p>
+<p><strong>加密算法</strong> </p>
+<p><strong>对称密钥加密算法</strong>：编、解码使用相同密钥的算法，如（AES，RC4,ChaCha20 ）。 </p>
+<p><strong>非对称密钥加密算法</strong>：它有两个密钥，一个叫“公钥”，一个叫“私 钥”。两个密钥是不同的，公钥可以公开给任何人使用，而私钥必须严格保密。非对称加密可以解决“密钥交换”的问题。<strong>网站秘密保管私钥，在网上任意分发公钥</strong>，你想要登录网站只要用公钥加密就行了，密文只能由私钥持有者才能解密。而黑客因为没有私钥，所以就无法破解密文。非对称密钥加密系统通常需要大量的数学运算，比较慢。如（DH、DSA、RSA、ECC ） </p>
+<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404112731961.png" alt="加密算法"></p>
+<p>TLS 里使用的混合加密方式，即把对称加密和非对称加密结合起来呢，两者互相取长补短，即能高效地加密解密，又能安全地密钥交换。大致流程如下： </p>
+<p>1.通信开始的时候使用非对称算法如 RSA,ECDHE先解决密钥交换的问题</p>
+<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404112757765.png" alt="请求公钥"></p>
+<p>2.用随机数产生对称算法使用的”会话密钥”，再用公钥加密。会话密钥很短，所以即便使用非对称加密算法也可以很快完成加解密。</p>
+<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404112820819.png" alt="会话密钥"></p>
+<p>3.对方拿到密文后用私钥解密，取出会话密钥。完成对称密钥的安全交换，后续就使用对称算法发完成数据交换</p>
+<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404112847331.png" alt="密钥解密"></p>
+<p><strong>身份验证</strong> </p>
+<p>数字证书组成： </p>
+<p>CA信息，公钥用户信息，公钥，权威机构的签名，有效期 </p>
+<p>数字证书作用： </p>
+<ol>
+<li><p>通过数字证书向浏览器证明身份 </p>
+</li>
+<li><p>数字证书里面包含了公钥 </p>
+</li>
+</ol>
+<p><strong>数字证书的申请和验证</strong> </p>
+<p>如何申请： </p>
+<ol>
+<li><p>生成自己的公钥和私钥，服务器自己保留私钥 </p>
+</li>
+<li><p>向CA机构提交公钥，公司，域名信息等待认证 </p>
+</li>
+<li><p>CA机构通过线上，线下多种途径验证你提交信息的真实性，合法性 </p>
+</li>
+<li><p>信息审核通过，CA机构则会向你签发认证的数字证书，包含了公钥，组织信息，CA信息，有效时间，证书序列号，同时生成一个签名；</p>
+</li>
+</ol>
+<p><strong>签名步骤:</strong> hash( 你用于申请证书所提交的明文信息 )=信息摘要；CA再使用私钥对 信息摘要进行加密，密文就是证书的数字签名 </p>
+<p><strong>浏览器如何验证呢？</strong> </p>
+<p>有了CA签名过的数字证书，当浏览器访问服务器时，服务器会返回数字证书给浏览器。浏览器收到证书后会对数字证书进行验证。首先浏览器读取证书中相关的明文信息，采用CA签名时相同的hash函数计算得到信息摘要A，再利用对应的CA公钥解密数字签名数据得到信息摘要B，如果摘要A和摘要B一致，则可以确认证书时合法的。</p>
+<p><img src="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/image-20220404113021908.png" alt="浏览器验证"></p>
+<p>知名的 CA 全世界就那么几家，比如 DigiCert、VeriSign、Entrust、Let’s Encrypt 等，它们签发的证书分域名验证（domain validated,DV）证书、组织验证（organization validated,OV）证 书、扩展验证（extended validation,EV）证书三种，区别在于可信程 度。</p>
+<p>DV可信级别是最低的，只是域名级别的可信，背后是谁不知道。OV证书可信级别比DV高，会验证申请证书时填写的组织，企业信息是 否是正确的，申请往往需要几天时间， EV 是最高的，经过了法律和审计的严格核查，可以证明网站拥有者的身份。</p>
+<h2 id="六、计算机网络常见问题"><a href="#六、计算机网络常见问题" class="headerlink" title="六、计算机网络常见问题"></a>六、计算机网络常见问题</h2><ol>
+<li><code>为什么TCP连接的时候是3次？2次不可以吗？</code></li>
+</ol>
+<p>因为需要考虑连接时丢包的问题，如果只握手2次，第二次握手时如果服务端发给客户端的确认报文段丢失，此时服务端已经准备好了收发数(可以理解服务端已经连接成功)据，而客户端一直没收到服务端的确认报文，所以客户端就不知道服务端是否已经准备好了(可以理解为客户端未连接成功)，这种情况下客户端不会给服务端发数据，也会忽略服务端发过来的数据。</p>
+<p>如果是三次握手，即便发生丢包也不会有问题，比如如果第三次握手客户端发的确认ack报文丢失，服务端在一段时间内没有收到确认ack报文的话就会重新进行第二次握手，也就是服务端会重发SYN报文段，客户端收到重发的报文段后会再次给服务端发送确认ack报文。</p>
+<ol start="2">
+<li><code>为什么TCP连接的时候是3次，关闭的时候却是4次？</code></li>
+</ol>
+<p>因为只有在客户端和服务端都没有数据要发送的时候才能断开TCP。而客户端发出FIN报文时只能保证客户端没有数据发了，服务端还有没有数据发客户端是不知道的。而服务端收到客户端的FIN报文后只能先回复客户端一个确认报文来告诉客户端我服务端已经收到你的FIN报文了，但我服务端还有一些数据没发完，等这些数据发完了服务端才能给客户端发FIN报文(所以不能一次性将确认报文和FIN报文发给客户端，就是这里多出来了一次)。</p>
+<ol start="3">
+<li><code>为什么客户端发出第四次挥手的确认报文后要等2MSL【<strong>MSL是Maximum Segment Lifetime的英文缩写，可译为“最长报文段寿命”，它是任何报文在网络上存在的最长的最长时间，超过这个时间报文将被丢弃</strong>】的时间才能释放TCP连接？</code></li>
+</ol>
+<p>这里同样是要考虑丢包的问题，如果第四次挥手的报文丢失，服务端没收到确认ack报文就会重发第三次挥手的报文，这样报文一去一回最长时间就是2MSL，所以需要等这么长时间来确认服务端确实已经收到了。</p>
+<ol start="4">
+<li><code>如果已经建立了连接，但是客户端突然出现故障了怎么办？</code></li>
+</ol>
+<p>TCP设有一个保活计时器，客户端如果出现故障，服务器不能一直等下去，白白浪费资源。服务器每收到一次客户端的请求后都会重新复位这个计时器，时间通常是设置为2小时，若两小时还没有收到客户端的任何数据，服务器就会发送一个探测报文段，以后每隔75秒钟发送一次。若一连发送10个探测报文仍然没反应，服务器就认为客户端出了故障，接着就关闭连接。</p>
+<ol start="5">
+<li><code>TCP 挥手可以只需要三次吗？</code></li>
+</ol>
+<p>因为服务器端收到客户端的FIN后，服务器端同时也要关闭连接，这样就可以把ACK和FIN合并到一起发送，节省了一个包，变成了“三次挥手”。</p>
+<ol start="6">
+<li><code>什么是HTTP，HTTP 与 HTTPS 的区别</code></li>
+</ol>
+<p>HTTP 是一个在计算机世界里专门在两点之间传输文字、图片、音频、视频等超文本数据的约定和规范</p>
+<table>
+<thead>
+<tr>
+<th><strong>区别</strong></th>
+<th><strong>HTTP</strong></th>
+<th><strong>HTTPS</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>协议</td>
+<td>运行在 TCP 之上，明文传输，客户端与服务器端都无法验证对方的身份</td>
+<td>身披 SSL( Secure Socket Layer )外壳的 HTTP，运行于 SSL 上，SSL 运行于 TCP 之上， 是添加了加密和认证机制的 HTTP。</td>
+</tr>
+<tr>
+<td>端口</td>
+<td>80</td>
+<td>443</td>
+</tr>
+<tr>
+<td>资源消耗</td>
+<td>较少</td>
+<td>由于加解密处理，会消耗更多的 CPU 和内存资源</td>
+</tr>
+<tr>
+<td>开销</td>
+<td>无需证书</td>
+<td>需要证书，而证书一般需要向认证机构购买</td>
+</tr>
+<tr>
+<td>加密机制</td>
+<td>无</td>
+<td>共享密钥加密和公开密钥加密并用的混合加密机制</td>
+</tr>
+<tr>
+<td>安全性</td>
+<td>弱</td>
+<td>由于加密机制，安全性强</td>
+</tr>
+</tbody></table>
+<ol start="7">
+<li><code>常用HTTP状态码</code></li>
+</ol>
+<p>HTTP状态码表示客户端HTTP请求的返回结果、标识服务器处理是否正常、表明请求出现的错误等。</p>
+<p>状态码的类别：</p>
+<table>
+<thead>
+<tr>
+<th><strong>类别</strong></th>
+<th><strong>原因短语</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1XX</td>
+<td>Informational（信息性状态码） 接受的请求正在处理</td>
+</tr>
+<tr>
+<td>2XX</td>
+<td>Success（成功状态码） 请求正常处理完毕</td>
+</tr>
+<tr>
+<td>3XX</td>
+<td>Redirection（重定向状态码） 需要进行附加操作以完成请求</td>
+</tr>
+<tr>
+<td>4XX</td>
+<td>Client Error（客户端错误状态码） 服务器无法处理请求</td>
+</tr>
+<tr>
+<td>5XX</td>
+<td>Server Error（服务器错误状态码） 服务器处理请求出错</td>
+</tr>
+</tbody></table>
+<p>常用HTTP状态码：</p>
+<table>
+<thead>
+<tr>
+<th><strong>2XX</strong></th>
+<th><strong>成功（这系列表明请求被正常处理了）</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>200</td>
+<td>OK，表示从客户端发来的请求在服务器端被正确处理</td>
+</tr>
+<tr>
+<td>204</td>
+<td>No content，表示请求成功，但响应报文不含实体的主体部分</td>
+</tr>
+<tr>
+<td>206</td>
+<td>Partial Content，进行范围请求成功</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th><strong>3XX</strong></th>
+<th><strong>重定向（表明浏览器要执行特殊处理）</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>301</td>
+<td>moved permanently，永久性重定向，表示资源已被分配了新的 URL</td>
+</tr>
+<tr>
+<td>302</td>
+<td>found，临时性重定向，表示资源临时被分配了新的 URL</td>
+</tr>
+<tr>
+<td>303</td>
+<td>see other，表示资源存在着另一个 URL，应使用 GET 方法获取资源（对于301/302/303响应，几乎所有浏览器都会删除报文主体并自动用GET重新请求）</td>
+</tr>
+<tr>
+<td>304</td>
+<td>not modified，表示服务器允许访问资源，但请求未满足条件的情况（与重定向无关）</td>
+</tr>
+<tr>
+<td>307</td>
+<td>temporary redirect，临时重定向，和302含义类似，但是期望客户端保持请求方法不变向新的地址发出请求</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th><strong>4XX</strong></th>
+<th><strong>客户端错误</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>400</td>
+<td>bad request，请求报文存在语法错误</td>
+</tr>
+<tr>
+<td>401</td>
+<td>unauthorized，表示发送的请求需要有通过 HTTP 认证的认证信息</td>
+</tr>
+<tr>
+<td>403</td>
+<td>forbidden，表示对请求资源的访问被服务器拒绝，可在实体主体部分返回原因描述</td>
+</tr>
+<tr>
+<td>404</td>
+<td>not found，表示在服务器上没有找到请求的资源</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th><strong>5XX</strong></th>
+<th><strong>服务器错误</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>500</td>
+<td>internal sever error，表示服务器端在执行请求时发生了错误</td>
+</tr>
+<tr>
+<td>501</td>
+<td>Not Implemented，表示服务器不支持当前请求所需要的某个功能</td>
+</tr>
+<tr>
+<td>503</td>
+<td>service unavailable，表明服务器暂时处于超负载或正在停机维护，无法处理请求</td>
+</tr>
+</tbody></table>
+<ol start="8">
+<li><code>GET和POST区别</code></li>
+</ol>
+<p>说道GET和POST，就不得不提HTTP协议，因为浏览器和服务器的交互是通过HTTP协议执行的，而GET和POST也是HTTP协议中的两种方法。</p>
+<p>HTTP全称为Hyper Text Transfer Protocol，中文翻译为超文本传输协议，目的是保证浏览器与服务器之间的通信。HTTP的工作方式是客户端与服务器之间的请求-应答协议。</p>
+<p>HTTP协议中定义了浏览器和服务器进行交互的不同方法，基本方法有4种，分别是GET，POST，PUT，DELETE。这四种方法可以理解为，对服务器资源的查，改，增，删。</p>
+<ul>
+<li>GET：从服务器上获取数据，也就是所谓的查，仅仅是获取服务器资源，不进行修改。</li>
+<li>POST：向服务器提交数据，这就涉及到了数据的更新，也就是更改服务器的数据。</li>
+<li>PUT：英文含义是放置，也就是向服务器新添加数据，就是所谓的增。</li>
+<li>DELETE：从字面意思也能看出，这种方式就是删除服务器数据的过程。</li>
+</ul>
+<ol start="9">
+<li><p><code>GET和POST区别</code></p>
+</li>
+<li><p>Get是不安全的，因为在传输过程，数据被放在请求的URL中；Post的所有操作对用户来说都是不可见的。 但是这种做法也不时绝对的，大部分人的做法也是按照上面的说法来的，但是也可以在get请求加上 request body，给 post请求带上 URL 参数。</p>
+</li>
+<li><p>Get请求提交的url中的数据最多只能是2048字节，这个限制是浏览器或者服务器给添加的，http协议并没有对url长度进行限制，目的是为了保证服务器和浏览器能够正常运行，防止有人恶意发送请求。Post请求则没有大小限制。</p>
+</li>
+<li><p>Get限制Form表单的数据集的值必须为ASCII字符；而Post支持整个ISO10646字符集。</p>
+</li>
+<li><p>Get执行效率却比Post方法好。Get是form提交的默认方法。</p>
+</li>
+<li><p>GET产生一个TCP数据包；POST产生两个TCP数据包。</p>
+</li>
+</ol>
+<p>对于GET方式的请求，浏览器会把http header和data一并发送出去，服务器响应200（返回数据）；</p>
+<p>而对于POST，浏览器先发送header，服务器响应100 continue，浏览器再发送data，服务器响应200 ok（返回数据）。</p>
+<ol start="10">
+<li><code>什么是对称加密与非对称加密</code></li>
+</ol>
+<p>对称密钥加密是指加密和解密使用同一个密钥的方式，<strong>这种方式存在的最大问题就是密钥发送问题，即如何安全地将密钥发给对方；</strong></p>
+<p>而非对称加密是指使用一对非对称密钥，即公钥和私钥，公钥可以随意发布，但私钥只有自己知道。发送密文的一方使用对方的公钥进行加密处理，对方接收到加密信息后，使用自己的私钥进行解密。</p>
+<p>由于非对称加密的方式不需要发送用来解密的私钥，所以可以保证安全性；但是和对称加密比起来，非常的慢</p>
+<ol start="11">
+<li><code>什么是HTTP2</code></li>
+</ol>
+<p>HTTP2 可以提高了网页的性能。</p>
+<p>在 HTTP1 中浏览器限制了同一个域名下的请求数量（Chrome 下一般是六个），当在请求很多资源的时候，由于队头阻塞当浏览器达到最大请求数量时，剩余的资源需等待当前的六个请求完成后才能发起请求。</p>
+<p>HTTP2 中引入了多路复用的技术，这个技术可以只通过一个 TCP 连接就可以传输所有的请求数据。多路复用可以绕过浏览器限制同一个域名下的请求数量的问题，进而提高了网页的性能。</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java/" rel="tag">Java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" rel="tag">计算机网络</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/04/05/06-00-00-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95%E5%85%A5%E9%97%A8%E5%9F%BA%E7%A1%80/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            数据结构与算法入门基础
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">操作系统原理</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2022
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

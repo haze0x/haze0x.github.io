@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>基础数据结构-数组 |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-06-00-01-基础数据结构-数组"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  基础数据结构-数组
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/04/06/06-00-01-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E6%95%B0%E7%BB%84/" class="article-date">
+  <time datetime="2022-04-06T11:34:14.000Z" itemprop="datePublished">2022-04-06</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a> / <a class="article-category-link" href="/categories/Java/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%AE%97%E6%B3%95/">算法</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">2.2k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">9 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p id="hitokoto">正在加载一言...</p>
+
+<h2 id="数据结构之数组"><a href="#数据结构之数组" class="headerlink" title="数据结构之数组"></a>数据结构之数组</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">经典面试题：</span><br><span class="line">    给你一个文件里面包含全国人民（<span class="number">14</span>亿）的年龄数据（<span class="number">0</span>~<span class="number">180</span>），现在要你统计每一个年龄有多少人？</span><br><span class="line">    给定机器为 单台+2CPU+2G内存。不得使用现成的容器，比如map等。</span><br><span class="line">常用思路：</span><br><span class="line">    <span class="number">1</span>、分布式，跑多台机器。</span><br><span class="line">    <span class="number">2</span>、排序。不行×  全国<span class="number">14</span>亿，内存放不下最好的排序算法时间复杂度 O(nlogn)</span><br><span class="line">    <span class="number">3</span>、最好的方法：新建一个长度<span class="number">180</span>的数组，每次io读取一行数据，每次按照年龄到数组对应索引+<span class="number">1</span>;伪代码如下：</span><br><span class="line">        <span class="keyword">int</span>[] ageArray = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">180</span>];</span><br><span class="line">		<span class="keyword">int</span>[] data ;<span class="comment">// 14亿数据</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i =<span class="number">0</span>;i&lt;<span class="number">14</span>亿;i++)&#123;</span><br><span class="line">            ageArray[data[i]]++;<span class="comment">//a[1]表示一岁的人有多少个</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">		String str = <span class="keyword">null</span>;</span><br><span class="line">		String fileName = <span class="string">&quot;E:\\数组\\age1.txt&quot;</span>;</span><br><span class="line">		InputStreamReader isr = <span class="keyword">new</span> InputStreamReader(<span class="keyword">new</span> FileInputStream(fileName),<span class="string">&quot;UTF-8&quot;</span>);</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">long</span> start = System.currentTimeMillis();</span><br><span class="line">		BufferedReader br = <span class="keyword">new</span> BufferedReader(isr);</span><br><span class="line">		<span class="keyword">int</span> tot = <span class="number">0</span> ;	<span class="comment">// Integer 21亿</span></span><br><span class="line">		<span class="keyword">int</span> data [] = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">200</span>];</span><br><span class="line">		<span class="keyword">while</span>((str = br.readLine()) != <span class="keyword">null</span>)&#123;		<span class="comment">//一行一行的读 O(n)</span></span><br><span class="line">			<span class="keyword">int</span> age = Integer.valueOf(str);</span><br><span class="line">			data[age] ++ ;</span><br><span class="line">			tot ++ ;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//O(n) 14亿. 100万/秒 *1000 = 10亿 100~1000s之间 =&gt; 500s以下 60*8=480s</span></span><br><span class="line">		System.out.println(<span class="string">&quot;总共的数据大小: &quot;</span> + tot);</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span> ; i &lt; <span class="number">200</span> ; i ++)&#123;<span class="comment">//下标从0开始的</span></span><br><span class="line">			System.out.println(i + <span class="string">&quot;:&quot;</span> + data[i]);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//144239ms =&gt; 144s</span></span><br><span class="line">		System.out.println(<span class="string">&quot;计算花费的时间为:&quot;</span> + (System.currentTimeMillis() - start) + <span class="string">&quot;ms&quot;</span>);</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="1、什么是数组"><a href="#1、什么是数组" class="headerlink" title="1、什么是数组"></a>1、什么是数组</h3><ol>
+<li><p>数组的定义</p>
+<p>所谓数组，是有序的元素序列。 若将有限个类型相同的变量的集合命名，那么这个名称为数组名。组成数组的各个变量称为数组的分量，也称为数组的元素，</p>
+<p>有时也称为下标变量。用于区分数组的各个元素的数字编号称为下标。数组是在程序设计中，为了处理方便， 把具有相同类型的若干元素按无序的形式组织起</p>
+<p>来的一种形式。这些无序排列的同类数据元素的集合称为数组。int 的数组你就不能存float 也不能存double</p>
+<p>数组是用于储存多个相同类型数据的集合。通常用Array表示，也称之为线性表，画图演示</p>
+</li>
+<li><p>特点</p>
+<p>(1)数组是相同数据类型的元素的集合。</p>
+<p>(2)数组中的各元素的存储是有先后顺序的，它们在内存中按照这个先后顺序连续存放在一起。内存地址</p>
+<p>(3)数组元素用整个数组的名字和它自己在数组中的顺序位置来表示。例如，a[0]表示名字为a的数组中的第一个元素，a[1]代表数组a的第二个元素，以此类</p>
+<p>推。</p>
+</li>
+<li><p>表现形式<br>（1）一维数组</p>
+<pre><code>Int a[],String a[]
+</code></pre>
+<p>（2）多维数组</p>
+<pre><code>Int a[][],int a[][][]。 int a[m] [n] :内存空间是多少？ m*n  a [0] [10]: 链表解决，a[0]:-&gt;10&gt;2   a[1]-&gt;15
+</code></pre>
+</li>
+<li><p>随机访问：</p>
+<p>数组是连续的内存空间和相同类型的数据。正是因为这两个限制，它才有了一个非常重要的特性：随机访问。但有利就有弊，这两个限制也让数组的很多操作</p>
+<p>变得非常低效，比如要想在数组中删除、插入一个数据，为了保证连续性，就需要做大量的数据搬移工作。</p>
+<p>随机访问的重要应用：查找，面试重点</p>
+</li>
+<li><p>数组的缺点：插入和删除</p>
+<p>实现代码：</p>
+<p>设数组的长度为n，现在，如果我们需要将一个数据插入到数组中的第k个位置。删除第N个位置的数据.</p>
+</li>
+<li><p>使用数组一定要注意访问越界问题。</p>
+</li>
+</ol>
+<h3 id="2、ArrayList和数组"><a href="#2、ArrayList和数组" class="headerlink" title="2、ArrayList和数组"></a>2、ArrayList和数组</h3><p>本质是一样的，都是数组。ArrayList是JDK封装了。不需要管扩容等操作，数组的话就要你全部操作</p>
+<p>两者之间应该如何选用？：</p>
+<p>不知道数据大小的肯定选ArrayList。</p>
+<p>如果你知道数据的大小而且你又非常关注性能那就用数组。</p>
+<h3 id="3、堆栈数组"><a href="#3、堆栈数组" class="headerlink" title="3、堆栈数组"></a>3、堆栈数组</h3><p>Java分为堆栈两种内存。</p>
+<p>什么是堆内存？：存放new创建的对象和数组</p>
+<p>什么是栈内存？ 引用变量</p>
+<p>堆栈都用Java用来存放数据的地方，与C++ /  c不一样。java自动管理我们的堆栈。gc，new出来的你没管过。</p>
+<p>堆栈的区别：</p>
+<ol>
+<li><p><strong>栈的速度要快</strong></p>
+</li>
+<li><p><strong>栈内存的数据可以共享，主要存一些基本数据类型</strong>。</p>
+</li>
+</ol>
+<p>int a = 3;    //在栈中创建变量a 然后给a赋值，先不会创建一个3而是先在栈中找有没有3，如果有直接指向。如果没有就加一个3进来。</p>
+<p>int b =3;  //首先也要创建一个变量b，</p>
+<h3 id="4、堆栈面试题"><a href="#4、堆栈面试题" class="headerlink" title="4、堆栈面试题"></a>4、堆栈面试题</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span>面试经典：</span><br><span class="line">String str1 = <span class="string">&quot;abc&quot;</span>; String str2 = <span class="string">&quot;abc&quot;</span>; System.out.println(str1==str2);	<span class="comment">//true</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">String str1 = <span class="string">&quot;abc&quot;</span>; String str2 = <span class="string">&quot;abc&quot;</span>; str1 = <span class="string">&quot;bcd&quot;</span>; </span><br><span class="line">System.out.println(str1 + <span class="string">&quot;,&quot;</span> + str2); 	<span class="comment">//bcd,abc</span></span><br><span class="line">System.out.println(str1==str2); 		<span class="comment">//false 虽然最开始 str1和str2都指向同一个变量abc但str1引用变化后不会改变str2的</span></span><br><span class="line"></span><br><span class="line">String str1 = <span class="string">&quot;abc&quot;</span>; </span><br><span class="line">String str2 = <span class="string">&quot;abc&quot;</span>; </span><br><span class="line">str1 = <span class="string">&quot;bcd&quot;</span>; </span><br><span class="line">String str3 = str1; </span><br><span class="line">System.out.println(str3);  <span class="comment">//bcd</span></span><br><span class="line">String str4 = <span class="string">&quot;bcd&quot;</span>; </span><br><span class="line">System.out.println(str1 == str4);	<span class="comment">//true</span></span><br><span class="line"></span><br><span class="line">String str1 = <span class="keyword">new</span> String(<span class="string">&quot;abc&quot;</span>); </span><br><span class="line">String str2 = <span class="string">&quot;abc&quot;</span>; </span><br><span class="line">System.out.println(str1==str2); 	<span class="comment">//false  new在堆内存中新开了一个对象</span></span><br><span class="line"></span><br><span class="line">String s1 = <span class="string">&quot;ja&quot;</span>;</span><br><span class="line">String s2 = <span class="string">&quot;va&quot;</span>;</span><br><span class="line">String s3 = <span class="string">&quot;java&quot;</span>;</span><br><span class="line">String s4 = s1 + s2; <span class="comment">//java 注意这个+号，java里面重载了+，其实调用了stringBuild，会new对象。</span></span><br><span class="line">System.out.println(s3 == s4);	<span class="comment">//false</span></span><br><span class="line">System.out.println(s3.equals(s4));	<span class="comment">//true 只是比较值</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5、思考"><a href="#5、思考" class="headerlink" title="5、思考"></a>5、思考</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">为什么很多计算机编程语言中数组的下标要从<span class="number">0</span>开始呢？</span><br><span class="line">定义一个数组一定会分配内存空间。数组的特点是内存是一段连续的地址。从<span class="number">0</span>开始便于定位其它索引地址，减少计算</span><br><span class="line"><span class="keyword">int</span> a[] = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">3</span>];</span><br><span class="line">到内存中申请空间：<span class="number">10001</span>,<span class="number">10002</span>,<span class="number">10003</span></span><br><span class="line">存数据</span><br><span class="line">a[<span class="number">0</span>] =&gt; <span class="number">10001</span>  ====&gt; <span class="number">10001</span>+<span class="number">0</span>*typesize</span><br><span class="line">a[<span class="number">1</span>] =&gt;  <span class="number">10002</span> =====&gt; <span class="number">10001</span>+<span class="number">1</span>*typesize</span><br><span class="line">a[<span class="number">2</span>]=&gt;   <span class="number">10003</span> =====&gt; <span class="number">10001</span>+<span class="number">2</span>*typesize</span><br><span class="line">如果我们不从<span class="number">0</span>开始 </span><br><span class="line">a[<span class="number">1</span>] = <span class="number">10001</span>+(<span class="number">1</span>-<span class="number">1</span>)</span><br><span class="line">a[<span class="number">2</span>] = <span class="number">10001</span>+(<span class="number">2</span>-<span class="number">1</span>)</span><br><span class="line">a[<span class="number">3</span>] = <span class="number">10001</span>+(<span class="number">3</span>-<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="6、算法题"><a href="#6、算法题" class="headerlink" title="6、算法题"></a>6、算法题</h3><p><code>Leetcode70爬楼梯</code></p>
+<p><code>题目描述</code>：</p>
+<p>假设你正在爬楼梯。需要 <code>n</code> 阶你才能到达楼顶。</p>
+<p>每次你可以爬 <code>1</code> 或 <code>2</code> 个台阶。你有多少种不同的方法可以爬到楼顶呢？</p>
+<p><code>思路分析</code>：</p>
+<p>n阶楼梯：</p>
+<ol>
+<li>最后一步爬一个台阶 则方法数 f(n-1)</li>
+<li>最后一步爬两个台阶 则方法数f(n-2)</li>
+</ol>
+<p>总方法数为f(n-1) + f(n-2);  当n=1,方法数为1，当n=2,方法数为2；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">## <span class="number">1</span>、迭代法[最优法]</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">climbStairs</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>( n== <span class="number">1</span> )&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>( n ==<span class="number">2</span> )&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">2</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> first = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">int</span> next = <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">int</span> N =<span class="number">0</span> ;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">3</span>;i&lt;=n;i++)&#123;</span><br><span class="line">            N = first + next;</span><br><span class="line">            first = next;</span><br><span class="line">            next = N;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> N;</span><br><span class="line">    &#125;</span><br><span class="line">## <span class="number">2</span>、递归</span><br><span class="line">    <span class="keyword">private</span> Map&lt;Integer,Integer&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">climbStairs2</span><span class="params">(Integer n)</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>( n== <span class="number">1</span> )&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>( n == <span class="number">2</span> )&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">2</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>( map.get(n) != <span class="keyword">null</span> )&#123;</span><br><span class="line">            <span class="keyword">return</span> map.get(n);</span><br><span class="line">        &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">int</span> result = climbStairs2(n-<span class="number">1</span>)+climbStairs2(n-<span class="number">2</span>);</span><br><span class="line">            map.put(n,result);</span><br><span class="line">            <span class="keyword">return</span> result;</span><br><span class="line">        &#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>剑指Offer Leetcode10斐波拉契数列</code></p>
+<p><code>题目描述:</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">写一个函数，输入 n ，求斐波那契（Fibonacci）数列的第 n 项（即 F(N)）。斐波那契数列的定义如下：</span><br><span class="line">F(<span class="number">0</span>) = <span class="number">0</span>,   F(<span class="number">1</span>) = <span class="number">1</span></span><br><span class="line">F(N) = F(N - <span class="number">1</span>) + F(N - <span class="number">2</span>), 其中 N &gt; <span class="number">1.</span></span><br><span class="line">斐波那契数列由 <span class="number">0</span> 和 <span class="number">1</span> 开始，之后的斐波那契数就是由之前的两数相加而得出。</span><br><span class="line">答案需要取模 <span class="number">1e9</span>+<span class="number">7</span>（<span class="number">1000000007</span>），如计算初始结果为：<span class="number">1000000008</span>，请返回 <span class="number">1</span>。</span><br></pre></td></tr></table></figure>
+
+<p><code>思路分析:</code></p>
+<p>f(n)=f(n-1)+f(n-2);</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">## <span class="number">1</span>、递归</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">fib</span><span class="params">(n)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>( n == <span class="number">1</span> )&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>( n == <span class="number">2</span> )&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">2</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> fib(n-<span class="number">1</span>) + fib(n-<span class="number">2</span>);</span><br><span class="line">&#125;</span><br><span class="line">## <span class="number">2</span>、双指针迭代</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">fib</span><span class="params">(<span class="keyword">int</span> n)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>( n == <span class="number">0</span> )&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>( n == <span class="number">1</span> )&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">int</span> first=<span class="number">0</span>,second=<span class="number">1</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">2</span>;i&lt;=n;i++)&#123;</span><br><span class="line">        <span class="keyword">int</span> temp = second;</span><br><span class="line">        <span class="keyword">int</span> second = first + second;</span><br><span class="line">        first = temp</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> second;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>Leetcode1两数之和</code></p>
+<p><code>题目描述：</code></p>
+<p>给定一个整数数组 nums 和一个整数目标值 target，请你在该数组中找出 和为目标值 target  的那 两个 整数，并返回它们的数组下标。</p>
+<p>你可以假设每种输入只会对应一个答案。但是，数组中同一个元素在答案里不能重复出现。</p>
+<p>你可以按任意顺序返回答案。</p>
+<p><code>思路分析：</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">## <span class="number">1</span>、最优解</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">int</span>[] twoSum(<span class="keyword">int</span>[] nums, <span class="keyword">int</span> target) &#123;</span><br><span class="line">        Map&lt;Integer,Integer&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;nums.length;i++)&#123;</span><br><span class="line">            <span class="keyword">if</span>( map.containsKey(target-nums[i]) )&#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">new</span> <span class="keyword">int</span>[]&#123;i,map.get(target-nums[i])&#125;;</span><br><span class="line">            &#125;</span><br><span class="line">            map.put(nums[i],i);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">## <span class="number">2</span>、双重<span class="keyword">for</span>循环 暴力破解 </span><br></pre></td></tr></table></figure>
+
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/04/06/06-00-01-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E6%95%B0%E7%BB%84/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java/" rel="tag">Java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E7%BB%84/" rel="tag">数组</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%AE%97%E6%B3%95/" rel="tag">算法</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/04/07/06-00-02-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E9%93%BE%E8%A1%A8/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            基础数据结构-链表
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/04/05/06-00-00-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95%E5%85%A5%E9%97%A8%E5%9F%BA%E7%A1%80/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">数据结构与算法入门基础</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2022
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

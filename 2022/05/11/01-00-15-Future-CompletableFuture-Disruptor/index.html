@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>Future&amp;CompletableFuture&amp;Disruptor |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-01-00-15-Future-CompletableFuture-Disruptor"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  Future&amp;CompletableFuture&amp;Disruptor
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/05/11/01-00-15-Future-CompletableFuture-Disruptor/" class="article-date">
+  <time datetime="2022-05-11T15:06:34.000Z" itemprop="datePublished">2022-05-11</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/">并发编程</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">5.4k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">21 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p id="hitokoto">正在加载一言...</p>
+
+<h2 id="1、Future"><a href="#1、Future" class="headerlink" title="1、Future"></a>1、Future</h2><p><code>Callable和Runnable的区别</code></p>
+<p>Runnable 的缺陷：</p>
+<ul>
+<li>不能返回一个返回值</li>
+<li>不能抛出 checked Exception</li>
+</ul>
+<p>Callable的call方法可以有返回值，可以声明抛出异常。和 Callable 配合的有一个 Future 类，通过 Future 可以了解任务执行情况，或者取消任务的执行，还可获取任务执行的结果，这些功能都是 Runnable 做不到的，Callable 的功能要比 Runnable 强大。</p>
+<p>参考如下例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;通过Runnable方式执行任务&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).start();</span><br><span class="line"></span><br><span class="line">FutureTask task = <span class="keyword">new</span> FutureTask(<span class="keyword">new</span> Callable() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;通过Callable方式执行任务&quot;</span>);</span><br><span class="line">        Thread.sleep(<span class="number">3000</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;返回任务结果&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="keyword">new</span> Thread(task).start();</span><br></pre></td></tr></table></figure>
+
+<p><code>Future 的主要功能</code></p>
+<p><strong>Future就是对于具体的Runnable或者Callable任务的执行结果进行取消、查询是否完成、获取结果。****必要时可以通过get方法获取执行结果，该方法会阻塞直到任务返回结果。</strong></p>
+<ul>
+<li>boolean cancel (boolean mayInterruptIfRunning) 取消任务的执行。参数指定是否立即中断任务执行，或者等等任务结束</li>
+<li>boolean isCancelled () 任务是否已经取消，任务正常完成前将其取消，则返回 true</li>
+<li>boolean isDone () 任务是否已经完成。需要注意的是如果任务正常终止、异常或取消，都将返回true</li>
+<li>V get () throws InterruptedException, ExecutionException  等待任务执行结束，然后获得V类型的结果。InterruptedException 线程被中断异常， ExecutionException任务执行异常，如果任务被取消，还会抛出CancellationException</li>
+<li>V get (long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException 同上面的get功能一样，多了设置超时时间。参数timeout指定超时时间，uint指定时间的单位，在枚举类TimeUnit中有相关的定义。如果计算超时，将抛出TimeoutException</li>
+</ul>
+<p>future例子如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FutureTaskDemo</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> ExecutionException, InterruptedException </span>&#123;</span><br><span class="line">        Task task = <span class="keyword">new</span> Task();</span><br><span class="line">        <span class="comment">//构建futureTask</span></span><br><span class="line">        FutureTask&lt;Integer&gt; futureTask = <span class="keyword">new</span> FutureTask&lt;&gt;(task);</span><br><span class="line">        <span class="comment">//作为Runnable入参</span></span><br><span class="line">        <span class="keyword">new</span> Thread(futureTask).start();</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;task运行结果：&quot;</span>+futureTask.get());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Task</span> <span class="keyword">implements</span> <span class="title">Callable</span>&lt;<span class="title">Integer</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Integer <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;子线程正在计算&quot;</span>);</span><br><span class="line">            <span class="keyword">int</span> sum = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>; i++) &#123;</span><br><span class="line">                sum += i;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> sum;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>future总结：</p>
+<p><strong>Future 注意事项</strong></p>
+<ul>
+<li>当 for 循环批量获取 Future 的结果时容易 block，get 方法调用时应使用 timeout 限制</li>
+<li>Future 的生命周期不能后退。一旦完成了任务，它就永久停在了“已完成”的状态，不能从头再来</li>
+</ul>
+<p>思考：  使用Callable 和Future 产生新的线程了吗？</p>
+<p>没有产生线程，它是任务相关的 </p>
+<p><strong>Future的局限性</strong></p>
+<p>从本质上说，<strong>Future表示一个异步计算的结果</strong>。它提供了isDone()来检测计算是否已经完成，并且在计算结束后，可以通过get()方法来获取计算结果。在异步计算中，Future确实是个非常优秀的接口。但是，它的本身也确实存在着许多限制：</p>
+<ul>
+<li><strong>并发执行多任务</strong>：Future只提供了get()方法来获取结果，并且是阻塞的。所以，除了等待你别无他法；</li>
+<li><strong>无法对多个任务进行链式调用</strong>：如果你希望在计算任务完成后执行特定动作，比如发邮件，但Future却没有提供这样的能力；</li>
+<li><strong>无法组合多个任务</strong>：如果你运行了10个任务，并期望在它们全部执行结束后执行特定动作，那么在Future中这是无能为力的；</li>
+<li><strong>没有异常处理</strong>：Future接口中没有关于异常处理的方法；</li>
+</ul>
+<p><code>CompletionService</code></p>
+<p>Callable+Future 可以实现多个task并行执行，但是如果遇到前面的task执行较慢时需要阻塞等待前面的task执行完后面task才能取得结果。而CompletionService的主要功能就是一边生成任务,一边获取任务的返回值。让两件事分开执行,任务之间不会互相阻塞，可以实现先执行完的先取结果，不再依赖任务顺序了。</p>
+<p><strong>CompletionService原理</strong></p>
+<p>内部通过阻塞队列+FutureTask，实现了任务先完成可优先获取到，即结果按照完成先后顺序排序，内部有一个先进先出的阻塞队列，用于保存已经执行完成的Future，通过调用它的take方法或poll方法可以获取到一个已经执行完成的Future，进而通过调用Future接口实现类的get方法获取最终的结果</p>
+<p>案例：</p>
+<p><strong>询价应用：向不同电商平台询价，并保存价格</strong></p>
+<p><strong>解决方案：</strong></p>
+<ul>
+<li><strong>采用“ThreadPoolExecutor+Future”的方案：异步执行询价然后再保存</strong></li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//    创建线程池 </span></span><br><span class="line">ExecutorService    executor = Executors.newFixedThreadPool(<span class="number">3</span>); </span><br><span class="line"><span class="comment">//    异步向电商S1询价 </span></span><br><span class="line">Future&lt;Integer&gt;    f1 = executor.submit(()-&gt;getPriceByS1()); </span><br><span class="line"><span class="comment">//    异步向电商S2询价 </span></span><br><span class="line">Future&lt;Integer&gt;    f2=    executor.submit(()-&gt;getPriceByS2());             </span><br><span class="line"><span class="comment">//    获取电商S1报价并异步保存 </span></span><br><span class="line">executor.execute(()-&gt;save(f1.get()));        </span><br><span class="line"><span class="comment">//    获取电商S2报价并异步保存 </span></span><br><span class="line">executor.execute(()-&gt;save(f2.get())   </span><br><span class="line"></span><br><span class="line">缺点：</span><br><span class="line">如果获取电商S1报价的耗时很长，那么即便获取电商S2报价的耗时很短，也无法让保存S2报价的操作先执行，因为这个主线程都阻塞 在了f1.get()操作上。</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>使用CompletionService实现先获取的报价先保存到数据库</strong></li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//创建线程池</span></span><br><span class="line">ExecutorService executor = Executors.newFixedThreadPool(<span class="number">10</span>);</span><br><span class="line"><span class="comment">//创建CompletionService</span></span><br><span class="line">CompletionService&lt;Integer&gt; cs = <span class="keyword">new</span> ExecutorCompletionService&lt;&gt;(executor);</span><br><span class="line"><span class="comment">//异步向电商S1询价</span></span><br><span class="line">cs.submit(() -&gt; getPriceByS1());</span><br><span class="line"><span class="comment">//异步向电商S2询价</span></span><br><span class="line">cs.submit(() -&gt; getPriceByS2());</span><br><span class="line"><span class="comment">//异步向电商S3询价</span></span><br><span class="line">cs.submit(() -&gt; getPriceByS3());</span><br><span class="line"><span class="comment">//将询价结果异步保存到数据库</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">3</span>; i++) &#123;</span><br><span class="line">    Integer r = cs.take().get();</span><br><span class="line">    executor.execute(() -&gt; save(r));</span><br></pre></td></tr></table></figure>
+
+<p><strong>应用场景总结</strong></p>
+<ul>
+<li>当需要批量提交异步任务的时候建议你使用CompletionService。CompletionService将线程池Executor和阻塞队列BlockingQueue的功能融合在了一起，能够让批量异步任务的管理更简单。</li>
+<li>CompletionService能够让异步任务的执行结果有序化。先执行完的先进入阻塞队列，利用这个特性，你可以轻松实现后续处理的有序性，避免无谓的等待，同时还可以快速实现诸如Forking Cluster这样的需求。</li>
+<li>线程池隔离。CompletionService支持自己创建线程池，这种隔离性能避免几个特别耗时的任务拖垮整个应用的风险。</li>
+</ul>
+<h2 id="2、CompletableFuture"><a href="#2、CompletableFuture" class="headerlink" title="2、CompletableFuture"></a>2、CompletableFuture</h2><p>适用示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">构造函数：</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> CompletableFuture&lt;Void&gt; <span class="title">runAsync</span><span class="params">(Runnable runnable)</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> CompletableFuture&lt;Void&gt; <span class="title">runAsync</span><span class="params">(Runnable runnable, Executor executor)</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> &lt;U&gt; CompletableFuture&lt;U&gt; <span class="title">supplyAsync</span><span class="params">(Supplier&lt;U&gt; supplier)</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> &lt;U&gt; CompletableFuture&lt;U&gt; <span class="title">supplyAsync</span><span class="params">(Supplier&lt;U&gt; supplier, Executor executor)</span></span></span><br><span class="line"><span class="function">    </span></span><br><span class="line"><span class="function">这四个方法区别在于：</span></span><br><span class="line"><span class="function">runAsync 方法以Runnable函数式接口类型为参数，没有返回结果，supplyAsync 方法Supplier函数式接口类型为参数，返回结果类型为U；Supplier 接口的 <span class="title">get</span><span class="params">()</span> 方法是有返回值的（会阻塞）</span></span><br><span class="line"><span class="function">没有指定Executor的方法会使用ForkJoinPool.<span class="title">commonPool</span><span class="params">()</span> 作为它的线程池执行异步代码。如果指定线程池，则使用指定的线程池运行。</span></span><br><span class="line"><span class="function">默认情况下 CompletableFuture 会使用公共的 ForkJoinPool 线程池，这个线程池默认创建的线程数是 CPU 的核数（也可以通过 JVM option:-Djava.util.concurrent.ForkJoinPool.common.parallelism 来设置 ForkJoinPool 线程池的线程数）。如果所有 CompletableFuture 共享一个线程池，那么一旦有任务执行一些很慢的 I/O 操作，就会导致线程池中所有线程都阻塞在 I/O 操作上，从而造成线程饥饿，进而影响整个系统的性能。所以，强烈建议你要根据不同的业务类型创建不同的线程池，以避免互相干扰</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>CompletableFuture使用详解</strong></p>
+<p>简单的任务，用Future获取结果还好，但我们并行提交的多个异步任务，往往并不是独立的，很多时候业务逻辑处理存在串行[依赖]、并行、聚合的关系。如果要我们手动用 Fueture 实现，是非常麻烦的。</p>
+<p><strong>CompletableFuture是Future接口的扩展和增强</strong>。CompletableFuture实现了Future接口，并在此基础上进行了丰富地扩展，完美地弥补了Future上述的种种问题。更为重要的是，<strong>CompletableFuture实现了对任务的编排能力</strong>。借助这项能力，我们可以轻松地组织不同任务的运行顺序、规则以及方式。从某种程度上说，这项能力是它的核心能力。而在以往，虽然通过CountDownLatch等工具类也可以实现任务的编排，但需要复杂的逻辑处理，不仅耗费精力且难以维护。</p>
+<p><strong>应用场景</strong></p>
+<p><strong>描述依赖关系：</strong></p>
+<ol>
+<li>thenApply() 把前面异步任务的结果，交给后面的Function</li>
+<li>thenCompose()用来连接两个有依赖关系的任务，结果由第二个任务返回</li>
+</ol>
+<p><strong>描述and聚合关系：</strong></p>
+<ol>
+<li>thenCombine:任务合并，有返回值</li>
+<li>thenAccepetBoth:两个任务执行完成后，将结果交给thenAccepetBoth消耗，无返回值。</li>
+<li>runAfterBoth:两个任务都执行完成后，执行下一步操作（Runnable）。</li>
+</ol>
+<p><strong>描述or聚合关系：</strong></p>
+<ol>
+<li>applyToEither:两个任务谁执行的快，就使用那一个结果，有返回值。</li>
+<li>acceptEither: 两个任务谁执行的快，就消耗那一个结果，无返回值。</li>
+<li>runAfterEither: 任意一个任务执行完成，进行下一步操作(Runnable)。</li>
+</ol>
+<p><strong>并行执行：</strong></p>
+<p>CompletableFuture类自己也提供了anyOf()和allOf()用于支持多个CompletableFuture并行执行</p>
+<p>适用总结：</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>创建异步操作</strong></td>
+<td><strong>runAsync&amp;supplyAsync</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>获取结果</strong></td>
+<td><strong>join&amp;get</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>结果处理</strong></td>
+<td><strong>whenComplete&amp;exceptionally</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>结果转换</strong></td>
+<td><strong>thenApply</strong>   <strong>thenCompose</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>结果消费</strong></td>
+<td><strong>thenAccept</strong>  <strong>thenAcceptBoth</strong>  <strong>thenRun</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>结果组合</strong></td>
+<td><strong>thenCombine</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>任务交互</strong></td>
+<td><strong>applyToEither</strong>  <strong>acceptEither</strong>  <strong>runAfterEither</strong>  <strong>runAfterBoth</strong>  <strong>anyOf</strong>  <strong>allOf</strong></td>
+<td></td>
+</tr>
+</tbody></table>
+<p><strong>CompletableFuture常用方法总结</strong></p>
+<p><img src="/2022/05/11/01-00-15-Future-CompletableFuture-Disruptor/image-20220512001353695.png" alt="image-20220512001353695"></p>
+<h2 id="3、Disruptor"><a href="#3、Disruptor" class="headerlink" title="3、Disruptor"></a>3、Disruptor</h2><p>Disruptor实现了队列的功能并且是一个有界队列，可以用于生产者-消费者模型。基于Disruptor开发的系统单线程能支撑每秒600万订单。</p>
+<p><code>传统juc下队列存在的问题</code></p>
+<ol>
+<li><p>juc下的队列大部分采用加ReentrantLock锁方式保证线程安全。在稳定性要求特别高的系统中，为了防止生产者速度过快，导致内存溢出，只能选择有界队列。</p>
+</li>
+<li><p>加锁的方式通常会严重影响性能。线程会因为竞争不到锁而被挂起，等待其他线程释放锁而唤醒，这个过程存在很大的开销，而且存在死锁的隐患。</p>
+</li>
+<li><p>有界队列通常采用数组实现。但是采用数组实现又会引发另外一个问题false sharing(伪共享)。</p>
+</li>
+</ol>
+<p><code>Disruptor的设计方案</code></p>
+<p>Disruptor通过以下设计来解决队列速度慢的问题：</p>
+<ul>
+<li><strong>环形数组结构</strong></li>
+</ul>
+<p>为了避免垃圾回收，采用数组而非链表。同时，数组对处理器的缓存机制更加友好（空间局部性原理）。</p>
+<ul>
+<li><strong>元素位置定位</strong></li>
+</ul>
+<p>数组长度2^n，通过位运算，加快定位的速度。下标采取递增的形式。不用担心index溢出的问题。index是long类型，即使100万QPS的处理速度，也需要30万年才能用完。</p>
+<ul>
+<li><strong>无锁设计</strong></li>
+</ul>
+<p>每个生产者或者消费者线程，会先申请可以操作的元素在数组中的位置，申请到之后，直接在该位置写入或者读取数据。</p>
+<ul>
+<li><strong>利用缓存行填充解决了伪共享的问题</strong></li>
+<li><strong>实现了基于事件驱动的生产者消费者模型（观察者模式）</strong>  </li>
+</ul>
+<p>消费者时刻关注着队列里有没有消息，一旦有新消息产生，消费者线程就会立刻把它消费</p>
+<p><code>RingBuffer数据结构</code></p>
+<p><img src="/2022/05/11/01-00-15-Future-CompletableFuture-Disruptor/image-20220522121934952.png" alt="image-20220522121934952"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">注：</span><br><span class="line"><span class="number">1</span>、Disruptor要求设置数组长度为<span class="number">2</span>的n次幂，便于计算索引，同hashmap</span><br><span class="line"><span class="number">2</span>、当所有位置都放满了，再放下一个时，就会把<span class="number">0</span>号位置覆盖掉</span><br></pre></td></tr></table></figure>
+
+<p><strong>能覆盖数据是否会导致数据丢失呢？</strong></p>
+<p>当需要覆盖数据时，会执行一个策略，Disruptor给提供多种策略，比较常用的：</p>
+<ul>
+<li><strong>BlockingWaitStrategy策略</strong>，常见且默认的等待策略，当这个队列里满了，不执行覆盖，而是阻塞等待。使用ReentrantLock+Condition实现阻塞，最节省cpu，但高并发场景下性能最差。适合CPU资源紧缺，吞吐量和延迟并不重要的场景</li>
+<li><strong>SleepingWaitStrategy策略</strong>，会在循环中不断等待数据。先进行自旋等待如果不成功，则使用Thread.yield()让出CPU,并最终使用LockSupport.parkNanos(1L)进行线程休眠，以确保不占用太多的CPU资源。因此这个策略会产生比较高的平均延时。典型的应用场景就是异步日志。 </li>
+<li><strong>YieldingWaitStrategy策略</strong>，这个策略用于低延时的场合。消费者线程会不断循环监控缓冲区变化，在循环内部使用Thread.yield()让出CPU给别的线程执行时间。如果需要一个高性能的系统，并且对延时比较有严格的要求，可以考虑这种策略。</li>
+<li><strong>BusySpinWaitStrategy策略</strong>: 采用死循环，消费者线程会尽最大努力监控缓冲区的变化。对延时非常苛刻的场景使用，cpu核数必须大于消费者线程数量。推荐在线程绑定到固定的CPU的场景下使用</li>
+</ul>
+<p><code><strong>一个生产者单线程写数据的流程</strong></code></p>
+<ol>
+<li>申请写入m个元素；</li>
+<li>若是有m个元素可以写入，则返回最大的序列号。这里主要判断是否会覆盖未读的元素；</li>
+<li>若是返回的正确，则生产者开始写入元素。</li>
+</ol>
+<p>代码示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br></pre></td><td class="code"><pre><span class="line">## 消息载体（事件）</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderEvent</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">long</span> value;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">## 事件工厂</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderEventFactory</span> <span class="keyword">implements</span> <span class="title">EventFactory</span>&lt;<span class="title">OrderEvent</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> OrderEvent <span class="title">newInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> OrderEvent();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">## 消费者</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderEventHandler</span> <span class="keyword">implements</span> <span class="title">EventHandler</span>&lt;<span class="title">OrderEvent</span>&gt;, <span class="title">WorkHandler</span>&lt;<span class="title">OrderEvent</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onEvent</span><span class="params">(OrderEvent event, <span class="keyword">long</span> sequence, <span class="keyword">boolean</span> endOfBatch)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">// TODO 消费逻辑</span></span><br><span class="line">        System.out.println(<span class="string">&quot;消费者&quot;</span>+ Thread.currentThread().getName()</span><br><span class="line">                +<span class="string">&quot;获取数据value:&quot;</span>+ event.getValue()+<span class="string">&quot;,name:&quot;</span>+event.getName());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onEvent</span><span class="params">(OrderEvent event)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">// TODO 消费逻辑</span></span><br><span class="line">        System.out.println(<span class="string">&quot;消费者&quot;</span>+ Thread.currentThread().getName()</span><br><span class="line">                +<span class="string">&quot;获取数据value:&quot;</span>+ event.getValue()+<span class="string">&quot;,name:&quot;</span>+event.getName());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">## 生产者</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderEventProducer</span> </span>&#123;</span><br><span class="line">    <span class="comment">//事件队列</span></span><br><span class="line">    <span class="keyword">private</span> RingBuffer&lt;OrderEvent&gt; ringBuffer;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">OrderEventProducer</span><span class="params">(RingBuffer&lt;OrderEvent&gt; ringBuffer)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.ringBuffer = ringBuffer;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onData</span><span class="params">(<span class="keyword">long</span> value,String name)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 获取事件队列 的下一个槽</span></span><br><span class="line">        <span class="keyword">long</span> sequence = ringBuffer.next();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">//获取消息（事件）</span></span><br><span class="line">            OrderEvent orderEvent = ringBuffer.get(sequence);</span><br><span class="line">            <span class="comment">// 写入消息数据</span></span><br><span class="line">            orderEvent.setValue(value);</span><br><span class="line">            orderEvent.setName(name);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            <span class="comment">// TODO  异常处理</span></span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;生产者&quot;</span>+ Thread.currentThread().getName()</span><br><span class="line">                    +<span class="string">&quot;发送数据value:&quot;</span>+value+<span class="string">&quot;,name:&quot;</span>+name);</span><br><span class="line">            <span class="comment">//发布事件</span></span><br><span class="line">            ringBuffer.publish(sequence);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">## 运行示例</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DisruptorDemo</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//创建disruptor</span></span><br><span class="line">        Disruptor&lt;OrderEvent&gt; disruptor = <span class="keyword">new</span> Disruptor&lt;&gt;(</span><br><span class="line">                OrderEvent::<span class="keyword">new</span>,</span><br><span class="line">                <span class="number">1024</span> * <span class="number">1024</span>,</span><br><span class="line">                Executors.defaultThreadFactory(),</span><br><span class="line">                ProducerType.SINGLE, <span class="comment">//单生产者</span></span><br><span class="line">                <span class="keyword">new</span> YieldingWaitStrategy()  <span class="comment">//等待策略</span></span><br><span class="line">        );</span><br><span class="line"></span><br><span class="line">        <span class="comment">//设置消费者用于处理RingBuffer的事件</span></span><br><span class="line">        <span class="comment">//disruptor.handleEventsWith(new OrderEventHandler());</span></span><br><span class="line">        <span class="comment">//设置多消费者,消息会被重复消费</span></span><br><span class="line"><span class="comment">//        disruptor.handleEventsWith(new OrderEventHandler(),new OrderEventHandler());</span></span><br><span class="line">        <span class="comment">//设置多消费者,消费者要实现WorkHandler接口，一条消息只会被一个消费者消费</span></span><br><span class="line">        disruptor.handleEventsWithWorkerPool(<span class="keyword">new</span> OrderEventHandler(), <span class="keyword">new</span> OrderEventHandler());</span><br><span class="line"></span><br><span class="line">        <span class="comment">//启动disruptor</span></span><br><span class="line">        disruptor.start();</span><br><span class="line"></span><br><span class="line">        <span class="comment">//创建ringbuffer容器</span></span><br><span class="line">        RingBuffer&lt;OrderEvent&gt; ringBuffer = disruptor.getRingBuffer();</span><br><span class="line">        <span class="comment">//创建生产者</span></span><br><span class="line">        OrderEventProducer eventProducer = <span class="keyword">new</span> OrderEventProducer(ringBuffer);</span><br><span class="line">        <span class="comment">// 发送消息</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;<span class="number">5</span>;i++)&#123;</span><br><span class="line">            eventProducer.onData(i,<span class="string">&quot;Fox&quot;</span>+i);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        disruptor.shutdown();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">## 结果</span><br><span class="line">## 执行<span class="number">80</span>行代码 即一个消费者消费</span><br><span class="line">生产者main发送数据value:<span class="number">0</span>,name:Fox0</span><br><span class="line">生产者main发送数据value:<span class="number">1</span>,name:Fox1</span><br><span class="line">生产者main发送数据value:<span class="number">2</span>,name:Fox2</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">1</span>获取数据value:<span class="number">0</span>,name:Fox0</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">1</span>获取数据value:<span class="number">1</span>,name:Fox1</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">1</span>获取数据value:<span class="number">2</span>,name:Fox2</span><br><span class="line">生产者main发送数据value:<span class="number">3</span>,name:Fox3</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">1</span>获取数据value:<span class="number">3</span>,name:Fox3</span><br><span class="line">生产者main发送数据value:<span class="number">4</span>,name:Fox4</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">1</span>获取数据value:<span class="number">4</span>,name:Fox4</span><br><span class="line">    </span><br><span class="line">## 执行<span class="number">81</span>行代码 注释<span class="number">80</span>行 即多个消费者消费【会重复消费】</span><br><span class="line">生产者main发送数据value:<span class="number">0</span>,name:Fox0</span><br><span class="line">生产者main发送数据value:<span class="number">1</span>,name:Fox1</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">2</span>获取数据value:<span class="number">0</span>,name:Fox0</span><br><span class="line">生产者main发送数据value:<span class="number">2</span>,name:Fox2</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">2</span>获取数据value:<span class="number">1</span>,name:Fox1</span><br><span class="line">生产者main发送数据value:<span class="number">3</span>,name:Fox3</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">2</span>获取数据value:<span class="number">2</span>,name:Fox2</span><br><span class="line">生产者main发送数据value:<span class="number">4</span>,name:Fox4</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">2</span>获取数据value:<span class="number">3</span>,name:Fox3</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">2</span>获取数据value:<span class="number">4</span>,name:Fox4</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">1</span>获取数据value:<span class="number">0</span>,name:Fox0</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">1</span>获取数据value:<span class="number">1</span>,name:Fox1</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">1</span>获取数据value:<span class="number">2</span>,name:Fox2</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">1</span>获取数据value:<span class="number">3</span>,name:Fox3</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">1</span>获取数据value:<span class="number">4</span>,name:Fox4</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><code>单生产者多消费者模式</code></p>
+<p>注意：消费者要实现WorkHandler接口</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">同上述执行<span class="number">81</span>行代码逻辑</span><br></pre></td></tr></table></figure>
+
+<p><code>多生产者多消费者模式</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DisruptorDemo2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//创建disruptor</span></span><br><span class="line">        Disruptor&lt;OrderEvent&gt; disruptor = <span class="keyword">new</span> Disruptor&lt;&gt;(</span><br><span class="line">                <span class="keyword">new</span> OrderEventFactory(),</span><br><span class="line">                <span class="number">1024</span> * <span class="number">1024</span>,</span><br><span class="line">                Executors.defaultThreadFactory(),</span><br><span class="line">                ProducerType.MULTI, <span class="comment">//多生产者</span></span><br><span class="line">                <span class="keyword">new</span> YieldingWaitStrategy()  <span class="comment">//等待策略</span></span><br><span class="line">        );</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//设置消费者用于处理RingBuffer的事件</span></span><br><span class="line">        <span class="comment">//disruptor.handleEventsWith(new OrderEventHandler());</span></span><br><span class="line">        <span class="comment">//设置多消费者,消息会被重复消费</span></span><br><span class="line"><span class="comment">//        disruptor.handleEventsWith(new OrderEventHandler(),new OrderEventHandler());</span></span><br><span class="line">        <span class="comment">//设置多消费者,消费者要实现WorkHandler接口，一条消息只会被一个消费者消费</span></span><br><span class="line">        disruptor.handleEventsWithWorkerPool(<span class="keyword">new</span> OrderEventHandler(), <span class="keyword">new</span> OrderEventHandler());</span><br><span class="line"></span><br><span class="line">        <span class="comment">//启动disruptor</span></span><br><span class="line">        disruptor.start();</span><br><span class="line"></span><br><span class="line">        <span class="comment">//创建ringbuffer容器</span></span><br><span class="line">        RingBuffer&lt;OrderEvent&gt; ringBuffer = disruptor.getRingBuffer();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">new</span> Thread(()-&gt;&#123;</span><br><span class="line">            <span class="comment">//创建生产者</span></span><br><span class="line">            OrderEventProducer eventProducer = <span class="keyword">new</span> OrderEventProducer(ringBuffer);</span><br><span class="line">            <span class="comment">// 发送消息</span></span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;<span class="number">5</span>;i++)&#123;</span><br><span class="line">                eventProducer.onData(i,<span class="string">&quot;Fox&quot;</span>+i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,<span class="string">&quot;producer1&quot;</span>).start();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">new</span> Thread(()-&gt;&#123;</span><br><span class="line">            <span class="comment">//创建生产者</span></span><br><span class="line">            OrderEventProducer eventProducer = <span class="keyword">new</span> OrderEventProducer(ringBuffer);</span><br><span class="line">            <span class="comment">// 发送消息</span></span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;<span class="number">100</span>;i++)&#123;</span><br><span class="line">                eventProducer.onData(i,<span class="string">&quot;monkey&quot;</span>+i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,<span class="string">&quot;producer2&quot;</span>).start();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="comment">//disruptor.shutdown();</span></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">## 结果</span><br><span class="line">生产者producer1发送数据value:<span class="number">0</span>,name:Fox0</span><br><span class="line">生产者producer2发送数据value:<span class="number">0</span>,name:monkey0</span><br><span class="line">生产者producer1发送数据value:<span class="number">1</span>,name:Fox1</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">1</span>获取数据value:<span class="number">0</span>,name:monkey0</span><br><span class="line">生产者producer2发送数据value:<span class="number">1</span>,name:monkey1</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">2</span>获取数据value:<span class="number">0</span>,name:Fox0</span><br><span class="line">生产者producer2发送数据value:<span class="number">2</span>,name:monkey2</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">1</span>获取数据value:<span class="number">1</span>,name:Fox1</span><br><span class="line">生产者producer1发送数据value:<span class="number">2</span>,name:Fox2</span><br><span class="line">生产者producer2发送数据value:<span class="number">3</span>,name:monkey3</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">2</span>获取数据value:<span class="number">1</span>,name:monkey1</span><br><span class="line">生产者producer2发送数据value:<span class="number">4</span>,name:monkey4</span><br><span class="line">生产者producer1发送数据value:<span class="number">3</span>,name:Fox3</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">1</span>获取数据value:<span class="number">2</span>,name:Fox2</span><br><span class="line">生产者producer1发送数据value:<span class="number">4</span>,name:Fox4</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">2</span>获取数据value:<span class="number">2</span>,name:monkey2</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">1</span>获取数据value:<span class="number">3</span>,name:monkey3</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">2</span>获取数据value:<span class="number">3</span>,name:Fox3</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">2</span>获取数据value:<span class="number">4</span>,name:Fox4</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">1</span>获取数据value:<span class="number">4</span>,name:monkey4</span><br></pre></td></tr></table></figure>
+
+<p><code>消费者优先级模式</code></p>
+<p>在实际场景中，我们通常会因为业务逻辑而形成一条消费链。比如一个消息必须由 消费者A -&gt; 消费者B -&gt; 消费者C 的顺序依次进行消费。在配置消费者时，可以通过 .then 方法去实现顺序消费。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">disruptor.handleEventsWith(<span class="keyword">new</span> OrderEventHandler())</span><br><span class="line">         .then(<span class="keyword">new</span> OrderEventHandler())</span><br></pre></td></tr></table></figure>
+
+<p>handleEventsWith 与 handleEventsWithWorkerPool 都是支持 .then 的，它们可以结合使用。比如可以按照 消费者A -&gt; (消费者B 消费者C) -&gt; 消费者D 的消费顺序。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">disruptor.handleEventsWith(<span class="keyword">new</span> OrderEventHandler())</span><br><span class="line">         .thenHandleEventsWithWorkerPool(<span class="keyword">new</span> OrderEventHandler(), <span class="keyword">new</span> OrderEventHandler())</span><br><span class="line">         .then(<span class="keyword">new</span> OrderEventHandler());</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DisruptorDemo3</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//创建disruptor</span></span><br><span class="line">        Disruptor&lt;OrderEvent&gt; disruptor = <span class="keyword">new</span> Disruptor&lt;&gt;(</span><br><span class="line">                <span class="keyword">new</span> OrderEventFactory(),</span><br><span class="line">                <span class="number">1024</span> * <span class="number">1024</span>,</span><br><span class="line">                Executors.defaultThreadFactory(),</span><br><span class="line">                ProducerType.MULTI, <span class="comment">//多生产者</span></span><br><span class="line">                <span class="keyword">new</span> YieldingWaitStrategy()  <span class="comment">//等待策略</span></span><br><span class="line">        );</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//设置消费者用于处理RingBuffer的事件</span></span><br><span class="line">        <span class="comment">//disruptor.handleEventsWith(new OrderEventHandler());</span></span><br><span class="line">        <span class="comment">//设置多消费者,消息会被重复消费</span></span><br><span class="line">        <span class="comment">//disruptor.handleEventsWith(new OrderEventHandler(),new OrderEventHandler());</span></span><br><span class="line">        <span class="comment">//设置多消费者,消费者要实现WorkHandler接口，一条消息只会被一个消费者消费</span></span><br><span class="line">        <span class="comment">//disruptor.handleEventsWithWorkerPool(new OrderEventHandler(), new OrderEventHandler());</span></span><br><span class="line">        <span class="comment">//按消费者优先级消费  消费者A -&gt; (消费者B 消费者C) -&gt; 消费者D</span></span><br><span class="line">        disruptor.handleEventsWith(<span class="keyword">new</span> OrderEventHandler())</span><br><span class="line">                .thenHandleEventsWithWorkerPool(<span class="keyword">new</span> OrderEventHandler(), <span class="keyword">new</span> OrderEventHandler())</span><br><span class="line">                .then(<span class="keyword">new</span> OrderEventHandler());</span><br><span class="line"></span><br><span class="line">        <span class="comment">//启动disruptor</span></span><br><span class="line">        disruptor.start();</span><br><span class="line"></span><br><span class="line">        <span class="comment">//创建ringbuffer容器</span></span><br><span class="line">        RingBuffer&lt;OrderEvent&gt; ringBuffer = disruptor.getRingBuffer();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">new</span> Thread(()-&gt;&#123;</span><br><span class="line">            <span class="comment">//创建生产者</span></span><br><span class="line">            OrderEventProducer eventProducer = <span class="keyword">new</span> OrderEventProducer(ringBuffer);</span><br><span class="line">            <span class="comment">// 发送消息</span></span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;<span class="number">5</span>;i++)&#123;</span><br><span class="line">                eventProducer.onData(i,<span class="string">&quot;Fox&quot;</span>+i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,<span class="string">&quot;producer1&quot;</span>).start();</span><br><span class="line"></span><br><span class="line"><span class="comment">//        new Thread(()-&gt;&#123;</span></span><br><span class="line"><span class="comment">//            //创建生产者</span></span><br><span class="line"><span class="comment">//            OrderEventProducer eventProducer = new OrderEventProducer(ringBuffer);</span></span><br><span class="line"><span class="comment">//            // 发送消息</span></span><br><span class="line"><span class="comment">//            for(int i=0;i&lt;100;i++)&#123;</span></span><br><span class="line"><span class="comment">//                eventProducer.onData(i,&quot;monkey&quot;+i);</span></span><br><span class="line"><span class="comment">//            &#125;</span></span><br><span class="line"><span class="comment">//        &#125;,&quot;producer2&quot;).start();</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="comment">//disruptor.shutdown();</span></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">## 结果</span><br><span class="line">生产者producer1发送数据value:<span class="number">0</span>,name:Fox0</span><br><span class="line">生产者producer1发送数据value:<span class="number">1</span>,name:Fox1</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">1</span>获取数据value:<span class="number">0</span>,name:Fox0</span><br><span class="line">生产者producer1发送数据value:<span class="number">2</span>,name:Fox2</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">2</span>获取数据value:<span class="number">0</span>,name:Fox0</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">1</span>获取数据value:<span class="number">1</span>,name:Fox1</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">4</span>获取数据value:<span class="number">0</span>,name:Fox0</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">3</span>获取数据value:<span class="number">1</span>,name:Fox1</span><br><span class="line">生产者producer1发送数据value:<span class="number">3</span>,name:Fox3</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">4</span>获取数据value:<span class="number">1</span>,name:Fox1</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">1</span>获取数据value:<span class="number">2</span>,name:Fox2</span><br><span class="line">生产者producer1发送数据value:<span class="number">4</span>,name:Fox4</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">1</span>获取数据value:<span class="number">3</span>,name:Fox3</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">2</span>获取数据value:<span class="number">2</span>,name:Fox2</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">3</span>获取数据value:<span class="number">3</span>,name:Fox3</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">1</span>获取数据value:<span class="number">4</span>,name:Fox4</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">4</span>获取数据value:<span class="number">2</span>,name:Fox2</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">2</span>获取数据value:<span class="number">4</span>,name:Fox4</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">4</span>获取数据value:<span class="number">3</span>,name:Fox3</span><br><span class="line">消费者pool-<span class="number">1</span>-thread-<span class="number">4</span>获取数据value:<span class="number">4</span>,name:Fox4</span><br></pre></td></tr></table></figure>
+
+
+
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/05/11/01-00-15-Future-CompletableFuture-Disruptor/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CompletableFuture/" rel="tag">CompletableFuture</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Disruptor/" rel="tag">Disruptor</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Future/" rel="tag">Future</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" rel="tag">并发编程</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/05/12/01-00-16-ThreadPoolExecutor%E4%BD%BF%E7%94%A8%E5%8F%8A%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            ThreadPoolExecutor使用及源码分析
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/05/10/01-00-14-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8BForkJoin/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">并发编程之ForkJoin</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2022
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

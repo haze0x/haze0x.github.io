@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>优雅的代码是一种艺术 |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-10-00-01-优雅的代码是一种艺术"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  优雅的代码是一种艺术
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/07/27/10-00-01-%E4%BC%98%E9%9B%85%E7%9A%84%E4%BB%A3%E7%A0%81%E6%98%AF%E4%B8%80%E7%A7%8D%E8%89%BA%E6%9C%AF/" class="article-date">
+  <time datetime="2022-07-27T12:35:44.000Z" itemprop="datePublished">2022-07-27</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E9%9A%8F%E7%AC%94/">随笔</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">2.3k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">13 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p id="hitokoto">正在加载一言...</p>
+
+<p><code>注解解析EL表达式AOP切面处理</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.java.learn .common.aspect;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.learn.common.business.exception.BusinessException;</span><br><span class="line"><span class="keyword">import</span> com.java.learn.common.annotation.InjectUser;</span><br><span class="line"><span class="keyword">import</span> com.java.learn.common.constants.MDA;</span><br><span class="line"><span class="keyword">import</span> com.java.learn.entity.dto.mit.UserInfoDTO;</span><br><span class="line"><span class="keyword">import</span> com.java.learn.service.flow.UserInfoService;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.lang.StringUtils;</span><br><span class="line"><span class="keyword">import</span> org.aspectj.lang.ProceedingJoinPoint;</span><br><span class="line"><span class="keyword">import</span> org.aspectj.lang.Signature;</span><br><span class="line"><span class="keyword">import</span> org.aspectj.lang.annotation.Around;</span><br><span class="line"><span class="keyword">import</span> org.aspectj.lang.annotation.Aspect;</span><br><span class="line"><span class="keyword">import</span> org.aspectj.lang.annotation.Pointcut;</span><br><span class="line"><span class="keyword">import</span> org.aspectj.lang.reflect.MethodSignature;</span><br><span class="line"><span class="keyword">import</span> org.springframework.beans.BeansException;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.ApplicationContext;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.ApplicationContextAware;</span><br><span class="line"><span class="keyword">import</span> org.springframework.core.DefaultParameterNameDiscoverer;</span><br><span class="line"><span class="keyword">import</span> org.springframework.core.ParameterNameDiscoverer;</span><br><span class="line"><span class="keyword">import</span> org.springframework.expression.EvaluationContext;</span><br><span class="line"><span class="keyword">import</span> org.springframework.expression.Expression;</span><br><span class="line"><span class="keyword">import</span> org.springframework.expression.ExpressionParser;</span><br><span class="line"><span class="keyword">import</span> org.springframework.expression.spel.SpelParserConfiguration;</span><br><span class="line"><span class="keyword">import</span> org.springframework.expression.spel.standard.SpelExpressionParser;</span><br><span class="line"><span class="keyword">import</span> org.springframework.expression.spel.support.StandardEvaluationContext;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Component;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Constructor;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"><span class="keyword">import</span> java.util.Optional;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Aspect</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Slf4jpublic</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">InjectAspect</span> <span class="keyword">implements</span> <span class="title">ApplicationContextAware</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> UserInfoService userInfoService;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> ExpressionParser parser;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> ParameterNameDiscoverer parameterNameDiscoverer;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 配置织入点   </span></span><br><span class="line">    <span class="meta">@Pointcut(&quot;@annotation(com.java.learn .common.annotation.InjectUser)&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">injectPointCut</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Around(value = &quot;injectPointCut()&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">doAround</span><span class="params">(ProceedingJoinPoint joinPoint)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            setUserInfo(joinPoint);</span><br><span class="line">            <span class="keyword">return</span> joinPoint.proceed();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            MDA.U.remove();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">setUserInfo</span><span class="params">(ProceedingJoinPoint joinPoint)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            InjectUser annotation = <span class="keyword">null</span>;</span><br><span class="line">            Signature signature = joinPoint.getSignature();</span><br><span class="line">            MethodSignature methodSignature = (MethodSignature) signature;</span><br><span class="line">            Method method = methodSignature.getMethod();</span><br><span class="line">            <span class="keyword">if</span> (method == <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            annotation = method.getAnnotation(InjectUser.class);</span><br><span class="line">            <span class="keyword">if</span> (annotation == <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            String userId = annotation.value();</span><br><span class="line">            <span class="keyword">if</span> (StringUtils.isEmpty(userId)) &#123;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            Expression expression = parser.parseExpression(userId);</span><br><span class="line">            <span class="keyword">if</span> (method.getParameterCount() &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            String[] parameterNames = parameterNameDiscoverer.getParameterNames(method);</span><br><span class="line">            Object[] args = joinPoint.getArgs();</span><br><span class="line">            EvaluationContext context = <span class="keyword">new</span> StandardEvaluationContext(<span class="keyword">new</span> Object());</span><br><span class="line">            <span class="keyword">if</span> (parameterNames != <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; parameterNames.length; i++) &#123;</span><br><span class="line">                    context.setVariable(parameterNames[i], args[i]);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            String value = expression.getValue(context, String.class);</span><br><span class="line">            <span class="keyword">if</span> (StringUtils.isEmpty(value)) &#123;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            MDA.U.set(Optional.ofNullable(userInfoService.getAirSignUserInfo(value)).map(x -&gt; &#123;</span><br><span class="line">                log.debug(<span class="string">&quot;InjectAspect userId is &#123;&#125; ,  userInfo is &#123;&#125;&quot;</span>, userId, x);</span><br><span class="line">                <span class="keyword">return</span> x;</span><br><span class="line">            &#125;).orElseGet(UserInfoDTO::<span class="keyword">new</span>));</span><br><span class="line">        &#125; <span class="keyword">catch</span> (BusinessException be) &#123;</span><br><span class="line">            log.error(<span class="string">&quot;InjectAspect BusinessException is &quot;</span>, be);</span><br><span class="line">            <span class="keyword">throw</span> be;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable th) &#123;</span><br><span class="line">            log.error(<span class="string">&quot;InjectAspect error , &quot;</span>, th);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setApplicationContext</span><span class="params">(ApplicationContext applicationContext)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">        userInfoService = applicationContext.getBean(UserInfoService.class);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Class modeClass = Class.forName(<span class="string">&quot;org.springframework.expression.spel.SpelCompilerMode&quot;</span>);</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Constructor&lt;SpelParserConfiguration&gt; c = SpelParserConfiguration.class.getConstructor(modeClass, ClassLoader.class);</span><br><span class="line">                Object mode = modeClass.getField(<span class="string">&quot;IMMEDIATE&quot;</span>).get(<span class="keyword">null</span>);</span><br><span class="line">                SpelParserConfiguration config = c.newInstance(mode, InjectAspect.class.getClassLoader());</span><br><span class="line">                parser = <span class="keyword">new</span> SpelExpressionParser(config);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                log.error(<span class="string">&quot;parser load error &quot;</span>, e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (ClassNotFoundException e) &#123;</span><br><span class="line">            parser = <span class="keyword">new</span> SpelExpressionParser();</span><br><span class="line">        &#125;</span><br><span class="line">        parameterNameDiscoverer = <span class="keyword">new</span> DefaultParameterNameDiscoverer();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">-- 注解</span><br><span class="line"><span class="keyword">package</span> com.java.learn .common.annotation;<span class="keyword">import</span> java.lang.annotation.*;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Target(&#123;ElementType.PARAMETER, ElementType.METHOD&#125;)</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.RUNTIME)</span></span><br><span class="line"><span class="meta">@Documentedpublic</span></span><br><span class="line"><span class="meta">@interface</span> InjectUser &#123;</span><br><span class="line">    <span class="function">String <span class="title">value</span><span class="params">()</span> <span class="keyword">default</span> &quot;&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">-- 使用</span><br><span class="line"><span class="meta">@InjectUser(&quot;request.userId&quot;)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">save</span><span class="params">(Request request)</span></span>&#123; </span><br><span class="line">    MDA.U.get().getUserId();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>优雅的数据上报</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.java.learn.entity.ubas;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.paic.smp.cloud.common.business.exception.BusinessException;</span><br><span class="line"><span class="keyword">import</span> com.java.learn.common.constants.ResponseEnum;</span><br><span class="line"><span class="keyword">import</span> com.java.learn.common.enums.InsuranceMetricEnum;</span><br><span class="line"><span class="keyword">import</span> com.java.learn.common.enums.InsuranceMetricStatusEnum;</span><br><span class="line"><span class="keyword">import</span> com.java.learn.sao.BizMetricReportSao;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.lang.StringUtils;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.Logger;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.LoggerFactory;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.Serializable;</span><br><span class="line"><span class="keyword">import</span> java.util.function.Consumer;</span><br><span class="line"><span class="keyword">import</span> java.util.function.Function;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * ubas 数据上报代理类</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ReportDataProxy</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger logger = LoggerFactory.getLogger(ReportDataProxy.class);</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">2286978876881645590L</span>;</span><br><span class="line">    <span class="keyword">private</span> MetricReport data;</span><br><span class="line">    <span class="keyword">private</span> BizMetricReportSao reportSao;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ReportDataProxy</span><span class="params">(InsuranceMetricEnum metricEnum, BizMetricReportSao reportSao)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.reportSao = reportSao;</span><br><span class="line">        <span class="keyword">this</span>.data = <span class="keyword">new</span> MetricReport();</span><br><span class="line">        <span class="keyword">this</span>.data.setBizId(metricEnum.getCode());</span><br><span class="line">        <span class="keyword">this</span>.data.setReportInfo(<span class="keyword">new</span> MetricReport.ReportInfo());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 业务方法代理     </span></span><br><span class="line"><span class="comment">     *     </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> function     </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> &lt;U&gt;     </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> &lt;U&gt; <span class="function">U <span class="title">report</span><span class="params">(Function&lt;MetricReport, U&gt; function)</span> </span>&#123;</span><br><span class="line">        U result;</span><br><span class="line">        String status = InsuranceMetricStatusEnum.SUCCESS.getCode();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            result = function.apply(data);</span><br><span class="line">            data.getReportInfo().setResponseCode(ResponseEnum.SUCCESS.getCode());</span><br><span class="line">        &#125; <span class="keyword">catch</span> (BusinessException bu) &#123;</span><br><span class="line">            status = InsuranceMetricStatusEnum.FAIL.getCode();</span><br><span class="line">            data.getReportInfo().setResponseCode(bu.getCode());</span><br><span class="line">            <span class="keyword">throw</span> bu;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">            status = InsuranceMetricStatusEnum.FAIL.getCode();</span><br><span class="line">            data.getReportInfo().setResponseCode(ResponseEnum.SYSTEM_ERROR.getCode());</span><br><span class="line">            <span class="keyword">throw</span> e;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (StringUtils.isEmpty(data.getReportInfo().getStatus())) &#123;</span><br><span class="line">                data.getReportInfo().setStatus(status);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">this</span>.ubasReport(data);            <span class="comment">// gc            </span></span><br><span class="line">            <span class="keyword">this</span>.data = <span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">this</span>.reportSao = <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 业务方法代理     </span></span><br><span class="line"><span class="comment">     *     </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> consumer     </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">report</span><span class="params">(Consumer&lt;MetricReport&gt; consumer)</span> </span>&#123;</span><br><span class="line">        String status = InsuranceMetricStatusEnum.SUCCESS.getCode();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            consumer.accept(data);</span><br><span class="line">            data.getReportInfo().setResponseCode(ResponseEnum.SUCCESS.getCode());</span><br><span class="line">        &#125; <span class="keyword">catch</span> (BusinessException bu) &#123;</span><br><span class="line">            status = InsuranceMetricStatusEnum.FAIL.getCode();</span><br><span class="line">            data.getReportInfo().setResponseCode(bu.getCode());</span><br><span class="line">            <span class="keyword">throw</span> bu;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">            status = InsuranceMetricStatusEnum.FAIL.getCode();</span><br><span class="line">            data.getReportInfo().setResponseCode(ResponseEnum.SYSTEM_ERROR.getCode());</span><br><span class="line">            <span class="keyword">throw</span> e;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (StringUtils.isEmpty(data.getReportInfo().getStatus())) &#123;</span><br><span class="line">                data.getReportInfo().setStatus(status);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">this</span>.ubasReport(data);</span><br><span class="line">            <span class="keyword">this</span>.data = <span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">this</span>.reportSao = <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * ubas上报     </span></span><br><span class="line"><span class="comment">     *     </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> data</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">ubasReport</span><span class="params">(MetricReport data)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (reportSao != <span class="keyword">null</span>) &#123;</span><br><span class="line">            reportSao.reportMetric(data);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">## 使用</span><br><span class="line"><span class="keyword">new</span> ReportDataProxy(reportEnum,reportService).report(data-&gt;&#123;</span><br><span class="line">    <span class="comment">// do your business </span></span><br><span class="line">    <span class="comment">// build data</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p><code>优雅的限流工具类</code></p>
+<p>支持动态更新信号量许可数</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.learn.spring.aspect;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.learn.spring.service.TestInterface;</span><br><span class="line"><span class="keyword">import</span> org.springframework.beans.factory.annotation.Autowired;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Component;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.ConcurrentHashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.Semaphore;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ShopSemaphoreFactory</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> TestInterface testInterface;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setTestInterface</span><span class="params">(TestInterface inter)</span> </span>&#123;</span><br><span class="line">        testInterface = inter;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Map&lt;SemaphoreEnum, ShopSemaphore&gt; semaphoreMap = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Semaphore <span class="title">create</span><span class="params">(SemaphoreEnum semaphoreEnum)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> createIfChanged(semaphoreEnum);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Semaphore <span class="title">createOrGetBucket</span><span class="params">(SemaphoreEnum semaphoreEnum)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> semaphoreMap.computeIfAbsent(semaphoreEnum, x -&gt; <span class="keyword">new</span> ShopSemaphore(testInterface.stateNumGet(semaphoreEnum)));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Semaphore <span class="title">createIfChanged</span><span class="params">(SemaphoreEnum semaphoreEnum)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (!semaphoreMap.containsKey(semaphoreEnum)) &#123;</span><br><span class="line">            <span class="keyword">return</span> createOrGetBucket(semaphoreEnum);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> semaphoreMap.computeIfPresent(semaphoreEnum, (k, v) -&gt; &#123;</span><br><span class="line">            <span class="keyword">if</span> (v.stateNumGet() == v.prevNumGet()) &#123;</span><br><span class="line">                <span class="keyword">return</span> v;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">synchronized</span> (v) &#123;</span><br><span class="line">                <span class="keyword">if</span> (v.stateNumGet() == v.prevNumGet()) &#123;</span><br><span class="line">                    <span class="keyword">return</span> v;</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (v.stateNumGet() &gt; v.prevNumGet()) &#123;</span><br><span class="line">                    v.release(v.stateNumGet() - v.prevNumGet());</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    v.reducePermits(v.prevNumGet() - v.stateNumGet());</span><br><span class="line">                &#125;</span><br><span class="line">                v.prevNumSet(v.stateNumGet());</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> v;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">package</span> com.learn.spring.aspect;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.aspectj.lang.ProceedingJoinPoint;</span><br><span class="line"><span class="keyword">import</span> org.aspectj.lang.Signature;</span><br><span class="line"><span class="keyword">import</span> org.aspectj.lang.annotation.Around;</span><br><span class="line"><span class="keyword">import</span> org.aspectj.lang.annotation.Aspect;</span><br><span class="line"><span class="keyword">import</span> org.aspectj.lang.annotation.Pointcut;</span><br><span class="line"><span class="keyword">import</span> org.aspectj.lang.reflect.MethodSignature;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Component;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"><span class="keyword">import</span> java.util.Optional;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.Semaphore;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Aspect</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RateLimiterAspect</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 配置织入点</span></span><br><span class="line">    <span class="meta">@Pointcut(&quot;@annotation(com.learn.spring.aspect.RateLimiter)&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">logPointCut</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Around(value = &quot;logPointCut()&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">doAfterReturning</span><span class="params">(ProceedingJoinPoint joinPoint)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">        Semaphore rate;</span><br><span class="line">        <span class="keyword">if</span> ((rate = create(joinPoint)) == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> joinPoint.proceed();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Optional.of(rate.tryAcquire()).filter(x -&gt; x).orElseThrow(() -&gt; <span class="keyword">new</span> Exception(<span class="string">&quot;限速&quot;</span>));</span><br><span class="line">            <span class="keyword">return</span> joinPoint.proceed();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            rate.release();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> Semaphore <span class="title">create</span><span class="params">(ProceedingJoinPoint joinPoint)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            RateLimiter annotationLog = <span class="keyword">null</span>;</span><br><span class="line">            Signature signature = joinPoint.getSignature();</span><br><span class="line">            MethodSignature methodSignature = (MethodSignature) signature;</span><br><span class="line">            Method method = methodSignature.getMethod();</span><br><span class="line">            <span class="keyword">if</span> (method != <span class="keyword">null</span>) &#123;</span><br><span class="line">                annotationLog = method.getAnnotation(RateLimiter.class);</span><br><span class="line">            &#125;</span><br><span class="line">            SemaphoreEnum value = annotationLog.value();</span><br><span class="line">            <span class="keyword">return</span> ShopSemaphoreFactory.create(value);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable th) &#123;</span><br><span class="line">            log.error(<span class="string">&quot;create &quot;</span>, th);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">package</span> com.learn.spring.aspect;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.ConcurrentHashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.Semaphore;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.locks.ReentrantLock;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">enum</span> <span class="title">SemaphoreEnum</span> </span>&#123;</span><br><span class="line">    rate_under_writing(<span class="string">&quot;rate_under_writing&quot;</span>, <span class="number">2</span>);</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 限流场景</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String scene;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 默认并发线程数</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> Integer limiter;</span><br><span class="line">    <span class="keyword">private</span> ReentrantLock lock;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//    private static final Map&lt;SemaphoreEnum, ShopSemaphore&gt; semaphoreMap = new ConcurrentHashMap&lt;&gt;();</span></span><br><span class="line">    SemaphoreEnum(String scene, <span class="keyword">int</span> i) &#123;</span><br><span class="line">        <span class="keyword">this</span>.scene = scene;</span><br><span class="line">        <span class="keyword">this</span>.limiter = i;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getScene</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> scene;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setScene</span><span class="params">(String scene)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.scene = scene;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setLock</span><span class="params">(ReentrantLock lock)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.lock = lock;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">limiterGet</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1000</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">    public static Semaphore createOrGetBucket(SemaphoreEnum semaphoreEnum) &#123;</span></span><br><span class="line"><span class="comment">        return semaphoreMap.computeIfAbsent(semaphoreEnum, x -&gt; new ShopSemaphore(x.limiterGet()));</span></span><br><span class="line"><span class="comment">    &#125;</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">    public static Semaphore createIfChanged(SemaphoreEnum semaphoreEnum) &#123;</span></span><br><span class="line"><span class="comment">        if (!semaphoreMap.containsKey(semaphoreEnum)) &#123;</span></span><br><span class="line"><span class="comment">            return createOrGetBucket(semaphoreEnum);</span></span><br><span class="line"><span class="comment">        &#125;</span></span><br><span class="line"><span class="comment">        return semaphoreMap.computeIfPresent(semaphoreEnum, (k, v) -&gt; &#123;</span></span><br><span class="line"><span class="comment">            if (v.stateNumGet() == v.prevNumGet()) &#123;</span></span><br><span class="line"><span class="comment">                return v;</span></span><br><span class="line"><span class="comment">            &#125;</span></span><br><span class="line"><span class="comment">            synchronized (v) &#123;</span></span><br><span class="line"><span class="comment">                if (v.stateNumGet() == v.prevNumGet()) &#123;</span></span><br><span class="line"><span class="comment">                    return v;</span></span><br><span class="line"><span class="comment">                &#125; else if (v.stateNumGet() &gt; v.prevNumGet()) &#123;</span></span><br><span class="line"><span class="comment">                    v.release(v.stateNumGet() - v.prevNumGet());</span></span><br><span class="line"><span class="comment">                &#125; else &#123;</span></span><br><span class="line"><span class="comment">                    v.reducePermits(v.prevNumGet() - v.stateNumGet());</span></span><br><span class="line"><span class="comment">                &#125;</span></span><br><span class="line"><span class="comment">                v.prevNumSet(v.stateNumGet());</span></span><br><span class="line"><span class="comment">            &#125;</span></span><br><span class="line"><span class="comment">            return v;</span></span><br><span class="line"><span class="comment">        &#125;);</span></span><br><span class="line"><span class="comment">    &#125;</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">    public static void reducePermits(Semaphore semaphore, Integer permits) &#123;</span></span><br><span class="line"><span class="comment">        try &#123;</span></span><br><span class="line"><span class="comment">            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();</span></span><br><span class="line"><span class="comment">            Class clazz = classLoader.loadClass(&quot;java.util.concurrent.Semaphore&quot;);</span></span><br><span class="line"><span class="comment">            Method method = clazz.getDeclaredMethod(&quot;reducePermits&quot;, int.class);</span></span><br><span class="line"><span class="comment">            method.setAccessible(true);</span></span><br><span class="line"><span class="comment">            method.invoke(semaphore, permits);</span></span><br><span class="line"><span class="comment">        &#125; catch (Exception e) &#123;</span></span><br><span class="line"><span class="comment">            log.error(&quot;SemaphoreEnum reducePermits error &quot;, e);</span></span><br><span class="line"><span class="comment">        &#125;</span></span><br><span class="line"><span class="comment">    &#125;</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Semaphore semaphore = <span class="keyword">new</span> Semaphore(<span class="number">100</span>);</span><br><span class="line">        <span class="comment">//        reducePermits(semaphore, 10);</span></span><br><span class="line">        <span class="keyword">int</span> value = <span class="number">100</span>;</span><br><span class="line">        Map&lt;String, Integer&gt; map = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;();</span><br><span class="line">        map.putIfAbsent(<span class="string">&quot;11&quot;</span>, <span class="number">11</span>);</span><br><span class="line">        map.computeIfAbsent(<span class="string">&quot;11&quot;</span>, x -&gt; Integer.parseInt(x) + <span class="number">100</span>);<span class="comment">// 有则不操作，没则添加</span></span><br><span class="line">        map.computeIfPresent(<span class="string">&quot;11&quot;</span>, (k, v) -&gt; &#123;</span><br><span class="line">            <span class="keyword">if</span> (v == value) &#123;</span><br><span class="line">                <span class="keyword">return</span> v;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">synchronized</span> (v) &#123;</span><br><span class="line">                    <span class="keyword">int</span> sd = value - v;</span><br><span class="line">                    <span class="keyword">if</span> (sd &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">return</span> v;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);<span class="comment">//有则覆盖，没值的时候不操作</span></span><br><span class="line">        <span class="keyword">int</span> a = <span class="number">0</span>;</span><br><span class="line">        <span class="comment">// 无 插入        // 有 判断是否想等 相等 不管 不等 插入</span></span><br><span class="line">        Map&lt;String, Integer&gt; map1 = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;();</span><br><span class="line">        Integer put = map1.put(<span class="string">&quot;11&quot;</span>, <span class="number">123</span>);</span><br><span class="line">        <span class="keyword">int</span> b = <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>好用的分页器</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span>  com.learn.common.util.page;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.Data;</span><br><span class="line"><span class="keyword">import</span> lombok.NoArgsConstructor;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.springframework.beans.factory.annotation.Value;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Component;</span><br><span class="line"><span class="keyword">import</span> org.springframework.util.CollectionUtils;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.Collection;</span><br><span class="line"><span class="keyword">import</span> java.util.Iterator;</span><br><span class="line"><span class="keyword">import</span> java.util.function.Function;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * sql 分页查询工具类 </span></span><br><span class="line"><span class="comment"> * 为解决 limit 1000000 5 实际会查出1000005条数据的分页问题</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SQLPageUtil</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Integer pageSize;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 使用条件：     </span></span><br><span class="line"><span class="comment">     * 1、数据量大需要分页场景     </span></span><br><span class="line"><span class="comment">     * 2、sql语句如下     </span></span><br><span class="line"><span class="comment">     * example:     </span></span><br><span class="line"><span class="comment">     * select id,col1,col2 from t where col1=#&#123;xxx&#125; and id &gt; #&#123;minId&#125; order by id（索引id 最好是主键id） asc limit size     		 * 3、sql语句必须排序，否则需自己实现外部排序器，自行扩展     </span></span><br><span class="line"><span class="comment">     * 4、使用外部排序器，适用于sql中不带order by 的     </span></span><br><span class="line"><span class="comment">     * 使用此方法需注意 排序器的id 可能整形超长问题     </span></span><br><span class="line"><span class="comment">     * 建议sql中使用order by     </span></span><br><span class="line"><span class="comment">     * &lt;p&gt;     </span></span><br><span class="line"><span class="comment">     * 递归调用     </span></span><br><span class="line"><span class="comment">     *     </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> pageEntity     </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> &lt;T&gt;     </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T extends BasePageEntity, R&gt; <span class="function">Collection&lt;R&gt; <span class="title">page</span><span class="params">(PageEntity&lt;T, R&gt; pageEntity)</span> </span>&#123;</span><br><span class="line">        Collection&lt;R&gt; apply = pageEntity.function.apply(pageEntity.getParam());</span><br><span class="line">        <span class="keyword">if</span> (CollectionUtils.isEmpty(apply)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        &#125;</span><br><span class="line">        R t = tail(apply);</span><br><span class="line">        pageEntity.getParam().setMinId(pageEntity.getPageKey().apply(t));</span><br><span class="line">        apply.addAll(page(pageEntity));</span><br><span class="line">        <span class="keyword">return</span> apply;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取Collection 最后一个值     </span></span><br><span class="line"><span class="comment">     *     </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> apply     </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> &lt;R&gt;     </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> &lt;R&gt; <span class="function">R <span class="title">tail</span><span class="params">(Collection&lt;R&gt; apply)</span> </span>&#123;</span><br><span class="line">        Iterator&lt;R&gt; iterator = apply.iterator();</span><br><span class="line">        R lastValue = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">while</span> (iterator.hasNext()) &#123;</span><br><span class="line">            lastValue = iterator.next();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> lastValue;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 创建分页     *     </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> param     </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> pageKey    </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> function    </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> &lt;T&gt;     </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> &lt;R&gt;     </span></span><br><span class="line"><span class="comment">     * 	<span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T extends BasePageEntity, R&gt; <span class="function">PageEntity&lt;T, R&gt; <span class="title">create</span><span class="params">(T param, Function&lt;R, Long&gt; pageKey, Function&lt;T, Collection&lt;R&gt;&gt; function)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> SQLPageUtil.PageEntity&lt;&gt;(param, pageKey, function);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;sql.search.page.size:500&#125;&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setPageSize</span><span class="params">(Integer pageSize)</span> </span>&#123;</span><br><span class="line">        SQLPageUtil.pageSize = pageSize;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Data</span></span><br><span class="line">    <span class="meta">@NoArgsConstructor</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">PageEntity</span>&lt;<span class="title">T</span> <span class="keyword">extends</span> <span class="title">BasePageEntity</span>, <span class="title">R</span>&gt; </span>&#123;</span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 入参</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="keyword">private</span> T param;</span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 主键值</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="keyword">private</span> Function&lt;R, Long&gt; pageKey;</span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 处理sql的方法</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="keyword">private</span> Function&lt;T, Collection&lt;R&gt;&gt; function;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">PageEntity</span><span class="params">(T param, Function&lt;R, Long&gt; pageKey, Function&lt;T, Collection&lt;R&gt;&gt; function)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.param = param;</span><br><span class="line">            <span class="keyword">this</span>.param.setSize(pageSize);</span><br><span class="line">            <span class="keyword">this</span>.pageKey = pageKey;</span><br><span class="line">            <span class="keyword">this</span>.function = function;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Collection&lt;R&gt; <span class="title">page</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> SQLPageUtil.page(<span class="keyword">this</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## 使用</span><br><span class="line">(List&lt;User&gt;)SQLPageUtil.creat(<span class="keyword">new</span> QueryUserPage(),User::getId,x-&gt;userMapper.queryUserListByPage(x)).page();</span><br></pre></td></tr></table></figure>
+
+
+
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/07/27/10-00-01-%E4%BC%98%E9%9B%85%E7%9A%84%E4%BB%A3%E7%A0%81%E6%98%AF%E4%B8%80%E7%A7%8D%E8%89%BA%E6%9C%AF/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%9A%8F%E7%AC%94/" rel="tag">随笔</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/07/27/03-05-01-Kafka%E5%BF%AB%E9%80%9F%E5%AE%9E%E6%88%98%E4%B8%8E%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            Kafka快速实战与基本原理详解
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/07/26/05-00-01-%E4%BC%81%E4%B8%9A%E7%BA%A7IM%E7%B3%BB%E7%BB%9F%E5%90%8E%E7%AB%AF%E6%9E%B6%E6%9E%84%E5%AE%9E%E6%88%98/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">企业级IM系统后端架构实战</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2022
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>垃圾收集器ParNew&amp;CMS与底层三色标记算法详解 |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-00-00-05-垃圾收集器ParNew-CMS与底层三色标记算法详解"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  垃圾收集器ParNew&amp;CMS与底层三色标记算法详解
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/04/19/00-00-05-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8ParNew-CMS%E4%B8%8E%E5%BA%95%E5%B1%82%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/" class="article-date">
+  <time datetime="2022-04-19T13:13:53.000Z" itemprop="datePublished">2022-04-19</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/">性能调优</a> / <a class="article-category-link" href="/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/Jvm/">Jvm</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">8k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">28 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p id="hitokoto">正在加载一言...</p>
+
+<h2 id="垃圾收集器ParNew-amp-CMS与底层三色标记算法详解"><a href="#垃圾收集器ParNew-amp-CMS与底层三色标记算法详解" class="headerlink" title="垃圾收集器ParNew&amp;CMS与底层三色标记算法详解"></a>垃圾收集器ParNew&amp;CMS与底层三色标记算法详解</h2><h3 id="1、垃圾收集算法"><a href="#1、垃圾收集算法" class="headerlink" title="1、垃圾收集算法"></a>1、垃圾收集算法</h3><p><img src="/2022/04/19/00-00-05-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8ParNew-CMS%E4%B8%8E%E5%BA%95%E5%B1%82%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/clipboard-1650552624990.png" alt="img"></p>
+<ul>
+<li><p><strong>分代收集理论</strong></p>
+<p>当前虚拟机的垃圾收集都采用分代收集算法，这种算法没有什么新的思想，只是根据对象存活周期的不同将内存分为几块。一般将java堆分为新生代和老年代，这样我们就可以根据各个年代的特点选择合适的垃圾收集算法。</p>
+<p>比如在新生代中，每次收集都会有大量对象(近99%)死去，所以可以选择复制算法，只需要付出少量对象的复制成本就可以完成每次垃圾收集。而老年代的对象存活几率是比较高的，而且没有额外的空间对它进行分配担保，所以我们必须选择“标记-清除”或“标记-整理”算法进行垃圾收集。注意，“标记-清除”或“标记-整理”算法会比复制算法慢10倍以上。</p>
+</li>
+<li><p><strong>标记-复制算法</strong></p>
+<p>为了解决效率问题，“复制”收集算法出现了。它可以将内存分为大小相同的两块，每次使用其中的一块。当这一块的内存使用完后，就将还存活的对象复制到另一块去，然后再把使用的空间一次清理掉。这样就使每次的内存回收都是对内存区间的一半进行回收。</p>
+<p><img src="/2022/04/19/00-00-05-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8ParNew-CMS%E4%B8%8E%E5%BA%95%E5%B1%82%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/96d6c205961c401fa08a222dd296f101-1650552914231.jpeg" alt="img"></p>
+</li>
+<li><p><strong>标记-清除算法</strong></p>
+<p>算法分为“标记”和“清除”阶段：标记存活的对象， 统一回收所有未被标记的对象(一般选择这种)；也可以反过来，标记出所有需要回收的对象，在标记完成后统一回收所有被标记的对象 。它是最基础的收集算法，比较简单，但是会带来两个明显的问题：</p>
+<ol>
+<li><strong>效率问题  (如果需要标记的对象太多，效率不高)</strong></li>
+<li><strong>空间问题（标记清除后会产生大量不连续的碎片）</strong></li>
+</ol>
+<p><img src="/2022/04/19/00-00-05-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8ParNew-CMS%E4%B8%8E%E5%BA%95%E5%B1%82%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/9ea2822391964677b532fa20ba6c1cfe.jpeg" alt="img"></p>
+</li>
+<li><p><strong>标记-整理算法</strong></p>
+<p>根据老年代的特点特出的一种标记算法，标记过程仍然与“标记-清除”算法一样，但后续步骤不是直接对可回收对象回收，而是让所有存活的对象向一端移动，然后直接清理掉端边界以外的内存。</p>
+<p><img src="/2022/04/19/00-00-05-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8ParNew-CMS%E4%B8%8E%E5%BA%95%E5%B1%82%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/96ba7c6a2fe44eecbe32b64ada05e03f.jpeg" alt="img"></p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>优点</th>
+<th align="left">缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>标记-复制算法</td>
+<td>效率高，是其它两种算法的10倍以上</td>
+<td align="left">浪费空间</td>
+</tr>
+<tr>
+<td>标记-清除算法</td>
+<td>简单</td>
+<td align="left">1、效率低；2、容易产生空间碎片</td>
+</tr>
+<tr>
+<td>标记-整理算法</td>
+<td>不会产生空间碎片</td>
+<td align="left">效率低</td>
+</tr>
+</tbody></table>
+<h3 id="2、垃圾收集器"><a href="#2、垃圾收集器" class="headerlink" title="2、垃圾收集器"></a>2、垃圾收集器</h3><p><img src="/2022/04/19/00-00-05-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8ParNew-CMS%E4%B8%8E%E5%BA%95%E5%B1%82%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/clipboard-1650553117097.png" alt="img"></p>
+<p><strong>如果说收集算法是内存回收的方法论，那么垃圾收集器就是内存回收的具体实现。</strong></p>
+<p>虽然我们对各个收集器进行比较，但并非为了挑选出一个最好的收集器。因为直到现在为止还没有最好的垃圾收集器出现，更加没有万能的垃圾收集器，<strong>我们能做的就是根据具体应用场景选择适合自己的垃圾收集器</strong>。试想一下：如果有一种四海之内、任何场景下都适用的完美收集器存在，那么我们的Java虚拟机就不会实现那么多不同的垃圾收集器了。</p>
+<p><strong>1.1 Serial收集器</strong>(-XX:+UseSerialGC  -XX:+UseSerialOldGC)</p>
+<p>Serial（串行）收集器是最基本、历史最悠久的垃圾收集器了。大家看名字就知道这个收集器是一个单线程收集器了。它的 <strong>“单线程”</strong> 的意义不仅仅意味着它只会使用一条垃圾收集线程去完成垃圾收集工作，更重要的是它在进行垃圾收集工作的时候必须暂停其他所有的工作线程（ <strong>“Stop The World”</strong> ），直到它收集结束。</p>
+<p><strong>新生代采用复制算法，老年代采用标记-整理算法。</strong></p>
+<p><img src="/2022/04/19/00-00-05-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8ParNew-CMS%E4%B8%8E%E5%BA%95%E5%B1%82%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/1c5bbb8efda34d30a04c67eb39c32e43.jpeg" alt="img"></p>
+<p>虚拟机的设计者们当然知道Stop The World带来的不良用户体验，所以在后续的垃圾收集器设计中停顿时间在不断缩短（仍然还有停顿，寻找最优秀的垃圾收集器的过程仍然在继续）。</p>
+<p>但是Serial收集器有没有优于其他垃圾收集器的地方呢？当然有，它<strong>简单而高效（与其他收集器的单线程相比）</strong>。Serial收集器由于没有线程交互的开销，自然可以获得很高的单线程收集效率。</p>
+<p><strong>Serial Old收集器是Serial收集器的老年代版本</strong>，它同样是一个单线程收集器。它主要有两大用途：一种用途是在JDK1.5以及以前的版本中与Parallel Scavenge收集器搭配使用，<strong>另一种用途是作为CMS收集器的后备方案</strong>。</p>
+<p><strong>1.2 Parallel Scavenge收集器(</strong>-XX:+UseParallelGC(年轻代),-XX:+UseParallelOldGC(老年代) JDK1.8默认的垃圾收集器)</p>
+<p><strong>Parallel</strong>收集器其实<strong>就是Serial收集器的多线程版本</strong>，除了使用多线程进行垃圾收集外，其余行为（控制参数、收集算法、回收策略等等）和Serial收集器类似。默认的收集线程数跟cpu核数相同，当然也可以用参数(-XX:ParallelGCThreads)指定收集线程数，但是一般不推荐修改。</p>
+<p><strong>Parallel Scavenge收集器关注点是吞吐量（高效率的利用CPU）。CMS等垃圾收集器的关注点更多的是用户线程的停顿时间（提高用户体验）。所谓吞吐量就是CPU中用于运行用户代码的时间与CPU总消耗时间的比值。</strong> Parallel Scavenge收集器提供了很多参数供用户找到最合适的停顿时间或最大吞吐量，如果对于收集器运作不太了解的话，可以选择把内存管理优化交给虚拟机去完成也是一个不错的选择。</p>
+<p><strong>新生代采用复制算法。</strong></p>
+<p><img src="/2022/04/19/00-00-05-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8ParNew-CMS%E4%B8%8E%E5%BA%95%E5%B1%82%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/f4928a43f18645a8891088ac5a0bc9c6.jpeg" alt="img"></p>
+<p><strong>Parallel Old收集器是Parallel Scavenge收集器的老年代版本</strong>。使用多线程和“标记-整理”算法。在注重吞吐量以及CPU资源的场合，都可以优先考虑 Parallel Scavenge收集器和Parallel Old收集器(<strong>JDK8默认的新生代和老年代收集器</strong>)。</p>
+<p><strong>1.3 ParNew收集器(****-XX:+UseParNewGC**</strong>)**</p>
+<p>ParNew收集器其实<strong>跟Parallel收集器很类似</strong>，区别主要在于它可以和CMS收集器配合使用。</p>
+<p><strong>新生代采用复制算法，老年代采用标记-整理算法。</strong></p>
+<p><img src="/2022/04/19/00-00-05-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8ParNew-CMS%E4%B8%8E%E5%BA%95%E5%B1%82%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/4d6372782ad6472b8483a221172fb995.jpeg" alt="img"></p>
+<p>它是许多运行在Server模式下的虚拟机的首要选择，除了Serial收集器外，只有它能与CMS收集器（真正意义上的并发收集器，后面会介绍到）配合工作。</p>
+<p><strong>1.4 CMS收集器(</strong>-XX:+UseConcMarkSweepGC(old))</p>
+<p><strong>CMS（Concurrent Mark Sweep）收集器是一种以获取最短回收停顿时间为目标的收集器。它非常符合在注重用户体验的应用上使用，它是HotSpot虚拟机第一款真正意义上的并发收集器，它第一次实现了让垃圾收集线程与用户线程（基本上）同时工作。</strong></p>
+<p>从名字中的<strong>Mark Sweep</strong>这两个词可以看出，CMS收集器是一种 <strong>“标记-清除”算法</strong>实现的，它的运作过程相比于前面几种垃圾收集器来说更加复杂一些。整个过程分为五个步骤：</p>
+<ul>
+<li><strong>初始标记：</strong> 暂停所有的其他线程(STW)，并记录下gc roots<strong>直接能引用的对象</strong>，<strong>速度很快</strong>。【需要stw的原因是如果不做stw，那么跟gc roots直接引用的对象可能不断增加，导致初始标记一直无法完成】</li>
+<li><strong>并发标记：</strong> 并发标记阶段就是从GC Roots的直接关联对象开始遍历整个对象图的过程， 这个过程耗时较长但是不需要停顿用户线程， 可以与垃圾收集线程一起并发运行。因为用户程序继续运行，可能会有导致已经标记过的对象状态发生改变。【并发的原因，提升用户体验，减少停顿时间】</li>
+<li><strong>重新标记：</strong> 重新标记阶段就是为了修正并发标记期间因为用户程序继续运行而导致标记【三色标记】产生变动的那一部分对象的标记记录，<strong>这个阶段的停顿时间一般会比初始标记阶段的时间稍长，远远比并发标记阶段时间短。主要用到三色标记里的增量更新算法(见下面详解)做重新标记。</strong></li>
+<li><strong>并发清理：</strong> 开启用户线程，同时GC线程开始对未标记的区域做清扫。这个阶段如果有新增对象会被标记为黑色不做任何处理(见下面三色标记算法详解)。</li>
+<li><strong>并发重置：</strong>重置本次GC过程中的标记数据。</li>
+</ul>
+<p><img src="/2022/04/19/00-00-05-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8ParNew-CMS%E4%B8%8E%E5%BA%95%E5%B1%82%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/e22d67705ee44f509442e7cd3b705910.jpeg" alt="img"></p>
+<p>cms线程（垃圾收集线程）是字节码执行引擎再后端开启的线程</p>
+<p>从它的名字就可以看出它是一款优秀的垃圾收集器，主要优点：<strong>并发收集、低停顿</strong>。但是它有下面几个明显的缺点：</p>
+<ul>
+<li>对CPU资源敏感（会和服务抢资源）；</li>
+<li>无法处理<strong>浮动垃圾</strong>(在并发标记和并发清理阶段又产生垃圾，这种浮动垃圾只能等到下一次gc再清理了)；</li>
+<li>它使用的回收算法-<strong>“标记-清除”算法</strong>会导致收集结束时会有<strong>大量空间碎片</strong>产生，当然通过参数-XX:+UseCMSCompactAtFullCollection可以让jvm在执行完标记清除后再做整理</li>
+<li>执行过程中的不确定性，会存在上一次垃圾回收还没执行完，然后垃圾回收又被触发的情况，<strong>特别是在并发标记和并发清理阶段会出现</strong>，一边回收，系统一边运行，也许没回收完就再次触发full gc，也就是”<strong>concurrent mode failure</strong>“，<strong>此时会进入stop the world，用serial old垃圾收集器来回收</strong></li>
+</ul>
+<p><strong>CMS的相关核心参数</strong></p>
+<p>jvm参数有 -xx -version -x ，X越多表示越不稳定，后续可能会去掉</p>
+<ol>
+<li>-XX:+UseConcMarkSweepGC：启用cms </li>
+<li>-XX:ConcGCThreads：并发的GC线程数</li>
+<li>-XX:+UseCMSCompactAtFullCollection：FullGC之后做压缩整理（减少碎片）【内存碎片的整理也会stw,不会太慢，剩下的对象越多越慢】</li>
+<li>-XX:CMSFullGCsBeforeCompaction：多少次FullGC之后压缩一次，默认是0，代表每次FullGC后都会压缩一次  </li>
+<li>-XX:CMSInitiatingOccupancyFraction: 当老年代使用达到该比例时会触发FullGC（默认是92，这是百分比）</li>
+<li>-XX:+UseCMSInitiatingOccupancyOnly：只使用设定的回收阈值(-XX:CMSInitiatingOccupancyFraction设定的值)，如果不指定，JVM仅在第一次使用设定值，后续则会自动调整</li>
+<li>-XX:+CMSScavengeBeforeRemark：在CMS GC前启动一次minor gc，降低CMS GC标记阶段**(<strong>也会对年轻代一起做标记，如果在minor gc就干掉了很多对垃圾对象，标记阶段就会减少一些标记时间</strong>)**时的开销，一般CMS的GC耗时 80%都在标记阶段</li>
+</ol>
+<p>【老年代可能对新生代有跨代引用，先做一次minor gc 清除掉年轻代大多数无用对象之后，在做并发标记就会比较快】</p>
+<ol>
+<li>-XX:+CMSParallellnitialMarkEnabled：表示在初始标记的时候多线程执行，缩短STW</li>
+<li>-XX:+CMSParallelRemarkEnabled：在重新标记的时候多线程执行，缩短STW;</li>
+</ol>
+<p><strong>亿级流量电商系统如何优化JVM参数设置(ParNew+CMS)</strong></p>
+<p>大型电商系统后端现在一般都是拆分为多个子系统部署的，比如，商品系统，库存系统，订单系统，促销系统，会员系统等等。</p>
+<p>我们这里以比较核心的订单系统为例 </p>
+<p><img src="/2022/04/19/00-00-05-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8ParNew-CMS%E4%B8%8E%E5%BA%95%E5%B1%82%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/clipboard-1650553251551.png" alt="img"></p>
+<p>对于8G内存，我们一般是分配4G内存给JVM，正常的JVM参数配置如下：</p>
+<p>调优前：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-Xms3072M -Xmx3072M -Xss1M -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=256M -XX:SurvivorRatio=<span class="number">8</span></span><br></pre></td></tr></table></figure>
+
+<p>上节课说过，这样设置可能会由于<strong>动态对象年龄判断原则</strong>导致频繁full gc。</p>
+<p>于是我们可以更新下JVM参数设置：</p>
+<p>调优后</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-Xms3072M -Xmx3072M -Xmn2048M -Xss1M -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=256M -XX:SurvivorRatio=<span class="number">8</span> </span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/04/19/00-00-05-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8ParNew-CMS%E4%B8%8E%E5%BA%95%E5%B1%82%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/clipboard-1650554820731.png" alt="img"></p>
+<p><strong>优化原则：</strong>让短期存活的对象尽量都留在survivor里，不要进入老年代，这样在minor gc的时候这些对象都会被回收，不会进到老年代从而导致full gc**。</p>
+<p><strong>优化手段</strong>：1、降低对象进入老年代的gc分代年龄 2、提高年轻代内存占比</p>
+<p>对于对象年龄应该为多少才移动到老年代比较合适，本例中一次minor gc要间隔二三十秒，大多数对象一般在几秒内就会变为垃圾，完全可以将默认的15岁改小一点，比如改为5，那么意味着对象要经过5次minor gc才会进入老年代，整个时间也有一两分钟了，如果对象这么长时间都没被回收，完全可以认为这些对象是会存活的比较长的对象，可以移动到老年代，而不是继续一直占用survivor区空间。</p>
+<p>对于多大的对象直接进入老年代(参数-XX:PretenureSizeThreshold)，这个一般可以结合你自己系统看下有没有什么大对象生成，预估下大对象的大小，一般来说设置为1M就差不多了，很少有超过1M的大对象，这些对象一般就是你系统初始化分配的缓存对象，比如大的缓存List，Map之类的对象。</p>
+<p>可以适当调整JVM参数如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-Xms3072M -Xmx3072M -Xmn2048M -Xss1M  -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=256M -XX:SurvivorRatio=<span class="number">8</span>  -XX:MaxTenuringThreshold=<span class="number">5</span> -XX:PretenureSizeThreshold=1M</span><br></pre></td></tr></table></figure>
+
+<p>参数解释：-XX:MaxTenuringThreshold=5 年龄大与等于5，进入老年代，为什么设置为5？通过上面分析每25s产生一次young gc ，分代年龄达到5，说明已经过了几分钟了（大致是 5* 25 s）年轻代里面的对象早就变成垃圾了，如果经历了5次gc还没有被回收那么可用认为他是长期存活对象（可能是系统缓存对象，线程池对象，spring bean），直接放到老年代，这样就可以把年轻代空间腾出来，存放那些朝生夕死的对象。</p>
+<p>-XX:PretenureSizeThreshold=1M </p>
+<p>对于大多数系统，1M的对象大小已经是大对象了，大对象直接放到老年代</p>
+<p><strong>需要注意的是：</strong>一般秒杀系统，对于单台机器，并发量可能是不稳定的。比如一般一台机器每秒能够支持300单，一秒只能能够完成订单生成；但是如果流量突增，导致每秒过来600个请求，那么可能会造成网络、磁盘、内存、带宽会比较吃紧，造成系统压力比较大，进而造成一个订单不一定能够在一秒之内生成，导致订单的处理周期时间会变长。最终导致的问题：当要发生minor gc 的最后几秒产生的订单都还没有执行完，导致这些对象都会从eden移到survivor区域，可能远远不止60M，甚至200多M，这样的话survivor区会放不下，会直接移到老年代。可能导致每隔几分钟有那么200M对象移到老年代，10、20、30分钟导致发生full gc。对于秒杀系统影响不大，秒杀系统大多前30分钟就完了</p>
+<p>对于JDK8默认的垃圾回收器是-XX:+UseParallelGC(年轻代)和-XX:+UseParallelOldGC(老年代)，如果内存较大(超过4个G，只是经验值)，系统对停顿时间比较敏感，我们可以使用<strong>ParNew+CMS(</strong>-XX:+UseParNewGC -XX:+UseConcMarkSweepGC**)**</p>
+<p>对于老年代CMS的参数如何设置我们可以思考下，首先我们想下当前这个系统有哪些对象可能会长期存活躲过5次以上minor gc最终进入老年代。</p>
+<p>无非就是那些Spring容器里的Bean，线程池对象，一些初始化缓存数据对象等，这些加起来充其量也就几十MB。</p>
+<p>还有就是某次minor gc完了之后还有超过一两百M的对象存活，那么就会直接进入老年代，比如突然某一秒瞬间要处理五六百单，那么每秒生成的对象可能有一百多M，再加上整个系统可能压力剧增，一个订单要好几秒才能处理完，下一秒可能又有很多订单过来。</p>
+<p>我们可以估算下大概每隔五六分钟出现一次这样的情况，那么大概半小时到一小时之间就可能因为老年代满了触发一次Full GC，Full GC的触发条件还有我们之前说过的<strong>老年代空间分配担保机制</strong>，历次的minor gc挪动到老年代的对象大小肯定是非常小的，所以几乎不会在minor gc触发之前由于老年代空间分配担保失败而产生full gc，其实在半小时后发生full gc，这时候已经过了抢购的最高峰期，后续可能几小时才做一次FullGC。</p>
+<p>对于碎片整理，因为都是1小时或几小时才做一次FullGC，是可以每做完一次就开始碎片整理，或者两到三次之后再做一次也行。</p>
+<p>综上，只要年轻代参数设置合理，老年代CMS的参数设置基本都可以用默认值，如下所示：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">-Xms3072M -Xmx3072M -Xmn2048M -Xss1M  -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=256M  -XX:SurvivorRatio=8  -XX:MaxTenuringThreshold=5 -XX:PretenureSizeThreshold=1M -XX:+UseParNewGC -XX:+UseConcMarkSweepGC  -XX:CMSInitiatingOccupancyFraction=92 -XX:+UseCMSCompactAtFullCollection -XX:CMSFullGCsBeforeCompaction=3</span><br><span class="line"></span><br><span class="line">-Xms3072M -Xmx3072M -Xmn2048M -Xss1M  -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=256M  -XX:SurvivorRatio=8 【eden survivor比例】</span><br><span class="line"></span><br><span class="line">-XX:MaxTenuringThreshold=5 【分代年龄大于等于5 则进入老年代】</span><br><span class="line"></span><br><span class="line">-XX:PretenureSizeThreshold=1M 【大对象的值】</span><br><span class="line"></span><br><span class="line">-XX:+UseParNewGC 【新生代使用parnewgc】</span><br><span class="line"></span><br><span class="line">-XX:+UseConcMarkSweepGC 【老年代使用cms垃圾收集器】</span><br><span class="line"></span><br><span class="line">-XX:CMSInitiatingOccupancyFraction=92 -XX:+UseCMSCompactAtFullCollection 【开启内存整理】</span><br><span class="line"></span><br><span class="line">-XX:CMSFullGCsBeforeCompaction=3【3次full gc后内存整理】</span><br><span class="line"></span><br><span class="line">参数解释：-XX:CMSInitiatingOccupancyFraction=92</span><br><span class="line"></span><br><span class="line">老年代占比92%触发full gc 减少这个比例可以在一定程度下减少 concurrent mode failure出现的机率，也会导致老年代一部分空间浪费</span><br></pre></td></tr></table></figure>
+
+<h3 id="3、垃圾收集底层算法实现"><a href="#3、垃圾收集底层算法实现" class="headerlink" title="3、垃圾收集底层算法实现"></a>3、垃圾收集底层算法实现</h3><p><strong>三色标记</strong></p>
+<p>在并发标记的过程中，因为标记期间应用线程还在继续跑，对象间的引用可能发生变化，多标和漏标的情况就有可能发生。</p>
+<p>这里我们引入“<strong>三色标记</strong>”来给大家解释下，把Gc roots可达性分析遍历对象过程中遇到的对象， 按照“是否访问过”这个条件标记成以下三种颜色：</p>
+<ul>
+<li><p><strong>黑色</strong>： 表示对象已经被垃圾收集器访问过， 且这个对象的所有引用都已经扫描过。 黑色的对象代表已经扫描过， 它是安全存活的， 如果有其他对象引用指向了黑色对象， 无须重新扫描一遍。 黑色对象不可能直接（不经过灰色对象） 指向某个白色对象。</p>
+</li>
+<li><p><strong>灰色</strong>： 表示对象已经被垃圾收集器访问过， 但这个对象上至少存在一个引用还没有被扫描过。</p>
+</li>
+<li><p><strong>白色</strong>： 表示对象尚未被垃圾收集器访问过。 显然在可达性分析刚刚开始的阶段， 所有的对象都是白色的， 若在分析结束的阶段， 仍然是白色的对象， 即代表不可达。</p>
+</li>
+</ul>
+<p><strong>漏标：扫描A对象的时候 A和D还没有建立连接，扫描到B，然后将B、D对象断开连接 ，将A和D建立连接。结果：A对象已经被扫描过了，不会再次扫描，扫描B的时候又扫不到D，这样D对象就会发生漏标。</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args])</span></span></span><br><span class="line"><span class="function"></span>&#123;    </span><br><span class="line">    A a = <span class="keyword">new</span> A();    </span><br><span class="line">    D d = a.b.d;    </span><br><span class="line">    a.b.d = <span class="keyword">null</span>;    </span><br><span class="line">    a.d = d; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/04/19/00-00-05-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8ParNew-CMS%E4%B8%8E%E5%BA%95%E5%B1%82%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/clipboard-1650554974271.png" alt="img"></p>
+<p><strong>多标-浮动垃圾</strong></p>
+<p>在并发标记过程中，如果由于方法运行结束导致部分局部变量(gcroot)被销毁，这个gcroot引用的对象之前又被扫描过(被标记为非垃圾对象)，那么本轮GC不会回收这部分内存。这部分本应该回收但是没有回收到的内存，被称之为“<strong>浮动垃圾</strong>”。浮动垃圾并不会影响垃圾回收的正确性，只是需要等到下一轮垃圾回收中才被清除。</p>
+<p>另外，<strong>针对并发标记(还有并发清理)开始后产生的新对象，通常的做法是直接全部当成黑色</strong>，本轮不会进行清除。这部分对象期间可能也会变为垃圾，这也算是浮动垃圾的一部分。</p>
+<p><strong>漏标-读写屏障</strong></p>
+<p>漏标会导致被引用的对象被当成垃圾误删除，这是严重bug，必须解决，有两种解决方案： <strong>增量更新（Incremental Update） 和原始快照（Snapshot At The Beginning，SATB） 。</strong></p>
+<p><strong>增量更新</strong>就是当黑色对象插入新的指向白色对象的引用关系时， 就将这个新插入的引用记录下来， 等并发扫描结束之后， 再将这些记录过的引用关系中的黑色对象为根， 重新扫描一次。 这可以简化理解为， <strong>黑色对象一旦新插入了指向白色对象的引用之后， 它就变回灰色对象了</strong>。</p>
+<p><strong>原始快照</strong>就是当灰色对象要删除指向白色对象的引用关系时， 就将这个要删除的引用记录下来， 在并发扫描结束之后， 再将这些记录过的引用关系中的灰色对象为根， 重新扫描一次，这样就能扫描到白色的对象，将白色对象直接标记为黑色(<strong>目的就是让这种对象在本轮gc清理中能存活下来，待下一轮gc的时候重新扫描，这个对象也有可能是浮动垃圾</strong>)</p>
+<p>以上无论是对引用关系记录的插入还是删除， 虚拟机的记录操作都是通过<strong>写屏障</strong>实现的。 </p>
+<p><strong>写屏障</strong></p>
+<p>给某个对象的成员变量赋值时，其底层代码大概长这样：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** * <span class="doctag">@param</span> field 某对象的成员变量，如 a.b.d  * <span class="doctag">@param</span> new_value 新值，如 null */</span> <span class="function"><span class="keyword">void</span> <span class="title">oop_field_store</span><span class="params">(oop* field, oop new_value)</span> </span>&#123;     *field = new_value; <span class="comment">// 赋值操作 &#125; </span></span><br><span class="line"></span><br><span class="line">所谓的写屏障，其实就是指在赋值操作前后，加入一些处理（可以参考AOP的概念）：</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">oop_field_store</span><span class="params">(oop* field, oop new_value)</span> </span>&#123;      pre_write_barrier(field);          <span class="comment">// 写屏障-写前操作    *field = new_value;     post_write_barrier(field, value);  // 写屏障-写后操作 &#125;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>写屏障实现SATB</strong></li>
+</ul>
+<p>当对象B的成员变量的引用发生变化时，比如引用消失（a.b.d = null），我们可以利用写屏障，将B<strong>原来成员变量的引用</strong>对象D记录下来：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">pre_write_barrier</span><span class="params">(oop* field)</span> </span>&#123;    oop old_value = *field;    <span class="comment">// 获取旧值    remark_set.add(old_value); // 记录原来的引用对象 &#125;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>写屏障实现增量更新</strong></li>
+</ul>
+<p>当对象A的成员变量的引用发生变化时，比如新增引用（a.d = d），我们可以利用写屏障，将A<strong>新的成员变量引用</strong>对象D记录下来：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">post_write_barrier</span><span class="params">(oop* field, oop new_value)</span> </span>&#123;      remark_set.add(new_value);  <span class="comment">// 记录新引用的对象 &#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>读屏障</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">oop <span class="title">oop_field_load</span><span class="params">(oop* field)</span> </span>&#123;    pre_load_barrier(field); <span class="comment">// 读屏障-读取前操作    return *field; &#125;</span></span><br><span class="line"></span><br><span class="line">读屏障是直接针对第一步：D d = a.b.d，当读取成员变量时，一律记录下来：</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">pre_load_barrier</span><span class="params">(oop* field)</span> </span>&#123;      oop old_value = *field;    remark_set.add(old_value); <span class="comment">// 记录读取到的对象 &#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>现代追踪式（可达性分析）的垃圾回收器几乎都借鉴了三色标记的算法思想，尽管实现的方式不尽相同：比如白色/黑色集合一般都不会出现（但是有其他体现颜色的地方）、灰色集合可以通过栈/队列/缓存日志等方式进行实现、遍历方式可以是广度/深度遍历等等。</p>
+<p>对于读写屏障，以Java HotSpot VM为例，其并发标记时对漏标的处理方案如下：</p>
+<ul>
+<li><strong>CMS：写屏障 + 增量更新</strong></li>
+<li><strong>G1，Shenandoah：写屏障 + SATB</strong></li>
+<li><strong>ZGC：读屏障</strong></li>
+</ul>
+<p>工程实现中，读写屏障还有其他功能，比如写屏障可以用于记录跨代/区引用的变化，读屏障可以用于支持移动对象的并发执行等。功能之外，还有性能的考虑，所以对于选择哪种，每款垃圾回收器都有自己的想法。</p>
+<p><strong>为什么G1用SATB？CMS用增量更新？</strong></p>
+<p><strong>我的理解</strong>：SATB相对增量更新效率会高(当然SATB可能造成更多的浮动垃圾)，因为不需要在重新标记阶段再次深度扫描被删除引用对象，而CMS对增量引用的根对象会做深度扫描，G1因为很多对象都位于不同的region，CMS就一块老年代区域，重新深度扫描对象的话G1的代价会比CMS高，所以G1选择SATB不深度扫描对象，只是简单标记，等到下一轮GC再深度扫描。</p>
+<p><strong>记忆集与卡表</strong></p>
+<p>在新生代做GCRoots可达性扫描过程中可能会碰到跨代引用的对象，这种如果又去对老年代再去扫描效率太低了。</p>
+<p>为此，在新生代可以引入记录集（<strong>Remember Set</strong>）的数据结构（记录从非收集区到收集区的指针集合），避免把整个老年代加入GCRoots扫描范围。事实上并不只是新生代、 老年代之间才有跨代引用的问题， 所有涉及部分区域收集（Partial GC） 行为的垃圾收集器， 典型的如G1、 ZGC和Shenandoah收集器， 都会面临相同的问题。</p>
+<p>垃圾收集场景中，收集器只需通过记忆集判断出某一块非收集区域是否存在指向收集区域的指针即可，无需了解跨代引用指针的全部细节。</p>
+<p>hotspot使用一种叫做“卡表”(<strong>Cardtable</strong>)的方式实现记忆集，也是目前最常用的一种方式。关于卡表与记忆集的关系， 可以类比为Java语言中HashMap与Map的关系。</p>
+<p>卡表是使用一个字节数组实现：CARD_TABLE[ ]，每个元素对应着其标识的内存区域一块特定大小的内存块，称为“卡页”。</p>
+<p>hotSpot使用的卡页是2^9大小，即512字节</p>
+<p><img src="/2022/04/19/00-00-05-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8ParNew-CMS%E4%B8%8E%E5%BA%95%E5%B1%82%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/ac2f4c8a417f.png" alt="img"></p>
+<p>一个卡页中可包含多个对象，只要有一个对象的字段存在跨代指针，其对应的卡表的元素标识就变成1，表示该元素变脏，否则为0.</p>
+<p>GC时，只要筛选本收集区的卡表中变脏的元素加入GCRoots里。</p>
+<p><strong>卡表的维护</strong></p>
+<p>卡表变脏上面已经说了，但是需要知道如何让卡表变脏，即发生引用字段赋值时，如何更新卡表对应的标识为1。</p>
+<p>Hotspot使用<strong>写屏障</strong>维护卡表状态。</p>
+<h2 id="每日总结"><a href="#每日总结" class="headerlink" title="每日总结"></a>每日总结</h2><p>1、JVM垃圾收集算法</p>
+<p>标记-复制算法：将内存区域分为大小想等的两块区域，每次垃圾回收只针对其中一块区域，将存活对象移到到另外一块区域，然后在把使用过的区域清除掉，这样每次的回收就是对内存区域的一半进行回收。优点：回收效率高，速度快；缺点：浪费空间</p>
+<p>标记-清除算法：分为标记和清除两部分，标记存活的对象（也可以标记垃圾对象），统一回收所有未被标记的对象，也可以反过来。缺点：效率问题，如果需要比较的对象很多，效率不高；空间问题：标记清除后会产生大量不连续的内存碎片</p>
+<p>标记-整理算法：标记过程和标记-清除算法一样，只是后续回收过程是把所有标记为存活的对象统一移动到一端，然后直接清理掉边界以外的内存。</p>
+<p>分代收集理论：没有具体的算法，只是一个理论，根据老年代和年轻代的特点，采用不同的策略做垃圾回收。比如针对年轻代每次有99%的对象会死亡，采用复制算法只需要付出少量对象的复制成本就可以完成每次垃圾收集。而老年代的对象存活几率是比较高的，而且没有额外的空间对它进行分配担保，所以我们必须选择“标记-清除”或“标记-整理”算法进行垃圾收集。注意，“标记-清除”或“标记-整理”算法会比复制算法慢10倍以上。</p>
+<p>2、垃圾收集器</p>
+<p>垃圾收集器是垃圾收集算法的具体实现。</p>
+<p>serial垃圾收集器：串行单线程收集器，适用于管理的内存比较小，比如几十M左右。年轻代采用复制算法，老年代采用标记整理算法。优点是简单。Serial Old是其老年代的垃圾收集器，同样是一个单线程收集器。</p>
+<p>parallel Scavenge收集器：parallel是serial垃圾收集器的多线程版本，其关注的是吞吐量【即用户程序执行时间和总时间的比值】，新生代采用复制算法，老年代采用标记-整理算法。jdk1.8默认的垃圾收集器</p>
+<p>parnew收集器：跟parallel收集器很像，区别主要是它可以配合cms垃圾收集器使用，新生代采用标记复制，老年代采用标记-整理。</p>
+<p>CMS垃圾收集器：真正意义上的并行收集器。分为几个阶段1)初始标记：标记与gc root直接相连的对象，此阶段会产生stw。2）并发标记：用户线程和垃圾收集线程同时运行，从GC Roots的直接关联对象开始遍历整个对象图的过程，这个过程耗时较长但是不需要停顿用户线程 ，可以与垃圾收集线程一起并发运行。因为用户程序继续运行，可能会有导致已经标记过的对象状态发生改变。【并发的原因，提升用户体验，减少停顿时间】。3)重新标记：重新标记阶段就是为了修正并发标记期间因为用户程序继续运行而导致标记产生变动的那一部分对象的标记记录，这个阶段的停顿时间一般会比初始标记阶段的时间稍长，远远比并发标记阶段时间短。主要用到三色标记里的增量更新算法(见下面详解)做重新标记。 4）并发清理： 开启用户线程，同时GC线程开始对未标记的区域做清扫。这个阶段如果有新增对象会被标记为黑色不做任何处理(见下面三色标记算法详解)。5）并发重置：重置本次GC过程中的标记数据。</p>
+<p>优点：以最小用户停顿时间为目标，对用户体验友好；缺点：1）gc线程和用户线程同时运行，争抢服务器资源，对资源比较敏感2）无法处理浮动垃圾，即并发标记和并发清理阶段又产生的垃圾无法处理，只能下一次垃圾回收处理。3)老年代使用标记-清理算法会产生大量的垃圾碎片。4）可能发生concurrent mode failure的情况，在进行并发标记和并发清理时，由于用户程序也在运行导致可能在次触发gc，从而导致使用serial old串行收集器进行内存回收</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/04/19/00-00-05-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8ParNew-CMS%E4%B8%8E%E5%BA%95%E5%B1%82%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Jvm/" rel="tag">Jvm</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/" rel="tag">性能调优</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/04/20/00-00-04-Jvm%E6%80%BB%E7%BB%93/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            Jvm总结
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/04/16/00-00-03-Jvm%E5%AF%B9%E8%B1%A1%E5%88%9B%E5%BB%BA%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">Jvm对象创建与内存分配机制深度剖析</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2022
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

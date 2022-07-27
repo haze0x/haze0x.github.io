@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>并发锁机制之深入理解synchronized |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-01-00-04-并发锁机制之深入理解synchronized"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  并发锁机制之深入理解synchronized
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/05/01/01-00-04-%E5%B9%B6%E5%8F%91%E9%94%81%E6%9C%BA%E5%88%B6%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3synchronized/" class="article-date">
+  <time datetime="2022-05-01T14:37:45.000Z" itemprop="datePublished">2022-05-01</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/">并发编程</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">5.1k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">19 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p id="hitokoto">正在加载一言...</p>
+
+<h2 id="并发锁机制之深入理解synchronized"><a href="#并发锁机制之深入理解synchronized" class="headerlink" title="并发锁机制之深入理解synchronized"></a>并发锁机制之深入理解synchronized</h2><h3 id="1、Java共享内存模型带来的线程安全问题"><a href="#1、Java共享内存模型带来的线程安全问题" class="headerlink" title="1、Java共享内存模型带来的线程安全问题"></a>1、Java共享内存模型带来的线程安全问题</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SyncDemo</span> </span>&#123;</span><br><span class="line">   </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> counter = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">increment</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        counter++;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">decrement</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        counter--;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        Thread t1 = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5000</span>; i++) &#123;</span><br><span class="line">                increment();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, <span class="string">&quot;t1&quot;</span>);</span><br><span class="line">        Thread t2 = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5000</span>; i++) &#123;</span><br><span class="line">                decrement();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, <span class="string">&quot;t2&quot;</span>);</span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">        t1.join();</span><br><span class="line">        t2.join();</span><br><span class="line"></span><br><span class="line">        <span class="comment">//思考： counter=？</span></span><br><span class="line">        log.info(<span class="string">&quot;&#123;&#125;&quot;</span>, counter);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>思考： 两个线程对初始值为 0 的静态变量一个做自增，一个做自减，各做 5000 次，结果是 0 吗？</p>
+<p>不是，变量++和–不是原子操作，现在执行会存在指令切换</p>
+<h4 id="问题分析："><a href="#问题分析：" class="headerlink" title="问题分析："></a>问题分析：</h4><p>i++和i–对应的字节码指令如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">i++:</span><br><span class="line">getstatic i <span class="comment">// 获取静态变量i的值 </span></span><br><span class="line">iconst_1 <span class="comment">// 将int常量1压入操作数栈</span></span><br><span class="line">iadd <span class="comment">// 自增 </span></span><br><span class="line"></span><br><span class="line">i--:</span><br><span class="line">getstatic i <span class="comment">// 获取静态变量i的值 </span></span><br><span class="line">iconst_1 <span class="comment">// 将int常量1压入操作数栈</span></span><br><span class="line">isub <span class="comment">// 自减 </span></span><br></pre></td></tr></table></figure>
+
+<p>执行情况如下图：</p>
+<p><img src="/2022/05/01/01-00-04-%E5%B9%B6%E5%8F%91%E9%94%81%E6%9C%BA%E5%88%B6%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3synchronized/image-20220501230026131.png" alt="image-20220501230026131"></p>
+<p>可能出现：距离，比如i初始等于5，线程2执行i–，值变为4，但是还没有写回主内存，线程1执行了i++,值变为6，并且写入了主内存，主内存值为6；然后线程2在将值写回主内存，这个时候就覆盖了线程1的值，此时主内存的值为4。</p>
+<h4 id="临界区（-Critical-Section）"><a href="#临界区（-Critical-Section）" class="headerlink" title="临界区（ Critical Section）"></a>临界区（ Critical Section）</h4><ul>
+<li><p>一个程序运行多个线程本身是没有问题的</p>
+</li>
+<li><p>问题出在多个线程访问共享资源 </p>
+</li>
+<li><ul>
+<li><ul>
+<li>多个线程读共享资源其实也没有问题 </li>
+<li>在多个线程对共享资源读写操作时发生指令交错，就会出现问题 </li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>一段代码块内如果存在对共享资源的多线程读写操作，称这段代码块为临界区，其共享资源为临界资源</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//临界资源</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> counter = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">increment</span><span class="params">()</span> </span>&#123; <span class="comment">//临界区</span></span><br><span class="line">    counter++;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">decrement</span><span class="params">()</span> </span>&#123;<span class="comment">//临界区</span></span><br><span class="line">    counter--;</span><br></pre></td></tr></table></figure>
+
+<h4 id="竞态条件（-Race-Condition-）"><a href="#竞态条件（-Race-Condition-）" class="headerlink" title="竞态条件（ Race Condition ）"></a>竞态条件（ Race Condition ）</h4><p>多个线程在临界区内执行，由于代码的执行序列不同而导致结果无法预测，称之为发生了竞态条件</p>
+<p>为了避免临界区的竞态条件发生，有多种手段可以达到目的：</p>
+<ul>
+<li>阻塞式的解决方案：synchronized，Lock </li>
+<li>非阻塞式的解决方案：原子变量</li>
+</ul>
+<p><strong>注意：</strong></p>
+<p>虽然 java 中互斥和同步都可以采用 synchronized 关键字来完成，但它们还是有区别的： </p>
+<ul>
+<li><p>互斥是保证临界区的竞态条件发生，同一时刻只能有一个线程执行临界区代码 </p>
+</li>
+<li><p>同步是由于线程执行的先后、顺序不同、需要一个线程等待其它线程运行到某个点</p>
+</li>
+</ul>
+<h3 id="2、synchronized的使用"><a href="#2、synchronized的使用" class="headerlink" title="2、synchronized的使用"></a>2、synchronized的使用</h3><table>
+<thead>
+<tr>
+<th>分类</th>
+<th>具体方法</th>
+<th>被锁对象</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>方法</td>
+<td>实例方法</td>
+<td>类的实例对象</td>
+</tr>
+<tr>
+<td></td>
+<td>静态方法</td>
+<td>类对象</td>
+</tr>
+<tr>
+<td>代码块</td>
+<td>实例对象</td>
+<td>类的实例对象</td>
+</tr>
+<tr>
+<td></td>
+<td>class对象</td>
+<td>类对象</td>
+</tr>
+<tr>
+<td></td>
+<td>任意实例对象Object</td>
+<td>实例对象Object</td>
+</tr>
+</tbody></table>
+<p><img src="/2022/05/01/01-00-04-%E5%B9%B6%E5%8F%91%E9%94%81%E6%9C%BA%E5%88%B6%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3synchronized/image-20220501231055583.png"></p>
+<p>synchronized 实际是用对象锁保证了临界区内代码的原子性</p>
+<h3 id="3、synchronized底层原理"><a href="#3、synchronized底层原理" class="headerlink" title="3、synchronized底层原理"></a>3、synchronized底层原理</h3><p>​        synchronized是JVM内置锁，基于<strong>Monitor</strong>机制实现，依赖底层操作系统的互斥原语Mutex（互斥量），它是一个重量级锁，性能较低。当然，JVM内置锁在1.5之后版本做了重大的优化，如锁粗化（Lock Coarsening）、锁消除（Lock Elimination）、轻量级锁（Lightweight Locking）、偏向锁（Biased Locking）、自适应自旋（Adaptive Spinning）等技术来减少锁操作的开销，内置锁的并发性能已经基本与Lock持平。</p>
+<p>​        Java虚拟机通过一个同步结构支持方法和方法中的指令序列的同步：monitor。</p>
+<p>同步方法是通过方法中的access_flags中设置ACC_SYNCHRONIZED标志来实现；同步代码块是通过monitorenter和monitorexit来实现。两个指令的执行是JVM通过调用操作系统的互斥原语mutex来实现，被阻塞的线程会被挂起、等待重新调度，会导致“用户态和内核态”两个态之间来回切换，对性能有较大影响。</p>
+<h4 id="Monitor（管程-监视器）"><a href="#Monitor（管程-监视器）" class="headerlink" title="Monitor（管程/监视器）"></a>Monitor（管程/监视器）</h4><p>Monitor，直译为“监视器”，而操作系统领域一般翻译为“管程”。管程是指管理共享变量以及对共享变量操作的过程，让它们支持并发。在Java 1.5之前，Java语言提供的唯一并发语言就是管程，Java 1.5之后提供的SDK并发包也是以管程为基础的。除了Java之外，C/C++、C#等高级语言也都是支持管程的。synchronized关键字和wait()、notify()、notifyAll()这三个方法是Java中实现管程技术的组成部分。</p>
+<h4 id="MESA模型"><a href="#MESA模型" class="headerlink" title="MESA模型"></a>MESA模型</h4><p>在管程的发展史上，先后出现过三种不同的管程模型，分别是Hasen模型、Hoare模型和MESA模型。现在正在广泛使用的是MESA模型。下面我们便介绍MESA模型：</p>
+<p><img src="/2022/05/01/01-00-04-%E5%B9%B6%E5%8F%91%E9%94%81%E6%9C%BA%E5%88%B6%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3synchronized/image-20220501231313735.png"></p>
+<p>管程中引入了条件变量的概念，而且每个条件变量都对应有一个等待队列。条件变量和等待队列的作用是解决线程之间的同步问题。</p>
+<p><strong>wait()的正确使用姿势</strong></p>
+<p>对于MESA管程来说，有一个编程范式：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span>(条件不满足) &#123;</span><br><span class="line">  wait();</span><br></pre></td></tr></table></figure>
+
+<p>唤醒的时间和获取到锁继续执行的时间是不一致的，被唤醒的线程再次执行时可能条件又不满足了，所以循环检验条件。MESA模型的wait()方法还有一个超时参数，为了避免线程进入等待队列永久阻塞。</p>
+<p><strong>notify()和notifyAll()分别何时使用</strong></p>
+<p>满足以下三个条件时，可以使用notify()，其余情况尽量使用notifyAll()：</p>
+<ol>
+<li>所有等待线程拥有相同的等待条件；</li>
+<li>所有等待线程被唤醒后，执行相同的操作；</li>
+<li>只需要唤醒一个线程。</li>
+</ol>
+<h4 id="Java语言的内置管程synchronized"><a href="#Java语言的内置管程synchronized" class="headerlink" title="Java语言的内置管程synchronized"></a>Java语言的内置管程synchronized</h4><p>​        Java 参考了 MESA 模型，语言内置的管程（synchronized）对 MESA 模型进行了精简。MESA 模型中，条件变量可以有多个，Java 语言内置的管程里只有一个条件变量。模型如下图所示。</p>
+<p><img src="/2022/05/01/01-00-04-%E5%B9%B6%E5%8F%91%E9%94%81%E6%9C%BA%E5%88%B6%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3synchronized/image-20220501231459351.png" alt="image-20220501231459351"></p>
+<p><strong>Monitor机制在Java中的实现</strong></p>
+<p>​        java.lang.Object 类定义了 wait()，notify()，notifyAll() 方法，这些方法的具体实现，依赖于 ObjectMonitor 实现，这是 JVM 内部基于 C++ 实现的一套机制。</p>
+<p>ObjectMonitor其主要数据结构如下（hotspot源码ObjectMonitor.hpp）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">ObjectMonitor() &#123;</span><br><span class="line">    _header       = NULL; <span class="comment">//对象头  markOop</span></span><br><span class="line">    _count        = <span class="number">0</span>;  </span><br><span class="line">    _waiters      = <span class="number">0</span>,   </span><br><span class="line">    _recursions   = <span class="number">0</span>;   <span class="comment">// 锁的重入次数 </span></span><br><span class="line">    _object       = NULL;  <span class="comment">//存储锁对象</span></span><br><span class="line">    _owner        = NULL;  <span class="comment">// 标识拥有该monitor的线程（当前获取锁的线程） </span></span><br><span class="line">    _WaitSet      = NULL;  <span class="comment">// 等待线程（调用wait）组成的双向循环链表，_WaitSet是第一个节点</span></span><br><span class="line">    _WaitSetLock  = <span class="number">0</span> ;    </span><br><span class="line">    _Responsible  = NULL ;</span><br><span class="line">    _succ         = NULL ;</span><br><span class="line">    _cxq          = NULL ; <span class="comment">// 入口等待队列 多线程竞争锁会先存到这个单向链表中 （FILO栈结构  先进后出 说明是非公平的）</span></span><br><span class="line">    FreeNext      = NULL ;</span><br><span class="line">    _EntryList    = NULL ; <span class="comment">//存放在进入或重新进入时被阻塞(blocked)的线程 (也是存竞争锁失败的线程) 存放之前wait 后被唤醒的线程，优先唤醒	</span></span><br><span class="line">    _SpinFreq     = <span class="number">0</span> ;</span><br><span class="line">    _SpinClock    = <span class="number">0</span> ;</span><br><span class="line">    OwnerIsThread = <span class="number">0</span> ;</span><br><span class="line">    _previous_owner_tid = <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/05/01/01-00-04-%E5%B9%B6%E5%8F%91%E9%94%81%E6%9C%BA%E5%88%B6%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3synchronized/image-20220501231531966.png"></p>
+<p>在获取锁时，是将当前线程插入到cxq的头部，而释放锁时，默认策略（QMode=0）是：如果EntryList为空，则将cxq中的元素按原有顺序插入到EntryList，并唤醒第一个线程，也就是当EntryList为空时，是后来的线程先获取锁。_EntryList不为空，直接从_EntryList中唤醒线程。</p>
+<p>代码示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SyncQModeDemo</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"></span><br><span class="line">        SyncQModeDemo demo = <span class="keyword">new</span> SyncQModeDemo();</span><br><span class="line"></span><br><span class="line">        demo.startThreadA();</span><br><span class="line">        <span class="comment">//控制线程执行时间</span></span><br><span class="line">        Thread.sleep(<span class="number">100</span>);</span><br><span class="line">        demo.startThreadB();</span><br><span class="line">        Thread.sleep(<span class="number">100</span>);</span><br><span class="line">        demo.startThreadC();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> Object lock = <span class="keyword">new</span> Object();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startThreadA</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (lock) &#123;</span><br><span class="line">                log.debug(<span class="string">&quot;A get lock&quot;</span>);</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line"><span class="comment">//                    Thread.sleep(300);</span></span><br><span class="line">                    lock.wait(<span class="number">300</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                log.debug(<span class="string">&quot;A release lock&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, <span class="string">&quot;thread-A&quot;</span>).start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startThreadB</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (lock) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    log.debug(<span class="string">&quot;B get lock&quot;</span>);</span><br><span class="line">                    Thread.sleep(<span class="number">500</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                log.debug(<span class="string">&quot;B release lock&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, <span class="string">&quot;thread-B&quot;</span>).start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startThreadC</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (lock) &#123;</span><br><span class="line"></span><br><span class="line">                log.debug(<span class="string">&quot;C get lock&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, <span class="string">&quot;thread-C&quot;</span>).start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">结果<span class="number">1</span>、【执行<span class="number">24</span>行代码 lock.wait(<span class="number">300</span>); 时】：</span><br><span class="line"><span class="number">14</span>:<span class="number">29</span>:<span class="number">21.065</span> [thread-A] DEBUG com.tuling.jucdemo.sync.SyncQModeDemo - A get lock</span><br><span class="line"><span class="number">14</span>:<span class="number">29</span>:<span class="number">21.164</span> [thread-B] DEBUG com.tuling.jucdemo.sync.SyncQModeDemo - B get lock</span><br><span class="line"><span class="number">14</span>:<span class="number">29</span>:<span class="number">21.664</span> [thread-B] DEBUG com.tuling.jucdemo.sync.SyncQModeDemo - B release lock</span><br><span class="line"><span class="number">14</span>:<span class="number">29</span>:<span class="number">21.664</span> [thread-A] DEBUG com.tuling.jucdemo.sync.SyncQModeDemo - A release lock</span><br><span class="line"><span class="number">14</span>:<span class="number">29</span>:<span class="number">21.664</span> [thread-C] DEBUG com.tuling.jucdemo.sync.SyncQModeDemo - C get lock</span><br><span class="line">分析：</span><br><span class="line">首先线程A获得锁，然后线程A调用wait()方法，进入_waitSet()</span><br><span class="line">然后线程B竞争锁，获取锁，释放锁</span><br><span class="line">线程A唤醒时会被放入EntryList，线程C获取锁会被放入cxq队列</span><br><span class="line">根据上述默认策略，EntryList不为空，放入EntryList的会先被唤醒，因此A先唤醒，C后唤醒</span><br><span class="line"></span><br><span class="line">为什么是这个结果？</span><br><span class="line">自己的思考：因为执行wait()方法而释放锁进入waitSet中的线程，因为之前以及获得过锁，所以唤醒时优先唤醒这种线程，从设计的角度看，这种更合理</span><br><span class="line"></span><br><span class="line">结果<span class="number">2</span>、【执行<span class="number">23</span>行代码 Thread.sleep(<span class="number">300</span>); 时】：</span><br><span class="line"><span class="number">14</span>:<span class="number">41</span>:<span class="number">27.810</span> [thread-A] DEBUG com.tuling.jucdemo.sync.SyncQModeDemo - A get lock</span><br><span class="line"><span class="number">14</span>:<span class="number">41</span>:<span class="number">28.113</span> [thread-A] DEBUG com.tuling.jucdemo.sync.SyncQModeDemo - A release lock</span><br><span class="line"><span class="number">14</span>:<span class="number">41</span>:<span class="number">28.113</span> [thread-C] DEBUG com.tuling.jucdemo.sync.SyncQModeDemo - C get lock</span><br><span class="line"><span class="number">14</span>:<span class="number">41</span>:<span class="number">28.113</span> [thread-B] DEBUG com.tuling.jucdemo.sync.SyncQModeDemo - B get lock</span><br><span class="line"><span class="number">14</span>:<span class="number">41</span>:<span class="number">28.613</span> [thread-B] DEBUG com.tuling.jucdemo.sync.SyncQModeDemo - B release lock</span><br><span class="line">分析：</span><br><span class="line">当三个线程都竞争锁时，线程A先获取锁，线程B、线程C会依次进入cxq队列，EntryList为空，所以会复制cxq数据进入EntryList，根据后进先出，C会先被唤醒</span><br></pre></td></tr></table></figure>
+
+<p><strong>思考：</strong>synchronized加锁加在对象上，锁对象是如何记录锁状态的？锁状态会被记录到锁的对象头markword中</p>
+<p>new Object()在内存中占几个字节？占16个字节，分析如下：8个markword+4个Klass+4个对齐填充位</p>
+<h3 id="4、对象的内存布局"><a href="#4、对象的内存布局" class="headerlink" title="4、对象的内存布局"></a>4、对象的内存布局</h3><p>Hotspot虚拟机中，对象在内存中存储的布局可以分为三块区域：对象头（Header）、实例数据（Instance Data）和对齐填充（Padding）。</p>
+<ul>
+<li><p>对象头：比如 hash码，对象所属的年代，对象锁，锁状态标志，偏向锁（线程）ID，偏向时间，数组长度（数组对象才有）等。</p>
+</li>
+<li><p>实例数据：存放类的属性数据信息，包括父类的属性信息；</p>
+</li>
+<li><p>对齐填充：由于虚拟机要求 <strong>对象起始地址必须是8字节的整数倍</strong>。填充数据不是必须存在的，仅仅是为了字节对齐。</p>
+<p> <img src="/2022/05/01/01-00-04-%E5%B9%B6%E5%8F%91%E9%94%81%E6%9C%BA%E5%88%B6%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3synchronized/image-20220501231816899.png"></p>
+</li>
+</ul>
+<p>Mark word:8个字节</p>
+<p>元数据指针:64位压缩成32为，占4个字节，32位占4个字节</p>
+<p>数组长度：如果是数组类型，占4个字节</p>
+<h4 id="对象头详解"><a href="#对象头详解" class="headerlink" title="对象头详解"></a>对象头详解</h4><p>HotSpot虚拟机的对象头包括：</p>
+<ul>
+<li>Mark Word </li>
+</ul>
+<p>用于存储对象自身的运行时数据，如哈希码（HashCode）、GC分代年龄、锁状态标志、线程持有的锁、偏向线程ID、偏向时间戳【跟批量重偏向，批量撤销有关】等，这部分数据的长度在32位和64位的虚拟机中分别为32bit和64bit，官方称它为“Mark Word”。</p>
+<ul>
+<li> Klass Pointer</li>
+</ul>
+<p>对象指向的类元数据</p>
+<p>对象头的另外一部分是klass类型指针，即对象指向它的类元数据的指针，虚拟机通过这个指针来确定这个对象是哪个类的实例。 32位4字节，64位开启指针压缩或最大堆内存&lt;32g时4字节，否则8字节。jdk1.8默认开启指针压缩后为4字节，当在JVM参数中关闭指针压缩（-XX:-UseCompressedOops）后，长度为8字节。</p>
+<ul>
+<li>数组长度（只有数组对象有）</li>
+</ul>
+<p>如果对象是一个数组, 那在对象头中还必须有一块数据用于记录数组长度。 4字节</p>
+<p><img src="/2022/05/01/01-00-04-%E5%B9%B6%E5%8F%91%E9%94%81%E6%9C%BA%E5%88%B6%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3synchronized/image-20220501231825472.png"></p>
+<h4 id="Mark-Word是如何记录锁状态的"><a href="#Mark-Word是如何记录锁状态的" class="headerlink" title="Mark Word是如何记录锁状态的"></a>Mark Word是如何记录锁状态的</h4><p>Hotspot通过markOop类型实现Mark Word，具体实现位于markOop.hpp文件中。由于对象需要存储的运行时数据很多，考虑到虚拟机的内存使用，markOop被设计成一个非固定的数据结构，以便在极小的空间存储尽量多的数据，根据对象的状态复用自己的存储空间。</p>
+<p>简单点理解就是：MarkWord 结构搞得这么复杂，是因为需要节省内存，让同一个内存区域在不同阶段有不同的用处。</p>
+<p><strong>Mark Word的结构</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//  32 bits:</span></span><br><span class="line"><span class="comment">//  --------</span></span><br><span class="line"><span class="comment">//             hash:25 ------------&gt;| age:4    biased_lock:1 lock:2 (normal object)</span></span><br><span class="line"><span class="comment">//             JavaThread*:23 epoch:2 age:4    biased_lock:1 lock:2 (biased object)</span></span><br><span class="line"><span class="comment">//             size:32 ------------------------------------------&gt;| (CMS free block)</span></span><br><span class="line"><span class="comment">//             PromotedObject*:29 ----------&gt;| promo_bits:3 -----&gt;| (CMS promoted object)</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  64 bits:</span></span><br><span class="line"><span class="comment">//  --------</span></span><br><span class="line"><span class="comment">//  unused:25 hash:31 --&gt;| unused:1   age:4    biased_lock:1 lock:2 (normal object)</span></span><br><span class="line"><span class="comment">//  JavaThread*:54 epoch:2 unused:1   age:4    biased_lock:1 lock:2 (biased object)</span></span><br><span class="line"><span class="comment">//  PromotedObject*:61 ---------------------&gt;| promo_bits:3 -----&gt;| (CMS promoted object)</span></span><br><span class="line"><span class="comment">//  size:64 -----------------------------------------------------&gt;| (CMS free block)</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  unused:25 hash:31 --&gt;| cms_free:1 age:4    biased_lock:1 lock:2 (COOPs &amp;&amp; normal object)</span></span><br><span class="line"><span class="comment">//  JavaThread*:54 epoch:2 cms_free:1 age:4    biased_lock:1 lock:2 (COOPs &amp;&amp; biased object)</span></span><br><span class="line"><span class="comment">//  narrowOop:32 unused:24 cms_free:1 unused:4 promo_bits:3 -----&gt;| (COOPs &amp;&amp; CMS promoted object)</span></span><br><span class="line"><span class="comment">//  unused:21 size:35 --&gt;| cms_free:1 unused:7 ------------------&gt;| (COOPs &amp;&amp; CMS free block)</span></span><br><span class="line"></span><br><span class="line">。。。。。。</span><br><span class="line"><span class="comment">//    [JavaThread* | epoch | age | 1 | 01]       lock is biased toward given thread</span></span><br><span class="line"><span class="comment">//    [0           | epoch | age | 1 | 01]       lock is anonymously biased</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  - the two lock bits are used to describe three states: locked/unlocked and monitor.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//    [ptr             | 00]  locked             ptr points to real header on stack</span></span><br><span class="line"><span class="comment">//    [header      | 0 | 01]  unlocked           regular object header</span></span><br><span class="line"><span class="comment">//    [ptr             | 10]  monitor            inflated lock (header is wapped out)</span></span><br><span class="line"><span class="comment">//    [ptr             | 11]  marked             used by markSweep to mark an object</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>hash： 保存对象的哈希码。运行期间调用System.identityHashCode()来计算，延迟计算，并把结果赋值到这里。</li>
+<li>age： 保存对象的分代年龄。表示对象被GC的次数，当该次数到达阈值的时候，对象就会转移到老年代。</li>
+<li>biased_lock： 偏向锁标识位。由于无锁和偏向锁的锁标识都是 01，没办法区分，这里引入一位的偏向锁标识位。</li>
+<li>lock： 锁状态标识位。区分锁状态，比如11时表示对象待GC回收状态, 只有最后2位锁标识(11)有效。</li>
+<li>JavaThread*： 保存持有偏向锁的线程ID。偏向模式的时候，当某个线程持有对象的时候，对象这里就会被置为该线程的ID。 在后面的操作中，就无需再进行尝试获取锁的动作。这个线程ID并不是JVM分配的线程ID号，和Java Thread中的ID是两个概念。</li>
+<li>epoch： 保存偏向时间戳。偏向锁在CAS锁操作过程中，偏向性标识，表示对象更偏向哪个锁。</li>
+</ul>
+<p><strong>32位JVM下的对象结构描述</strong></p>
+<p>​    <img src="/2022/05/01/01-00-04-%E5%B9%B6%E5%8F%91%E9%94%81%E6%9C%BA%E5%88%B6%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3synchronized/image-20220501232241221.png" alt="image-20220501232241221"></p>
+<p><strong>64位JVM下的对象结构描述</strong></p>
+<p>​    <img src="/2022/05/01/01-00-04-%E5%B9%B6%E5%8F%91%E9%94%81%E6%9C%BA%E5%88%B6%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3synchronized/image-20220501232246816.png" alt="image-20220501232246816"></p>
+<ul>
+<li>ptr_to_lock_record：轻量级锁状态下，指向栈中锁记录的指针。当锁获取是无竞争时，JVM使用原子操作而不是OS互斥，这种技术称为轻量级锁定。在轻量级锁定的情况下，JVM通过CAS操作在对象的Mark Word中设置指向锁记录的指针。</li>
+<li>ptr_to_heavyweight_monitor：重量级锁状态下，指向对象监视器Monitor的指针。如果两个不同的线程同时在同一个对象上竞争，则必须将轻量级锁定升级到Monitor以管理等待的线程。在重量级锁定的情况下，JVM在对象的ptr_to_heavyweight_monitor设置指向Monitor的指针</li>
+</ul>
+<h4 id="Mark-Word中锁标记枚举"><a href="#Mark-Word中锁标记枚举" class="headerlink" title="Mark Word中锁标记枚举"></a>Mark Word中锁标记枚举</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">enum</span> </span>&#123; locked_value             = <span class="number">0</span>,    <span class="comment">//00 轻量级锁 </span></span><br><span class="line">         unlocked_value           = <span class="number">1</span>,   <span class="comment">//001 无锁</span></span><br><span class="line">         monitor_value            = <span class="number">2</span>,   <span class="comment">//10 监视器锁，也叫膨胀锁，也叫重量级锁</span></span><br><span class="line">         marked_value             = <span class="number">3</span>,   <span class="comment">//11 GC标记</span></span><br><span class="line">         biased_lock_pattern      = <span class="number">5</span>    <span class="comment">//101 偏向锁</span></span><br><span class="line">         &#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/05/01/01-00-04-%E5%B9%B6%E5%8F%91%E9%94%81%E6%9C%BA%E5%88%B6%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3synchronized/image-20220501232732433.png"></p>
+<h3 id="5、synchronized底层的锁"><a href="#5、synchronized底层的锁" class="headerlink" title="5、synchronized底层的锁"></a>5、synchronized底层的锁</h3><h4 id="偏向锁"><a href="#偏向锁" class="headerlink" title="偏向锁"></a>偏向锁</h4><p>偏向锁加锁解锁不会做任何事情，解锁之后还是偏向锁</p>
+<p>偏向锁是一种针对加锁操作的优化手段，经过研究发现，在大多数情况下，锁不仅不存在多线程竞争，而且总是由同一线程多次获得，因此为了消除数据在无竞争情况下锁重入（CAS操作）的开销而引入偏向锁。对于没有锁竞争的场合，偏向锁有很好的优化效果。</p>
+<p>详细介绍：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">	偏向锁是Java <span class="number">6</span>之后加入的新锁，它是一种针对加锁操作的优化手段，经过研究发现，在大多数情况下，锁不仅不存在多线程竞争，而且总是由同一线程多次获得，因此为了减少同一线程获取锁(会涉及到一些CAS操作,耗时)的代价而引入偏向锁。偏向锁的核心思想是，如果一个线程获得了锁，那么锁就进入偏向模式，此时Mark Word 的结构也变为偏向锁结构，当这个线程再次请求锁时，无需再做任何同步操作，即获取锁的过程，这样就省去了大量有关锁申请的操作，从而也就提供程序的性能。所以，对于没有锁竞争的场合，偏向锁有很好的优化效果，毕竟极有可能连续多次是同一个线程申请相同的锁。但是对于锁竞争比较激烈的场合，偏向锁就失效了，因为这样场合极有可能每次申请锁的线程都是不相同的，因此这种场合下不应该使用偏向锁，否则会得不偿失，需要注意的是，偏向锁失败后，并不会立即膨胀为重量级锁，而是先升级为轻量级锁。下面我们接着了解轻量级锁。</span><br><span class="line">默认开启偏向锁</span><br><span class="line">开启偏向锁：-XX:+UseBiasedLocking -XX:BiasedLockingStartupDelay=<span class="number">0</span></span><br><span class="line">关闭偏向锁：-XX:-UseBiasedLocking</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/***StringBuffer内部同步***/</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">int</span> <span class="title">length</span><span class="params">()</span> </span>&#123; </span><br><span class="line">   <span class="keyword">return</span> count; </span><br><span class="line">&#125; </span><br><span class="line"><span class="comment">//System.out.println 无意识的使用锁 </span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">println</span><span class="params">(String x)</span> </span>&#123; </span><br><span class="line">  <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">     print(x); newLine(); </span><br><span class="line">  &#125; </span><br></pre></td></tr></table></figure>
+
+<p>当JVM启用了偏向锁模式（jdk6默认开启），新创建对象的Mark Word中的Thread Id为0，说明此时处于可偏向但未偏向任何线程，也叫做匿名偏向状态(anonymously biased)。</p>
+<p><strong>偏向锁延迟偏向</strong></p>
+<p>​        偏向锁模式存在偏向锁延迟机制：HotSpot 虚拟机在启动后有个 4s 的延迟才会对之后每个新建的对象开启偏向锁模式。JVM启动时会进行一系列的复杂活动，比如装载配置，系统类初始化等等。在这个过程中会使用大量synchronized关键字对对象加锁，且这些锁大多数都不是偏向锁。为了减少初始化时间，JVM默认延时加载偏向锁。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//关闭延迟开启偏向锁</span></span><br><span class="line">-XX:BiasedLockingStartupDelay=<span class="number">0</span></span><br><span class="line"><span class="comment">//禁止偏向锁</span></span><br><span class="line">-XX:-UseBiasedLocking </span><br><span class="line"><span class="comment">//启用偏向锁</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>偏向锁撤销之调用对象HashCode</strong></p>
+<p>偏向锁撤销是会在安全点撤销（同GC中的安全点）</p>
+<p>偏向锁撤销可能会变成：1、无锁状态2、轻量级锁3、重量级锁【具体看锁升级图】</p>
+<p>调用锁对象的obj.hashCode()或System.identityHashCode(obj)方法会导致该对象的偏向锁被撤销。因为对于一个对象，其HashCode只会生成一次并保存，偏向锁是没有地方保存hashcode的。</p>
+<ul>
+<li>轻量级锁会在锁记录中记录 hashCode </li>
+<li>重量级锁会在 Monitor 中记录 hashCode</li>
+</ul>
+<p>当对象处于可偏向（也就是线程ID为0）和已偏向的状态下，调用HashCode计算将会使对象再也无法偏向：</p>
+<ul>
+<li>当对象可偏向时，MarkWord将变成未锁定状态，并只能升级成轻量锁；</li>
+<li>当对象正处于偏向锁时，调用HashCode将使偏向锁强制升级成重量锁。</li>
+</ul>
+<p><strong>偏向锁撤销之调用wait/notify</strong></p>
+<p> 偏向锁状态执行obj.notify() 会升级为轻量级锁，调用obj.wait(timeout) 会升级为重量级锁</p>
+<h4 id="轻量级锁"><a href="#轻量级锁" class="headerlink" title="轻量级锁"></a>轻量级锁</h4><p>倘若偏向锁失败，虚拟机并不会立即升级为重量级锁，它还会尝试使用一种称为轻量级锁的优化手段，此时Mark Word 的结构也变为轻量级锁的结构。轻量级锁所适应的场景是线程交替执行同步块的场合，如果存在同一时间多个线程访问同一把锁的场合，就会导致轻量级锁膨胀为重量级锁。</p>
+<h4 id="总结：锁对象状态转换"><a href="#总结：锁对象状态转换" class="headerlink" title="总结：锁对象状态转换"></a>总结：锁对象状态转换</h4><p><img src="/2022/05/01/01-00-04-%E5%B9%B6%E5%8F%91%E9%94%81%E6%9C%BA%E5%88%B6%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3synchronized/image-20220501233349943.png"></p>
+<p>偏向锁撤销需要到达安全点才能撤销，撤销之后变为无锁才能升级位轻量级锁</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/05/01/01-00-04-%E5%B9%B6%E5%8F%91%E9%94%81%E6%9C%BA%E5%88%B6%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3synchronized/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/synchronized/" rel="tag">synchronized</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" rel="tag">并发编程</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/05/02/01-00-05-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3synchronized/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            深入理解synchronized
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/04/30/01-00-03-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3CAS/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">并发编程之深入理解CAS</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2022
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

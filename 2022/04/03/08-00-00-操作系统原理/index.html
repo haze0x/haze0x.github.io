@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>操作系统原理 |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-08-00-00-操作系统原理"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  操作系统原理
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/" class="article-date">
+  <time datetime="2022-04-03T08:01:51.000Z" itemprop="datePublished">2022-04-03</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">3k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">10 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p id="hitokoto">正在加载一言...</p>
+
+<h2 id="1、进程的概念"><a href="#1、进程的概念" class="headerlink" title="1、进程的概念"></a>1、进程的概念</h2><p>​        运行中的程序就叫做<strong>进程</strong>。</p>
+<h2 id="2、并行与并发"><a href="#2、并行与并发" class="headerlink" title="2、并行与并发"></a>2、并行与并发</h2><p>​        并发是一种<strong>物理架构</strong>，多个cpu核同一时间执行多个任务。而并行是一种<strong>逻辑架构</strong>，在一个核上，多个任务通过竞争时间片交替执行。</p>
+<p>​        并行与并发的关系图</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/%E5%B9%B6%E8%A1%8C%E4%B8%8E%E5%B9%B6%E5%8F%91.png"></p>
+<h2 id="3、进程的状态"><a href="#3、进程的状态" class="headerlink" title="3、进程的状态"></a>3、进程的状态</h2><p>​        <strong>单进程五状态模型：</strong></p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/%E8%BF%9B%E7%A8%8B%E4%BA%94%E6%88%96%E4%B8%83%E7%8A%B6%E6%80%81%E6%A8%A1%E5%9E%8B.png" alt="进程5/7状态模型"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">进程进入就绪队列，就会变为就绪状态，各个状态转换如下：</span><br><span class="line">1、就绪-&gt;运行，当操作系统内存在着调度程序，当需要运行一个新进程时，调度程序选择一个就绪状态的进程，让其进入运行状态</span><br><span class="line">2、运行-&gt;就绪，运行态的进程，会占有cpu，每个进程会被分配一定的执行时间，时间片用完，状态就由运行态变为就绪状态</span><br><span class="line">3、运行-&gt;阻塞，进程请求调用操作系统的某些服务，但是操作系统没法立即给到它（比如这些服务需要比较耗时的初始化，比如io资源需要等待等），那么它就会进入阻塞状态</span><br><span class="line">4、阻塞-&gt;就绪，当等待结束了，就由阻塞进入就绪状态</span><br><span class="line">5、运行-&gt;终止，当前进程表示自己已经完成了，它就会被操作系统终止</span><br></pre></td></tr></table></figure>
+
+<h2 id="4、进程的控制结构"><a href="#4、进程的控制结构" class="headerlink" title="4、进程的控制结构"></a>4、进程的控制结构</h2><p>​        在操作系统中，是用<strong>进程控制块</strong>（pcb）数据结构来描述进程的。</p>
+<p>​        pcb是进程存在的唯一标识，这意味着一个进程的存在，必然会有一个pcb,如果进程消失了，那么pcb也会消失。</p>
+<p>​        pcb包含的信息：</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403214515124.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1、进程管理：寄存器、程序计数器、堆栈指针、进程状态、优先级、调度参数、进程ID、父进程、进程组、信号...</span><br><span class="line">2、存储管理：Text段指针、数据段指针、堆栈段指针</span><br><span class="line">3、文件管理：根目录、工作目录、文件描述符、用户ID、组ID</span><br></pre></td></tr></table></figure>
+
+<p>pcb组织形式：</p>
+<p>通常是通过<strong>链表</strong>的方式进行组织，把具有相同状态的进程链在一起，组成各种队列，比如：</p>
+<ol>
+<li><p>所有处于就绪状态的进程链在一起，称为就绪队列</p>
+</li>
+<li><p>把所有因等待某事件而处于等待状态的进程链在一起就组成各种阻塞队列</p>
+<p>链表方式：</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403214747723.png"></p>
+<p>除了链表的方式，还有索引的方式，如下图。</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403214811202.png"></p>
+</li>
+</ol>
+<h2 id="5、进程的切换"><a href="#5、进程的切换" class="headerlink" title="5、进程的切换"></a>5、进程的切换</h2><p>当一个正在运行的进程被中断，操作系统指定另一个就绪态的进程进入运行状态，这个过程就是<strong>进程切换</strong>，也叫<strong>上下文切换</strong>。</p>
+<p><strong>该切换过程一般涉及以下步骤：</strong></p>
+<p>1.保存处理器上下文环境</p>
+<p>2.更新当前进程的pcb</p>
+<p>3.将当前进程移到就绪队列或阻塞队列</p>
+<p>4.根据调度算法，选择就绪队列中的一个合适的进程，将其更改为运行状态</p>
+<p>5.更新内存管理的数据结构</p>
+<p>6.新进程内对堆栈所保存的上下文信息载入到cpu的寄存器和程序计数器，占有cpu</p>
+<p><strong>发生进程切换的场景</strong></p>
+<ol>
+<li>为了保证所有进程可以得到公平调度，cpu的时间被划分为一段段时间片，这些时间片在被轮流分配给各个进程，这样当某个进程时间片用尽后，就会被系统挂起，切换到其它正在等在cpu的进程运行</li>
+<li>进程在系统资源不足时，需要等到资源满足后才可以运行，这个时候进程也会被挂起，并由系统调度其它进程运行</li>
+<li>当进程通过睡眠函数sleep这样的方法将自己主动挂起时，自然也会重新调度。</li>
+<li>当有优先级更高的进程运行时，为了保证高优先级的先运行 ，当前进程也会挂起，由高优先级进程来运行。</li>
+<li>发生硬件中断时，cpu上的 的进程也会被挂起，转而执行内核中的中断服务程序。</li>
+</ol>
+<h2 id="6、线程"><a href="#6、线程" class="headerlink" title="6、线程"></a>6、线程</h2><p><strong>进程是资源分配的最小单位，线程是cpu调度的基本单位，线程是进程中的一条执行流程，一个进程包含多个线程，线程又被称之为轻量级进程。</strong></p>
+<p>同一个进程内多个线程之间可以共享代码段、数据段、打开的文件资源等，但每个线程各自都有一套独立的寄存器和栈，这样可以确保线程的控制流程是独立的。</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215049674.png"></p>
+<p><strong>线程上下文切换的是什么</strong></p>
+<ol>
+<li>当两个线程不属于同一个进程，则切换的过程就跟进程切换是一样的</li>
+<li><strong>当两个线程属于同一个进程，因为虚拟内存是共享的，所以在切换时，虚拟内存这些资源就会保持不动，只需要切换线程的私有数据、寄存器等不共享的数据</strong></li>
+</ol>
+<p>所以线程的上下文切换要别进程上下文切换开销小的多。</p>
+<h2 id="7、进程调度"><a href="#7、进程调度" class="headerlink" title="7、进程调度"></a>7、进程调度</h2><p><strong>什么时候进行调度：</strong></p>
+<ol>
+<li><p>从就绪状态-&gt;运行状态</p>
+</li>
+<li><p>从运行状态-&gt;阻塞状态</p>
+</li>
+<li><p>从运行状态-&gt;结束状态</p>
+</li>
+</ol>
+<p><strong>调度算法分为两类：</strong></p>
+<ul>
+<li><strong>非抢占式调度算法</strong>挑选一个进程，然后让该进程运行直到被阻塞，才会调用另外一个进程，也就是说不会理时钟中断这个事情。</li>
+<li>抢占式调度算法挑选一个进程，然后让该进程只运行某段时间，如果在该时段结束时，该进程仍然在运行时，则会把它挂起，接着调度程序从就绪队列中挑选另外一个进程，这种抢占式调度处理，需要在时间间隔的末端发生<strong>时钟中断</strong>，以便把cpu控制返回给调度程序进行调度，这就是常说的<strong>时间片机制</strong>。</li>
+</ul>
+<p><strong>以什么原则来调度进程</strong></p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215344419.png"></p>
+<p>五种调度原则：</p>
+<ul>
+<li>cpu利用率</li>
+<li>系统吞吐量</li>
+<li>周转时间</li>
+<li>等待时间</li>
+<li>响应时间</li>
+</ul>
+<p><strong>进程调度算法</strong></p>
+<ul>
+<li><p>先来先服务：先进就绪队列，则先被调度。问题：当前面任务耗费很长时间执行，那么后面的任务只需要执行很短的时间，也必须一直等待，属于<strong>非抢占式</strong></p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215428609.png"></p>
+</li>
+<li><p>时间片轮转：每个进程会被分配时间片，表示运行该进程在这个时间段运行，如果时间结束了，进程还没有运行完毕，那么会通过抢占式调度，将cpu分配给其它进程，该进程回到就绪队列。这是一种最简单最公平的调度算法，但是有可能会存在问题。<strong>缺点：</strong>如果时间片太短，频繁进行切换，会影响效率。如果进程时间片太长，有可能导致排后面的进程等待太长时间。因此时间片的长度，需要有大致合理的数值。（一般建议时间片20ms~50ms）</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215506907.png"></p>
+</li>
+<li><p>最短作业优先：按照作业时长排队，作业时间短的排前面先执行。缺点：一个长作业在就绪队列等待运行，而这个就绪队列有非常多的短作业，那么就会使长作业不断的往后推，致使长作业不会被运行。</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215604603.png"></p>
+</li>
+<li><p>最短剩余时间优先：从就绪队列中选择剩余时间最短的进程进行调度。该算法可以理解为最短作业优先和时间片轮转的结合。如果没有时间片，那么最短剩余时间其实就是最短作业时间，因为每个进程都是从投执行到尾。</p>
+</li>
+<li><p>优先级调度：按照优先级来调度。</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215629550.png"></p>
+</li>
+<li><p>多级反馈队列调度：设置多个就绪队列，赋予每个就绪队列优先级，优先级越高的队列进程的时间片越短。兼顾了长短作业，同时有较好的响应时间。</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215655867.png"></p>
+</li>
+</ul>
+<h2 id="8、进程间通信"><a href="#8、进程间通信" class="headerlink" title="8、进程间通信"></a>8、进程间通信</h2><p>每个进程的用户地址空间都是独立的，一般而言是不能互相访问的，但内核空间都是每个进程共享的，所以进程之间的通信必须通过内核。</p>
+<p>进程间的通信目的一般有共享数据、数据传输、消息通知、进程控制等。进程间的通信方式：共享<strong>内存、管道、消息队列、信号量</strong>。</p>
+<ul>
+<li><p>管道：管道传输数据是单向的。匿名管道：用完了就销毁，如linux 【|】。<strong>缺点：</strong>通信方式效率低，不适合进程间频繁的交换数据。<strong>好处：</strong>简单，同时我们也很容易的知道管道里面的数据已经被另一个进程读取了。<strong>对于匿名管道，它的通讯范围是存在父子关系的进程。对于命名管道，可以在不相关的进程间通信，基于文件。</strong></p>
+</li>
+<li><p>消息队列：消息队列是保存在内核中的消息链表。A进程给B进程发送消息，A进程把数据放在对应的消息队列后就可以返回了，B进程需要的时候再去读取数据就可以换了，数据读完后，内核会将数据删除掉。如果没有释放消息队列或者没有关闭操作系统，消息队列会一直存在。<strong>缺点：</strong>消息队列通信过程中，存在用户态和内核态之间的数据拷贝。写入数据：用户态-&gt;内核态，读取消息：内核态-&gt;用户态。</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215835113.png"></p>
+</li>
+<li><p>共享内存：消息队列的方式存在数据内核态和用户态转换，共享内存可以解决这一问题。共享内存的机制，就是拿出一块虚拟地址空间来，映射到相同的物理内存中，这样这个进程写入的数据，另一个进程就能里面看到了，不需要拷贝来拷贝去。<strong>缺点：</strong>多个进程同时往这个物理内存写入，可以造成数据覆盖。</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403215924096.png"></p>
+</li>
+<li><p>信号量：信号量其实就是一个整形的计数器，主要用于实现进程间的互斥和同步，而不是用于缓存进程通信的数据。信号量表示资源的数量，有两种原子操作，<strong>P操作</strong>信号量会减1，信号量&lt;0表示资源已被占用，进程阻塞等待 ,&gt;=0表示还有资源可用，进程可以正常执行，<strong>V操作</strong>信号量加1，信号量&lt;=0,表示当前有阻塞进程，于是会将该进程唤醒执行；&gt;0表示当前没有阻塞中的进程。</p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403220010341.png"></p>
+</li>
+<li><p>信号：信号一般用于一些异常情况下的进程间的通信，是一种异步通信，它的数据结构一般就是一个数字。信号是进程间通信机制中的<strong>唯一的异步通信机制。</strong>信号的来源主要有硬件来源。常用信号：Ctrl+c（SIGINT信号，表示终止该进程）Ctrl+Z（SIGTSTP 表示停止该进程，但还未结束）。进程需要为信号设置相应的 监听处理，当收到特定信号时，执行相应的操作，类似很多变成语言里面的通知机制。</p>
+</li>
+<li><p>Socket:前面几种都是在同一台主机上的进程间的通信，如果需要跨网络与不同主机上的进程之间通信，就需要sokcet通信了。socket不仅可以跨网络与不同主机进行通信，还可以在同主机上进行进程间通信。</p>
+</li>
+</ul>
+<p><strong>进程间通信总结</strong></p>
+<p><img src="/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/image-20220403214026093.png"></p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/04/03/08-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java/" rel="tag">Java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" rel="tag">操作系统</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/04/04/07-00-00-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            计算机网络
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2021/12/29/10-00-01-%E8%A7%A3%E5%86%B3maven-jar%E5%8C%85%E4%B8%8B%E8%BD%BD%E6%BA%90%E7%A0%81%E9%97%AE%E9%A2%98/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">解决maven jar包下载源码问题</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2022
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>synchronized锁升级总结 |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-01-00-20-synchronized锁升级总结"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  synchronized锁升级总结
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/05/17/01-00-20-synchronized%E9%94%81%E5%8D%87%E7%BA%A7%E6%80%BB%E7%BB%93/" class="article-date">
+  <time datetime="2022-05-17T14:46:51.000Z" itemprop="datePublished">2022-05-17</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/">并发编程</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">1.9k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">6 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p id="hitokoto">正在加载一言...</p>
+
+<h2 id="synchronized总结"><a href="#synchronized总结" class="headerlink" title="synchronized总结"></a>synchronized总结</h2><p>synchronized是面试高频考点，今天又重点回顾了下synchronized升级流程，特此记录下来</p>
+<h3 id="1、synchronized锁升级过程"><a href="#1、synchronized锁升级过程" class="headerlink" title="1、synchronized锁升级过程"></a>1、synchronized锁升级过程</h3>
+
+	<div class="row">
+    <embed src="synchronized.png" width="100%" height="550" type="application/pdf">
+	</div>
+
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">（<span class="number">1</span>）、初始锁状态有两种，无锁：禁用偏向锁或不满足延迟偏向条件；偏向锁：开启了偏向锁</span><br><span class="line">（<span class="number">2</span>）、开启了偏向锁，jvm会延迟偏向（4s），之后创建的对象初始状态就是匿名偏向状态，即无偏向线程的偏向锁（threadId=<span class="number">0</span>）</span><br><span class="line">（<span class="number">3</span>）、当一个线程thread1访问同步代码块，会先通过cas修改mark word的ThreadId字段从<span class="number">0</span>改为当前线程地址，cas修改成功，锁状态就由匿名偏向状态改为偏向锁锁定  状态。后续这个线程再多次访问这个锁对象，就不在有加锁/解锁的开销了。注：偏向锁解锁还是偏向锁</span><br><span class="line">（<span class="number">4</span>）、此时如果有另一个线程thread2与thread1竞争锁。分几种情况：<span class="number">1</span>&gt;当前锁对象已被锁定，偏向锁撤销，升级为轻量级锁：当前对象已锁定（被thread1锁定），此时进行偏向锁撤销，当前锁对象升级为轻量级锁，轻量级锁解锁之后会变为无锁；<span class="number">2</span>&gt;当前锁对象未被锁定，偏向锁撤销，变为无锁：比如一个对象初始状态为匿名偏向锁状态，调用了对象的hashCode()方法，则会发生偏向锁撤销，变为无锁状态（原因偏向锁状态无法存储hashCode）。<span class="number">3</span>&gt;如果当前对象锁定，且在同步代码块中调用hashcode或者wait方法，偏向锁撤销，变为重量级锁：</span><br><span class="line">注：</span><br><span class="line">无锁/偏向锁可以升级为轻量级锁；轻量级锁也可以升级为重量级锁；无锁也可以升级为重量级锁（无锁状态的对象多个线程cas修改mark work竞争升级为轻量级锁，竞争失败的就会升级为重量级锁）。</span><br><span class="line">无锁-&gt;轻量级锁过程：修改mark word为轻量级锁结构，拷贝mark word 到线程栈的Lock Record中，mark word中的ptr_to_log_record指向线程栈的logrecord</span><br><span class="line">轻量级锁-&gt;重量级锁过程：轻量级锁膨胀（创建对象的objectmonitor对象）、修改mark word结构</span><br></pre></td></tr></table></figure>
+
+<h3 id="2、synchronized轻量级锁升级过程"><a href="#2、synchronized轻量级锁升级过程" class="headerlink" title="2、synchronized轻量级锁升级过程"></a>2、synchronized轻量级锁升级过程</h3>
+
+	<div class="row">
+    <embed src="Synchronized轻量级锁源码分析.png" width="100%" height="550" type="application/pdf">
+	</div>
+
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">轻量级锁加锁过程：</span><br><span class="line"><span class="number">1</span>、无锁-&gt;轻量级锁过程</span><br><span class="line">-&gt;首先判断是不是无锁状态(锁标识是不是<span class="number">001</span>)</span><br><span class="line">-&gt;是<span class="number">001</span>，则将锁对象的mark word拷贝到线程栈的Log record（如图包含两部分obj和 displayed word ）中的displayed word【便于解锁时，将线程栈中logrecord中的mark word赋值回锁 对象的mark word】</span><br><span class="line">-&gt;cas尝试将mark word的指针ptr_to_lock_record指向Log Record，如果cas成功，那么就获取轻量级锁，失败继续后续步骤</span><br><span class="line">-&gt;如果失败，直接膨胀，即无锁状态经过一次cas失败，不进行自旋，直接升级膨胀为重量级锁</span><br><span class="line"><span class="number">2</span>、轻量级锁重入逻辑</span><br><span class="line">首先判断锁对象是不是处于轻量级锁状态（has_locker()方法），然后看线程栈是不是有这个锁记录，如果是则表示是重入操作，那么再次在线程栈（Log record保存在线程的一个栈结构中）压入一条锁记录（displaced word为空，即mark word 为空），只有再最后释放锁的时候才将栈底有效的mark word 复制回对象头</span><br><span class="line"><span class="number">3</span>、轻量级锁膨胀逻辑</span><br><span class="line">首先拿到monitor监视器对象，真正锁升级的方法实在ObjectMonitor::enter()方法</span><br><span class="line"><span class="keyword">for</span>(;;)&#123;</span><br><span class="line">-&gt;（<span class="number">1</span>）、<span class="keyword">if</span>(mark-&gt;has_monitor()) 首先判断mark word是否是<span class="number">10</span>（是否有monitor对象，即是否是重量级锁）如果有则表示是重量级锁，直接返回</span><br><span class="line">-&gt;（<span class="number">2</span>）、如果没有，则<span class="keyword">if</span>(mark == markOopDesc::INFLATING()) 判断是否正在膨胀，如果正在膨胀，则执行ReadStableMark(object)进行自旋(实际通过调用yield释放时间片，避免活锁，即防止线程空跑不干真正的活)（自旋逻辑是：如果自旋次数大于<span class="number">16</span>则进行park()阻塞，否则调用yield释放时间片）</span><br><span class="line">-&gt;（<span class="number">3</span>）、不是正在膨胀，则执行  <span class="keyword">if</span>(mark-&gt;has_locker()) 判断当前锁标志位是不是<span class="number">00</span>（即轻量级锁），是的话 初始化ObjectMonitor，cas设置状态为膨胀中，然后通过cas操作，修改mark word 指针指向monitor指针，如果改成功则获取锁，设置ObjectMonitor的_header,_owner和_object，设置mark word锁状态为重量级锁，</span><br><span class="line">-&gt;（<span class="number">4</span>）、如果不是轻量级锁，则判断是不是无锁</span><br><span class="line">-&gt;是无锁，调用omAlloc分配一个ObjectMonitor对象</span><br><span class="line">-&gt;初始化objectMontor对象</span><br><span class="line">-&gt;设置monitor的header字段为mark word ,owner为<span class="keyword">null</span>，obj字段为锁对象</span><br><span class="line">-&gt;设置锁对象的mark word 为重量级锁状态，指向第一步分配的monitor对象</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3、重量级锁加锁过程"><a href="#3、重量级锁加锁过程" class="headerlink" title="3、重量级锁加锁过程"></a>3、重量级锁加锁过程</h3>
+
+	<div class="row">
+    <embed src="Synchronized重量级锁加锁解锁执行逻辑.png" width="100%" height="550" type="application/pdf">
+	</div>
+
+
+
+
+<ol>
+<li>重量级锁ObjectMonitor::enter() 加锁逻辑：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-&gt;通过cas尝试获取锁，就是将monitor对象的_owner指针指向当前线程，cas成功直接即返回获取锁</span><br><span class="line">-&gt;cas失败判断是否是当前线程获取锁，是当前线程，则表示是重入锁，重入次数加<span class="number">1</span>，直接获取锁</span><br><span class="line">-&gt;不是当前线程，则判断当前线程是否是之前持有轻量级锁的线程。由轻量级锁膨胀且则重入次数记为<span class="number">1</span></span><br><span class="line">-&gt;不是之前持有轻量级锁的线程，则先进行自适应自旋，自旋过程中会尝试获取锁，自旋终止条件：<span class="number">1</span>)成功获取锁<span class="number">2</span>)达到自旋次数（会自动调整自旋次数）<span class="number">3</span>)自旋的过程中会判断是否进入安全点，如果进入则终止自旋（每自旋<span class="number">256</span>次就会检查一次）</span><br><span class="line">-&gt;如果自旋结束，获取锁失败，会再尝试获取锁；如果获取锁失败，此时当前线程不甘心被挂起，再次尝试自旋，尝试获取锁</span><br><span class="line">-&gt;如果还获取锁失败，则准备在_cxq上排队</span><br><span class="line">-&gt;通过自旋保证当前线程一定能进入_cxq队列，进入循环，先还是通过自旋尝试获取锁，然后调用park()挂起当前线程，在park()之后在进行自旋尝试唤醒之后获取锁；最后在循环末尾增加内存屏障OrderAccess::fence()保证可见性</span><br><span class="line">-&gt;获取锁成功，跳出循环，_cxq出队</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>重量级锁ObjectMonitor::exit() 解锁唤醒逻辑：</li>
+</ol>
+<p><strong>1&gt;判断当前线程是不是持有锁的线程（即判断_owner是不是当前线程），如果是，如果重入计数器不为0，则重入计数器减1后返回，否则将对象头_ower设置为null，释放锁，然后加入一个内存屏障storeLoad，让修改生效（保证如果某个线程正在自旋抢占该锁，这种策略会优先保证通过自旋抢占锁的线程获取锁，而其它处于等待队列的线程则靠后）；根据QMODE的不同，执行不同的唤醒策略，策略如下</strong></p>
+<p><img src="/2022/05/17/01-00-20-synchronized%E9%94%81%E5%8D%87%E7%BA%A7%E6%80%BB%E7%BB%93/%E6%88%AA%E5%9B%BE.png" alt="截图"></p>
+<p>最后执行unpark唤醒线程</p>
+<p><strong>2&gt;如果_owner不是当前线程，判断当前线程是不是之前持有轻量级锁的线程，如果_owner位于当前线程调用栈帧，说明该锁是轻量级锁膨胀来的，修改_owner属性为当前线程；</strong></p>
+<p><strong>如果不是当前线程，直接返回</strong></p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/05/17/01-00-20-synchronized%E9%94%81%E5%8D%87%E7%BA%A7%E6%80%BB%E7%BB%93/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/synchronized/" rel="tag">synchronized</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" rel="tag">并发编程</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/05/18/01-00-21-ThreadPoolExecutor-ForkJoin-CompletableFuture%E6%80%BB%E7%BB%93/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            ThreadPoolExecutor&amp;ForkJoin&amp;CompletableFuture总结
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/05/16/01-00-19-HashMap%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">HashMap源码解析</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2022
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

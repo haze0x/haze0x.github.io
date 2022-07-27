@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>Spring底层核心原理解析 |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-02-00-00-Spring底层核心原理解析"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  Spring底层核心原理解析
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/06/18/02-00-00-Spring%E5%BA%95%E5%B1%82%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/" class="article-date">
+  <time datetime="2022-06-18T03:21:01.000Z" itemprop="datePublished">2022-06-18</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6/">源码框架</a> / <a class="article-category-link" href="/categories/Java/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6/Spring/">Spring</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">3.5k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">13 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p id="hitokoto">正在加载一言...</p>
+
+<h2 id="Spring底层核心原理解析"><a href="#Spring底层核心原理解析" class="headerlink" title="Spring底层核心原理解析"></a>Spring底层核心原理解析</h2><h3 id="1、Spring概要"><a href="#1、Spring概要" class="headerlink" title="1、Spring概要"></a>1、Spring概要</h3><ol>
+<li>Bean的生命周期底层原理</li>
+<li>依赖注入底层原理</li>
+<li>初始化底层原理</li>
+<li>推断构造方法底层原理</li>
+<li>AOP底层原理</li>
+<li>Spring事务底层原理</li>
+</ol>
+<h3 id="2、Spring入门使用"><a href="#2、Spring入门使用" class="headerlink" title="2、Spring入门使用"></a>2、Spring入门使用</h3><blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ClassPathXmlApplicationContext context = <span class="keyword">new</span> ClassPathXmlApplicationContext(<span class="string">&quot;spring.xml&quot;</span>);</span><br><span class="line">UserService userService = (UserService) context.getBean(<span class="string">&quot;userService&quot;</span>);</span><br><span class="line">userService.test();</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>对于这三行代码应该，大部分同学应该都是比较熟悉，这是学习Spring的hello world。可是，这三行代码底层都做了什么，比如：</p>
+<ol>
+<li>第一行代码，会构造一个ClassPathXmlApplicationContext对象，ClassPathXmlApplicationContext该如何理解，调用该构造方法除开会实例化得到一个对象，还会做哪些事情？</li>
+<li>第二行代码，会调用ClassPathXmlApplicationContext的getBean方法，会得到一个UserService对象，getBean()是如何实现的？返回的UserService对象和我们自己直接new的UserService对象有区别吗？</li>
+<li>第三行代码，就是简单的调用UserService的test()方法，不难理解。</li>
+</ol>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">AnnotationConfigApplicationContext context = <span class="keyword">new</span> AnnotationConfigApplicationContext(AppConfig.class);</span><br><span class="line"><span class="comment">//ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(&quot;spring.xml&quot;);</span></span><br><span class="line">UserService userService = (UserService) context.getBean(<span class="string">&quot;userService&quot;</span>);</span><br><span class="line">userService.test();</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>可以看到AnnotationConfigApplicationContext的用法和ClassPathXmlApplicationContext是非常类似的，只不过需要传入的是一个class，而不是一个xml文件。</p>
+<p>而AppConfig.class和spring.xml一样，表示Spring的配置，比如可以指定扫描路径，可以直接定义Bean</p>
+</blockquote>
+<blockquote>
+<p>所以spring.xml和AppConfig.class本质上是一样的。</p>
+<p>目前，我们基本很少直接使用上面这种方式来用Spring，而是使用Spring MVC，或者Spring Boot，但是它们都是基于上面这种方式的，都需要在内部去创建一个ApplicationContext的，只不过：</p>
+<ol>
+<li>Spring MVC创建的是<strong>XmlWebApplicationContext</strong>，和<strong>ClassPathXmlApplicationContext</strong>类似，都是基于XML配置的</li>
+<li>Spring Boot创建的是<strong>AnnotationConfigApplicationContext</strong></li>
+</ol>
+<p>因为AnnotationConfigApplicationContext是比较重要的，并且AnnotationConfigApplicationContext和ClassPathXmlApplicationContext大部分底层都是共同的，后续课程我们会着重将AnnotationConfigApplicationContext的底层实现，对于ClassPathXmlApplicationContext，同学们可以在课程结束后作为作业，业余时间看看相关源码即可。</p>
+</blockquote>
+</blockquote>
+<h3 id="3、Spring中是如何创建一个对象？"><a href="#3、Spring中是如何创建一个对象？" class="headerlink" title="3、Spring中是如何创建一个对象？"></a>3、<strong>Spring中是如何创建一个对象？</strong></h3><p>例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">AnnotationConfigApplicationContext context = <span class="keyword">new</span> AnnotationConfigApplicationContext(AppConfig.class);</span><br><span class="line">UserService userService = (UserService) context.getBean(<span class="string">&quot;userService&quot;</span>);</span><br><span class="line">userService.test();</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>当我们调用context.getBean(“userService”)时，就会去创建一个对象，但是getBean方法内部怎么知道”userService”对应的是UserService类呢？</p>
+<p>所以，我们就可以分析出来，在调用AnnotationConfigApplicationContext的构造方法时，也就是第一行代码，会去做一些事情：</p>
+<ol>
+<li>解析AppConfig.class，得到扫描路径</li>
+<li>遍历扫描路径下的所有Java类，如果发现某个类上存在@Component、@Service等注解，那么Spring就把这个类记录下来，存在一个Map中，比如Map。（实际上，Spring源码中确实存在类似的这么一个Map，叫做BeanDefinitionMap）</li>
+<li>Spring会根据某个规则生成当前类对应的beanName，作为key存入Map，当前类作为value</li>
+</ol>
+<p>这样，但调用context.getBean(“userService”)时，就可以根据”userService”找到UserService类，从而就可以去创建对象了。</p>
+</blockquote>
+<h3 id="4、Bean的创建过程"><a href="#4、Bean的创建过程" class="headerlink" title="4、Bean的创建过程"></a>4、Bean的创建过程</h3><p>那么Spring到底是如何来创建一个Bean的呢，这个就是Bean创建的生命周期，大致过程如下</p>
+<ol>
+<li>利用该类的构造方法来实例化得到一个对象（但是如何一个类中有多个构造方法，Spring则会进行选择，这个叫做<strong>推断构造方法</strong>）</li>
+<li>得到一个对象后，Spring会判断该对象中是否存在被@Autowired注解了的属性，把这些属性找出来并由Spring进行赋值（<strong>依赖注入</strong>）</li>
+<li>依赖注入后，Spring会判断该对象是否实现了BeanNameAware接口、BeanClassLoaderAware接口、BeanFactoryAware接口，如果实现了，就表示当前对象必须实现该接口中所定义的setBeanName()、setBeanClassLoader()、setBeanFactory()方法，那Spring就会调用这些方法并传入相应的参数（<strong>Aware回调</strong>）</li>
+<li>Aware回调后，Spring会判断该对象中是否存在某个方法被@PostConstruct注解了，如果存在，Spring会调用当前对象的此方法（<strong>初始化前</strong>）</li>
+<li>紧接着，Spring会判断该对象是否实现了InitializingBean接口，如果实现了，就表示当前对象必须实现该接口中的afterPropertiesSet()方法，那Spring就会调用当前对象中的afterPropertiesSet()方法（<strong>初始化</strong>）</li>
+<li>最后，Spring会判断当前对象需不需要进行AOP，如果不需要那么Bean就创建完了，如果需要进行AOP，则会进行动态代理并生成一个代理对象做为Bean（<strong>初始化后</strong>）</li>
+</ol>
+<p>通过最后一步，我们可以发现，当Spring根据UserService类来创建一个Bean时：</p>
+<ol>
+<li>如果不用进行AOP，那么Bean就是UserService类的构造方法所得到的对象。</li>
+<li>如果需要进行AOP，那么Bean就是UserService的代理类所实例化得到的对象，而不是UserService本身所得到的对象。</li>
+</ol>
+<p><strong>Bean对象创建出来后：</strong></p>
+<ol>
+<li>如果当前Bean是单例Bean，那么会把该Bean对象存入一个Map，Map的key为beanName，value为Bean对象。这样下次getBean时就可以直接从Map中拿到对应的Bean对象了。（实际上，在Spring源码中，这个Map就是<strong>单例池</strong>）</li>
+<li>如果当前Bean是原型Bean，那么后续没有其他动作，不会存入一个Map，下次getBean时会再次执行上述创建过程，得到一个新的Bean对象。</li>
+</ol>
+<h3 id="5、推断构造方法"><a href="#5、推断构造方法" class="headerlink" title="5、推断构造方法"></a>5、<strong>推断构造方法</strong></h3><p>Spring在基于某个类生成Bean的过程中，需要利用该类的构造方法来实例化得到一个对象，但是<strong>如果一个类存在多个构造方法，Spring会使用哪个呢？</strong></p>
+<p>Spring的判断逻辑如下：</p>
+<ol>
+<li><p>如果一个类只存在一个构造方法，不管该构造方法是无参构造方法，还是有参构造方法，Spring都会用这个构造方法</p>
+</li>
+<li><p>如果一个类存在多个构造方法</p>
+</li>
+<li><p>这些构造方法中，存在一个无参的构造方法，那么Spring就会用这个无参的构造方法</p>
+<p>这些构造方法中，不存在一个无参的构造方法，那么Spring就会<strong>报错</strong></p>
+</li>
+</ol>
+<p>Spring的设计思想是这样的：</p>
+<ol>
+<li>如果一个类只有一个构造方法，那么没得选择，只能用这个构造方法</li>
+<li>如果一个类存在多个构造方法，Spring不知道如何选择，就会看是否有无参的构造方法，因为无参构造方法本身表示了一种默认的意义</li>
+<li>不过如果某个构造方法上加了@Autowired注解，那就表示程序员告诉Spring就用这个加了注解的方法，那Spring就会用这个加了@Autowired注解构造方法了</li>
+</ol>
+<p>需要重视的是，如果Spring选择了一个有参的构造方法，Spring在调用这个有参构造方法时，需要传入参数，那这个参数是怎么来的呢？</p>
+<p>Spring会根据入参的类型和入参的名字去Spring中找Bean对象（以单例Bean为例，Spring会从单例池那个Map中去找）：</p>
+<ol>
+<li>先根据入参类型找，如果只找到一个，那就直接用来作为入参</li>
+<li>如果根据类型找到多个，则再根据入参名字来确定唯一一个</li>
+<li>最终如果没有找到，则会报错，无法创建当前Bean对象</li>
+</ol>
+<p>确定用哪个构造方法，确定入参的Bean对象，这个过程就叫做<strong>推断构造方法</strong>。</p>
+<h3 id="6、AOP大致流程"><a href="#6、AOP大致流程" class="headerlink" title="6、AOP大致流程"></a>6、<strong>AOP大致流程</strong></h3><p>AOP就是进行动态代理，在创建一个Bean的过程中，Spring在最后一步会去判断当前正在创建的这个Bean是不是需要进行AOP，如果需要则会进行动态代理。</p>
+<p>如何判断当前Bean对象需不需要进行AOP:</p>
+<ol>
+<li>找出所有的切面Bean</li>
+<li>遍历切面bean中的每个方法，看是否写了@Before、@After等注解</li>
+<li>如果写了，则判断所对应的Pointcut是否和当前Bean对象的类是否匹配</li>
+<li>如果匹配则表示当前Bean对象有匹配的的Pointcut，表示需要进行AOP</li>
+<li>然后将匹配的切面bean方法和对应的当前bean通过map存储起来</li>
+<li>map存储起来的bean方法和对应的当前bean，在代理执行对应的方法时调用，map结构举例为</li>
+</ol>
+<p>利用cglib进行AOP的大致流程：</p>
+<ol>
+<li><p>生成代理类UserServiceProxy，代理类继承UserService</p>
+</li>
+<li><p>代理类中重写了父类的方法，比如UserService中的test()方法</p>
+</li>
+<li><p>代理类中还会有一个target属性，该属性的值为被代理对象（也就是通过UserService类推断构造方法实例化出来的对象，进行了依赖注入、初始化等步骤的对象）</p>
+</li>
+<li><p>代理类中的test()方法被执行时的逻辑如下：</p>
+</li>
+<li><ol>
+<li>执行切面逻辑（@Before）</li>
+<li>调用target.test()</li>
+</ol>
+</li>
+</ol>
+<p>当我们从Spring容器得到UserService的Bean对象时，拿到的就是UserServiceProxy所生成的对象，也就是代理对象。</p>
+<p>UserService代理对象.test()—&gt;执行切面逻辑—&gt;target.test()，注意target对象不是代理对象，而是被代理对象。</p>
+<p>如下图：</p>
+<p>![11](02-00-00-Spring底层核心原理解析/截图 (1).png)</p>
+<p><strong>Aop  cglib代理过程如下：</strong></p>
+<p>举例：</p>
+<p>比如类UserService</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><span class="line">## 配置类</span><br><span class="line"><span class="meta">@ComponentScan(&quot;com.zhouyu&quot;)</span></span><br><span class="line"><span class="comment">//@EnableAspectJAutoProxy</span></span><br><span class="line"><span class="meta">@EnableTransactionManagement</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AppConfig</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">   <span class="meta">@Bean</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> JdbcTemplate <span class="title">jdbcTemplate</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">new</span> JdbcTemplate(dataSource());</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">   <span class="meta">@Bean</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> PlatformTransactionManager <span class="title">transactionManager</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      DataSourceTransactionManager transactionManager = <span class="keyword">new</span> DataSourceTransactionManager();</span><br><span class="line">      transactionManager.setDataSource(dataSource());</span><br><span class="line">      <span class="keyword">return</span> transactionManager;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">   <span class="meta">@Bean</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> DataSource <span class="title">dataSource</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      DriverManagerDataSource dataSource = <span class="keyword">new</span> DriverManagerDataSource();</span><br><span class="line">      dataSource.setUrl(<span class="string">&quot;jdbc:mysql://127.0.0.1:3306/mysql_test?characterEncoding=utf-8&amp;useSSL=false&quot;</span>);</span><br><span class="line">      dataSource.setUsername(<span class="string">&quot;root&quot;</span>);</span><br><span class="line">      dataSource.setPassword(<span class="string">&quot;Zhouyu123456***&quot;</span>);</span><br><span class="line">      <span class="keyword">return</span> dataSource;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">   <span class="meta">@Bean</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> SqlSessionFactory <span class="title">sqlSessionFactory</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">      SqlSessionFactoryBean sessionFactoryBean = <span class="keyword">new</span> SqlSessionFactoryBean();</span><br><span class="line">      sessionFactoryBean.setDataSource(dataSource());</span><br><span class="line">      <span class="keyword">return</span> sessionFactoryBean.getObject();</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserService</span> </span>&#123;</span><br><span class="line">   <span class="meta">@Autowired</span></span><br><span class="line">   <span class="keyword">private</span> OrderService orderService;</span><br><span class="line"></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">      System.out.println(<span class="string">&quot;test&quot;</span>);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line">## 有如下切面</span><br><span class="line"><span class="meta">@Aspect</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ZhouyuAspect</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">   <span class="meta">@Before(&quot;execution(public void com.zhouyu.service.UserService.test())&quot;)</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">zhouyuBefore</span><span class="params">(JoinPoint joinPoint)</span> </span>&#123;</span><br><span class="line">      System.out.println(<span class="string">&quot;zhouyuBefore&quot;</span>);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">cglib代理逻辑如下：</span><br><span class="line"><span class="number">1</span>&gt;cglib的本质是通过继承来实现，对于UserService，会生成如下代理类</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UserServiceProxy</span> <span class="keyword">extends</span> <span class="title">UserService</span></span>&#123;</span><br><span class="line">    UserService target; <span class="comment">// 组合实现了userService，这个userService就是spring中注入了属性的userService对象</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 执行@Before 切面逻辑</span></span><br><span class="line">      target.test();</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## 具体的调用</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">      AnnotationConfigApplicationContext applicationContext = <span class="keyword">new</span> AnnotationConfigApplicationContext(AppConfig.class);</span><br><span class="line">      UserService userService = (UserService) applicationContext.getBean(<span class="string">&quot;userService&quot;</span>);</span><br><span class="line">      userService.test(); <span class="comment">// 断点到这里的时候 这个userService是aop代理类 这个userService的orderService是null，而跟踪断点到UserService 类的test方法时，</span></span><br><span class="line">      <span class="comment">//orderService不为null，具体原因如上所述，调用userService的时候这个对象是spring中注入了属性的userService对象（@Component）</span></span><br><span class="line">      <span class="comment">// 对象具体内容如下图</span></span><br><span class="line">      <span class="comment">// 为什么aop代理对象的属性没有值？因为aop代理对象生成后不会再注入属性。为什么不再注入属性？没有必要，因为target可以通过其它方式注入，再切面中可以通过</span></span><br><span class="line">      <span class="comment">// joinPoint.getTarget()方法拿到userService，间接就拿到了orderService</span></span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>![](02-00-00-Spring底层核心原理解析/截图 (1)-1655523165409.png)</p>
+<h3 id="7、Spring事务"><a href="#7、Spring事务" class="headerlink" title="7、Spring事务"></a>7、<strong>Spring事务</strong></h3><p>当我们在某个方法上加了@Transactional注解后，就表示该方法在调用时会开启Spring事务，而这个方法所在的类所对应的Bean对象会是该类的代理对象。</p>
+<p>Spring事务的代理对象执行某个方法时的步骤：</p>
+<ol>
+<li>判断当前执行的方法是否存在@Transactional注解</li>
+<li>如果存在，则利用事务管理器（TransactionMananger）新建一个数据库连接conn</li>
+<li>修改数据库连接的autocommit为false（默认true，比如userService中test方法中有两个sql，sql1和sql2，为true的话就会sql1执行完自动提交，sql2执行完自动提交；分开提交，事务无法起到作用，并且sql执行完如果后面抛异常，没法回滚，起不到事务的作用，设置为fasle后，在test方法执行完后，手动进行提交，conn.commit()，异常就调用conn.rollback回滚）</li>
+<li>执行target.test()，执行程序员所写的业务逻辑代码，也就是执行sql</li>
+<li>执行完了之后如果没有出现异常，则提交，否则回滚</li>
+</ol>
+<p>Spring事务是否会失效的判断标准：<strong>某个加了@Transactional注解的方法被调用时，要判断到底是不是直接被代理对象调用的，如果是则事务会生效，如果不是则失效。</strong></p>
+<p><strong>方法内调事务失效分析：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserService</span> </span>&#123;</span><br><span class="line">   <span class="meta">@Autowired</span></span><br><span class="line">   <span class="keyword">public</span> OrderService orderService;</span><br><span class="line">   <span class="meta">@Autowired</span></span><br><span class="line">   <span class="keyword">private</span> JdbcTemplate jdbcTemplate;</span><br><span class="line">   <span class="meta">@Transactional</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      jdbcTemplate.execute(<span class="string">&quot;INSERT INTO `mysql_test`.`product`(`id`, `product_name`, `stock`, `version`) VALUES (3, &#x27;元旦大礼包&#x27;, 5, 0);&quot;</span>);</span><br><span class="line">      a();</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="meta">@Transactional</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">a</span><span class="params">()</span></span>&#123;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">##分析事务失效原因：</span><br><span class="line"><span class="number">1</span>&gt;test()方法调用a()按照如下代理逻辑执行</span><br><span class="line">a&gt;cglib的本质是通过继承来实现，对于UserService，会生成如下代理类</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UserServiceProxy</span> <span class="keyword">extends</span> <span class="title">UserService</span></span>&#123;</span><br><span class="line">    UserService target; <span class="comment">// 组合实现了userService，这个userService就是spring中注入了属性的userService对象</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 执行@Before 切面逻辑</span></span><br><span class="line">      target.test();</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line">b&gt;target是一个普通对象（注入了相应的属性），即没有经过事务切面处理的非代理增强的对象</span><br><span class="line">c&gt;调用test方法，然后内调a（）方法，实际是普通对象调用a（）方法，因此事务不会生效</span><br><span class="line">d&gt;想要生效，可以新建一个有事务方法a（）的类，在通过注入调用 或者 自我注入（注入的是增强后的代理对象）</span><br></pre></td></tr></table></figure>
+
+<p><strong>为什么AppConfig类不加@Configuration注解，事务不会生效呢？</strong></p>
+<p><strong>1&gt;AppConfig类不加@Configuration注解，则事务管理器</strong>transactionManager<strong>的datasource和jdbcTemplate的datasource不是同一个</strong></p>
+<p><strong>2&gt;事务方法执行时，会生成事务管理器</strong>transactionManager<strong>，执行sql时会用到jdbcTemplate，这两个dataSource不是同一个，执行sql时会通过jdbcTemplate的dataSource建立数据库连接</strong></p>
+<p><strong>3&gt;导致事务执行时，事务无法生效</strong></p>
+<p><strong>4&gt;加了@Configuration，事务管理器</strong>transactionManager<strong>和jdbcTemplate的datasource就是同一个（跟代理模式有关）</strong></p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/06/18/02-00-00-Spring%E5%BA%95%E5%B1%82%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring%E5%8E%9F%E7%90%86/" rel="tag">Spring原理</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6/" rel="tag">源码框架</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/06/18/02-00-01-Spring%E4%B9%8B%E5%BA%95%E5%B1%82%E6%9E%B6%E6%9E%84%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            Spring之底层架构核心概念
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/06/15/03-02-05-Zookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AEZAB%E6%BA%90%E7%A0%81/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">Zookeeper分布式一致性协议ZAB源码</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2022
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

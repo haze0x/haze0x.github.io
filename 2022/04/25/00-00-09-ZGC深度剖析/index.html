@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>ZGC深度剖析 |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-00-00-09-ZGC深度剖析"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  ZGC深度剖析
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/" class="article-date">
+  <time datetime="2022-04-25T14:40:53.000Z" itemprop="datePublished">2022-04-25</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/">性能调优</a> / <a class="article-category-link" href="/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/Jvm/">Jvm</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">5.3k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">19 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p id="hitokoto">正在加载一言...</p>
+
+<p><strong>ZGC深度剖析</strong></p>
+<p>JVM是虚拟机，能够识别字节码，就是class文件或者你打包的jar文件，运行在操作系统上。</p>
+<p>JVM帮我们实现了跨平台，你只需要编译一次，就可以在不同的操作系统上运行，并且效果是一致的。</p>
+<p><img src="/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/09aca020f029.png" alt="img"></p>
+<p>在Java中你使用对象，使用内存，不用担心回收，只管new对象就行了，不用管垃圾的回收。</p>
+<p>因为Java当中是自动化的垃圾回收机制。JVM有专门的垃圾回收器，把垃圾回收这件事给干了。</p>
+<p><img src="/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/e14f43dd2baf.png" alt="img"></p>
+<p><strong>ZGC出现背景</strong></p>
+<p>但是对于Java的项目来说，JVM进行垃圾回收会有一个很大的问题，就是STW。</p>
+<p>什么是STW，STW的全称是StopTheWorld。</p>
+<p><img src="/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/a502bd6f9329.png" alt="img"></p>
+<p>Java项目中，如果JVM要进行垃圾回收，会暂停所有的业务线程，也就是项目中的线程，这样会导致业务系统暂停。</p>
+<p><strong>STW带来的问题</strong></p>
+<p><strong>手机系统(Android) 显示卡顿</strong></p>
+<p>Google 主导的 Android 系统需要解决的一大问题就是显示卡顿问题，通过对 GC 算法的不断演进，停顿时间控制在几个ms 级别。</p>
+<p>所以这也是Android与苹果IOS系统竞争的一大利器。</p>
+<p><strong>证券交易系统实时性要求</strong></p>
+<p>证券交易系统主要就是买入、卖出，现在都是使用系统完成自动下单，如果用Java系统来做，遇到了STW，假如STW的时间是3秒。</p>
+<p>刚收到市场行情是比较低的买入的，但是因为STW卡顿了3秒，3秒后的市场行情可能完全不同。所以如果使用Java来做证券系统，一定是要求STW时间越短越好！</p>
+<p><strong>大数据平台(Hadoop集群性能)</strong></p>
+<p>同样，像58同城的大数据系统，单集群5000+的Hadoop集群，日万亿级实时数据分发。如果遇到STW也是不行的。</p>
+<p><strong>垃圾回收器的发展</strong></p>
+<p>为了满足不同的业务需求，Java 的 GC 算法也在不停迭代，对于特定的应用，选择其最适合的 GC 算法，才能更高效的帮助业务实现其业务目标。对于这些延迟敏感的应用来说，GC 停顿已经成为阻碍 Java 广泛应用的一大顽疾，需要更适合的 GC 算法以满足这些业务的需求。</p>
+<p>近些年来，服务器的性能越来越强劲，各种应用可使用的堆内存也越来越大，常见的堆大小从 10G 到百 G 级别，部分机型甚至可以到达 TB 级别，在这类大堆应用上，传统的 GC，如 CMS、G1 的停顿时间也跟随着堆大小的增长而同步增加，即堆大小指数级增长时，停顿时间也会指数级增长。特别是当触发 Full GC 时，停顿可达分钟级别(百GB级别的堆)。当业务应用需要提供高服务级别协议（Service Level Agreement，SLA），例如 99.99% 的响应时间不能超过 100ms，此时 CMS、G1 等就无法满足业务的需求。</p>
+<p>为满足当前应用对于超低停顿、并应对大堆和超大堆带来的挑战，伴随着 2018 年发布的 JDK 11，A Scalable Low-Latency Garbage Collector - ZGC 应运而生。</p>
+<p><img src="/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/4c4acef80cbe.png" alt="img"></p>
+<p><strong>ZGC介绍</strong></p>
+<p>ZGC（The Z Garbage Collector）是<a target="_blank" rel="noopener" href="https://www.zhihu.com/search?q=JDK+11&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra=%7B%22sourceType%22:%22article%22,%22sourceId%22:%22364813270%22%7D">JDK 11</a>中推出的一款追求极致低延迟的垃圾收集器，它曾经设计目标包括：</p>
+<ul>
+<li><p><strong>停顿时间不超过10ms（JDK16已经达到不超过1ms）</strong>；</p>
+</li>
+<li><p>停顿时间不会随着堆的大小，或者活跃对象的大小而增加；</p>
+</li>
+<li><p>支持8MB~4TB级别的堆，JDK15后已经可以支持16TB。</p>
+</li>
+</ul>
+<p>这么去想，如果使用ZGC来做Java项目，像对STW敏感的证券系统，游戏的系统都可以去用Java来做（以前都是C或者C++的市场），所以ZGC的出现就是为了抢占其他语言的市场（卷！）。</p>
+<p><strong>ZGC中的内存布局</strong></p>
+<p>为了细粒度地控制内存的分配，和G1一样，ZGC将内存划分成小的分区，在ZGC中称为页面（page）。</p>
+<p><strong>ZGC中没有分代的概念（新生代、老年代）</strong></p>
+<p>ZGC支持<strong>3种</strong>页面，分别为小页面、中页面和大页面。</p>
+<p>其中小页面指的是2MB的页面空间，中页面指32MB的页面空间，大页面指受操作系统控制的大页。</p>
+<p><img src="/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/3aba9255dec8.png" alt="img"></p>
+<p>当对象大小小于等于256KB时，对象分配在小页面。</p>
+<p>当对象大小在256KB和4M之间，对象分配在中页面。</p>
+<p>当对象大于4M，对象分配在大页面。</p>
+<p>ZGC对于不同页面回收的策略也不同。<strong>简单地说，小页面优先回收；中页面和大页面则尽量不回收。</strong></p>
+<p><strong>为什么这么设计？</strong></p>
+<p><strong>这种分页模型垃圾回收的时候可以优先选择垃圾回收效率特别高的区域优先回收，从而提高垃圾回收效率。</strong></p>
+<p>标准大页（huge page）是Linux Kernel 2.6引入的，目的是通过使用大页内存来取代传统的4KB内存页面，以适应越来越大的系统内存，让操作系统可以支持现代硬件架构的大页面容量功能。</p>
+<p>Huge pages 有两种格式大小： 2MB 和 1GB ， 2MB 页块大小适合用于 GB 大小的内存， 1GB 页块大小适合用于 TB 级别的内存； 2MB 是默认的页大小。</p>
+<p>所以ZGC这么设置也是为了适应现代硬件架构的发展，提升性能。</p>
+<p><strong>ZGC支持NUMA（了解即可）</strong></p>
+<p>在过去，对于X86架构的计算机，内存控制器还没有整合进CPU，所有对内存的访问都需要通过北桥芯片来完成。X86系统中的所有内存都可以通过CPU进行同等访问。任何CPU访问任何内存的速度是一致的，不必考虑不同内存地址之间的差异，这称为“统一内存访问”（Uniform Memory Access，UMA）。UMA系统的架构示意图如图所示。</p>
+<p><img src="/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/5d0e48df526f.png" alt="img"></p>
+<p>在UMA中，各处理器与内存单元通过互联总线进行连接，各个CPU之间没有主从关系。之后的X86平台经历了一场从“拼频率”到“拼核心数”的转变，越来越多的核心被尽可能地塞进了同一块芯片上，各个核心对于内存带宽的争抢访问成为瓶颈，所以人们希望能够把CPU和内存集成在一个单元上（称Socket），这就是非统一内存访问（Non-Uniform Memory Access，NUMA）。很明显，在NUMA下，CPU访问本地存储器的速度比访问非本地存储器快一些。下图所示是支持NUMA处理器架构示意图。</p>
+<p><img src="/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/f555399da3e6.png" alt="img"></p>
+<p>ZGC是支持NUMA的，在进行小页面分配时会优先从本地内存分配，当不能分配时才会从远端的内存分配。对于中页面和大页面的分配，ZGC并没有要求从本地内存分配，而是直接交给操作系统，由操作系统找到一块能满足ZGC页面的空间。ZGC这样设计的目的在于，对于小页面，存放的都是小对象，从本地内存分配速度很快，且不会造成内存使用的不平衡，而中页面和大页面因为需要的空间大，如果也优先从本地内存分配，极易造成内存使用不均衡，反而影响性能。</p>
+<p><strong>ZGC的核心概念</strong></p>
+<p><strong>指针着色技术（Color Pointers）</strong></p>
+<p>颜色指针可以说是ZGC的核心概念。因为他在指针中借了几个位出来做事情，所以它必须要求在64位的机器上才可以工作。并且因为要求64位的指针，也就不能支持压缩指针。</p>
+<p>ZGC中低42位表示使用中的堆空间</p>
+<p>ZGC借几位高位来做GC相关的事情(快速实现垃圾回收中的并发标记、转移和重定位等)</p>
+<p><img src="/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/bc055bfc8e6a.png" alt="img"></p>
+<p>我们通过一个例子演示Linux多视图映射。Linux中主要通过系统函数mmap完成视图映射。多个视图映射就是多次调用mmap函数，多次调用的返回结果就是不同的虚拟地址。示例代码如下</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/mman.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdint.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">//创建一个共享内存的文件描述符</span></span><br><span class="line">    <span class="keyword">int</span> fd = <span class="built_in">shm_open</span>(<span class="string">&quot;/example&quot;</span>, O_RDWR | O_CREAT | O_EXCL, <span class="number">0600</span>);</span><br><span class="line">    <span class="keyword">if</span> (fd == <span class="number">-1</span>) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    <span class="comment">//防止资源泄露,需要删除。执行之后共享对象仍然存活,但是不能通过名字访问</span></span><br><span class="line">    <span class="built_in">shm_unlink</span>(<span class="string">&quot;/example&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//将共享内存对象的大小设置为4字节</span></span><br><span class="line">    <span class="keyword">size_t</span> size = <span class="built_in"><span class="keyword">sizeof</span></span>(<span class="keyword">uint32_t</span>);</span><br><span class="line">    <span class="built_in">ftruncate</span>(fd, size);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//3次调用mmap,把一个共享内存对象映射到3个虚拟地址上</span></span><br><span class="line">    <span class="keyword">int</span> prot = PROT_READ | PROT_WRITE;</span><br><span class="line">    <span class="keyword">uint32_t</span> *remapped = <span class="built_in">mmap</span>(<span class="literal">NULL</span>, size, prot, MAP_SHARED, fd, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">uint32_t</span> *m0 = <span class="built_in">mmap</span>(<span class="literal">NULL</span>, size, prot, MAP_SHARED, fd, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">uint32_t</span> *m1 = <span class="built_in">mmap</span>(<span class="literal">NULL</span>, size, prot, MAP_SHARED, fd, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">//关闭文件描述符</span></span><br><span class="line">    <span class="built_in">close</span>(fd);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//测试,通过一个虚拟地址设置数据,3个虚拟地址得到相同的数据</span></span><br><span class="line">    *remapped = <span class="number">0xdeafbeef</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;48bit of remapped is: %p, value of 32bit is: 0x%x\n&quot;</span>, remapped, *remapped);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;48bit of m0 is: %p, value of 32bit is: 0x%x\n&quot;</span>, m0, *m0);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;48bit of m1 is: %p, value of 32bit is: 0x%x\n&quot;</span>, m1, *m1);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在Linux上通过gcc编译后运行文件，得到的执行文件：</p>
+<p>gcc -lrt -o mapping mapping.c</p>
+<p><img src="/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/84e3c24fbb2a.png" alt="img"></p>
+<p>然后执行下，我们来看下执行结果</p>
+<p><img src="/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/6168a9be0dbb.png" alt="img"></p>
+<p>从结果我们可以发现，3个变量对应3个不同的虚拟地址。</p>
+<p><strong>实地址：（32位指针）</strong>是：0xdeafbeef &lt;一位16进制代表4位二进制&gt;</p>
+<p><strong>虚地址：****（48位指针）</strong>:</p>
+<p>0x7f93aef8e000&lt;虚地址remapped&gt;</p>
+<p>0x7f93aef8d000&lt;虚地址m0&gt;</p>
+<p>0x7f93aef8c000&lt;虚地址m1&gt;</p>
+<p>但是因为它们都是通过mmap映射同一个内存共享对象，所以它们的物理地址是一样的，并且它们的值都是0xdeafbeef。</p>
+<p><strong>ZGC流程</strong></p>
+<p><strong>一次ZGC流程</strong></p>
+<p>标记阶段(标识垃圾)</p>
+<p>转移阶段(对象复制或移动)</p>
+<p><img src="/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/8db56e2b2b5d.png" alt="img"></p>
+<p><strong>根可达算法</strong></p>
+<p>来判定对象是否存活的。这个算法的基本思路就是通过一系列的称为“GC Roots”的对象作为起始点，从这些节点开始向下搜索，搜索所走过的路径称为引用链（Reference Chain），当一个对象到GC Roots没有任何引用链相连时，则证明此对象是不可用的。</p>
+<p><img src="/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/49d50162cb40.png" alt="img"></p>
+<p><strong>作为GC Roots的对象主要包括下面4种</strong></p>
+<ul>
+<li><p>虚拟机栈（栈帧中的本地变量表）：各个线程调用方法堆栈中使用到的参数、局部变量、临时变量等。</p>
+</li>
+<li><p>方法区中类静态变量：java类的引用类型静态变量。</p>
+</li>
+<li><p>方法区中常量：比如：字符串常量池里的引用。</p>
+</li>
+<li><p>本地方法栈中JNI指针：（即一般说的Native方法）。</p>
+</li>
+</ul>
+<p><strong>ZGC中初始标记和并发标记</strong></p>
+<p><strong>初始标记：</strong>从根集合(GC Roots)出发，找出根集合直接引用的活跃对象(根对象)</p>
+<p><strong>并发标记：</strong>根据初始标记找到的根对象，使用深度优先遍历对象的成员变量进行标记</p>
+<p><strong>ZGC基于指针着色的并发标记算法</strong></p>
+<p><img src="/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/38fc712d9763.png" alt="img"></p>
+<p><strong>0．初始阶段</strong></p>
+<p>在ZGC初始化之后，此时地址视图为Remapped，程序正常运行，在内存中分配对象，满足一定条件后垃圾回收启动。</p>
+<p><strong>1、初始标记</strong></p>
+<p>这个阶段需要暂停（STW），初始标记只需要扫描所有GC Roots，其处理时间和GC Roots的数量成正比，停顿时间不会随着堆的大小或者活跃对象的大小而增加。</p>
+<p><strong>2、并发标记</strong></p>
+<p>这个阶段不需要暂停（没有STW），扫描剩余的所有对象，这个处理时间比较长，所以走并发，业务线程与GC线程同时运行。但是这个阶段会产生漏标问题。</p>
+<p><strong>3、再标记</strong></p>
+<p>这个阶段需要暂停（没有STW），主要处理漏标对象，通过SATB算法解决（G1中的解决漏标的方案）。</p>
+<p><strong>ZGC基于指针着色的并发转移算法</strong></p>
+<p><strong>ZGC的转移阶段</strong></p>
+<ul>
+<li><p>并发转移准备(分析最有价值GC分页&lt;无STW &gt; )</p>
+</li>
+<li><p>初始转移（转移初始标记的存活对象同时做对象重定位&lt;有STW&gt; ）</p>
+</li>
+<li><p>并发转移（对转移并发标记的存活对象做转移&lt;无STW&gt;）</p>
+</li>
+</ul>
+<p><strong>如何做到并发转移？</strong></p>
+<p>转发表(类似于HashMap)</p>
+<p>对象转移和插转发表做原子操作</p>
+<p><img src="/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/280d64bc65d2.png" alt="img"></p>
+<p><img src="/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/5d2035bb5663.png" alt="img"></p>
+<p><strong>ZGC基于指针着色的重定位算法</strong></p>
+<p><strong>并发标记对象的重定位</strong></p>
+<p>下次GC中的并发标记（同时做上次并发标记对象的重定位）</p>
+<p>技术上：指针着色中M0和M1区分</p>
+<p><img src="/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/121017230aa2.png" alt="img"></p>
+<p><strong>ZGC中读屏障</strong></p>
+<p><strong>ZGC中的读屏障</strong></p>
+<p>涉及对象：并发转移但还没做对象重定位的对象（着色指针使用M0和M1可以区分）</p>
+<p>触发时机：在两次GC之间业务线程访问这样的对象</p>
+<p>触发操作：对象重定位+删除转发表记录（两个一起做原子操作）</p>
+<p>读屏障是JVM向应用代码插入一小段代码的技术。当应用线程从堆中读取对象引用时，就会执行这段代码。</p>
+<p>需要注意的是，仅“从堆中读取对象引用”才会触发这段代码。</p>
+<p><img src="/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/f33a4de39dfa.png" alt="img"></p>
+<p><strong>ZGC中GC触发机制（JAVA16）</strong></p>
+<p><strong>预热规则：</strong>服务刚启动时出现，一般不需要关注。日志中关键字是“Warmup”。</p>
+<p>JVM启动预热，如果从来没有发生过GC，则在堆内存使用超过10%、20%、30%时，分别触发一次GC，以收集GC数据.</p>
+<p><img src="/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/e1ee8c7e8a22.png" alt="img"></p>
+<p><strong>基于分配速率的自适应算法：</strong>最主要的GC触发方式（默认方式），其算法原理可简单描述为”ZGC根据近期的对象分配速率以及GC时间，计算出当内存占用达到什么阈值时触发下一次GC”。通过ZAllocationSpikeTolerance参数控制阈值大小，该参数默认2，数值越大，越早的触发GC。日志中关键字是“Allocation Rate”。</p>
+<p><img src="/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/9cff33c8be97.png" alt="img"></p>
+<p><strong>基于固定时间间隔：</strong>通过ZCollectionInterval控制，适合应对突增流量场景。流量平稳变化时，自适应算法可能在堆使用率达到95%以上才触发GC。流量突增时，自适应算法触发的时机可能会过晚，导致部分线程阻塞。我们通过调整此参数解决流量突增场景的问题，比如定时活动、秒杀等场景。</p>
+<p><strong>主动触发规则：</strong>类似于固定间隔规则，但时间间隔不固定，是ZGC自行算出来的时机，我们的服务因为已经加了基于固定时间间隔的触发机制，所以通过-ZProactive参数将该功能关闭，以免GC频繁，影响服务可用性。</p>
+<p><strong>阻塞内存分配请求触发：</strong>当垃圾来不及回收，垃圾将堆占满时，会导致部分线程阻塞。我们应当避免出现这种触发方式。日志中关键字是“Allocation Stall”。</p>
+<p><strong>外部触发：</strong>代码中显式调用System.gc()触发。 日志中关键字是“System.gc()”。</p>
+<p><strong>元数据分配触发：</strong>元数据区不足时导致，一般不需要关注。 日志中关键字是“Metadata GC Threshold”。</p>
+<p><strong>ZGC参数设置</strong></p>
+<p>ZGC 优势不仅在于其超低的 STW 停顿，也在于其参数的简单，绝大部分生产场景都可以自适应。当然，极端情况下，还是有可能需要对 ZGC 个别参数做个调整，大致可以分为三类：</p>
+<ul>
+<li><p><strong>堆大小：</strong>Xmx。当分配速率过高，超过回收速率，造成堆内存不够时，会触发 Allocation Stall，这类 Stall 会减缓当前的用户线程。因此，当我们在 GC 日志中看到 Allocation Stall，通常可以认为堆空间偏小或者 concurrent gc threads 数偏小。</p>
+</li>
+<li><p><strong>GC 触发时机：</strong>ZAllocationSpikeTolerance, ZCollectionInterval。ZAllocationSpikeTolerance 用来估算当前的堆内存分配速率，在当前剩余的堆内存下，ZAllocationSpikeTolerance 越大，估算的达到 OOM 的时间越快，ZGC 就会更早地进行触发 GC。ZCollectionInterval 用来指定 GC 发生的间隔，以秒为单位触发 GC。</p>
+</li>
+<li><p><strong>GC 线程：</strong>ParallelGCThreads， ConcGCThreads。ParallelGCThreads 是设置 STW 任务的 GC 线程数目，默认为 CPU 个数的 60%；ConcGCThreads 是并发阶段 GC 线程的数目，默认为 CPU 个数的 12.5%。增加 GC 线程数目，可以加快 GC 完成任务，减少各个阶段的时间，但也会增加 CPU 的抢占开销，可根据生产情况调整。</p>
+</li>
+</ul>
+<p>由上可以看出 ZGC 需要调整的参数十分简单，通常设置 Xmx 即可满足业务的需求，大大减轻 Java 开发者的负担。</p>
+<p><strong>ZGC典型应用场景</strong></p>
+<p>对于性能来说，不同的配置对性能的影响是不同的，如充足的内存下即大堆场景，ZGC 在各类 Benchmark 中能够超过 G1 大约 5% 到 20%，而在小堆情况下，则要低于 G1 大约 10%；不同的配置对于应用的影响不尽相同，开发者需要根据使用场景来合理判断。</p>
+<p>当前 ZGC 不支持压缩指针和分代 GC，其内存占用相对于 G1 来说要稍大，在小堆情况下较为明显，而在大堆情况下，这些多占用的内存则显得不那么突出。<strong>因此，以下两类应用强烈建议使用 ZGC 来提升业务体验：</strong></p>
+<ul>
+<li>超大堆应用。超大堆（百 G 以上）下，CMS 或者 G1 如果发生 Full GC，停顿会在分钟级别，可能会造成业务的终端，强烈推荐使用 ZGC。</li>
+<li>当业务应用需要提供高服务级别协议（Service Level Agreement，SLA），例如 99.99% 的响应时间不能超过 100ms，此类应用无论堆大小，均推荐采用低停顿的 ZGC。</li>
+</ul>
+<p><strong>ZGC生产注意事项</strong></p>
+<p><strong>RSS 内存异常现象</strong></p>
+<p>由前面 ZGC 原理可知，ZGC 采用多映射 multi-mapping 的方法实现了三份虚拟内存指向同一份物理内存。而 Linux 统计进程 RSS 内存占用的算法是比较脆弱的，这种多映射的方式并没有考虑完整，因此根据当前 Linux 采用大页和小页时，其统计的开启 ZGC 的 Java 进程的内存表现是不同的。在内核使用小页的 Linux 版本上，这种三映射的同一块物理内存会被 linux 的 RSS 占用算法统计 3 次，因此通常可以看到使用 ZGC 的 Java 进程的 RSS 内存膨胀了三倍左右，但是实际占用只有统计数据的三分之一，会对运维或者其他业务造成一定的困扰。而在内核使用大页的 Linux 版本上，这部分三映射的物理内存则会统计到 hugetlbfs inode 上，而不是当前 Java 进程上。</p>
+<p><strong>共享内存调整</strong></p>
+<p>ZGC 需要在 share memory 中建立一个内存文件来作为实际物理内存占用，因此当要使用的 Java 的堆大小大于 /dev/shm 的大小时，需要对 /dev/shm 的大小进行调整。通常来说，命令如下（下面是将 /dev/shm 调整为 64G）：</p>
+<p>vi/etc/fstabtmpfs /dev/shm tmpfs defaults,size= 65536M00</p>
+<p>首先修改 fstab 中 shm 配置的大小，size 的值根据需求进行修改，然后再进行 shm 的 mount 和 umount。</p>
+<p>umount/dev/shmmount /dev/shm</p>
+<p><strong>mmap 节点上限调整</strong></p>
+<p>ZGC 的堆申请和传统的 GC 有所不同，需要占用的 memory mapping 数目更多，即每个 ZPage 需要 mmap 映射三次，这样系统中仅 Java Heap 所占用的 mmap 个数为 (Xmx / zpage_size) * 3，默认情况下 zpage_size 的大小为 2M。</p>
+<p>为了给 JNI 等 native 模块中的 mmap 映射数目留出空间，内存映射的数目应该调整为 (Xmx / zpage_size) 3*1.2。</p>
+<p>默认的系统 memory mapping 数目由文件 /proc/sys/vm/max_map_count 指定，通常数目为 65536，当给 JVM 配置一个很大的堆时，需要调整该文件的配置，使得其大于 (Xmx / zpage_size) 3*1.2。</p>
+<p><strong>ZGC存在的问题及持续改进</strong></p>
+<p>目前ZGC历代版本中存在的一些问题（阿里、腾讯、美团、华为等大厂在支持业务切换 ZGC 的出现的），基本上都已经将遇到的相关问题和修复积极向社区报告和回馈，很多问题在JDK16和JDK17已经修复完善。另外的话，问题相对来说不是非常严重，如果遇到类似的问题可以查看下JVM团队的历代修复日志，同时建议就是尽量使用比较新的版本来上线，以免重复掉坑里面。</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/04/25/00-00-09-ZGC%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Jvm/" rel="tag">Jvm</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ZGC/" rel="tag">ZGC</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/" rel="tag">性能调优</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/04/26/00-00-10-Jvm%E6%80%BB%E7%BB%93%E5%A4%A7%E5%85%A8/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            Jvm总结大全
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/04/25/10-00-00-hexo%E8%A7%A3%E5%86%B3%E6%8E%A8%E9%80%81github-ssh-key%E8%BF%87%E6%9C%9F%E9%97%AE%E9%A2%98/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">hexo解决推送github ssh key过期问题</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2022
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>Zookeeper客户端使用与集群特性 |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-03-02-01-Zookeeper客户端使用与集群特性"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  Zookeeper客户端使用与集群特性
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/06/10/03-02-01-Zookeeper%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8%E4%B8%8E%E9%9B%86%E7%BE%A4%E7%89%B9%E6%80%A7/" class="article-date">
+  <time datetime="2022-06-10T15:00:43.000Z" itemprop="datePublished">2022-06-10</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a> / <a class="article-category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a> / <a class="article-category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/Zookeeper/">Zookeeper</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">2k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">8 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p id="hitokoto">正在加载一言...</p>
+
+<h2 id="一、Zookeeper-Java-客户端"><a href="#一、Zookeeper-Java-客户端" class="headerlink" title="一、Zookeeper Java 客户端"></a>一、Zookeeper Java 客户端</h2><h3 id="1、zookeeper原生方式"><a href="#1、zookeeper原生方式" class="headerlink" title="1、zookeeper原生方式"></a>1、zookeeper原生方式</h3><blockquote>
+<ul>
+<li>maven坐标</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.zookeeper&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;zookeeper&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;<span class="number">3.5</span><span class="number">.8</span>&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>客户端创建</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ZookeeperClientTest</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String ZK_ADDRESS=<span class="string">&quot;192.168.32.139:2181&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> SESSION_TIMEOUT = <span class="number">5000</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> ZooKeeper zooKeeper;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String ZK_NODE=<span class="string">&quot;/zk-node&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Before</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> <span class="keyword">throws</span> IOException, InterruptedException </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> CountDownLatch countDownLatch=<span class="keyword">new</span> CountDownLatch(<span class="number">1</span>);</span><br><span class="line">        zooKeeper=<span class="keyword">new</span> ZooKeeper(ZK_ADDRESS, SESSION_TIMEOUT, event -&gt; &#123;</span><br><span class="line">            <span class="keyword">if</span> (event.getState()== Watcher.Event.KeeperState.SyncConnected &amp;&amp;</span><br><span class="line">                    event.getType()== Watcher.Event.EventType.None)&#123;</span><br><span class="line">                countDownLatch.countDown();</span><br><span class="line">                log.info(<span class="string">&quot;连接成功！&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        log.info(<span class="string">&quot;连接中....&quot;</span>);</span><br><span class="line">        countDownLatch.await();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">## 创建zookeeper实例方法</span><br><span class="line">ZooKeeper(String connectString, <span class="keyword">int</span> sessionTimeout, Watcher watcher)</span><br><span class="line">ZooKeeper(String connectString, <span class="keyword">int</span> sessionTimeout, Watcher watcher, ZKClientConfig)</span><br><span class="line">ZooKeeper(String connectString, <span class="keyword">int</span> sessionTimeout, Watcher watcher, <span class="keyword">boolean</span> canBeReadOnly, HostProvider)</span><br><span class="line">ZooKeeper(String connectString, <span class="keyword">int</span> sessionTimeout, Watcher watcher, <span class="keyword">boolean</span> canBeReadOnly, HostProvider, ZKClientConfig)</span><br><span class="line">ZooKeeper(String connectString, <span class="keyword">int</span> sessionTimeout, Watcher watcher, <span class="keyword">boolean</span> canBeReadOnly)</span><br><span class="line">ZooKeeper(String connectString, <span class="keyword">int</span> sessionTimeout, Watcher watcher, <span class="keyword">boolean</span> canBeReadOnly, ZKClientConfig)</span><br><span class="line">ZooKeeper(String connectString, <span class="keyword">int</span> sessionTimeout, Watcher watcher, <span class="keyword">long</span>, <span class="keyword">byte</span>[])</span><br><span class="line">ZooKeeper(String connectString, <span class="keyword">int</span> sessionTimeout, Watcher watcher, <span class="keyword">long</span>, <span class="keyword">byte</span>[], <span class="keyword">boolean</span>, HostProvider)</span><br><span class="line">ZooKeeper(String connectString, <span class="keyword">int</span> sessionTimeout, Watcher watcher, <span class="keyword">long</span>, <span class="keyword">byte</span>[], <span class="keyword">boolean</span>, HostProvider, ZKClientConfig)</span><br><span class="line">ZooKeeper(String connectString, <span class="keyword">int</span>  sessionTimeout, Watcher watcher, <span class="keyword">long</span>, <span class="keyword">byte</span>[], <span class="keyword">boolean</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="参数说明"><a href="#参数说明" class="headerlink" title="参数说明"></a>参数说明</h2><table>
+<thead>
+<tr>
+<th>参数名称</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>connectString</td>
+<td>ZooKeeper服务器列表，由英文逗号分开的host:port字符串组成， 每一个都代表一台ZooKeeper机器，如，host1:port1,host2:port2,host3:port3。另外，也可以在connectString中设置客户端连接上ZooKeeper 后的根目录，方法是在host:port字符串之后添加上这个根目录，例如,host1:port1,host2:port2,host3:port3/zk-base,这样就指定了该客户端连接上ZooKeeper服务器之后,所有对ZooKeeper 的操作，都会基于这个根目录。例如，客户端对/sub-node 的操作，最终创建 /zk-node/sub-node, 这个目录也叫Chroot，即客户端隔离命名空间。</td>
+</tr>
+<tr>
+<td>sessionTimeout</td>
+<td>会话的超时时间，是一个以“毫秒”为单位的整型值。在ZooKeeper中有 会话的概念，在一个会话周期内，ZooKeeper客户端和服务器之间会通过心跳检 测机制来维持会话的有效性，一旦在sessionTimeout时间内没有进行有效 的心跳检测，会话就会失效。</td>
+</tr>
+<tr>
+<td>watcher</td>
+<td>ZooKeeper允许 客户端在构造方法中传入一个接口 watcher (org.apache. zookeeper. Watcher)的实现类对象来作为默认的 Watcher事件通知处理器。当然，该参 数可以设置为null 以表明不需要设置默认的 Watcher处理器。</td>
+</tr>
+<tr>
+<td>canBeReadOnly</td>
+<td>这是一个boolean类型的参数，用于标识当前会话是否支持“read-only(只 读)”模式。默认情况下，在ZooKeeper集群中，一个机器如果和集群中过半及 以上机器失去了网络连接，那么这个机器将不再处理客户端请求（包括读写请 求)。但是在某些使用场景下，当ZooKeeper服务器发生此类故障的时候，我们 还是希望ZooKeeper服务器能够提供读服务（当然写服务肯定无法提供）—— 这就是 ZooKeeper的“read-only”模式。</td>
+</tr>
+<tr>
+<td>sessionId和 ses sionPasswd</td>
+<td>分别代表会话ID和会话秘钥。这两个参数能够唯一确定一个会话，同时客户 端使用这两个参数可以实现客户端会话复用，从而达到恢复会话的效果。具体 使用方法是，第一次连接上ZooKeeper服务器时，通过调用ZooKeeper对象实 例的以下两个接口，即可获得当前会话的ID和秘钥: long getSessionId(); byte[]getSessionPasswd( ); 荻取到这两个参数值之后，就可以在下次创建ZooKeeper对象实例的时候传 入构造方法了</td>
+</tr>
+</tbody></table>
+</li>
+<li><p>创建同步节点/异步创建节点/修改节点数据</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">## 创建同步节点</span><br><span class="line">String path = zooKeeper.create(ZK_NODE, <span class="string">&quot;data&quot;</span>.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);</span><br><span class="line">## 异步创建节点</span><br><span class="line"> zooKeeper.create(ZK_NODE, <span class="string">&quot;data&quot;</span>.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE,</span><br><span class="line">             CreateMode.PERSISTENT,</span><br><span class="line">             (rc, path, ctx, name) -&gt; log.info(<span class="string">&quot;rc  &#123;&#125;,path &#123;&#125;,ctx &#123;&#125;,name &#123;&#125;&quot;</span>,rc,path,ctx,name),<span class="string">&quot;context&quot;</span>);</span><br><span class="line">## 修改节点数据 【带版本号】</span><br><span class="line">Stat stat = <span class="keyword">new</span> Stat();</span><br><span class="line">    <span class="keyword">byte</span>[] data = zooKeeper.getData(ZK_NODE, <span class="keyword">false</span>, stat);</span><br><span class="line">    log.info(<span class="string">&quot;修改前: &#123;&#125;&quot;</span>,<span class="keyword">new</span> String(data));</span><br><span class="line">    zooKeeper.setData(ZK_NODE, <span class="string">&quot;changed!&quot;</span>.getBytes(), stat.getVersion());</span><br><span class="line">     <span class="keyword">byte</span>[] dataAfter = zooKeeper.getData(ZK_NODE, <span class="keyword">false</span>, stat);</span><br><span class="line">    log.info(<span class="string">&quot;修改后: &#123;&#125;&quot;</span>,<span class="keyword">new</span> String(dataAfter));</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h2 id="二、Curator方式"><a href="#二、Curator方式" class="headerlink" title="二、Curator方式"></a>二、Curator方式</h2><blockquote>
+<p>简介：Java 语言编程的 ZooKeeper 客户端框架，Curator项目是现在ZooKeeper 客户端中使用最多，对ZooKeeper 版本支持最好的第三方客户端，并推荐使用，Curator 把我们平时常用的很多 ZooKeeper 服务开发功能做了封装，例如 Leader 选举、分布式计数器、分布式锁。这就减少了技术人员在使用 ZooKeeper 时的大部分底层细节开发工作。在会话重新连接、Watch 反复注册、多种异常处理等使用场景中，用原生的 ZooKeeper 处理比较复杂。而在使用 Curator 时，由于其对这些功能都做了高度的封装，使用起来更加简单，不但减少了开发时间，而且增强了程序的可靠性。</p>
+</blockquote>
+<h3 id="1、Curator使用"><a href="#1、Curator使用" class="headerlink" title="1、Curator使用"></a>1、Curator使用</h3><blockquote>
+<ul>
+<li><p>maven坐标</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.curator&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;curator-recipes&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;<span class="number">5.0</span><span class="number">.0</span>&lt;/version&gt;</span><br><span class="line">    &lt;exclusions&gt;</span><br><span class="line">        &lt;exclusion&gt;</span><br><span class="line">            &lt;groupId&gt;org.apache.zookeeper&lt;/groupId&gt;</span><br><span class="line">            &lt;artifactId&gt;zookeeper&lt;/artifactId&gt;</span><br><span class="line">        &lt;/exclusion&gt;</span><br><span class="line">    &lt;/exclusions&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure></li>
+<li><p>会话创建</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">## 静态工厂方式</span><br><span class="line"><span class="comment">// 重试策略 </span></span><br><span class="line">RetryPolicy retryPolicy = <span class="keyword">new</span> ExponentialBackoffRetry(<span class="number">1000</span>, <span class="number">3</span>)</span><br><span class="line">CuratorFramework client = CuratorFrameworkFactory.newClient(zookeeperConnectionString, retryPolicy);</span><br><span class="line">client.start();</span><br><span class="line">##  fluent 风格创建</span><br><span class="line">RetryPolicy retryPolicy = <span class="keyword">new</span> ExponentialBackoffRetry(<span class="number">1000</span>, <span class="number">3</span>);</span><br><span class="line">CuratorFramework client = CuratorFrameworkFactory.builder()</span><br><span class="line">                .connectString(<span class="string">&quot;192.168.128.129:2181&quot;</span>)</span><br><span class="line">                .sessionTimeoutMs(<span class="number">5000</span>)  <span class="comment">// 会话超时时间</span></span><br><span class="line">                .connectionTimeoutMs(<span class="number">5000</span>) <span class="comment">// 连接超时时间</span></span><br><span class="line">                .retryPolicy(retryPolicy)</span><br><span class="line">                .namespace(<span class="string">&quot;base&quot;</span>) <span class="comment">// 包含隔离名称</span></span><br><span class="line">                .build();</span><br><span class="line">client.start();</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键参数：</strong></p>
+<ul>
+<li><p>connectionString：服务器地址列表</p>
+</li>
+<li><p>retryPolicy：重试策略</p>
+<table>
+<thead>
+<tr>
+<th><strong>策略名称</strong></th>
+<th><strong>描述</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ExponentialBackoffRetry</td>
+<td>重试一组次数，重试之间的睡眠时间增加</td>
+</tr>
+<tr>
+<td>RetryNTimes</td>
+<td>重试最大次数</td>
+</tr>
+<tr>
+<td>RetryOneTime</td>
+<td>只重试一次</td>
+</tr>
+<tr>
+<td>RetryUntilElapsed</td>
+<td>在给定的时间结束之前重试</td>
+</tr>
+</tbody></table>
+</li>
+<li><p>超时时间：Curator 客户端创建过程中，有两个超时时间的设置。</p>
+<blockquote>
+<p>一个是 sessionTimeoutMs 会话超时时间，用来设置该条会话在 ZooKeeper 服务端的失效时间。另一个是 connectionTimeoutMs 客户端创建会话的超时时间，用来限制客户端发起一个会话连接到接收 ZooKeeper 服务端应答的时间。sessionTimeoutMs 作用在服务端，而 connectionTimeoutMs 作用在客户端。</p>
+</blockquote>
+</li>
+<li><p>创建节点/一次性创建带层级结构的节点/获取数据/更新节点/删除节点</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">## 创建节点</span><br><span class="line">String path = curatorFramework.create().forPath(<span class="string">&quot;/curator-node&quot;</span>);</span><br><span class="line"><span class="comment">// curatorFramework.create().withMode(CreateMode.PERSISTENT).forPath(&quot;/curator-node&quot;,&quot;some-data&quot;.getBytes())</span></span><br><span class="line">## 一次性创建带层级结构的节点</span><br><span class="line">String pathWithParent=<span class="string">&quot;/node-parent/sub-node-1&quot;</span>;</span><br><span class="line">    String path = curatorFramework.create().creatingParentsIfNeeded().forPath(pathWithParent);</span><br><span class="line">## 获取数据</span><br><span class="line"><span class="keyword">byte</span>[] bytes = curatorFramework.getData().forPath(<span class="string">&quot;/curator-node&quot;</span>);</span><br><span class="line">    log.info(<span class="string">&quot;get data from  node :&#123;&#125;  successfully.&quot;</span>,<span class="keyword">new</span> String(bytes));</span><br><span class="line">## 更新节点</span><br><span class="line">curatorFramework.setData().forPath(<span class="string">&quot;/curator-node&quot;</span>,<span class="string">&quot;changed!&quot;</span>.getBytes());</span><br><span class="line">    <span class="keyword">byte</span>[] bytes = curatorFramework.getData().forPath(<span class="string">&quot;/curator-node&quot;</span>);</span><br><span class="line">    log.info(<span class="string">&quot;get data from  node /curator-node :&#123;&#125;  successfully.&quot;</span>,<span class="keyword">new</span> String(bytes));</span><br><span class="line">## 删除节点</span><br><span class="line">String pathWithParent=<span class="string">&quot;/node-parent&quot;</span>;</span><br><span class="line">    curatorFramework.delete().guaranteed().deletingChildrenIfNeeded().forPath(pathWithParent);</span><br><span class="line">注：guaranteed：该函数的功能如字面意思一样，主要起到一个保障删除成功的作用，其底层工作方式是：只要该客户端的会话有效，就会在后台持续发起删除请求，直到该数据节点在 ZooKeeper 服务端被删除。</span><br><span class="line">deletingChildrenIfNeeded：指定了该函数后，系统在删除该数据节点的时候会以递归的方式直接删除其子节点，以及子节点的子节点。</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<h2 id="三、Zookeeper-集群模式"><a href="#三、Zookeeper-集群模式" class="headerlink" title="三、Zookeeper 集群模式"></a>三、<strong>Zookeeper 集群模式</strong></h2><p>Zookeeper 集群模式一共有三种类型的角色</p>
+<p><strong>Leader</strong>:  处理所有的事务请求（写请求），可以处理读请求，集群中只能有一个Leader</p>
+<p><strong>Follower</strong>：只能处理读请求，同时作为 Leader的候选节点，即如果Leader宕机，Follower节点要参与到新的Leader选举中，有可能成为新的Leader节点。</p>
+<p><strong>Observer</strong>：只能处理读请求。不能参与选举 </p>
+<p><strong>Zookeeper 3.5.0 新特性： 集群动态配置</strong></p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/06/10/03-02-01-Zookeeper%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8%E4%B8%8E%E9%9B%86%E7%BE%A4%E7%89%B9%E6%80%A7/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zookeeper/" rel="tag">zookeeper</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/06/11/03-02-02-Zookeeper%E5%85%B8%E5%9E%8B%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E5%AE%9E%E6%88%98/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            Zookeeper典型使用场景实战
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/06/09/03-02-00-Zookeeper%E7%89%B9%E6%80%A7%E4%B8%8E%E8%8A%82%E7%82%B9%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">Zookeeper特性与节点数据类型</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2022
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

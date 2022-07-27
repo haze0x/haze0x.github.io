@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>Kafka快速实战与基本原理详解 |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-03-05-01-Kafka快速实战与基本原理详解"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  Kafka快速实战与基本原理详解
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/07/27/03-05-01-Kafka%E5%BF%AB%E9%80%9F%E5%AE%9E%E6%88%98%E4%B8%8E%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/" class="article-date">
+  <time datetime="2022-07-27T15:13:59.000Z" itemprop="datePublished">2022-07-27</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a> / <a class="article-category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a> / <a class="article-category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/kafka/">kafka</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">2.4k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">9 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p id="hitokoto">正在加载一言...</p>
+
+<h2 id="Kafka快速实战与基本原理详解"><a href="#Kafka快速实战与基本原理详解" class="headerlink" title="Kafka快速实战与基本原理详解"></a>Kafka快速实战与基本原理详解</h2><h3 id="1、Kafka的使用场景"><a href="#1、Kafka的使用场景" class="headerlink" title="1、Kafka的使用场景"></a>1、<strong>Kafka的使用场景</strong></h3><ul>
+<li>日志收集：一个公司可以用Kafka收集各种服务的log，通过kafka以统一接口服务的方式开放给各种consumer，例如hadoop、Hbase、Solr等。</li>
+<li>消息系统：解耦和生产者和消费者、缓存消息等。</li>
+<li>用户活动跟踪：Kafka经常被用来记录web用户或者app用户的各种活动，如浏览网页、搜索、点击等活动，这些活动信息被各个服务器发布到kafka的topic中，然后订阅者通过订阅这些topic来做实时的监控分析，或者装载到hadoop、数据仓库中做离线分析和挖掘。</li>
+<li>运营指标：Kafka也经常用来记录运营监控数据。包括收集各种分布式应用的数据，生产各种操作的集中反馈，比如报警和报告。</li>
+</ul>
+<h3 id="2、Kafka基本概念"><a href="#2、Kafka基本概念" class="headerlink" title="2、Kafka基本概念"></a>2、<strong>Kafka基本概念</strong></h3><p>kafka是一个分布式的，分区的消息(官方称之为commit log)服务。它提供一个消息系统应该具备的功能，但是确有着独特的设计。可以这样来说，Kafka借鉴了JMS规范的思想，但是确并<strong>没有完全遵循JMS规范。</strong></p>
+<p>首先，让我们来看一下基础的消息(Message)相关术语：</p>
+<table>
+<thead>
+<tr>
+<th><strong>名称</strong></th>
+<th><strong>解释</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Broker</td>
+<td>消息中间件处理节点，一个Kafka节点就是一个broker，一个或者多个Broker可以组成一个Kafka集群</td>
+</tr>
+<tr>
+<td>Topic</td>
+<td>Kafka根据topic对消息进行归类，发布到Kafka集群的每条消息都需要指定一个topic逻辑概念，真正消息发送在partition</td>
+</tr>
+<tr>
+<td>Producer</td>
+<td>消息生产者，向Broker发送消息的客户端</td>
+</tr>
+<tr>
+<td>Consumer</td>
+<td>消息消费者，从Broker读取消息的客户端</td>
+</tr>
+<tr>
+<td>ConsumerGroup</td>
+<td>每个Consumer属于一个特定的Consumer Group，一条消息可以被多个不同的Consumer Group消费，但是一个Consumer Group中只能有一个Consumer能够消费该消息</td>
+</tr>
+<tr>
+<td>Partition</td>
+<td>物理上的概念，一个topic可以分为多个partition，每个partition内部消息是有序的</td>
+</tr>
+</tbody></table>
+<p>因此，从一个较高的层面上来看，producer通过网络发送消息到Kafka集群，然后consumer来进行消费，如下图：</p>
+<p><img src="/2022/07/27/03-05-01-Kafka%E5%BF%AB%E9%80%9F%E5%AE%9E%E6%88%98%E4%B8%8E%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/image-20220728013835791.png" alt="image-20220728013835791"></p>
+<blockquote>
+<p>服务端(brokers)和客户端(producer、consumer)之间通信通过<strong>TCP协议</strong>来完成。</p>
+</blockquote>
+<h3 id="3、kafka环境搭建"><a href="#3、kafka环境搭建" class="headerlink" title="3、kafka环境搭建"></a>3、kafka环境搭建</h3><ul>
+<li><p>安装jdk</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install java-<span class="number">1.8</span><span class="number">.0</span>-openjdk* -y</span><br></pre></td></tr></table></figure></li>
+<li><p>kafka依赖zookeeper，所以需要先安装zookeeper</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">wget https:<span class="comment">//archive.apache.org/dist/zookeeper/zookeeper-3.5.8/apache-zookeeper-3.5.8-bin.tar.gz</span></span><br><span class="line">tar -zxvf apache-zookeeper-<span class="number">3.5</span><span class="number">.8</span>-bin.tar.gz</span><br><span class="line">cd  apache-zookeeper-<span class="number">3.5</span><span class="number">.8</span>-bin</span><br><span class="line">cp conf/zoo_sample.cfg conf/zoo.cfg</span><br><span class="line"></span><br><span class="line"># 启动zookeeper</span><br><span class="line">bin/zkServer.sh start</span><br><span class="line">bin/zkCli.sh </span><br><span class="line">ls /			#查看zk的根目录相关节点</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>下载安装包</strong></p>
+<p>下载2.4.1 release版本，并解压：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget https:<span class="comment">//archive.apache.org/dist/kafka/2.4.1/kafka_2.11-2.4.1.tgz  # 2.11是scala的版本，2.4.1是kafka的版本</span></span><br><span class="line">tar -xzf kafka_2<span class="number">.11</span>-<span class="number">2.4</span><span class="number">.1</span>.tgz</span><br><span class="line">cd kafka_2<span class="number">.11</span>-<span class="number">2.4</span><span class="number">.1</span></span><br></pre></td></tr></table></figure></li>
+<li><p><strong>修改配置</strong></p>
+<p>修改配置文件config/server.properties:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#broker.id属性在kafka集群中必须要是唯一</span><br><span class="line">broker.id=<span class="number">0</span></span><br><span class="line">#kafka部署的机器ip和提供服务的端口号</span><br><span class="line">listeners=PLAINTEXT:<span class="comment">//192.168.65.60:9092   </span></span><br><span class="line">#kafka的消息存储文件</span><br><span class="line">log.dir=/usr/local/data/kafka-logs</span><br><span class="line">#kafka连接zookeeper的地址</span><br><span class="line">zookeeper.connect=<span class="number">192.168</span><span class="number">.65</span><span class="number">.60</span>:<span class="number">2181</span></span><br></pre></td></tr></table></figure></li>
+<li><p><strong>启动服务</strong></p>
+<p>现在来启动kafka服务：</p>
+<p>启动脚本语法：kafka-server-start.sh [-daemon] server.properties</p>
+<p>可以看到，server.properties的配置路径是一个强制的参数，-daemon表示以后台进程运行，否则ssh客户端退出后，就会停止服务。(注意，在启动kafka时会使用linux主机名关联的ip地址，所以需要把主机名和linux的ip映射配置到本地host里，用vim /etc/hosts)</p>
+<p>​                # 启动kafka，运行日志在logs目录的server.log文件里 bin/kafka-server-start.sh -daemon config/server.properties   #后台启动，不会打印日志到控制台 或者用 bin/kafka-server-start.sh config/server.properties &amp; # 我们进入zookeeper目录通过zookeeper客户端查看下zookeeper的目录树 bin/zkCli.sh  ls /        #查看zk的根目录kafka相关节点 ls /brokers/ids    #查看kafka节点 # 停止kafka bin/kafka-server-stop.sh              </p>
+<p>启动报错日志可以查看server.log</p>
+<p><strong>server.properties核心配置详解：</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>Property</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>broker.id</td>
+<td>0</td>
+<td>每个broker都可以用一个唯一的非负整数id进行标识；这个id可以作为broker的“名字”，你可以选择任意你喜欢的数字作为id，只要id是唯一的即可。</td>
+</tr>
+<tr>
+<td>log.dirs</td>
+<td>/tmp/kafka-logs</td>
+<td>kafka存放数据的路径。这个路径并不是唯一的，可以是多个，路径之间只需要使用逗号分隔即可；每当创建新partition时，都会选择在包含最少partitions的路径下进行。</td>
+</tr>
+<tr>
+<td>listeners</td>
+<td>PLAINTEXT://192.168.65.60:9092</td>
+<td>server接受客户端连接的端口，ip配置kafka本机ip即可</td>
+</tr>
+<tr>
+<td>zookeeper.connect</td>
+<td>localhost:2181</td>
+<td>zooKeeper连接字符串的格式为：hostname:port，此处hostname和port分别是ZooKeeper集群中某个节点的host和port；zookeeper如果是集群，连接方式为 hostname1:port1, hostname2:port2, hostname3:port3</td>
+</tr>
+<tr>
+<td>log.retention.hours</td>
+<td>168</td>
+<td>每个日志文件删除之前保存的时间。默认数据保存时间对所有topic都一样。</td>
+</tr>
+<tr>
+<td>num.partitions</td>
+<td>1</td>
+<td>创建topic的默认分区数</td>
+</tr>
+<tr>
+<td>default.replication.factor</td>
+<td>1</td>
+<td>自动创建topic的默认副本数量，建议设置为大于等于2</td>
+</tr>
+<tr>
+<td>min.insync.replicas</td>
+<td>1</td>
+<td>当producer设置acks为-1时，min.insync.replicas指定replicas的最小数目（必须确认每一个repica的写数据都是成功的），如果这个数目没有达到，producer发送消息会产生异常</td>
+</tr>
+<tr>
+<td>delete.topic.enable</td>
+<td>false</td>
+<td>是否允许删除主题</td>
+</tr>
+</tbody></table>
+</li>
+<li><p><strong>创建主题</strong> </p>
+<p>现在我们来创建一个名字为“test”的Topic，这个topic只有一个partition，并且备份因子也设置为1：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-topics.sh --create --zookeeper <span class="number">192.168</span><span class="number">.31</span><span class="number">.139</span>:<span class="number">2181</span> --replication-factor <span class="number">1</span> --partitions <span class="number">1</span> --topic test</span><br></pre></td></tr></table></figure>
+
+<p>查看kafka中目前存在的topic</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-topics.sh --list --zookeeper <span class="number">192.168</span><span class="number">.65</span><span class="number">.60</span>:<span class="number">2181</span></span><br></pre></td></tr></table></figure>
+
+<p>除了我们通过手工的方式创建Topic，当producer发布一个消息到某个指定的Topic，这个Topic如果不存在，就自动创建。</p>
+</li>
+<li><p><strong>删除主题</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-topics.sh --delete --topic test --zookeeper <span class="number">192.168</span><span class="number">.65</span><span class="number">.60</span>:<span class="number">2181</span></span><br></pre></td></tr></table></figure></li>
+<li><p><strong>发送消息</strong></p>
+<p>kafka自带了一个producer命令客户端，可以从本地文件中读取内容，或者我们也可以以命令行中直接输入内容，并将这些内容以消息的形式发送到kafka集群中。在默认情况下，每一个行会被当做成一个独立的消息。</p>
+<p>首先我们要运行发布消息的脚本，然后在命令中输入要发送的消息的内容：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-console-producer.sh --broker-list <span class="number">192.168</span><span class="number">.65</span><span class="number">.60</span>:<span class="number">9092</span> --topic test </span><br><span class="line">&gt;<span class="keyword">this</span> is a msg</span><br><span class="line">&gt;<span class="keyword">this</span> is a another msg </span><br></pre></td></tr></table></figure></li>
+<li><p><strong>消费消息</strong></p>
+<p><strong>kafka消费消息默认是消费消费者启动之后的消息，也就是说在消费者启动之前的消息不会消费，可以通过配置进行修改（</strong>from-beginning<strong>）</strong></p>
+<p>对于consumer，kafka同样也携带了一个命令行客户端，会将获取到内容在命令中进行输出，<strong>默认是消费最新的消息</strong>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-console-consumer.sh --bootstrap-server <span class="number">192.168</span><span class="number">.65</span><span class="number">.60</span>:<span class="number">9092</span> --topic test   </span><br></pre></td></tr></table></figure>
+
+<p>如果想要消费之前的消息可以通过–from-beginning参数指定，如下命令：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-console-consumer.sh --bootstrap-server <span class="number">192.168</span><span class="number">.65</span><span class="number">.60</span>:<span class="number">9092</span> --from-beginning --topic test </span><br></pre></td></tr></table></figure>
+
+<p>如果你是通过不同的终端窗口来运行以上的命令，你将会看到在producer终端输入的内容，很快就会在consumer的终端窗口上显示出来。</p>
+<p>以上所有的命令都有一些附加的选项；当我们不携带任何参数运行命令的时候，将会显示出这个命令的详细用法。</p>
+</li>
+<li><p><strong>消费多主题</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-console-consumer.sh --bootstrap-server <span class="number">192.168</span><span class="number">.65</span><span class="number">.60</span>:<span class="number">9092</span> --whitelist <span class="string">&quot;test|test-2&quot;</span></span><br></pre></td></tr></table></figure></li>
+<li><p><strong>单播消费（rocketmq中的集群消费，同一个消费者组中只有一个消费者可以消费到某个消息）</strong></p>
+<p>一条消息只能被某一个消费者消费的模式，类似queue模式，只需让所有消费者在同一个消费组里即可</p>
+<p>分别在两个客户端执行如下消费命令，然后往主题里发送消息，结果只有一个客户端能收到消息</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-console-consumer.sh --bootstrap-server <span class="number">192.168</span><span class="number">.65</span><span class="number">.60</span>:<span class="number">9092</span>  --consumer-property group.id=testGroup --topic test</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>多播消费（rocketmq中的广播消费）</strong></p>
+<p>一条消息能被多个消费者消费的模式，类似publish-subscribe模式费，针对Kafka同一条消息只能被同一个消费组下的某一个消费者消费的特性，要实现多播只要保证这些消费者属于不同的消费组即可。我们再增加一个消费者，该消费者属于testGroup-2消费组，结果两个客户端都能收到消息</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-console-consumer.sh --bootstrap-server <span class="number">192.168</span><span class="number">.65</span><span class="number">.60</span>:<span class="number">9092</span> --consumer-property group.id=testGroup-<span class="number">2</span> --topic test </span><br></pre></td></tr></table></figure></li>
+<li><p><strong>查看消费组名</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-consumer-groups.sh --bootstrap-server <span class="number">192.168</span><span class="number">.65</span><span class="number">.60</span>:<span class="number">9092</span> --list </span><br></pre></td></tr></table></figure></li>
+<li><p><strong>查看消费组的消费偏移量</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-consumer-groups.sh --bootstrap-server <span class="number">192.168</span><span class="number">.65</span><span class="number">.60</span>:<span class="number">9092</span> --describe --group testGroup</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/07/27/03-05-01-Kafka%E5%BF%AB%E9%80%9F%E5%AE%9E%E6%88%98%E4%B8%8E%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/image-20220728014609405.png" alt="image-20220728014609405"></p>
+<p><strong>current-offset：</strong>当前消费组的已消费偏移量</p>
+<p><strong>log-end-offset：</strong>主题对应分区消息的结束偏移量(HW)</p>
+<p><strong>lag：</strong>当前消费组未消费的消息数</p>
+<p>总结：</p>
+<p>对于某个单分区的topic来说，单播消费模式：所有的消费者都属于同一个消费者组；</p>
+<p>多播模式：所有的消费者属于不同的几个消费者组，每个消费者组都会消费消息，但是消费者组内部只有一个消费者可以消费消息</p>
+</li>
+</ul>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/07/27/03-05-01-Kafka%E5%BF%AB%E9%80%9F%E5%AE%9E%E6%88%98%E4%B8%8E%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/kafka/" rel="tag">kafka</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" rel="tag">消息队列</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/2022/07/27/10-00-01-%E4%BC%98%E9%9B%85%E7%9A%84%E4%BB%A3%E7%A0%81%E6%98%AF%E4%B8%80%E7%A7%8D%E8%89%BA%E6%9C%AF/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">优雅的代码是一种艺术</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2022
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

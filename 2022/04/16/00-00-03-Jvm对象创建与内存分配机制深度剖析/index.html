@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>Jvm对象创建与内存分配机制深度剖析 |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-00-00-03-Jvm对象创建与内存分配机制深度剖析"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  Jvm对象创建与内存分配机制深度剖析
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/04/16/00-00-03-Jvm%E5%AF%B9%E8%B1%A1%E5%88%9B%E5%BB%BA%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/" class="article-date">
+  <time datetime="2022-04-16T13:09:27.000Z" itemprop="datePublished">2022-04-16</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/">性能调优</a> / <a class="article-category-link" href="/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/Jvm/">Jvm</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">9.6k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">36 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p id="hitokoto">正在加载一言...</p>
+
+<h2 id="Jvm对象创建与内存分配机制深度剖析"><a href="#Jvm对象创建与内存分配机制深度剖析" class="headerlink" title="Jvm对象创建与内存分配机制深度剖析"></a>Jvm对象创建与内存分配机制深度剖析</h2><h2 id="一、对象的创建"><a href="#一、对象的创建" class="headerlink" title="一、对象的创建"></a>一、对象的创建</h2><p>对象创建的主要流程:</p>
+<p><img src="/2022/04/16/00-00-03-Jvm%E5%AF%B9%E8%B1%A1%E5%88%9B%E5%BB%BA%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/clipboard-1650200740666.png" alt="img"></p>
+<p><strong>1.类加载检查</strong></p>
+<p> 虚拟机遇到一条new指令时，首先将去检查这个指令的参数是否能在常量池中定位到一个类的符号引用，并且检查这个符号引用代表的类是否已被加载、解析和初始化过。如果没有，那必须先执行相应的类加载过程。</p>
+<p> new指令对应到语言层面上讲是，new关键词、对象克隆、对象序列化等。</p>
+<p><strong>2.分配内存</strong></p>
+<p> 在类加载检查通过后，接下来虚拟机将为新生对象分配内存。对象所需内存的大小在类 加载完成后便可完全确定，为对象分配空间的任务等同于把 一块确定大小的内存从Java堆中划分出来。</p>
+<p>这个步骤有两个问题：</p>
+<p>1.如何划分内存。</p>
+<p>2.在并发情况下， 可能出现正在给对象A分配内存，指针还没来得及修改，对象B又同时使用了原来的指针来分配内存的情况。</p>
+<p><strong>划分内存的方法：</strong></p>
+<ul>
+<li>“指针碰撞”（Bump the Pointer）(默认用指针碰撞)</li>
+</ul>
+<p>如果Java堆中内存是绝对规整的，所有用过的内存都放在一边，空闲的内存放在另一边，中间放着一个指针作为分界点的指示器，那所分配内存就仅仅是把那个指针向空闲空间那边挪动一段与对象大小相等的距离。</p>
+<ul>
+<li>“空闲列表”（Free List）</li>
+</ul>
+<p>如果Java堆中的内存并不是规整的，已使用的内存和空 闲的内存相互交错，那就没有办法简单地进行指针碰撞了，虚拟机就必须维护一个列表，记 录上哪些内存块是可用的，在分配的时候从列表中找到一块足够大的空间划分给对象实例， 并更新列表上的记录</p>
+<p><strong>解决并发问题的方法：</strong></p>
+<ul>
+<li>CAS（compare and swap）</li>
+</ul>
+<p>虚拟机采用<strong>CAS配上失败重试</strong>的方式保证更新操作的原子性来对分配内存空间的动作进行同步处理。</p>
+<ul>
+<li>本地线程分配缓冲（Thread Local Allocation Buffer,TLAB）</li>
+</ul>
+<p>把内存分配的动作按照线程划分在不同的空间之中进行，即每个线程在Java堆中预先分配一小块内存。通过**-XX:+/-*<em><strong>UseTLAB</strong>参数来设定虚拟机是否使用TLAB(JVM会默认开启</em>*-XX:+**<strong>UseTLAB</strong>)，-XX:TLABSize 指定TLAB大小。</p>
+<p><strong>3.初始化零值</strong></p>
+<p>内存分配完成后，虚拟机需要将分配到的内存空间都初始化为零值（不包括对象头）， 如果使用TLAB，这一工作过程也可以提前至TLAB分配时进行。这一步操作保证了对象的实例字段在Java代码中可以不赋初始值就直接使用，程序能访问到这些字段的数据类型所对应的零值。</p>
+<p><strong>4.设置对象头</strong></p>
+<p>初始化零值之后，虚拟机要对对象进行必要的设置，例如这个对象是哪个类的实例、如何才能找到类的元数据信息、对象的哈希码、对象的GC分代年龄等信息。这些信息存放在对象的对象头Object Header之中。</p>
+<p>在HotSpot虚拟机中，对象在内存中存储的布局可以分为3块区域：对象头（Header）、 实例数据（Instance Data）和对齐填充（Padding）。 HotSpot虚拟机的对象头包括两部分信息，第一部分用于存储对象自身的运行时数据， 如哈希码（HashCode）、GC分代年龄、锁状态标志、线程持有的锁、偏向线程ID、偏向时 间戳等。对象头的另外一部分是类型指针，即对象指向它的类元数据的指针，虚拟机通过这个指针来确定这个对象是哪个类的实例。</p>
+<p><strong>32位对象头</strong></p>
+<p><img src="/2022/04/16/00-00-03-Jvm%E5%AF%B9%E8%B1%A1%E5%88%9B%E5%BB%BA%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/clipboard-1650200753189.png" alt="img"></p>
+<p><strong>Klass指针指向的元空间中的类元信息，jvm内部使用的就是Klass【c++对象】，对象的.getClass()对象【java对象】则是jvm生成的给java开发者使用的</strong></p>
+<p><strong>64位对象头</strong></p>
+<p><img src="/2022/04/16/00-00-03-Jvm%E5%AF%B9%E8%B1%A1%E5%88%9B%E5%BB%BA%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/clipboard-1650200763541.png" alt="img"></p>
+<p>对象头在hotspot的C++源码markOop.hpp文件里的注释如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Bit-format of an object header (most significant first, big endian layout below):</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  32 bits:</span></span><br><span class="line"><span class="comment">//  --------</span></span><br><span class="line"><span class="comment">//             hash:25 ------------&gt;| age:4    biased_lock:1 lock:2 (normal object)</span></span><br><span class="line"><span class="comment">//             JavaThread*:23 epoch:2 age:4    biased_lock:1 lock:2 (biased object)</span></span><br><span class="line"><span class="comment">//             size:32 ------------------------------------------&gt;| (CMS free block)</span></span><br><span class="line"><span class="comment">//             PromotedObject*:29 ----------&gt;| promo_bits:3 -----&gt;| (CMS promoted object)</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  64 bits:</span></span><br><span class="line"><span class="comment">//  --------</span></span><br><span class="line"><span class="comment">//  unused:25 hash:31 --&gt;| unused:1   age:4    biased_lock:1 lock:2 (normal object)</span></span><br><span class="line"><span class="comment">//  JavaThread*:54 epoch:2 unused:1   age:4    biased_lock:1 lock:2 (biased object)</span></span><br><span class="line"><span class="comment">//  PromotedObject*:61 ---------------------&gt;| promo_bits:3 -----&gt;| (CMS promoted object)</span></span><br><span class="line"><span class="comment">//  size:64 -----------------------------------------------------&gt;| (CMS free block)</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  unused:25 hash:31 --&gt;| cms_free:1 age:4    biased_lock:1 lock:2 (COOPs &amp;&amp; normal object)</span></span><br><span class="line"><span class="comment">//  JavaThread*:54 epoch:2 cms_free:1 age:4    biased_lock:1 lock:2 (COOPs &amp;&amp; biased object)</span></span><br><span class="line"><span class="comment">//  narrowOop:32 unused:24 cms_free:1 unused:4 promo_bits:3 -----&gt;| (COOPs &amp;&amp; CMS promoted object)</span></span><br><span class="line"><span class="comment">//  unused:21 size:35 --&gt;| cms_free:1 unused:7 ------------------&gt;| (COOPs &amp;&amp; CMS free block)</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>5.执行<init>方法</init></strong></p>
+<p> 执行<init>方法，即对象按照程序员的意愿进行初始化。对应到语言层面上讲，就是为属性赋值（注意，这与上面的赋零值不同，这是由程序员赋的值），和执行构造方法。</init></p>
+<p><strong>对象大小与指针压缩</strong></p>
+<p>对象大小可以用jol-core包查看，引入依赖</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.openjdk.jol&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;jol-core&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;<span class="number">0.9</span>&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.openjdk.jol.info.ClassLayout;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 计算对象大小</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JOLSample</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        ClassLayout layout = ClassLayout.parseInstance(<span class="keyword">new</span> Object());</span><br><span class="line">        System.out.println(layout.toPrintable());</span><br><span class="line"></span><br><span class="line">        System.out.println();</span><br><span class="line">        ClassLayout layout1 = ClassLayout.parseInstance(<span class="keyword">new</span> <span class="keyword">int</span>[]&#123;&#125;);</span><br><span class="line">        System.out.println(layout1.toPrintable());</span><br><span class="line"></span><br><span class="line">        System.out.println();</span><br><span class="line">        ClassLayout layout2 = ClassLayout.parseInstance(<span class="keyword">new</span> A());</span><br><span class="line">        System.out.println(layout2.toPrintable());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// -XX:+UseCompressedOops           默认开启的压缩所有指针</span></span><br><span class="line">    <span class="comment">// -XX:+UseCompressedClassPointers  默认开启的压缩对象头里的类型指针Klass Pointer</span></span><br><span class="line">    <span class="comment">// Oops : Ordinary Object Pointers</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">                       <span class="comment">//8B mark word</span></span><br><span class="line">                       <span class="comment">//4B Klass Pointer   如果关闭压缩-XX:-UseCompressedClassPointers或-XX:-UseCompressedOops，则占用8B</span></span><br><span class="line">        <span class="keyword">int</span> id;        <span class="comment">//4B</span></span><br><span class="line">        String name;   <span class="comment">//4B  如果关闭压缩-XX:-UseCompressedOops，则占用8B</span></span><br><span class="line">        <span class="keyword">byte</span> b;        <span class="comment">//1B </span></span><br><span class="line">        Object o;      <span class="comment">//4B  如果关闭压缩-XX:-UseCompressedOops，则占用8B</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">运行结果：</span><br><span class="line">java.lang.Object object internals:</span><br><span class="line"> OFFSET  SIZE   TYPE DESCRIPTION                               VALUE</span><br><span class="line">      <span class="number">0</span>     <span class="number">4</span>        (object header)                           <span class="number">01</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> (<span class="number">00000001</span> <span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00000000</span>) (<span class="number">1</span>)    <span class="comment">//mark word</span></span><br><span class="line">      <span class="number">4</span>     <span class="number">4</span>        (object header)                           <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> (<span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00000000</span>) (<span class="number">0</span>)    <span class="comment">//mark word     </span></span><br><span class="line">      <span class="number">8</span>     <span class="number">4</span>        (object header)                           e5 <span class="number">01</span> <span class="number">00</span> f8 (<span class="number">11100101</span> <span class="number">00000001</span> <span class="number">00000000</span> <span class="number">11111000</span>) (-<span class="number">134217243</span>)    <span class="comment">//Klass Pointer</span></span><br><span class="line">     <span class="number">12</span>     <span class="number">4</span>        (loss due to the next object alignment)</span><br><span class="line">Instance size: <span class="number">16</span> bytes</span><br><span class="line">Space losses: <span class="number">0</span> bytes internal + <span class="number">4</span> bytes external = <span class="number">4</span> bytes total</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[I object internals:</span><br><span class="line"> OFFSET  SIZE   TYPE DESCRIPTION                               VALUE</span><br><span class="line">      <span class="number">0</span>     <span class="number">4</span>        (object header)                           <span class="number">01</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> (<span class="number">00000001</span> <span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00000000</span>) (<span class="number">1</span>)</span><br><span class="line">      <span class="number">4</span>     <span class="number">4</span>        (object header)                           <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> (<span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00000000</span>) (<span class="number">0</span>)</span><br><span class="line">      <span class="number">8</span>     <span class="number">4</span>        (object header)                           <span class="number">6d</span> <span class="number">01</span> <span class="number">00</span> f8 (<span class="number">01101101</span> <span class="number">00000001</span> <span class="number">00000000</span> <span class="number">11111000</span>) (-<span class="number">134217363</span>)</span><br><span class="line">     <span class="number">12</span>     <span class="number">4</span>        (object header)                           <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> (<span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00000000</span>) (<span class="number">0</span>)</span><br><span class="line">     <span class="number">16</span>     <span class="number">0</span>    <span class="keyword">int</span> [I.&lt;elements&gt;                             N/A</span><br><span class="line">Instance size: <span class="number">16</span> bytes</span><br><span class="line">Space losses: <span class="number">0</span> bytes internal + <span class="number">0</span> bytes external = <span class="number">0</span> bytes total</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">com.tuling.jvm.JOLSample$A object internals:</span><br><span class="line"> OFFSET  SIZE               TYPE DESCRIPTION                               VALUE</span><br><span class="line">      <span class="number">0</span>     <span class="number">4</span>                    (object header)                           <span class="number">01</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> (<span class="number">00000001</span> <span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00000000</span>) (<span class="number">1</span>)</span><br><span class="line">      <span class="number">4</span>     <span class="number">4</span>                    (object header)                           <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> (<span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00000000</span>) (<span class="number">0</span>)</span><br><span class="line">      <span class="number">8</span>     <span class="number">4</span>                    (object header)                           <span class="number">61</span> cc <span class="number">00</span> f8 (<span class="number">01100001</span> <span class="number">11001100</span> <span class="number">00000000</span> <span class="number">11111000</span>) (-<span class="number">134165407</span>)</span><br><span class="line">     <span class="number">12</span>     <span class="number">4</span>                <span class="keyword">int</span> A.id                                      <span class="number">0</span></span><br><span class="line">     <span class="number">16</span>     <span class="number">1</span>               <span class="keyword">byte</span> A.b                                       <span class="number">0</span></span><br><span class="line">     <span class="number">17</span>     <span class="number">3</span>                    (alignment/padding gap)                  </span><br><span class="line">     <span class="number">20</span>     <span class="number">4</span>   java.lang.String A.name                                    <span class="keyword">null</span></span><br><span class="line">     <span class="number">24</span>     <span class="number">4</span>   java.lang.Object A.o                                       <span class="keyword">null</span></span><br><span class="line">     <span class="number">28</span>     <span class="number">4</span>                    (loss due to the next object alignment)</span><br><span class="line">Instance size: <span class="number">32</span> bytes</span><br><span class="line">Space losses: <span class="number">3</span> bytes internal + <span class="number">4</span> bytes external = <span class="number">7</span> bytes total</span><br></pre></td></tr></table></figure>
+
+<p>什么是java对象的<strong>指针压缩</strong>？</p>
+<p>1.jdk1.6 update14开始，在64bit操作系统中，JVM支持指针压缩</p>
+<p>2.jvm配置参数:UseCompressedOops，compressed–压缩、oop(ordinary object pointer)–对象指针</p>
+<p>3.启用指针压缩:-XX:+UseCompressedOops(<strong>默认开启</strong>)，禁止指针压缩:-XX:-UseCompressedOops</p>
+<p>为什么要进行指针压缩？</p>
+<p>1.在64位平台的HotSpot中使用32位指针(实际存储用64位)，内存使用会多出1.5倍左右，使用较大指针在主内存和缓存之间移动数据，<strong>占用较大宽带，同时GC也会承受较大压力</strong></p>
+<p>2.为了减少64位平台下内存的消耗，启用指针压缩功能</p>
+<p>3.在jvm中，32位地址最大支持4G内存(2的32次方)，可以通过对对象指针的存入<strong>堆内存</strong>时压缩编码、取出到<strong>cpu寄存器</strong>后解码方式进行优化(对象指针在堆中是32位，在寄存器中是35位，2的35次方=32G)，使得jvm只用32位地址就可以支持更大的内存配置(小于等于32G)</p>
+<p>4.堆内存小于4G时，不需要启用指针压缩，jvm会直接去除高32位地址，即使用低虚拟地址空间</p>
+<p>5.堆内存大于32G时，压缩指针会失效，会强制使用64位(即8字节)来对java对象寻址，这就会出现1的问题，所以堆内存不要大于32G为好</p>
+<p>关于指针压缩个人理解：</p>
+<p>32位最大表示内存4g，当使用32位地址记录超过4g内存地址时，采用一定的压缩算法，将本来需要超过32位表示的地址压缩成能够使用32位地址来表示，cpu寄存器在使用使用时通过对应的解码算法算出对应的超过32位的地址寻址，使得32位地址可以表示超过4g内存</p>
+<p><strong>关于对齐填充：</strong>对于大部分处理器，对象以8字节整数倍来对齐填充都是最高效的存取方式。</p>
+<h2 id="二、对象内存分配"><a href="#二、对象内存分配" class="headerlink" title="二、对象内存分配"></a>二、对象内存分配</h2><p><strong>对象内存分配流程图</strong></p>
+<p><img src="/2022/04/16/00-00-03-Jvm%E5%AF%B9%E8%B1%A1%E5%88%9B%E5%BB%BA%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/327202027172.png" alt="img"></p>
+<p><strong>对象栈上分配</strong></p>
+<p>我们通过JVM内存分配可以知道JAVA中的对象都是在堆上进行分配，当对象没有被引用的时候，需要依靠GC进行回收内存，如果对象数量较多的时候，会给GC带来较大压力，也间接影响了应用的性能。为了减少临时对象在堆内分配的数量，JVM通过<strong>逃逸分析</strong>确定该对象不会被外部访问。如果不会逃逸可以将该对象在<strong>栈上分配</strong>内存，这样该对象所占用的内存空间就可以随栈帧出栈而销毁，就减轻了垃圾回收的压力。</p>
+<p><strong>对象逃逸分析</strong>：就是分析对象动态作用域，当一个对象在方法中被定义后，它可能被外部方法所引用，例如作为调用参数传递到其他地方中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> User <span class="title">test1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   User user = <span class="keyword">new</span> User();</span><br><span class="line">   user.setId(<span class="number">1</span>);</span><br><span class="line">   user.setName(<span class="string">&quot;zhuge&quot;</span>);</span><br><span class="line">   <span class="comment">//TODO 保存到数据库</span></span><br><span class="line">   <span class="keyword">return</span> user;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   User user = <span class="keyword">new</span> User();</span><br><span class="line">   user.setId(<span class="number">1</span>);</span><br><span class="line">   user.setName(<span class="string">&quot;zhuge&quot;</span>);</span><br><span class="line">   <span class="comment">//TODO 保存到数据库</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>很显然test1方法中的user对象被返回了，这个对象的作用域范围不确定，test2方法中的user对象我们可以确定当方法结束这个对象就可以认为是无效对象了，对于这样的对象我们其实可以将其分配在栈内存里，让其在方法结束时跟随栈内存一起被回收掉。</p>
+<p>JVM对于这种情况可以通过开启逃逸分析参数(-XX:+DoEscapeAnalysis)来优化对象内存分配位置，使其通过<strong>标量替换</strong>优先分配在栈上(<strong>栈上分配</strong>)，<strong>JDK7之后默认开启逃逸分析</strong>，如果要关闭使用参数(-XX:-DoEscapeAnalysis)</p>
+<p><strong>标量替换：</strong>通过逃逸分析确定该对象不会被外部访问，并且对象可以被进一步分解时，<strong>JVM不会创建该对象</strong>，而是将该对象成员变量分解若干个被这个方法使用的成员变量所代替，这些代替的成员变量在栈帧或寄存器上分配空间，这样就不会因为没有一大块连续空间导致对象内存不够分配。开启标量替换参数(-XX:+EliminateAllocations)，<strong>JDK7之后默认开启</strong>。</p>
+<p><strong>标量与聚合量：</strong>标量即不可被进一步分解的量，而JAVA的基本数据类型就是标量（如：int，long等基本数据类型以及reference类型等），标量的对立就是可以被进一步分解的量，而这种量称之为聚合量。而在JAVA中对象就是可以被进一步分解的聚合量。</p>
+<p><strong>栈上分配示例：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 栈上分配，标量替换</span></span><br><span class="line"><span class="comment"> * 代码调用了1亿次alloc()，如果是分配到堆上，大概需要1GB以上堆空间，如果堆空间小于该值，必然会触发GC。</span></span><br><span class="line"><span class="comment"> * </span></span><br><span class="line"><span class="comment"> * 使用如下参数不会发生GC</span></span><br><span class="line"><span class="comment"> * -Xmx15m -Xms15m -XX:+DoEscapeAnalysis -XX:+PrintGC -XX:+EliminateAllocations</span></span><br><span class="line"><span class="comment"> * 使用如下参数都会发生大量GC</span></span><br><span class="line"><span class="comment"> * -Xmx15m -Xms15m -XX:-DoEscapeAnalysis -XX:+PrintGC -XX:+EliminateAllocations</span></span><br><span class="line"><span class="comment"> * -Xmx15m -Xms15m -XX:+DoEscapeAnalysis -XX:+PrintGC -XX:-EliminateAllocations</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AllotOnStack</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">long</span> start = System.currentTimeMillis();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100000000</span>; i++) &#123;</span><br><span class="line">            alloc();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">long</span> end = System.currentTimeMillis();</span><br><span class="line">        System.out.println(end - start);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">alloc</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        User user = <span class="keyword">new</span> User();</span><br><span class="line">        user.setId(<span class="number">1</span>);</span><br><span class="line">        user.setName(<span class="string">&quot;zhuge&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>结论：****栈上分配依赖于逃逸分析和标量替换</strong></p>
+<p><strong>对象在Eden区分配</strong></p>
+<p>大多数情况下，对象在新生代中 Eden 区分配。当 Eden 区没有足够空间进行分配时，虚拟机将发起一次Minor GC。我们来进行实际测试一下。</p>
+<p>在测试之前我们先来看看 <strong>Minor GC和Full GC 有什么不同呢？</strong></p>
+<ul>
+<li><strong>Minor GC/Young GC</strong>：指发生新生代的的垃圾收集动作，Minor GC非常频繁，回收速度一般也比较快。</li>
+<li><strong>Major GC/Full GC</strong>：一般会回收老年代 ，年轻代，方法区的垃圾，Major GC的速度一般会比Minor GC的慢10倍以上。</li>
+</ul>
+<p><strong>Eden与Survivor区默认8:1:1</strong></p>
+<p>大量的对象被分配在eden区，eden区满了后会触发minor gc，可能会有99%以上的对象成为垃圾被回收掉，剩余存活的对象会被挪到为空的那块survivor区，下一次eden区满了后又会触发minor gc，把eden区和survivor区垃圾对象回收，把剩余存活的对象一次性挪动到另外一块为空的survivor区，因为新生代的对象都是朝生夕死的，存活时间很短，所以JVM默认的8:1:1的比例是很合适的，<strong>让eden区尽量的大，survivor区够用即可，</strong></p>
+<p>JVM默认有这个参数-XX:+UseAdaptiveSizePolicy(默认开启)，会导致这个8:1:1比例自动变化，如果不想这个比例有变化可以设置参数-XX:-UseAdaptiveSizePolicy</p>
+<p><strong>示例：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//添加运行JVM参数： -XX:+PrintGCDetails</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GCTest</span> </span>&#123;</span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">      <span class="keyword">byte</span>[] allocation1, allocation2<span class="comment">/*, allocation3, allocation4, allocation5, allocation6*/</span>;</span><br><span class="line">      allocation1 = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">60000</span>*<span class="number">1024</span>];</span><br><span class="line"></span><br><span class="line">      <span class="comment">//allocation2 = new byte[8000*1024];</span></span><br><span class="line"></span><br><span class="line">      <span class="comment">/*allocation3 = new byte[1000*1024];</span></span><br><span class="line"><span class="comment">     allocation4 = new byte[1000*1024];</span></span><br><span class="line"><span class="comment">     allocation5 = new byte[1000*1024];</span></span><br><span class="line"><span class="comment">     allocation6 = new byte[1000*1024];*/</span></span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">运行结果：</span><br><span class="line">Heap</span><br><span class="line"> PSYoungGen      total 76288K, used 65536K [<span class="number">0x000000076b400000</span>, <span class="number">0x0000000770900000</span>, <span class="number">0x00000007c0000000</span>)</span><br><span class="line">  eden space 65536K, <span class="number">100</span>% used [<span class="number">0x000000076b400000</span>,<span class="number">0x000000076f400000</span>,<span class="number">0x000000076f400000</span>)</span><br><span class="line">  from space 10752K, <span class="number">0</span>% used [<span class="number">0x000000076fe80000</span>,<span class="number">0x000000076fe80000</span>,<span class="number">0x0000000770900000</span>)</span><br><span class="line">  to   space 10752K, <span class="number">0</span>% used [<span class="number">0x000000076f400000</span>,<span class="number">0x000000076f400000</span>,<span class="number">0x000000076fe80000</span>)</span><br><span class="line"> ParOldGen       total 175104K, used 0K [<span class="number">0x00000006c1c00000</span>, <span class="number">0x00000006cc700000</span>, <span class="number">0x000000076b400000</span>)</span><br><span class="line">  object space 175104K, <span class="number">0</span>% used [<span class="number">0x00000006c1c00000</span>,<span class="number">0x00000006c1c00000</span>,<span class="number">0x00000006cc700000</span>)</span><br><span class="line"> Metaspace       used 3342K, capacity 4496K, committed 4864K, reserved 1056768K</span><br><span class="line">  <span class="class"><span class="keyword">class</span> <span class="title">space</span>    <span class="title">used</span> 361<span class="title">K</span>, <span class="title">capacity</span> 388<span class="title">K</span>, <span class="title">committed</span> 512<span class="title">K</span>, <span class="title">reserved</span> 1048576<span class="title">K</span></span></span><br></pre></td></tr></table></figure>
+
+<p>我们可以看出eden区内存几乎已经被分配完全（即使程序什么也不做，新生代也会使用至少几M内存）。<strong>假如我们再为allocation2分配内存会出现什么情况呢？</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//添加运行JVM参数： -XX:+PrintGCDetails</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GCTest</span> </span>&#123;</span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">      <span class="keyword">byte</span>[] allocation1, allocation2<span class="comment">/*, allocation3, allocation4, allocation5, allocation6*/</span>;</span><br><span class="line">      allocation1 = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">60000</span>*<span class="number">1024</span>];</span><br><span class="line"></span><br><span class="line">      allocation2 = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">8000</span>*<span class="number">1024</span>];</span><br><span class="line"></span><br><span class="line">      <span class="comment">/*allocation3 = new byte[1000*1024];</span></span><br><span class="line"><span class="comment">      allocation4 = new byte[1000*1024];</span></span><br><span class="line"><span class="comment">      allocation5 = new byte[1000*1024];</span></span><br><span class="line"><span class="comment">      allocation6 = new byte[1000*1024];*/</span></span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">运行结果：</span><br><span class="line">[GC (Allocation Failure) [PSYoungGen: 65253K-&gt;936K(76288K)] 65253K-&gt;60944K(251392K), <span class="number">0.0279083</span> secs] [Times: user=<span class="number">0.13</span> sys=<span class="number">0.02</span>, real=<span class="number">0.03</span> secs] </span><br><span class="line">Heap</span><br><span class="line"> PSYoungGen      total 76288K, used 9591K [<span class="number">0x000000076b400000</span>, <span class="number">0x0000000774900000</span>, <span class="number">0x00000007c0000000</span>)</span><br><span class="line">  eden space 65536K, <span class="number">13</span>% used [<span class="number">0x000000076b400000</span>,<span class="number">0x000000076bc73ef8</span>,<span class="number">0x000000076f400000</span>)</span><br><span class="line">  from space 10752K, <span class="number">8</span>% used [<span class="number">0x000000076f400000</span>,<span class="number">0x000000076f4ea020</span>,<span class="number">0x000000076fe80000</span>)</span><br><span class="line">  to   space 10752K, <span class="number">0</span>% used [<span class="number">0x0000000773e80000</span>,<span class="number">0x0000000773e80000</span>,<span class="number">0x0000000774900000</span>)</span><br><span class="line"> ParOldGen       total 175104K, used 60008K [<span class="number">0x00000006c1c00000</span>, <span class="number">0x00000006cc700000</span>, <span class="number">0x000000076b400000</span>)</span><br><span class="line">  object space 175104K, <span class="number">34</span>% used [<span class="number">0x00000006c1c00000</span>,<span class="number">0x00000006c569a010</span>,<span class="number">0x00000006cc700000</span>)</span><br><span class="line"> Metaspace       used 3342K, capacity 4496K, committed 4864K, reserved 1056768K</span><br><span class="line">  <span class="class"><span class="keyword">class</span> <span class="title">space</span>    <span class="title">used</span> 361<span class="title">K</span>, <span class="title">capacity</span> 388<span class="title">K</span>, <span class="title">committed</span> 512<span class="title">K</span>, <span class="title">reserved</span> 1048576<span class="title">K</span></span></span><br></pre></td></tr></table></figure>
+
+<p><strong>简单解释一下为什么会出现这种情况：</strong> 因为给allocation2分配内存的时候eden区内存几乎已经被分配完了，我们刚刚讲了当Eden区没有足够空间进行分配时，虚拟机将发起一次Minor GC，GC期间虚拟机又发现allocation1无法存入Survior空间，所以只好把新生代的对象<strong>提前转移到老年代</strong>中去，老年代上的空间足够存放allocation1，所以不会出现Full GC。执行Minor GC后，后面分配的对象如果能够存在eden区的话，还是会在eden区分配内存。可以执行如下代码验证：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GCTest</span> </span>&#123;</span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">      <span class="keyword">byte</span>[] allocation1, allocation2, allocation3, allocation4, allocation5, allocation6;</span><br><span class="line">      allocation1 = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">60000</span>*<span class="number">1024</span>];</span><br><span class="line"></span><br><span class="line">      allocation2 = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">8000</span>*<span class="number">1024</span>];</span><br><span class="line"></span><br><span class="line">      allocation3 = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1000</span>*<span class="number">1024</span>];</span><br><span class="line">      allocation4 = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1000</span>*<span class="number">1024</span>];</span><br><span class="line">     allocation5 = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1000</span>*<span class="number">1024</span>];</span><br><span class="line">     allocation6 = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1000</span>*<span class="number">1024</span>];</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">运行结果：</span><br><span class="line">[GC (Allocation Failure) [PSYoungGen: 65253K-&gt;952K(76288K)] 65253K-&gt;60960K(251392K), <span class="number">0.0311467</span> secs] [Times: user=<span class="number">0.08</span> sys=<span class="number">0.02</span>, real=<span class="number">0.03</span> secs] </span><br><span class="line">Heap</span><br><span class="line"> PSYoungGen      total 76288K, used 13878K [<span class="number">0x000000076b400000</span>, <span class="number">0x0000000774900000</span>, <span class="number">0x00000007c0000000</span>)</span><br><span class="line">  eden space 65536K, <span class="number">19</span>% used [<span class="number">0x000000076b400000</span>,<span class="number">0x000000076c09fb68</span>,<span class="number">0x000000076f400000</span>)</span><br><span class="line">  from space 10752K, <span class="number">8</span>% used [<span class="number">0x000000076f400000</span>,<span class="number">0x000000076f4ee030</span>,<span class="number">0x000000076fe80000</span>)</span><br><span class="line">  to   space 10752K, <span class="number">0</span>% used [<span class="number">0x0000000773e80000</span>,<span class="number">0x0000000773e80000</span>,<span class="number">0x0000000774900000</span>)</span><br><span class="line"> ParOldGen       total 175104K, used 60008K [<span class="number">0x00000006c1c00000</span>, <span class="number">0x00000006cc700000</span>, <span class="number">0x000000076b400000</span>)</span><br><span class="line">  object space 175104K, <span class="number">34</span>% used [<span class="number">0x00000006c1c00000</span>,<span class="number">0x00000006c569a010</span>,<span class="number">0x00000006cc700000</span>)</span><br><span class="line"> Metaspace       used 3343K, capacity 4496K, committed 4864K, reserved 1056768K</span><br><span class="line">  <span class="class"><span class="keyword">class</span> <span class="title">space</span>    <span class="title">used</span> 361<span class="title">K</span>, <span class="title">capacity</span> 388<span class="title">K</span>, <span class="title">committed</span> 512<span class="title">K</span>, <span class="title">reserved</span> 1048576<span class="title">K</span></span></span><br></pre></td></tr></table></figure>
+
+<p><strong>大对象直接进入老年代</strong></p>
+<p>大对象就是需要大量连续内存空间的对象（比如：字符串、数组）。JVM参数 -XX:PretenureSizeThreshold 可以设置大对象的大小，如果对象超过设置大小会直接进入老年代，不会进入年轻代，这个参数只在 Serial 和ParNew两个收集器下有效。</p>
+<p>比如设置JVM参数：-XX:PretenureSizeThreshold=1000000 (单位是字节)  -XX:+UseSerialGC  ，再执行下上面的第一个程序会发现大对象直接进了老年代</p>
+<p><strong>为什么要这样呢？</strong></p>
+<p>为了避免为大对象分配内存时的复制操作而降低效率。</p>
+<p><strong>长期存活的对象将进入老年代</strong></p>
+<p>既然虚拟机采用了分代收集的思想来管理内存，那么内存回收时就必须能识别哪些对象应放在新生代，哪些对象应放在老年代中。为了做到这一点，虚拟机给每个对象一个对象年龄（Age）计数器。</p>
+<p>如果对象在 Eden 出生并经过第一次 Minor GC 后仍然能够存活，并且能被 Survivor 容纳的话，将被移动到 Survivor 空间中，并将对象年龄设为1。对象在 Survivor 中每熬过一次 MinorGC，年龄就增加1岁，当它的年龄增加到一定程度（默认为15岁，CMS收集器默认6岁，不同的垃圾收集器会略微有点不同），就会被晋升到老年代中。对象晋升到老年代的年龄阈值，可以通过参数 <strong>-XX:MaxTenuringThreshold</strong> 来设置。</p>
+<p><strong>对象动态年龄判断</strong></p>
+<p>当前放对象的Survivor区域里(其中一块区域，放对象的那块s区)，一批对象的总大小大于这块Survivor区域内存大小的50%(-XX:TargetSurvivorRatio可以指定)，那么此时<strong>大于等于</strong>这批对象年龄最大值的对象，就可以<strong>直接进入老年代</strong>了，例如Survivor区域里现在有一批对象，年龄1+年龄2+年龄n的多个年龄对象总和超过了Survivor区域的50%，此时就会把年龄n(含)以上的对象都放入老年代。这个规则其实是希望那些可能是长期存活的对象，尽早进入老年代。<strong>对象动态年龄判断机制一般是在minor gc之后触发的。</strong></p>
+<p><strong>老年代空间分配担保机制</strong></p>
+<p>年轻代每次<strong>minor gc</strong>之前JVM都会计算下老年代<strong>剩余可用空间</strong></p>
+<p>如果这个可用空间小于年轻代里现有的所有对象大小之和(<strong>包括垃圾对象</strong>)</p>
+<p>就会看一个“-XX:-HandlePromotionFailure”(jdk1.8默认就设置了)的参数是否设置了</p>
+<p>如果有这个参数，就会看看老年代的可用内存大小，是否大于之前每一次minor gc后进入老年代的对象的<strong>平均大小</strong>。</p>
+<p>如果上一步结果是小于或者之前说的参数没有设置，那么就会触发一次Full gc，对老年代和年轻代一起回收一次垃圾，如果回收完还是没有足够空间存放新的对象就会发生”OOM”</p>
+<p>当然，如果minor gc之后剩余存活的需要挪动到老年代的对象大小还是大于老年代可用空间，那么也会触发full gc，full gc完之后如果还是没有空间放minor gc之后的存活对象，则也会发生“OOM”</p>
+<p><img src="/2022/04/16/00-00-03-Jvm%E5%AF%B9%E8%B1%A1%E5%88%9B%E5%BB%BA%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/clipboard-1650200974560.png" alt="img"></p>
+<h2 id="三、对象内存回收"><a href="#三、对象内存回收" class="headerlink" title="三、对象内存回收"></a>三、对象内存回收</h2><p>堆中几乎放着所有的对象实例，对堆垃圾回收前的第一步就是要判断哪些对象已经死亡（即不能再被任何途径使用的对象）。</p>
+<p><strong>引用计数法</strong></p>
+<p>给对象中添加一个引用计数器，每当有一个地方引用它，计数器就加1；当引用失效，计数器就减1；任何时候计数器为0的对象就是不可能再被使用的。</p>
+<p><strong>这个方法实现简单，效率高，但是目前主流的虚拟机中并没有选择这个算法来管理内存，其最主要的原因是它很难解决对象之间相互循环引用的问题。</strong> 所谓对象之间的相互引用问题，如下面代码所示：除了对象objA 和 objB 相互引用着对方之外，这两个对象之间再无任何引用。但是他们因为互相引用对方，导致它们的引用计数器都不为0，于是引用计数算法无法通知 GC 回收器回收他们。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ReferenceCountingGc</span> </span>&#123;</span><br><span class="line">   Object instance = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">      ReferenceCountingGc objA = <span class="keyword">new</span> ReferenceCountingGc();</span><br><span class="line">      ReferenceCountingGc objB = <span class="keyword">new</span> ReferenceCountingGc();</span><br><span class="line">      objA.instance = objB;</span><br><span class="line">      objB.instance = objA;</span><br><span class="line">      objA = <span class="keyword">null</span>;</span><br><span class="line">      objB = <span class="keyword">null</span>;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>可达性分析算法</strong></p>
+<p>将<strong>“GC Roots”</strong> 对象作为起点，从这些节点开始向下搜索引用的对象，找到的对象都标记为<strong>非垃圾对象</strong>，其余未标记的对象都是垃圾对象</p>
+<p><strong>GC Roots</strong>根节点：线程栈的本地变量、静态变量、本地方法栈的变量等等</p>
+<p><img src="/2022/04/16/00-00-03-Jvm%E5%AF%B9%E8%B1%A1%E5%88%9B%E5%BB%BA%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/6e72848c54e84bb7a76f0ff89ed5010d.jpeg" alt="img"></p>
+<p><strong>常见引用类型</strong></p>
+<p>java的引用类型一般分为四种：<strong>强引用</strong>、<strong>软引用</strong>、弱引用、虚引用</p>
+<p><strong>强引用</strong>：普通的变量引用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> User user = <span class="keyword">new</span> User();</span><br></pre></td></tr></table></figure>
+
+<p><strong>软引用</strong>：将对象用SoftReference软引用类型的对象包裹，正常情况不会被回收，但是GC做完后发现释放不出空间存放新的对象，则会把这些软引用的对象回收掉。<strong>软引用可用来实现内存敏感的高速缓存。</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> SoftReference&lt;User&gt; user = <span class="keyword">new</span> SoftReference&lt;User&gt;(<span class="keyword">new</span> User());</span><br></pre></td></tr></table></figure>
+
+<p>软引用在实际中有重要的应用，例如浏览器的后退按钮。按后退时，这个后退时显示的网页内容是重新进行请求还是从缓存中取出呢？这就要看具体的实现策略了。</p>
+<p>（1）如果一个网页在浏览结束时就进行内容的回收，则按后退查看前面浏览过的页面时，需要重新构建</p>
+<p>（2）如果将浏览过的网页存储到内存中会造成内存的大量浪费，甚至会造成内存溢出</p>
+<p><strong>弱引用</strong>：将对象用WeakReference软引用类型的对象包裹，弱引用跟没引用差不多，<strong>GC会直接回收掉</strong>，很少用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> WeakReference&lt;User&gt; user = <span class="keyword">new</span> WeakReference&lt;User&gt;(<span class="keyword">new</span> User());</span><br></pre></td></tr></table></figure>
+
+<p><strong>虚引用：</strong>虚引用也称为幽灵引用或者幻影引用，它是最弱的一种引用关系，几乎不用</p>
+<p><strong>finalize()方法最终判定对象是否存活</strong></p>
+<p>即使在可达性分析算法中不可达的对象，也并非是“非死不可”的，这时候它们暂时处于“缓刑”阶段，要真正宣告一个对象死亡，至少要经历再次标记过程。</p>
+<p><strong>标记的前提是对象在进行可达性分析后发现没有与GC Roots相连接的引用链。</strong></p>
+<p><strong>1. 第一次标记并进行一次筛选。</strong></p>
+<p>筛选的条件是此对象是否有必要执行finalize()方法。</p>
+<p>当对象没有覆盖finalize方法，对象将直接被回收。</p>
+<p><strong>2. 第二次标记</strong></p>
+<p>如果这个对象覆盖了finalize方法，finalize方法是对象脱逃死亡命运的最后一次机会，如果对象要在finalize()中成功拯救自己，只要重新与引用链上的任何的一个对象建立关联即可，譬如把自己赋值给某个类变量或对象的成员变量，那在第二次标记时它将移除出“即将回收”的集合。如果对象这时候还没逃脱，那基本上它就真的被回收了。</p>
+<p>注意：一个对象的finalize()方法只会被执行一次，也就是说通过调用finalize方法自我救命的机会就一次。</p>
+<p>示例代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OOMTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">      List&lt;Object&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">      <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">      <span class="keyword">int</span> j = <span class="number">0</span>;</span><br><span class="line">      <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">         list.add(<span class="keyword">new</span> User(i++, UUID.randomUUID().toString()));</span><br><span class="line">         <span class="keyword">new</span> User(j--, UUID.randomUUID().toString());</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//User类需要重写finalize方法</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">finalize</span><span class="params">()</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">    OOMTest.list.add(<span class="keyword">this</span>);</span><br><span class="line">    System.out.println(<span class="string">&quot;关闭资源，userid=&quot;</span> + id + <span class="string">&quot;即将被回收&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>finalize()方法的运行代价高昂， 不确定性大， 无法保证各个对象的调用顺序， 如今已被官方明确声明为不推荐使用的语法。 有些资料描述它适合做“关闭外部资源”之类的清理性工作， 这完全是对finalize()方法用途的一种自我安慰。 finalize()能做的所有工作， 使用try-finally或者其他方式都可以做得更好、更及时， 所以建议大家完全可以忘掉Java语言里面的这个方法。</p>
+<p><strong>如何判断一个类是无用的类</strong></p>
+<p>方法区主要回收的是无用的类，那么如何判断一个类是无用的类呢？</p>
+<p>类需要同时满足下面3个条件才能算是 <strong>“无用的类”</strong> ：</p>
+<ul>
+<li>该类所有的对象实例都已经被回收，也就是 Java 堆中不存在该类的任何实例。</li>
+<li>加载该类的 ClassLoader 已经被回收。【一般是自定义类加载器比如tomcat自定义的类加载jsp类加载器】</li>
+<li>该类对应的 java.lang.Class 对象没有在任何地方被引用，无法在任何地方通过反射访问该类的方法。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br></pre></td><td class="code"><pre><span class="line">总结：</span><br><span class="line"></span><br><span class="line">一、java对象创建：</span><br><span class="line"></span><br><span class="line"><span class="number">1</span>、类加载检查</span><br><span class="line"></span><br><span class="line">jvm遇到一条<span class="keyword">new</span>指令时，首先会去检查这个指令对应的参数能否在常量池中定位到一个类的符号引用，并且检查这个类是否被加载、解析过，如果没有则执行类的加载过程</span><br><span class="line"></span><br><span class="line"><span class="number">2</span>、对象内存分配</span><br><span class="line"></span><br><span class="line">指针碰撞（默认使用）：如果Java堆中内存是绝对规整的，所有用过的内存都放在一边，空闲的内存放在另一边，中间放着一个指针作为分界点的指示器，那所分配内存就仅仅是把那个指针向空闲空间那边挪动一段与对象大小相等的距离。</span><br><span class="line"></span><br><span class="line">空闲列表：如果Java堆中的内存并不是规整的，已使用的内存和空 闲的内存相互交错，那就没有办法简单地进行指针碰撞了，虚拟机就必须维护一个列表，记 录上哪些内存块是可用的，在分配的时候从列表中找到一块足够大的空间划分给对象实例， 并更新列表上的记录</span><br><span class="line"></span><br><span class="line">解决内存分配并发问题：</span><br><span class="line"></span><br><span class="line">cas：虚拟机采用**CAS配上失败重试**的方式保证更新操作的原子性来对分配内存空间的动作进行同步处理。</span><br><span class="line"></span><br><span class="line">本地线程分配缓存（TLAB）：把内存分配的动作按照线程划分在不同的空间之中进行，即每个线程在Java堆中预先分配一小块内存，**-XX:+/- UseTLAB**参数来设定</span><br><span class="line"></span><br><span class="line"><span class="number">3</span>、初始化零值</span><br><span class="line"></span><br><span class="line">内存分配完成后，虚拟机需要将分配到的内存空间都初始化为零值（不包括对象头）， 如果使用TLAB，这一工作过程也可以提前至TLAB分配时进行。这一步操作保证了对象的实例字段在Java代码中可以不赋初始值就直接使用，程序能访问到这些字段的数据类型所对应的零值。</span><br><span class="line"></span><br><span class="line"><span class="number">4</span>、设置对象头</span><br><span class="line"></span><br><span class="line">对象头：</span><br><span class="line"></span><br><span class="line">markword标记字段、自身运行时数据（hashcode，对象分代年龄、锁状态标志位、线程持有的锁、偏向线程id、偏向时间戳）；Klass指针：指向方法区的类元数据，非java对象的<span class="class"><span class="keyword">class</span>；数组长度：针对数组类型，存储长度</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">实例数据：对象本身的数据存储</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">对齐填充位：对于大部分处理器，对象以8字节整数倍来对齐填充都是最高效的存取方式。</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">5、执行<span class="title">init</span>方法</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">执行方法，即对象按照程序员的意愿进行初始化。对应到语言层面上讲，就是为属性赋值（注意，这与上面的赋零值不同，这是由程序员赋的值），和执行构造方法。</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">这里区别下类加载过程的准备和初始化阶段：类加载过程中的准备阶段是针对静态变量赋默认值，比如<span class="title">int</span>类型就是0，引用类型就是<span class="title">null</span>；类加载过程中的初始化阶段也是针对静态变量和静态代码块</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">指针压缩：</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">关于指针压缩个人理解：32位最大表示内存4<span class="title">g</span>，当使用32位地址记录超过4<span class="title">g</span>内存地址时，采用一定的压缩算法，将本来需要超过32位表示的地址压缩成能够使用32位地址来表示，<span class="title">cpu</span>寄存器在使用使用时通过对应的解码算法算出对应的超过32位的地址寻址，使得32位地址可以表示超过4<span class="title">g</span>内存</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">指针压缩好处：在64位平台的<span class="title">HotSpot</span>中使用32位指针(实际存储用64位)，内存使用会多出1.5倍左右，使用较大指针在主内存和缓存之间移动数据，**占用较大宽带，同时<span class="title">GC</span>也会承受较大压力**</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">二、对象内存分配</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">一般来说，新创建的对象内存一般是在堆上分配，但是也有在栈上分配的。为了减少临时对象在堆内分配的数量，<span class="title">JVM</span>通过**逃逸分析**确定该对象不会被外部访问。如果不会逃逸可以将该对象在**栈上分配**内存，这样该对象所占用的内存空间就可以随栈帧出栈而销毁，就减轻了垃圾回收的压力。对象逃逸分析就是分析对象的动态作用域，当一个对象在方法中被定义后，它可能被外部方法所引用，例如作为调用参数传递到其他地方中。</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">标量替换：通过逃逸分析确定该对象不会被外部访问，并且对象可以被进一步分解时，<span class="title">Jvm</span>不会创建该对象，而是将该对象分解成若干个被这个方法使用的成员变量所替代，这些代替的成员变量在栈帧或寄存器上分配空间。这样就不会因为没有一大片连续空间导致对象内存不够分配。标量：就是不可被进一步分解的量，二<span class="title">java</span>的基本类型就是标量，标量对应的就是可以被进一步分解的量，这种就聚合量，在<span class="title">java</span>中对象就是可以被进一步分解的量。</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">大多数对象都是分配在<span class="title">eden</span>，<span class="title">eden</span>内存不够时，就会触发<span class="title">minor</span> <span class="title">gc</span> / <span class="title">young</span> <span class="title">gc</span></span>;</span><br><span class="line"></span><br><span class="line">minor gc /young gc：指在年轻代发生的gc，minor gc非常频繁，回收速度一般也比较快。</span><br><span class="line"></span><br><span class="line">major gc / full gc：一般时回收老年代，年轻代，方法区中的垃圾，major gc 的速度一般也比minor gc 慢十倍以上。</span><br><span class="line"></span><br><span class="line">新生代分为eden、survivor 区（s0,s1）比例为<span class="number">8</span>：<span class="number">1</span>：<span class="number">1</span></span><br><span class="line"></span><br><span class="line">**大对象直接进入老年代**</span><br><span class="line"></span><br><span class="line">大对象就是需要大量连续内存空间的对象（比如：字符串、数组）。JVM参数 -XX:PretenureSizeThreshold 可以设置大对象的大小，如果对象超过设置大小会直接进入老年代，不会进入年轻代，这个参数只在 Serial 和ParNew两个收集器下有效。</span><br><span class="line"></span><br><span class="line">比如设置JVM参数：-XX:PretenureSizeThreshold=<span class="number">1000000</span> (单位是字节)  -XX:+UseSerialGC  ，再执行下上面的第一个程序会发现大对象直接进了老年代</span><br><span class="line"></span><br><span class="line">**为什么要这样呢？**</span><br><span class="line"></span><br><span class="line">为了避免为大对象分配内存时的复制操作而降低效率。</span><br><span class="line"></span><br><span class="line">**长期存活的对象将进入老年代**</span><br><span class="line"></span><br><span class="line">既然虚拟机采用了分代收集的思想来管理内存，那么内存回收时就必须能识别哪些对象应放在新生代，哪些对象应放在老年代中。为了做到这一点，虚拟机给每个对象一个对象年龄（Age）计数器。</span><br><span class="line"></span><br><span class="line">如果对象在 Eden 出生并经过第一次 Minor GC 后仍然能够存活，并且能被 Survivor 容纳的话，将被移动到 Survivor 空间中，并将对象年龄设为<span class="number">1</span>。对象在 Survivor 中每熬过一次 MinorGC，年龄就增加<span class="number">1</span>岁，当它的年龄增加到一定程度（默认为<span class="number">15</span>岁，CMS收集器默认<span class="number">6</span>岁，不同的垃圾收集器会略微有点不同），就会被晋升到老年代中。对象晋升到老年代的年龄阈值，可以通过参数 **-XX:MaxTenuringThreshold** 来设置。</span><br><span class="line"></span><br><span class="line">**老年代空间分配担保机制**</span><br><span class="line"></span><br><span class="line">年轻代每次**minor gc**之前JVM都会计算下老年代**剩余可用空间**</span><br><span class="line"></span><br><span class="line">如果这个可用空间小于年轻代里现有的所有对象大小之和(**包括垃圾对象**)</span><br><span class="line"></span><br><span class="line">就会看一个“-XX:-HandlePromotionFailure”(jdk1<span class="number">.8</span>默认就设置了)的参数是否设置了</span><br><span class="line"></span><br><span class="line">如果有这个参数，就会看看老年代的可用内存大小，是否大于之前每一次minor gc后进入老年代的对象的**平均大小**。</span><br><span class="line"></span><br><span class="line">如果上一步结果是小于或者之前说的参数没有设置，那么就会触发一次Full gc，对老年代和年轻代一起回收一次垃圾，如果回收完还是没有足够空间存放新的对象就会发生<span class="string">&quot;OOM&quot;</span></span><br><span class="line"></span><br><span class="line">当然，如果minor gc之后剩余存活的需要挪动到老年代的对象大小还是大于老年代可用空间，那么也会触发full gc，full gc完之后如果还是没有空间放minor gc之后的存活对象，则也会发生“OOM”</span><br><span class="line"></span><br><span class="line">三、**对象内存回收**</span><br><span class="line"></span><br><span class="line"><span class="number">1</span>、引用计数法</span><br><span class="line"></span><br><span class="line">给对象中添加一个引用计数器，每当有一个地方引用它，计数器就加<span class="number">1</span>；当引用失效，计数器就减<span class="number">1</span>；任何时候计数器为<span class="number">0</span>的对象就是不可能再被使用的。</span><br><span class="line"></span><br><span class="line">**这个方法实现简单，效率高，但是目前主流的虚拟机中并没有选择这个算法来管理内存，其最主要的原因是它很难解决对象之间相互循环引用的问题。**</span><br><span class="line"></span><br><span class="line"><span class="number">2</span>、可达性分析算法</span><br><span class="line"></span><br><span class="line">将**“GC Roots”** 对象作为起点，从这些节点开始向下搜索引用的对象，找到的对象都标记为**非垃圾对象**，其余未标记的对象都是垃圾对象</span><br><span class="line"></span><br><span class="line">**GC Roots**根节点：线程栈的本地变量、静态变量、本地方法栈的变量等等</span><br><span class="line"></span><br><span class="line"><span class="number">3</span>、常见引用类型</span><br><span class="line"></span><br><span class="line">java的引用类型一般分为四种：**强引用**、**软引用**、弱引用、虚引用</span><br><span class="line"></span><br><span class="line">**强引用**：普通的变量引用</span><br><span class="line"></span><br><span class="line">**软引用**：将对象用SoftReference软引用类型的对象包裹，正常情况不会被回收，但是GC做完后发现释放不出空间存放新的对象，则会把这些软引用的对象回收掉。**软引用可用来实现内存敏感的高速缓存。**</span><br><span class="line"></span><br><span class="line">**弱引用**：将对象用WeakReference软引用类型的对象包裹，弱引用跟没引用差不多，**GC会直接回收掉**，很少用</span><br><span class="line"></span><br><span class="line">**虚引用：**虚引用也称为幽灵引用或者幻影引用，它是最弱的一种引用关系，几乎不用</span><br><span class="line"></span><br><span class="line">**finalize()方法最终判定对象是否存活**</span><br><span class="line"></span><br><span class="line">即使在可达性分析算法中不可达的对象，也并非是“非死不可”的，这时候它们暂时处于“缓刑”阶段，要真正宣告一个对象死亡，至少要经历再次标记过程。</span><br><span class="line"></span><br><span class="line">**标记的前提是对象在进行可达性分析后发现没有与GC Roots相连接的引用链。**</span><br><span class="line"></span><br><span class="line">**<span class="number">1.</span> 第一次标记并进行一次筛选。**</span><br><span class="line"></span><br><span class="line">筛选的条件是此对象是否有必要执行finalize()方法。</span><br><span class="line"></span><br><span class="line">当对象没有覆盖finalize方法，对象将直接被回收。</span><br><span class="line"></span><br><span class="line">**<span class="number">2.</span> 第二次标记**</span><br><span class="line"></span><br><span class="line">如果这个对象覆盖了finalize方法，finalize方法是对象脱逃死亡命运的最后一次机会，如果对象要在finalize()中成功拯救自己，只要重新与引用链上的任何的一个对象建立关联即可，譬如把自己赋值给某个类变量或对象的成员变量，那在第二次标记时它将移除出“即将回收”的集合。如果对象这时候还没逃脱，那基本上它就真的被回收了。</span><br><span class="line"></span><br><span class="line"><span class="number">4</span>、如何判断一个类是无用的类</span><br><span class="line"></span><br><span class="line">- 该类所有的对象实例都已经被回收，也就是 Java 堆中不存在该类的任何实例。</span><br><span class="line">- 加载该类的 ClassLoader 已经被回收。【一般是自定义类加载器比如tomcat自定义的类加载jsp类加载器】</span><br><span class="line">- 该类对应的 java.lang.Class 对象没有在任何地方被引用，无法在任何地方通过反射访问该类的方法。</span><br></pre></td></tr></table></figure>
+
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/04/16/00-00-03-Jvm%E5%AF%B9%E8%B1%A1%E5%88%9B%E5%BB%BA%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Jvm/" rel="tag">Jvm</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/" rel="tag">性能调优</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/04/19/00-00-05-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8ParNew-CMS%E4%B8%8E%E5%BA%95%E5%B1%82%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            垃圾收集器ParNew&amp;CMS与底层三色标记算法详解
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/04/14/00-00-02-Jvm%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">Jvm内存模型深度剖析与优化</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2022
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>Zookeeper典型使用场景实战 |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-03-02-02-Zookeeper典型使用场景实战"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  Zookeeper典型使用场景实战
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/06/11/03-02-02-Zookeeper%E5%85%B8%E5%9E%8B%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E5%AE%9E%E6%88%98/" class="article-date">
+  <time datetime="2022-06-11T11:33:23.000Z" itemprop="datePublished">2022-06-11</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a> / <a class="article-category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a> / <a class="article-category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/Zookeeper/">Zookeeper</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">3.4k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">14 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p id="hitokoto">正在加载一言...</p>
+
+<h2 id="一、Zookeeper典型使用场景实战"><a href="#一、Zookeeper典型使用场景实战" class="headerlink" title="一、Zookeeper典型使用场景实战"></a>一、Zookeeper典型使用场景实战</h2><h3 id="1、Zookeeper实现分布式锁"><a href="#1、Zookeeper实现分布式锁" class="headerlink" title="1、Zookeeper实现分布式锁"></a>1、Zookeeper实现分布式锁</h3><h4 id="1-1-非公平锁"><a href="#1-1-非公平锁" class="headerlink" title="1.1 非公平锁"></a>1.1 非公平锁</h4><p><strong>原理：</strong></p>
+<p><img src="/2022/06/11/03-02-02-Zookeeper%E5%85%B8%E5%9E%8B%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E5%AE%9E%E6%88%98/image-20220611194332769.png" alt="image-20220611194332769"></p>
+<blockquote>
+<p>原理（是非公平锁，因为监听等待的线程在重新加锁的时候是没有顺序的，无法控制先来后到）：模拟两个线程并发获取锁</p>
+<p>1&gt;thread1获取锁（通过命令create -e /exclusive/lock创建节点），判断锁是否被创建，此时没有被创建可以加锁成功；</p>
+<p>2&gt;thread2此时来获取锁，判断锁释放被创建，此时锁被创建，则thread2会监听 /exclusive/lock节点（执行get -w /exclusive/lock命令），等待拿到锁的线程对锁进行释放</p>
+<p>3&gt;thread1执行完业务逻辑，就释放锁（执行delete /exclusive/lock命令），此时thread2通过监听得知锁被释放，然后就尝试进行加锁，加锁成功，执行业务逻辑，然后释放锁</p>
+<p><strong>这种非公平锁的缺点：</strong></p>
+<p>加入竞争锁，导致等待的线程非常多，当一个线程使用完锁，释放锁之后，其余线程都会尝试去加锁，但是只能有一个线程可以成功获取到锁。这样循环往复会对zookeeper造成很大的压力。<strong>这就是著名的羊群效应，也叫惊群效应</strong></p>
+</blockquote>
+<h4 id="1-2-公平锁"><a href="#1-2-公平锁" class="headerlink" title="1.2 公平锁"></a>1.2 公平锁</h4><p><strong>原理：</strong></p>
+<p><img src="/2022/06/11/03-02-02-Zookeeper%E5%85%B8%E5%9E%8B%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E5%AE%9E%E6%88%98/image-20220611194440831.png" alt="image-20220611194440831"></p>
+<blockquote>
+<p>基于临时顺序节点加锁（公平性，要加锁的线程排序，临时顺序节点维护了先来后到的顺序）：</p>
+<p>原理：模拟多个线程并发举例</p>
+<p>1&gt;thread1请求加锁，会创建一个临时顺序节点（/x-0000000000），然后thread1会查询/lock下的所有的节点，判断自己是不是最小的节点，如果是则加锁成功，获得锁</p>
+<p>2&gt;后续的线程加锁请求比如thread2加锁会先创建顺序节点（/x-0000000001），然后监听他的上一个节点。</p>
+<p>3&gt;thread1执行完业务逻辑，就要释放锁，删除当前临时节点，然后会通知监听它的下一个节点（/x-0000000001）</p>
+<p>4&gt;当thread2收到通知后，会获取/lock下面的所有子节点，然后判断自己的节点是不是当前最小节点，此时是最小节点，则thread2获取锁，执行自己的业务逻辑</p>
+<p>5&gt;以此类推，就实现了公平锁</p>
+<p>另：</p>
+<p>1&gt;一般来说节点都是顺序的，如果按上图，0000000001节点被删除了（可能客户端连接挂了），这个节点会被清除掉；节点就会变为不连续了。</p>
+<p>2&gt;假如此时000000000还在使用锁执行业务逻辑。</p>
+<p>3&gt;000000001被删除0000000002会收到通知,会获取/lock下的所有子节点，判断0000000002是否是当前最小节点。</p>
+<p>3&gt;如果000000000还没有释放，则不是最小节点，00000002会对00000000进行监听；如果是最小节点，则获取锁</p>
+<p>还有一种情况：</p>
+<p>比如一个客户端请求在zookeeper上加锁，服务端执行完创建节点命令，已经有数据了，但是服务端响应客户端失败了，即客户端不知道自己创建节点成功。</p>
+<p>1&gt;如果session还在生命周期以内，服务端停掉了，立马重启，session还是有效的</p>
+<p>2&gt;使用curator的话会自动重试，这样的话会创建多个临时顺序节点。那第一个创建的节点不会做任何处理，第一个节点我们称之为<strong>幽灵节点</strong></p>
+<p><strong>3&gt;解决这种问题可以使用curator的保护模式（原理，创建节点的时候带一个前缀唯一标识，这个标识会维护在本地缓存中，重试的场景下，先判断这个唯一标志对应的节点有没有被创建过，已经创建过就不在重建了，避免了幽灵节点的产生）。</strong></p>
+</blockquote>
+<h4 id="1-3-curator实现的分布式锁原理"><a href="#1-3-curator实现的分布式锁原理" class="headerlink" title="1.3 curator实现的分布式锁原理"></a>1.3 curator实现的分布式锁原理</h4><p>代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestController</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> OrderService orderService;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;server.port&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String port;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    CuratorFramework curatorFramework;</span><br><span class="line">    <span class="meta">@PostMapping(&quot;/stock/deduct&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">reduceStock</span><span class="params">(Integer id)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        InterProcessMutex interProcessMutex = <span class="keyword">new</span> InterProcessMutex(curatorFramework, <span class="string">&quot;/product_&quot;</span> + id);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">            interProcessMutex.acquire();<span class="comment">// 【0】</span></span><br><span class="line">            orderService.reduceStock(id);</span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            <span class="keyword">if</span> (e <span class="keyword">instanceof</span> RuntimeException) &#123;</span><br><span class="line">                <span class="keyword">throw</span> e;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;<span class="keyword">finally</span> &#123;</span><br><span class="line">            interProcessMutex.release();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;ok:&quot;</span> + port;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">## 加锁原理分析：</span><br><span class="line">---------&gt;【<span class="number">0</span>】</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">acquire</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> ( !internalLock(-<span class="number">1</span>, <span class="keyword">null</span>) )<span class="comment">// 【1】</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IOException(<span class="string">&quot;Lost connection while trying to acquire lock: &quot;</span> + basePath);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">---------&gt;【<span class="number">1</span>】</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">internalLock</span><span class="params">(<span class="keyword">long</span> time, TimeUnit unit)</span> <span class="keyword">throws</span> Exception</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Thread currentThread = Thread.currentThread();</span><br><span class="line">    LockData lockData = threadData.get(currentThread);</span><br><span class="line">    <span class="keyword">if</span> ( lockData != <span class="keyword">null</span> )</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// re-entering</span></span><br><span class="line">        lockData.lockCount.incrementAndGet();</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    String lockPath = internals.attemptLock(time, unit, getLockNodeBytes()); <span class="comment">// 【2】</span></span><br><span class="line">    <span class="keyword">if</span> ( lockPath != <span class="keyword">null</span> )</span><br><span class="line">    &#123;</span><br><span class="line">        LockData newLockData = <span class="keyword">new</span> LockData(currentThread, lockPath);</span><br><span class="line">        threadData.put(currentThread, newLockData);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br><span class="line">----------【<span class="number">2</span>】</span><br><span class="line"><span class="function">String <span class="title">attemptLock</span><span class="params">(<span class="keyword">long</span> time, TimeUnit unit, <span class="keyword">byte</span>[] lockNodeBytes)</span> <span class="keyword">throws</span> Exception</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">long</span>      startMillis = System.currentTimeMillis();</span><br><span class="line">    <span class="keyword">final</span> Long      millisToWait = (unit != <span class="keyword">null</span>) ? unit.toMillis(time) : <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">byte</span>[]    localLockNodeBytes = (revocable.get() != <span class="keyword">null</span>) ? <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">0</span>] : lockNodeBytes;</span><br><span class="line">    <span class="keyword">int</span>             retryCount = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    String          ourPath = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">boolean</span>         hasTheLock = <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">boolean</span>         isDone = <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">while</span> ( !isDone )</span><br><span class="line">    &#123;</span><br><span class="line">        isDone = <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span></span><br><span class="line">        &#123;</span><br><span class="line">            ourPath = driver.createsTheLock(client, path, localLockNodeBytes); <span class="comment">// 【3】 创建节点</span></span><br><span class="line">            hasTheLock = internalLockLoop(startMillis, millisToWait, ourPath); <span class="comment">// 【4】 判断是不是最小节点</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">catch</span> ( KeeperException.NoNodeException e )</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// gets thrown by StandardLockInternalsDriver when it can&#x27;t find the lock node</span></span><br><span class="line">            <span class="comment">// this can happen when the session expires, etc. So, if the retry allows, just try it all again</span></span><br><span class="line">            <span class="keyword">if</span> ( client.getZookeeperClient().getRetryPolicy().allowRetry(retryCount++, System.currentTimeMillis() - startMillis, RetryLoop.getDefaultRetrySleeper()) )</span><br><span class="line">            &#123;</span><br><span class="line">                isDone = <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">throw</span> e;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ( hasTheLock )</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">return</span> ourPath;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br><span class="line">----------&gt;【<span class="number">3</span>】</span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">createsTheLock</span><span class="params">(CuratorFramework client, String path, <span class="keyword">byte</span>[] lockNodeBytes)</span> <span class="keyword">throws</span> Exception</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    String ourPath;</span><br><span class="line">    <span class="keyword">if</span> ( lockNodeBytes != <span class="keyword">null</span> )</span><br><span class="line">    &#123;</span><br><span class="line">    <span class="comment">// 父节点是容器节点  子节点是 临时顺序节点</span></span><br><span class="line">        ourPath = client.create().creatingParentContainersIfNeeded().withProtection().withMode(CreateMode.EPHEMERAL_SEQUENTIAL).forPath(path, lockNodeBytes);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        ourPath = client.create().creatingParentContainersIfNeeded().withProtection().withMode(CreateMode.EPHEMERAL_SEQUENTIAL).forPath(path);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> ourPath;</span><br><span class="line">&#125;</span><br><span class="line">--------&gt;【<span class="number">4</span>】</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">internalLockLoop</span><span class="params">(<span class="keyword">long</span> startMillis, Long millisToWait, String ourPath)</span> <span class="keyword">throws</span> Exception</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">boolean</span>     haveTheLock = <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">boolean</span>     doDelete = <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">try</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> ( revocable.get() != <span class="keyword">null</span> )</span><br><span class="line">        &#123;</span><br><span class="line">            client.getData().usingWatcher(revocableWatcher).forPath(ourPath);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> ( (client.getState() == CuratorFrameworkState.STARTED) &amp;&amp; !haveTheLock )</span><br><span class="line">        &#123;</span><br><span class="line">            List&lt;String&gt;        children = getSortedChildren();  <span class="comment">// 获取所有的节点并进行排序</span></span><br><span class="line">            String              sequenceNodeName = ourPath.substring(basePath.length() + <span class="number">1</span>); <span class="comment">// +1 to include the slash</span></span><br><span class="line">            PredicateResults    predicateResults = driver.getsTheLock(client, children, sequenceNodeName, maxLeases); <span class="comment">// 【5】 判断当前节点是不是最小节点</span></span><br><span class="line">            <span class="keyword">if</span> ( predicateResults.getsTheLock() ) <span class="comment">// 为true 是最小节点</span></span><br><span class="line">            &#123;</span><br><span class="line">                haveTheLock = <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> <span class="comment">// 不是最小节点</span></span><br><span class="line">            &#123; </span><br><span class="line">                String  previousSequencePath = basePath + <span class="string">&quot;/&quot;</span> + predicateResults.getPathToWatch(); <span class="comment">// 拼接全路径</span></span><br><span class="line">                <span class="keyword">synchronized</span>(<span class="keyword">this</span>)</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="keyword">try</span></span><br><span class="line">                    &#123;</span><br><span class="line">                        <span class="comment">// use getData() instead of exists() to avoid leaving unneeded watchers which is a type of resource leak</span></span><br><span class="line">                        client.getData().usingWatcher(watcher).forPath(previousSequencePath);</span><br><span class="line">                        <span class="keyword">if</span> ( millisToWait != <span class="keyword">null</span> )</span><br><span class="line">                        &#123;</span><br><span class="line">                            millisToWait -= (System.currentTimeMillis() - startMillis);</span><br><span class="line">                            startMillis = System.currentTimeMillis();</span><br><span class="line">                            <span class="keyword">if</span> ( millisToWait &lt;= <span class="number">0</span> )</span><br><span class="line">                            &#123;</span><br><span class="line">                                doDelete = <span class="keyword">true</span>;    <span class="comment">// timed out - delete our node</span></span><br><span class="line">                                <span class="keyword">break</span>;</span><br><span class="line">                            &#125;</span><br><span class="line">                            wait(millisToWait); <span class="comment">// 监听等待 加锁目的</span></span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="keyword">else</span></span><br><span class="line">                        &#123;</span><br><span class="line">                            wait(); <span class="comment">// 监听等待 加锁目的</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">catch</span> ( KeeperException.NoNodeException e )</span><br><span class="line">                    &#123;</span><br><span class="line">                        <span class="comment">// it has been deleted (i.e. lock released). Try to acquire again</span></span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> ( Exception e )&#123;</span><br><span class="line">        ThreadUtils.checkInterrupted(e);</span><br><span class="line">        doDelete = <span class="keyword">true</span>;</span><br><span class="line">        <span class="keyword">throw</span> e;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">finally</span>&#123;</span><br><span class="line">        <span class="keyword">if</span> ( doDelete )&#123;</span><br><span class="line">            deleteOurPath(ourPath);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> haveTheLock;</span><br><span class="line">&#125;</span><br><span class="line">---------&gt;【<span class="number">5</span>】</span><br><span class="line"><span class="function"><span class="keyword">public</span> PredicateResults <span class="title">getsTheLock</span><span class="params">(CuratorFramework client, List&lt;String&gt; children, String sequenceNodeName, <span class="keyword">int</span> maxLeases)</span> <span class="keyword">throws</span> Exception</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span>             ourIndex = children.indexOf(sequenceNodeName);</span><br><span class="line">    validateOurIndex(sequenceNodeName, ourIndex);</span><br><span class="line">    <span class="keyword">boolean</span>         getsTheLock = ourIndex &lt; maxLeases;</span><br><span class="line">    String          pathToWatch = getsTheLock ? <span class="keyword">null</span> : children.get(ourIndex - maxLeases); <span class="comment">// 当前节点是最小节点 不需要监听 如果不是最小节点则监听前一个节点，</span></span><br><span class="line">    <span class="comment">// 返回前一个几点路径索引</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> PredicateResults(pathToWatch, getsTheLock);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-4-redis实现的分布式锁和zk实现的分布式锁有什么区别？"><a href="#1-4-redis实现的分布式锁和zk实现的分布式锁有什么区别？" class="headerlink" title="1.4 redis实现的分布式锁和zk实现的分布式锁有什么区别？"></a>1.4 redis实现的分布式锁和zk实现的分布式锁有什么区别？</h4><p>redis一般生产使用集群模式，集群模式当主从切换时，可能会有数据丢失问题，当加锁的key在主从切换空挡出现了数据丢失，那么就很可能出现之前已经加过的锁，在主从切换之后还能加锁成功，因为之前加的锁的key可能已经丢失了。</p>
+<p>而zk写入数据的时候有过半机制，当写入leader节点时，还会同步数据写入flower节点，当过半写入成功（没写入成功的会跟leader数据同步）才算写入成功，因为数据的保存比redis更安全。</p>
+<h4 id="1-5-读写锁（共享锁）"><a href="#1-5-读写锁（共享锁）" class="headerlink" title="1.5 读写锁（共享锁）"></a>1.5 读写锁（共享锁）</h4><blockquote>
+<p>前面这两种加锁方式有一个共同的特质，就是都是<strong>互斥锁</strong>，同一时间只能有一个请求占用，如果是大量的并发上来，性能是会急剧下降的，所有的请求都得加锁，那是不是真的所有的请求都需要加锁呢？答案是否定的，比如如果数据没有进行任何修改的话，是不需要加锁的，但是如果读数据的请求还没读完，这个时候来了一个写请求，怎么办呢？有人已经在读数据了，这个时候是不能写数据的，不然数据就不正确了。直到前面读锁全部释放掉以后，写请求才能执行，所以需要给这个读请求加一个标识（读锁），让写请求知道，这个时候是不能修改数据的。不然数据就不一致了。如果已经有人在写数据了，再来一个请求写数据，也是不允许的，这样也会导致数据的不一致，所以所有的写请求，都需要加一个写锁，是为了避免同时对共享数据进行写操作。</p>
+</blockquote>
+<ul>
+<li><p>原理</p>
+<p><img src="/2022/06/11/03-02-02-Zookeeper%E5%85%B8%E5%9E%8B%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E5%AE%9E%E6%88%98/image-20220611200951116.png" alt="image-20220611200951116"></p>
+</li>
+</ul>
+<blockquote>
+<p><strong>写操作：</strong></p>
+<p>前面不能有读，不能有写，写操作监听前面一个节点</p>
+<p><strong>读操作：</strong></p>
+<p>前面不能有写，监听前面的最近的写操作</p>
+</blockquote>
+<h4 id="1-6-集群选举实战："><a href="#1-6-集群选举实战：" class="headerlink" title="1.6 集群选举实战："></a>1.6 <strong>集群选举实战：</strong></h4><p><strong>代码示例：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> zookeeper.leaderselector;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.apache.curator.RetryPolicy;</span><br><span class="line"><span class="keyword">import</span> org.apache.curator.framework.CuratorFramework;</span><br><span class="line"><span class="keyword">import</span> org.apache.curator.framework.CuratorFrameworkFactory;</span><br><span class="line"><span class="keyword">import</span> org.apache.curator.framework.recipes.leader.LeaderSelector;</span><br><span class="line"><span class="keyword">import</span> org.apache.curator.framework.recipes.leader.LeaderSelectorListener;</span><br><span class="line"><span class="keyword">import</span> org.apache.curator.framework.recipes.leader.LeaderSelectorListenerAdapter;</span><br><span class="line"><span class="keyword">import</span> org.apache.curator.retry.ExponentialBackoffRetry;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.CountDownLatch;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.TimeUnit;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LeaderSelectorDemo</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span>  <span class="keyword">final</span>  String CONNECT_STR=<span class="string">&quot;192.168.31.139:2181&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> RetryPolicy retryPolicy=<span class="keyword">new</span> ExponentialBackoffRetry( <span class="number">5</span>*<span class="number">1000</span>, <span class="number">10</span> );</span><br><span class="line">    <span class="keyword">private</span>  <span class="keyword">static</span>  CuratorFramework curatorFramework;</span><br><span class="line">     <span class="keyword">private</span> <span class="keyword">static</span> CountDownLatch countDownLatch = <span class="keyword">new</span> CountDownLatch(<span class="number">1</span>);</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        String appName = System.getProperty(<span class="string">&quot;appName&quot;</span>);</span><br><span class="line">        CuratorFramework curatorFramework = CuratorFrameworkFactory.newClient(CONNECT_STR, retryPolicy);</span><br><span class="line">        LeaderSelectorDemo.curatorFramework = curatorFramework;</span><br><span class="line">        curatorFramework.start();</span><br><span class="line"></span><br><span class="line">        LeaderSelectorListener listener = <span class="keyword">new</span> LeaderSelectorListenerAdapter()</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">takeLeadership</span><span class="params">(CuratorFramework client)</span> <span class="keyword">throws</span> Exception</span></span><br><span class="line"><span class="function">            </span>&#123;</span><br><span class="line">                System.out.println(<span class="string">&quot; I&#x27; m leader now . i&#x27;m , &quot;</span>+appName);</span><br><span class="line">                TimeUnit.SECONDS.sleep(<span class="number">15</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        LeaderSelector selector = <span class="keyword">new</span> LeaderSelector(curatorFramework, <span class="string">&quot;/cachePreHeat_leader&quot;</span>, listener);</span><br><span class="line">        selector.autoRequeue();  <span class="comment">// not required, but this is behavior that you will probably expect</span></span><br><span class="line">        selector.start(); <span class="comment">// 【0】</span></span><br><span class="line">        countDownLatch.await();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">## 关键源码</span><br><span class="line">----------&gt;【<span class="number">0</span>】</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Preconditions.checkState(state.compareAndSet(State.LATENT, State.STARTED), <span class="string">&quot;Cannot be started more than once&quot;</span>);</span><br><span class="line"></span><br><span class="line">    Preconditions.checkState(!executorService.isShutdown(), <span class="string">&quot;Already started&quot;</span>);</span><br><span class="line">    Preconditions.checkState(!hasLeadership, <span class="string">&quot;Already has leadership&quot;</span>);</span><br><span class="line"></span><br><span class="line">    client.getConnectionStateListenable().addListener(listener); <span class="comment">// main中添加的监听方法</span></span><br><span class="line">    requeue(); <span class="comment">// 【1】</span></span><br><span class="line">&#125;</span><br><span class="line">----------&gt;【<span class="number">1</span>】</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">requeue</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Preconditions.checkState(state.get() == State.STARTED, <span class="string">&quot;close() has already been called&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> internalRequeue();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">synchronized</span> <span class="keyword">boolean</span> <span class="title">internalRequeue</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> ( !isQueued &amp;&amp; (state.get() == State.STARTED) ) <span class="comment">// 判断任务是否时正常状态</span></span><br><span class="line">    &#123;</span><br><span class="line">        isQueued = <span class="keyword">true</span>;</span><br><span class="line">        Future&lt;Void&gt; task = executorService.submit(<span class="keyword">new</span> Callable&lt;Void&gt;() <span class="comment">// 线程池执行</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> Void <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span></span><br><span class="line"><span class="function">            </span>&#123;</span><br><span class="line">                <span class="keyword">try</span></span><br><span class="line">                &#123;</span><br><span class="line">                    doWorkLoop(); <span class="comment">// 【2】</span></span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">finally</span></span><br><span class="line">                &#123;</span><br><span class="line">                    clearIsQueued();</span><br><span class="line">                    <span class="keyword">if</span> ( autoRequeue.get() )</span><br><span class="line">                    &#123;</span><br><span class="line">                        internalRequeue();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        ourTask.set(task);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br><span class="line">----------&gt;【<span class="number">2</span>】</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">doWorkLoop</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    KeeperException exception = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">try</span></span><br><span class="line">    &#123;</span><br><span class="line">        doWork();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> ( KeeperException.ConnectionLossException e )</span><br><span class="line">    &#123;</span><br><span class="line">        exception = e;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> ( KeeperException.SessionExpiredException e )</span><br><span class="line">    &#123;</span><br><span class="line">        exception = e;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> ( InterruptedException ignore )</span><br><span class="line">    &#123;</span><br><span class="line">        Thread.currentThread().interrupt();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> ( (exception != <span class="keyword">null</span>) &amp;&amp; !autoRequeue.get() )   <span class="comment">// autoRequeue should ignore connection loss or session expired and just keep trying</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">throw</span> exception;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">@VisibleForTesting</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">doWork</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    hasLeadership = <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">try</span></span><br><span class="line">    &#123;</span><br><span class="line">        mutex.acquire();  <span class="comment">// 获取分布式锁的逻辑</span></span><br><span class="line"></span><br><span class="line">        hasLeadership = <span class="keyword">true</span>;</span><br><span class="line">        <span class="keyword">try</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> ( debugLeadershipLatch != <span class="keyword">null</span> )</span><br><span class="line">            &#123;</span><br><span class="line">                debugLeadershipLatch.countDown();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> ( debugLeadershipWaitLatch != <span class="keyword">null</span> )</span><br><span class="line">            &#123;</span><br><span class="line">                debugLeadershipWaitLatch.await();</span><br><span class="line">            &#125;</span><br><span class="line">            listener.takeLeadership(client);  <span class="comment">// 执行leader选举算法</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">catch</span> ( InterruptedException e )</span><br><span class="line">        &#123;</span><br><span class="line">            Thread.currentThread().interrupt();</span><br><span class="line">            <span class="keyword">throw</span> e;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">catch</span> ( Throwable e )</span><br><span class="line">        &#123;</span><br><span class="line">            ThreadUtils.checkInterrupted(e);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">finally</span></span><br><span class="line">        &#123;</span><br><span class="line">            clearIsQueued();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> ( InterruptedException e )</span><br><span class="line">    &#123;</span><br><span class="line">        Thread.currentThread().interrupt();</span><br><span class="line">        <span class="keyword">throw</span> e;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">finally</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> ( hasLeadership )</span><br><span class="line">        &#123;</span><br><span class="line">            hasLeadership = <span class="keyword">false</span>;</span><br><span class="line">            <span class="keyword">boolean</span> wasInterrupted = Thread.interrupted();  <span class="comment">// clear any interrupted tatus so that mutex.release() works immediately</span></span><br><span class="line">            <span class="keyword">try</span></span><br><span class="line">            &#123;</span><br><span class="line">                mutex.release();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">catch</span> ( Exception e )</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">if</span> ( failedMutexReleaseCount != <span class="keyword">null</span> )</span><br><span class="line">                &#123;</span><br><span class="line">                    failedMutexReleaseCount.incrementAndGet();</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                ThreadUtils.checkInterrupted(e);</span><br><span class="line">                log.error(<span class="string">&quot;The leader threw an exception&quot;</span>, e);</span><br><span class="line">                <span class="comment">// ignore errors - this is just a safety</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">finally</span></span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">if</span> ( wasInterrupted )</span><br><span class="line">                &#123;</span><br><span class="line">                    Thread.currentThread().interrupt();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">原理：</span><br><span class="line">底层就是一个公平锁实现</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-7-注册中心实战"><a href="#1-7-注册中心实战" class="headerlink" title="1.7 注册中心实战"></a>1.7 <strong>注册中心实战</strong></h4><blockquote>
+<p>这个时候我们可以借助于Zookeeper的基本特性来实现一个注册中心,什么是注册中心，顾名思义，就是让众多的服务，都在Zookeeper中进行注册，啥是注册，注册就是把自己的一些服务信息，比如IP，端口，还有一些更加具体的服务信息，都写到 Zookeeper节点上， 这样有需要的服务就可以直接从zookeeper上面去拿，怎么拿呢？ 这时我们可以定义统一的名称，比如，User-Service, 那所有的<strong>用户服务</strong>在<strong>启动</strong>的时候，都在User-Service 这个节点下面创建一个子节点（临时节点），这个子节点保持唯一就好，代表了每个服务实例的唯一标识，有依赖<strong>用户服务</strong>的比如<strong>Order-Service</strong> 就可以通过<strong>User-Service</strong> 这个父节点，就能获取所有的User-Service 子节点，并且获取所有的子节点信息（IP，端口等信息），拿到子节点的数据后<strong>Order-Service</strong>可以对其进行缓存，然后实现一个客户端的负载均衡，同时还可以对这个User-Service 目录进行监听， 这样有新的节点加入，或者退出，<strong>Order-Service</strong>都能收到通知，这样<strong>Order-Service</strong>重新获取所有子节点，且进行数据更新。这个用户服务的子节点的类型为临时节点。 第一节课有讲过，Zookeeper中临时节点生命周期是和SESSION绑定的，如果SESSION超时了，对应的节点会被删除，被删除时，Zookeeper 会通知对该节点父节点进行监听的客户端, 这样对应的客户端又可以刷新本地缓存了。当有新服务加入时，同样也会通知对应的客户端，刷新本地缓存，要达到这个目标需要客户端重复的注册对父节点的监听。这样就实现了服务的自动注册和自动退出。</p>
+</blockquote>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/06/11/03-02-02-Zookeeper%E5%85%B8%E5%9E%8B%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E5%AE%9E%E6%88%98/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zookeeper/" rel="tag">zookeeper</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/06/12/03-02-03-Zookeeper%E9%9B%86%E7%BE%A4Leader%E9%80%89%E4%B8%BE%E6%BA%90%E7%A0%81/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            Zookeeper集群Leader选举源码
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/06/10/03-02-01-Zookeeper%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8%E4%B8%8E%E9%9B%86%E7%BE%A4%E7%89%B9%E6%80%A7/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">Zookeeper客户端使用与集群特性</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2022
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

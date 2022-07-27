@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>JVM调优工具详解及调优实战 |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-00-00-07-JVM调优工具详解及调优实战"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  JVM调优工具详解及调优实战
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/" class="article-date">
+  <time datetime="2022-04-23T12:31:55.000Z" itemprop="datePublished">2022-04-23</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/">性能调优</a> / <a class="article-category-link" href="/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/Jvm/">Jvm</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">3.7k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">14 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p id="hitokoto">正在加载一言...</p>
+
+<p><strong>前置启动程序</strong></p>
+<p>事先启动一个web应用程序，用jps查看其进程id，接着用各种jdk自带命令优化应用</p>
+<p><strong>Jmap</strong></p>
+<p>此命令可以用来查看内存信息，实例个数以及占用内存大小</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard.png" alt="img"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">jmap -histo <span class="number">14660</span>  #查看历史生成的实例</span><br><span class="line">jmap -histo:live <span class="number">14660</span>  #查看当前存活的实例，执行过程中可能会触发一次full gc</span><br></pre></td></tr></table></figure>
+
+<p>打开log.txt，文件内容如下：</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717297968.png" alt="img"></p>
+<ul>
+<li>num：序号</li>
+<li>instances：实例数量</li>
+<li>bytes：占用空间大小</li>
+<li>class name：类名称，[C is a char[]，[S is a short[]，[I is a int[]，[B is a byte[]，[[I is a int[][]</li>
+</ul>
+<p>堆信息</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717336518.png" alt="img"></p>
+<p>堆内存dump</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jmap -dump:format=b,file=eureka.hprof 14660</span><br></pre></td></tr></table></figure>
+
+<p>也可以设置内存溢出自动导出dump文件(内存很大的时候，可能会导不出来)</p>
+<ol>
+<li>-XX:+HeapDumpOnOutOfMemoryError</li>
+<li>-XX:HeapDumpPath=./  （路径）</li>
+</ol>
+<p>示例代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OOMTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">public</span> <span class="keyword">static</span> List&lt;Object&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">   <span class="comment">// JVM设置    </span></span><br><span class="line">   <span class="comment">// -Xms10M -Xmx10M -XX:+PrintGCDetails -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=D:\jvm.dump </span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">      List&lt;Object&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">      <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">      <span class="keyword">int</span> j = <span class="number">0</span>;</span><br><span class="line">      <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">         list.add(<span class="keyword">new</span> User(i++, UUID.randomUUID().toString()));</span><br><span class="line">         <span class="keyword">new</span> User(j--, UUID.randomUUID().toString());</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>可以用jvisualvm命令工具导入该dump文件分析</strong></p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717373368.png" alt="img"></p>
+<p><strong>Jstack</strong></p>
+<p>查看堆栈情况</p>
+<p>用jstack加进程id查找死锁，见如下示例</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DeadLockTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">static</span> Object lock1 = <span class="keyword">new</span> Object();</span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">static</span> Object lock2 = <span class="keyword">new</span> Object();</span><br><span class="line"></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">         <span class="keyword">synchronized</span> (lock1) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">               System.out.println(<span class="string">&quot;thread1 begin&quot;</span>);</span><br><span class="line">               Thread.sleep(<span class="number">5000</span>);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">synchronized</span> (lock2) &#123;</span><br><span class="line">               System.out.println(<span class="string">&quot;thread1 end&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;).start();</span><br><span class="line"></span><br><span class="line">      <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">         <span class="keyword">synchronized</span> (lock2) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">               System.out.println(<span class="string">&quot;thread2 begin&quot;</span>);</span><br><span class="line">               Thread.sleep(<span class="number">5000</span>);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">synchronized</span> (lock1) &#123;</span><br><span class="line">               System.out.println(<span class="string">&quot;thread2 end&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;).start();</span><br><span class="line"></span><br><span class="line">      System.out.println(<span class="string">&quot;main thread end&quot;</span>);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717418373.png" alt="img"></p>
+<p>“Thread-1” 线程名 </p>
+<p>prio=5 优先级=5</p>
+<p>tid=0x000000001fa9e000 线程id</p>
+<p>nid=0x2d64 线程对应的本地线程标识nid</p>
+<p>java.lang.Thread.State: BLOCKED 线程状态</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717426097.png" alt="img"></p>
+<p>还可以用jvisualvm自动检测死锁</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717432836.png" alt="img"></p>
+<p> <strong>远程连接jvisualvm</strong></p>
+<p><strong>启动普通的jar程序JMX端口配置：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -Dcom.sun.management.jmxremote.port=<span class="number">8888</span> -Djava.rmi.server.hostname=<span class="number">192.168</span><span class="number">.65</span><span class="number">.60</span> -Dcom.sun.management.jmxremote.ssl=<span class="keyword">false</span> -Dcom.sun.management.jmxremote.authenticate=<span class="keyword">false</span> -jar microservice-eureka-server.jar</span><br></pre></td></tr></table></figure>
+
+<p>PS：</p>
+<p>-Dcom.sun.management.jmxremote.port 为远程机器的JMX端口</p>
+<p>-Djava.rmi.server.hostname 为远程机器IP</p>
+<p><strong>tomcat的JMX配置：在catalina.sh文件里的最后一个JAVA_OPTS的赋值语句下一行增加如下配置行</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">JAVA_OPTS=<span class="string">&quot;$JAVA_OPTS -Dcom.sun.management.jmxremote.port=8888 -Djava.rmi.server.hostname=192.168.50.60 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>连接时确认下端口是否通畅，可以临时关闭下防火墙</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop firewalld   #临时关闭防火墙</span><br></pre></td></tr></table></figure>
+
+<p><strong>jstack找出占用cpu最高的线程堆栈信息</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.tuling.jvm;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 运行此代码，cpu会飙高</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Math</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> initData = <span class="number">666</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> User user = <span class="keyword">new</span> User();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compute</span><span class="params">()</span> </span>&#123;  <span class="comment">//一个方法对应一块栈帧内存区域</span></span><br><span class="line">        <span class="keyword">int</span> a = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">int</span> b = <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">int</span> c = (a + b) * <span class="number">10</span>;</span><br><span class="line">        <span class="keyword">return</span> c;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Math math = <span class="keyword">new</span> Math();</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>)&#123;</span><br><span class="line">            math.compute();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>1，使用命令top -p <pid> ，显示你的java进程的内存情况，pid是你的java进程号，比如19663</pid></p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717539962.png" alt="img"></p>
+<p>2，按H，获取每个线程的内存情况 【shift+h】</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717539962.png" alt="img"></p>
+<p>3，找到内存和cpu占用最高的线程tid，比如19664</p>
+<p>4，转为十六进制得到 0x4cd0，此为线程id的十六进制表示</p>
+<p>5，执行 jstack 19663|grep -A 10 4cd0，得到线程堆栈信息中 4cd0 这个线程所在行的后面10行，从堆栈中可以发现导致cpu飙高的调用方法</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717539962.png" alt="img"></p>
+<p>6，查看对应的堆栈信息找出可能存在问题的代码</p>
+<p><strong>Jinfo</strong> </p>
+<p>查看正在运行的Java应用程序的扩展参数 </p>
+<p>查看jvm的参数</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650974007886.png" alt="img"></p>
+<p>查看java系统参数</p>
+<p>jinfo -sysprops pid 查询系统属性</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650974020201.png" alt="img"></p>
+<p><strong>Jstat</strong></p>
+<p>jstat命令可以查看堆内存各部分的使用量，以及加载类的数量。命令的格式如下：</p>
+<p>jstat [-命令选项] [vmid] [间隔时间(毫秒)] [查询次数]</p>
+<p>注意：使用的jdk版本是jdk8</p>
+<p>垃圾回收统计</p>
+<p><strong>jstat -gc pid 最常用</strong>，可以评估程序内存使用及GC压力整体情况</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717633232.png" alt="img"></p>
+<ul>
+<li>S0C：第一个幸存区的大小，单位KB</li>
+<li>S1C：第二个幸存区的大小</li>
+<li>S0U：第一个幸存区的使用大小</li>
+<li>S1U：第二个幸存区的使用大小</li>
+<li>EC：伊甸园区的大小</li>
+<li>EU：伊甸园区的使用大小</li>
+<li>OC：老年代大小</li>
+<li>OU：老年代使用大小</li>
+<li>MC：方法区大小(元空间)</li>
+<li>MU：方法区使用大小</li>
+<li>CCSC:压缩类空间大小</li>
+<li>CCSU:压缩类空间使用大小</li>
+<li>YGC：年轻代垃圾回收次数</li>
+<li>YGCT：年轻代垃圾回收消耗时间，单位s</li>
+<li>FGC：老年代垃圾回收次数 </li>
+<li>FGCT：老年代垃圾回收消耗时间，单位s</li>
+<li>GCT：垃圾回收消耗总时间，单位s</li>
+</ul>
+<p>堆内存统计</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717642147.png" alt="img"></p>
+<ul>
+<li>NGCMN：新生代最小容量</li>
+<li>NGCMX：新生代最大容量</li>
+<li>NGC：当前新生代容量</li>
+<li>S0C：第一个幸存区大小</li>
+<li>S1C：第二个幸存区的大小</li>
+<li>EC：伊甸园区的大小</li>
+<li>OGCMN：老年代最小容量</li>
+<li>OGCMX：老年代最大容量</li>
+<li>OGC：当前老年代大小</li>
+<li>OC:当前老年代大小</li>
+<li>MCMN:最小元数据容量</li>
+<li>MCMX：最大元数据容量</li>
+<li>MC：当前元数据空间大小</li>
+<li>CCSMN：最小压缩类空间大小</li>
+<li>CCSMX：最大压缩类空间大小</li>
+<li>CCSC：当前压缩类空间大小</li>
+<li>YGC：年轻代gc次数</li>
+<li>FGC：老年代GC次数</li>
+</ul>
+<p>新生代垃圾回收统计</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717653233.png" alt="img"></p>
+<ul>
+<li>S0C：第一个幸存区的大小</li>
+<li>S1C：第二个幸存区的大小</li>
+<li>S0U：第一个幸存区的使用大小</li>
+<li>S1U：第二个幸存区的使用大小</li>
+<li>TT:对象在新生代存活的次数</li>
+<li>MTT:对象在新生代存活的最大次数</li>
+<li>DSS:期望的幸存区大小</li>
+<li>EC：伊甸园区的大小</li>
+<li>EU：伊甸园区的使用大小</li>
+<li>YGC：年轻代垃圾回收次数</li>
+<li>YGCT：年轻代垃圾回收消耗时间</li>
+</ul>
+<p>新生代内存统计</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717662929.png" alt="img"></p>
+<ul>
+<li>NGCMN：新生代最小容量</li>
+<li>NGCMX：新生代最大容量</li>
+<li>NGC：当前新生代容量</li>
+<li>S0CMX：最大幸存1区大小</li>
+<li>S0C：当前幸存1区大小</li>
+<li>S1CMX：最大幸存2区大小</li>
+<li>S1C：当前幸存2区大小</li>
+<li>ECMX：最大伊甸园区大小</li>
+<li>EC：当前伊甸园区大小</li>
+<li>YGC：年轻代垃圾回收次数</li>
+<li>FGC：老年代回收次数</li>
+</ul>
+<p>老年代垃圾回收统计</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/SoftWare/YoudaoNote/data/weixinobU7VjhvI_xPabJNr-TrodDikjY4/8f6d44c9d9134a78a516100242f38d60/clipboard.png" alt="img"></p>
+<ul>
+<li>MC：方法区大小</li>
+<li>MU：方法区使用大小</li>
+<li>CCSC:压缩类空间大小</li>
+<li>CCSU:压缩类空间使用大小</li>
+<li>OC：老年代大小</li>
+<li>OU：老年代使用大小</li>
+<li>YGC：年轻代垃圾回收次数</li>
+<li>FGC：老年代垃圾回收次数</li>
+<li>FGCT：老年代垃圾回收消耗时间</li>
+<li>GCT：垃圾回收消耗总时间</li>
+</ul>
+<p>老年代内存统计</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/SoftWare/YoudaoNote/data/weixinobU7VjhvI_xPabJNr-TrodDikjY4/db0afa703b8b45cdb33b603877fd14ee/clipboard.png" alt="img"></p>
+<ul>
+<li>OGCMN：老年代最小容量</li>
+<li>OGCMX：老年代最大容量</li>
+<li>OGC：当前老年代大小</li>
+<li>OC：老年代大小</li>
+<li>YGC：年轻代垃圾回收次数</li>
+<li>FGC：老年代垃圾回收次数</li>
+<li>FGCT：老年代垃圾回收消耗时间</li>
+<li>GCT：垃圾回收消耗总时间</li>
+</ul>
+<p>元数据空间统计</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/SoftWare/YoudaoNote/data/weixinobU7VjhvI_xPabJNr-TrodDikjY4/fbf747efc2a84ffb97ea5ae79bf46c87/clipboard.png" alt="img"></p>
+<ul>
+<li>MCMN:最小元数据容量</li>
+<li>MCMX：最大元数据容量</li>
+<li>MC：当前元数据空间大小 </li>
+<li>CCSMN：最小压缩类空间大小</li>
+<li>CCSMX：最大压缩类空间大小</li>
+<li>CCSC：当前压缩类空间大小</li>
+<li>YGC：年轻代垃圾回收次数</li>
+<li>FGC：老年代垃圾回收次数</li>
+<li>FGCT：老年代垃圾回收消耗时间</li>
+<li>GCT：垃圾回收消耗总时间</li>
+</ul>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717687825.png" alt="img"></p>
+<ul>
+<li>S0：幸存1区当前使用比例</li>
+<li>S1：幸存2区当前使用比例</li>
+<li>E：伊甸园区使用比例</li>
+<li>O：老年代使用比例</li>
+<li>M：元数据区使用比例</li>
+<li>CCS：压缩使用比例</li>
+<li>YGC：年轻代垃圾回收次数</li>
+<li>FGC：老年代垃圾回收次数</li>
+<li>FGCT：老年代垃圾回收消耗时间</li>
+<li>GCT：垃圾回收消耗总时间</li>
+</ul>
+<p><strong>JVM运行情况预估</strong></p>
+<p>用 jstat gc -pid 命令可以计算出如下一些关键数据，有了这些数据就可以采用之前介绍过的优化思路，先给自己的系统设置一些初始性的JVM参数，比如堆内存大小，年轻代大小，Eden和Survivor的比例，老年代的大小，大对象的阈值，大龄对象进入老年代的阈值等。</p>
+<p><strong>年轻代对象增长的速率</strong></p>
+<p>可以执行命令 jstat -gc pid 1000 10 (每隔1秒执行1次命令，共执行10次)，通过观察EU(eden区的使用)来估算每秒eden大概新增多少对象，如果系统负载不高，可以把频率1秒换成1分钟，甚至10分钟来观察整体情况。注意，一般系统可能有高峰期和日常期，所以需要在不同的时间分别估算不同情况下对象增长速率。</p>
+<p><strong>Young GC的触发频率和每次耗时</strong></p>
+<p>知道年轻代对象增长速率我们就能推根据eden区的大小推算出Young GC大概多久触发一次，Young GC的平均耗时可以通过 YGCT/YGC 公式算出，根据结果我们大概就能知道<strong>系统大概多久会因为Young GC的执行而卡顿多久。</strong></p>
+<p><strong>每次Young GC后有多少对象存活和进入老年代</strong></p>
+<p>这个因为之前已经大概知道Young GC的频率，假设是每5分钟一次，那么可以执行命令 jstat -gc pid 300000 10 ，观察每次结果eden，survivor和老年代使用的变化情况，在每次gc后eden区使用一般会大幅减少，survivor和老年代都有可能增长，这些增长的对象就是每次Young GC后存活的对象，同时还可以看出每次Young GC后进去老年代大概多少对象，从而可以推算出<strong>老年代对象增长速率。</strong></p>
+<p><strong>Full GC的触发频率和每次耗时</strong></p>
+<p>知道了老年代对象的增长速率就可以推算出Full GC的触发频率了，Full GC的每次耗时可以用公式 FGCT/FGC 计算得出。</p>
+<p><strong>优化思路</strong>其实简单来说就是尽量让每次Young GC后的存活对象小于Survivor区域的50%，都留存在年轻代里。尽量别让对象进入老年代。尽量减少Full GC的频率，避免频繁Full GC对JVM性能的影响。</p>
+<p><strong>系统频繁Full GC导致系统卡顿是怎么回事</strong></p>
+<ul>
+<li>机器配置：2核4G</li>
+<li>JVM内存大小：2G</li>
+<li>系统运行时间：7天</li>
+<li>期间发生的Full GC次数和耗时：500多次，200多秒</li>
+<li>期间发生的Young GC次数和耗时：1万多次，500多秒</li>
+</ul>
+<p>大致算下来每天会发生70多次Full GC，平均每小时3次，每次Full GC在400毫秒左右；</p>
+<p>每天会发生1000多次Young GC，每分钟会发生1次，每次Young GC在50毫秒左右。</p>
+<p>JVM参数设置如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-Xms1536M -Xmx1536M -Xmn512M -Xss256K -XX:SurvivorRatio=<span class="number">6</span>  -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=256M </span><br><span class="line">-XX:+UseParNewGC  -XX:+UseConcMarkSweepGC  -XX:CMSInitiatingOccupancyFraction=<span class="number">75</span> -XX:+UseCMSInitiatingOccupancyOnly </span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717714884.png" alt="img"></p>
+<p>大家可以结合<strong>对象挪动到老年代那些规则</strong>推理下我们这个程序可能存在的一些问题</p>
+<p>经过分析感觉可能会由于对象动态年龄判断机制导致full gc较为频繁</p>
+<p>为了给大家看效果，我模拟了一个示例程序(见课程对应工程代码：jvm-full-gc)，打印了jstat的结果如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jstat -gc <span class="number">13456</span> <span class="number">2000</span> <span class="number">10000</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717742876.png" alt="img"></p>
+<p>对于对象动态年龄判断机制导致的full gc较为频繁可以先试着优化下JVM参数，把年轻代适当调大点：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-Xms1536M -Xmx1536M -Xmn1024M -Xss256K -XX:SurvivorRatio=<span class="number">6</span>  -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=256M </span><br><span class="line">-XX:+UseParNewGC  -XX:+UseConcMarkSweepGC  -XX:CMSInitiatingOccupancyFraction=<span class="number">92</span> -XX:+UseCMSInitiatingOccupancyOnly </span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717768183.png" alt="img"></p>
+<p>优化完发现没什么变化，<strong>full gc的次数比minor gc的次数还多了</strong></p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717806011.png" alt="img"></p>
+<p>我们可以推测下full gc比minor gc还多的原因有哪些？</p>
+<p>1、元空间不够导致的多余full gc</p>
+<p>2、显示调用System.gc()造成多余的full gc，这种一般线上尽量通过-XX:+DisableExplicitGC参数禁用，如果加上了这个JVM启动参数，那么代码中调用System.gc()没有任何效果</p>
+<p>3、老年代空间分配担保机制</p>
+<p>最快速度分析完这些我们推测的原因以及优化后，我们发现young gc和full gc依然很频繁了，而且看到有大量的对象频繁的被挪动到老年代，这种情况我们可以借助jmap命令大概看下是什么对象</p>
+<p><img src="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/clipboard-1650717814247.png" alt="img"></p>
+<p>查到了有大量User对象产生，这个可能是问题所在，但不确定，还必须找到对应的代码确认，如何去找对应的代码了？</p>
+<p>1、代码里全文搜索生成User对象的地方(适合只有少数几处地方的情况)</p>
+<p>2、如果生成User对象的地方太多，无法定位具体代码，我们可以同时分析下占用cpu较高的线程，一般有大量对象不断产生，对应的方法代码肯定会被频繁调用，占用的cpu必然较高</p>
+<p>可以用上面讲过的jstack或jvisualvm来定位cpu使用较高的代码，最终定位到的代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">IndexController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping(&quot;/user/process&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">processUserData</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        ArrayList&lt;User&gt; users = queryUsers();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (User user: users) &#123;</span><br><span class="line">            <span class="comment">//TODO 业务处理</span></span><br><span class="line">            System.out.println(<span class="string">&quot;user:&quot;</span> + user.toString());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;end&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 模拟批量查询用户场景</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> ArrayList&lt;User&gt; <span class="title">queryUsers</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        ArrayList&lt;User&gt; users = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5000</span>; i++) &#123;</span><br><span class="line">            users.add(<span class="keyword">new</span> User(i,<span class="string">&quot;zhuge&quot;</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> users;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同时，java的代码也是需要优化的，一次查询出500M的对象出来，明显不合适，要根据之前说的各种原则尽量优化到合适的值，尽量消除这种朝生夕死的对象导致的full gc</p>
+<p><strong>内存泄露到底是怎么回事</strong></p>
+<p>再给大家讲一种情况，一般电商架构可能会使用多级缓存架构，就是redis加上JVM级缓存，大多数同学可能为了图方便对于JVM级缓存就简单使用一个hashmap，于是不断往里面放缓存数据，但是很少考虑这个map的容量问题，结果这个缓存map越来越大，一直占用着老年代的很多空间，时间长了就会导致full gc非常频繁，这就是一种内存泄漏，对于一些老旧数据没有及时清理导致一直占用着宝贵的内存资源，时间长了除了导致full gc，还有可能导致OOM。</p>
+<p>这种情况完全可以考虑采用一些成熟的JVM级缓存框架来解决，比如ehcache等自带一些LRU数据淘汰算法的框架来作为JVM级的缓存。</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Jvm/" rel="tag">Jvm</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/" rel="tag">性能调优</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/04/24/00-00-08-Jvm%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E8%AF%A6%E8%A7%A3/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            Jvm调优实战及常量池详解
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/04/22/00-00-06-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8G1-ZGC%E8%AF%A6%E8%A7%A3/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">垃圾收集器G1&amp;ZGC详解</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2022
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>Jvm调优实战及常量池详解 |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-00-00-08-Jvm调优实战及常量池详解"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  Jvm调优实战及常量池详解
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/04/24/00-00-08-Jvm%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E8%AF%A6%E8%A7%A3/" class="article-date">
+  <time datetime="2022-04-24T14:56:01.000Z" itemprop="datePublished">2022-04-24</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/">性能调优</a> / <a class="article-category-link" href="/categories/Java/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/Jvm/">Jvm</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">5.5k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">22 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p id="hitokoto">正在加载一言...</p>
+
+<p><strong>阿里巴巴Arthas详解</strong></p>
+<p><strong>Arthas</strong> 是 Alibaba 在 2018 年 9 月开源的 <strong>Java 诊断</strong>工具。支持 JDK6+， 采用命令行交互模式，可以方便的定位和诊断线上程序运行问题。<strong>Arthas</strong> 官方文档十分详细，详见：<a target="_blank" rel="noopener" href="https://alibaba.github.io/arthas"><em>https://alibaba.github.io/arthas</em></a></p>
+<p> <strong>Arthas****使用场景</strong></p>
+<p>得益于 <strong>Arthas</strong> 强大且丰富的功能，让 <strong>Arthas</strong> 能做的事情超乎想象。下面仅仅列举几项常见的使用情况，更多的使用场景可以在熟悉了 <strong>Arthas</strong> 之后自行探索。</p>
+<ol>
+<li>是否有一个全局视角来查看系统的运行状况？</li>
+<li>为什么 CPU 又升高了，到底是哪里占用了 CPU ？</li>
+<li>运行的多线程有死锁吗？有阻塞吗？</li>
+<li>程序运行耗时很长，是哪里耗时比较长呢？如何监测呢？</li>
+<li>这个类从哪个 jar 包加载的？为什么会报各种类相关的 Exception？</li>
+<li>我改的代码为什么没有执行到？难道是我没 commit？分支搞错了？</li>
+<li>遇到问题无法在线上 debug，难道只能通过加日志再重新发布吗？</li>
+<li>有什么办法可以监控到 JVM 的实时运行状态？</li>
+</ol>
+<p> <strong>Arthas****使用</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># github下载arthas</span><br><span class="line">wget https:<span class="comment">//alibaba.github.io/arthas/arthas-boot.jar</span></span><br><span class="line"># 或者 Gitee 下载</span><br><span class="line">wget https:<span class="comment">//arthas.gitee.io/arthas-boot.jar</span></span><br></pre></td></tr></table></figure>
+
+<p>用java -jar运行即可，可以识别机器上所有Java进程(我们这里之前已经运行了一个Arthas测试程序，代码见下方)</p>
+<p><img src="/2022/04/24/00-00-08-Jvm%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E8%AF%A6%E8%A7%A3/clipboard.png" alt="img"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.tuling.jvm;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.HashSet;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Arthas</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> HashSet hashSet = <span class="keyword">new</span> HashSet();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 模拟 CPU 过高</span></span><br><span class="line">        cpuHigh();</span><br><span class="line">        <span class="comment">// 模拟线程死锁</span></span><br><span class="line">        deadThread();</span><br><span class="line">        <span class="comment">// 不断的向 hashSet 集合增加数据</span></span><br><span class="line">        addHashSetThread();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 不断的向 hashSet 集合添加数据</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">addHashSetThread</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 初始化常量</span></span><br><span class="line">        <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    hashSet.add(<span class="string">&quot;count&quot;</span> + count);</span><br><span class="line">                    Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">                    count++;</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;).start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">cpuHigh</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;).start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 死锁</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">deadThread</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">/** 创建资源 */</span></span><br><span class="line">        Object resourceA = <span class="keyword">new</span> Object();</span><br><span class="line">        Object resourceB = <span class="keyword">new</span> Object();</span><br><span class="line">        <span class="comment">// 创建线程</span></span><br><span class="line">        Thread threadA = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (resourceA) &#123;</span><br><span class="line">                System.out.println(Thread.currentThread() + <span class="string">&quot; get ResourceA&quot;</span>);</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                System.out.println(Thread.currentThread() + <span class="string">&quot;waiting get resourceB&quot;</span>);</span><br><span class="line">                <span class="keyword">synchronized</span> (resourceB) &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread() + <span class="string">&quot; get resourceB&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        Thread threadB = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (resourceB) &#123;</span><br><span class="line">                System.out.println(Thread.currentThread() + <span class="string">&quot; get ResourceB&quot;</span>);</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                System.out.println(Thread.currentThread() + <span class="string">&quot;waiting get resourceA&quot;</span>);</span><br><span class="line">                <span class="keyword">synchronized</span> (resourceA) &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread() + <span class="string">&quot; get resourceA&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        threadA.start();</span><br><span class="line">        threadB.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>选择进程序号1，进入进程信息操作</p>
+<p><img src="/2022/04/24/00-00-08-Jvm%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E8%AF%A6%E8%A7%A3/clipboard-1650812470545.png" alt="img"></p>
+<p>输入<strong>dashboard</strong>可以查看整个进程的运行情况，线程、内存、GC、运行环境信息：</p>
+<p><img src="/2022/04/24/00-00-08-Jvm%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E8%AF%A6%E8%A7%A3/clipboard-1650812479044.png" alt="img"></p>
+<p>输入<strong>thread</strong>可以查看线程详细情况</p>
+<p><img src="/2022/04/24/00-00-08-Jvm%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E8%AF%A6%E8%A7%A3/clipboard-1650812486746.png" alt="img"></p>
+<p>输入 <strong>thread加上线程ID</strong> 可以查看线程堆栈</p>
+<p><img src="/2022/04/24/00-00-08-Jvm%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E8%AF%A6%E8%A7%A3/clipboard-1650812495439.png" alt="img"></p>
+<p>输入 <strong>thread -b</strong> 可以查看线程死锁</p>
+<p><img src="/2022/04/24/00-00-08-Jvm%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E8%AF%A6%E8%A7%A3/clipboard-1650812503752.png" alt="img"></p>
+<p>输入 <strong>jad加类的全名</strong> 可以反编译，这样可以方便我们查看线上代码是否是正确的版本</p>
+<p><img src="/2022/04/24/00-00-08-Jvm%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E8%AF%A6%E8%A7%A3/clipboard-1650812511982.png" alt="img"></p>
+<p>使用 <strong>ognl</strong> 命令可以    </p>
+<p><img src="/2022/04/24/00-00-08-Jvm%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E8%AF%A6%E8%A7%A3/clipboard-1650812523527.png" alt="img"></p>
+<p><img src="/2022/04/24/00-00-08-Jvm%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E8%AF%A6%E8%A7%A3/clipboard-1650812537002.png" alt="img"></p>
+<p>更多命令使用可以用help命令查看，或查看文档：<a target="_blank" rel="noopener" href="https://alibaba.github.io/arthas/commands.html#arthas">https://alibaba.github.io/arthas/commands.html#arthas</a></p>
+<p><strong>GC日志详解</strong></p>
+<p>对于java应用我们可以通过一些配置把程序运行过程中的gc日志全部打印出来，然后分析gc日志得到关键性指标，分析GC原因，调优JVM参数。</p>
+<p>打印GC日志方法，在JVM参数里增加参数，%t 代表时间</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-Xloggc:./gc-%t.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps  -XX:+PrintGCTimeStamps -XX:+PrintGCCause  </span><br><span class="line">-XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=<span class="number">10</span> -XX:GCLogFileSize=100M</span><br></pre></td></tr></table></figure>
+
+<p>Tomcat则直接加在JAVA_OPTS变量里。</p>
+<p><strong>如何分析GC日志</strong></p>
+<p>运行程序加上对应gc日志</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">java -jar -Xloggc:./gc-%t.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps  -XX:+PrintGCTimeStamps -XX:+PrintGCCause  </span><br><span class="line">-XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=<span class="number">10</span> -XX:GCLogFileSize=100M microservice-eureka-server.jar</span><br></pre></td></tr></table></figure>
+
+<p>下图中是我截取的JVM刚启动的一部分GC日志 </p>
+<p><img src="/2022/04/24/00-00-08-Jvm%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E8%AF%A6%E8%A7%A3/clipboard-1650812587264.png" alt="img"></p>
+<p>我们可以看到图中第一行红框，是项目的配置参数。这里不仅配置了打印GC日志，还有相关的VM内存参数。 </p>
+<p>第二行红框中的是在这个GC时间点发生GC之后相关GC情况。 </p>
+<p>1、对于<strong>2.909：</strong>  这是从jvm启动开始计算到这次GC经过的时间，前面还有具体的发生时间日期。 </p>
+<p>2、Full GC(Metadata GC Threshold)指这是一次full gc，括号里是gc的原因， PSYoungGen是年轻代的GC，ParOldGen是老年代的GC，Metaspace是元空间的GC</p>
+<p>3、 6160K-&gt;0K(141824K)，这三个数字分别对应GC之前占用年轻代的大小，GC之后年轻代占用，以及整个年轻代的大小。 </p>
+<p>4、112K-&gt;6056K(95744K)，这三个数字分别对应GC之前占用老年代的大小，GC之后老年代占用，以及整个老年代的大小。 </p>
+<p>5、6272K-&gt;6056K(237568K)，这三个数字分别对应GC之前占用堆内存的大小，GC之后堆内存占用，以及整个堆内存的大小。 </p>
+<p>6、20516K-&gt;20516K(1069056K)，这三个数字分别对应GC之前占用元空间内存的大小，GC之后元空间内存占用，以及整个元空间内存的大小。 </p>
+<p>7、0.0209707是该时间点GC总耗费时间。 </p>
+<p>从日志可以发现几次fullgc都是由于元空间不够导致的，所以我们可以将元空间调大点</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">java -jar -Xloggc:./gc-adjust-%t.log -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=256M -XX:+PrintGCDetails -XX:+PrintGCDateStamps  </span><br><span class="line">-XX:+PrintGCTimeStamps -XX:+PrintGCCause  -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=<span class="number">10</span> -XX:GCLogFileSize=100M </span><br><span class="line">microservice-eureka-server.jar</span><br></pre></td></tr></table></figure>
+
+<p>调整完我们再看下gc日志发现已经没有因为元空间不够导致的fullgc了</p>
+<p>对于CMS和G1收集器的日志会有一点不一样，也可以试着打印下对应的gc日志分析下，可以发现gc日志里面的gc步骤跟我们之前讲过的步骤是类似的</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HeapTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">byte</span>[] a = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1024</span> * <span class="number">100</span>];  <span class="comment">//100KB</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        ArrayList&lt;HeapTest&gt; heapTests = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            heapTests.add(<span class="keyword">new</span> HeapTest());</span><br><span class="line">            Thread.sleep(<span class="number">10</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>CMS</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-Xloggc:d:/gc-cms-%t.log -Xms50M -Xmx50M -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=256M -XX:+PrintGCDetails -XX:+PrintGCDateStamps  </span><br><span class="line"> -XX:+PrintGCTimeStamps -XX:+PrintGCCause  -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=<span class="number">10</span> -XX:GCLogFileSize=100M </span><br><span class="line"> -XX:+UseParNewGC -XX:+UseConcMarkSweepGC   </span><br></pre></td></tr></table></figure>
+
+<p><strong>G1</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-Xloggc:d:/gc-g1-%t.log -Xms50M -Xmx50M -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=256M -XX:+PrintGCDetails -XX:+PrintGCDateStamps  </span><br><span class="line"> -XX:+PrintGCTimeStamps -XX:+PrintGCCause  -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=<span class="number">10</span> -XX:GCLogFileSize=100M -XX:+UseG1GC </span><br></pre></td></tr></table></figure>
+
+<p>上面的这些参数，能够帮我们查看分析GC的垃圾收集情况。但是如果GC日志很多很多，成千上万行。就算你一目十行，看完了，脑子也是一片空白。所以我们可以借助一些功能来帮助我们分析，这里推荐一个gceasy(<a target="_blank" rel="noopener" href="https://gceasy.io/">https://gceasy.io</a>)，可以上传gc文件，然后他会利用可视化的界面来展现GC情况。具体下图所示 </p>
+<p><img src="/2022/04/24/00-00-08-Jvm%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E8%AF%A6%E8%A7%A3/clipboard-1650812686019.png" alt="img"></p>
+<p>上图我们可以看到年轻代，老年代，以及永久代的内存分配，和最大使用情况。 </p>
+<p><img src="/2022/04/24/00-00-08-Jvm%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E8%AF%A6%E8%A7%A3/clipboard-1650812686020.png" alt="img"></p>
+<p>上图我们可以看到堆内存在GC之前和之后的变化，以及其他信息。</p>
+<p>这个工具还提供基于机器学习的JVM智能优化建议，当然现在这个功能需要付费</p>
+<p><img src="/2022/04/24/00-00-08-Jvm%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E8%AF%A6%E8%A7%A3/clipboard-1650812686020.png" alt="img"></p>
+<p><img src="/2022/04/24/00-00-08-Jvm%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E8%AF%A6%E8%A7%A3/clipboard-1650812686020.png" alt="img"></p>
+<p><strong>JVM参数汇总查看命令</strong></p>
+<p>java -XX:+PrintFlagsInitial 表示打印出所有参数选项的默认值</p>
+<p>java -XX:+PrintFlagsFinal 表示打印出所有参数选项在运行程序时生效的值</p>
+<p><strong>Class常量池与运行时常量池</strong></p>
+<p>Class常量池可以理解为是Class文件中的资源仓库。 Class文件中除了包含类的版本、字段、方法、接口等描述信息外，还有一项信息就是**常量池(constant pool table)<strong>，用于存放编译期生成的各种</strong>字面量(Literal)和符号引用(Symbolic References)**。</p>
+<p>一个class文件的16进制大体结构如下图：</p>
+<p><img src="/2022/04/24/00-00-08-Jvm%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E8%AF%A6%E8%A7%A3/clipboard-1650812732149.png" alt="img"></p>
+<p>对应的含义如下，细节可以查下oracle官方文档</p>
+<p><img src="/2022/04/24/00-00-08-Jvm%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E8%AF%A6%E8%A7%A3/clipboard-1650812739645.png" alt="img"></p>
+<p>当然我们一般不会去人工解析这种16进制的字节码文件，我们一般可以通过javap命令生成更可读的JVM字节码指令文件：</p>
+<p><strong>javap -v Math.class</strong></p>
+<p><img src="/2022/04/24/00-00-08-Jvm%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E8%AF%A6%E8%A7%A3/clipboard-1650812715738.png" alt="img"></p>
+<p>红框标出的就是class常量池信息，常量池中主要存放两大类常量：<strong>字面量和符号引用</strong>。</p>
+<p><strong>字面量</strong></p>
+<p><strong>字面量就是指由字母、数字等构成的字符串或者数值常量</strong></p>
+<p>字面量只可以右值出现，所谓右值是指等号右边的值，如：int a=1 这里的a为左值，1为右值。在这个例子中1就是字面量。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> a = <span class="number">1</span>;</span><br><span class="line"><span class="keyword">int</span> b = <span class="number">2</span>;</span><br><span class="line"><span class="keyword">int</span> c = <span class="string">&quot;abcdefg&quot;</span>;</span><br><span class="line"><span class="keyword">int</span> d = <span class="string">&quot;abcdefg&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>符号引用</strong></p>
+<p>符号引用是编译原理中的概念，是相对于直接引用来说的。主要包括了以下三类常量：</p>
+<ul>
+<li>类和接口的全限定名 </li>
+<li>字段的名称和描述符 </li>
+<li>方法的名称和描述符</li>
+</ul>
+<p>上面的a，b就是字段名称，就是一种符号引用，还有Math类常量池里的 Lcom/tuling/jvm/Math 是类的全限定名，main和compute是方法名称，()是一种UTF8格式的描述符，这些都是符号引用。</p>
+<p>这些常量池现在是静态信息，只有到运行时被加载到内存后，这些符号才有对应的内存地址信息，这些常量池一旦被装入内存就变成<strong>运行时常量池</strong>，对应的符号引用在程序加载或运行时会被转变为被加载到内存区域的代码的直接引用，也就是我们说的<strong>动态链接了。例如，compute()这个符号引用在运行时就会被转变为compute()方法具体代码在内存中的地址，主要通过对象头里的类型指针去转换直接引用。</strong></p>
+<p><strong>字符串常量池</strong></p>
+<p><strong>字符串常量池的设计思想</strong></p>
+<ol>
+<li>字符串的分配，和其他的对象分配一样，耗费高昂的时间与空间代价，作为最基础的数据类型，大量频繁的创建字符串，极大程度地影响程序的性能</li>
+<li>JVM为了提高性能和减少内存开销，在实例化字符串常量的时候进行了一些优化</li>
+</ol>
+<ul>
+<li>为字符串开辟一个字符串常量池，类似于缓存区</li>
+<li>创建字符串常量时，首先查询字符串常量池是否存在该字符串</li>
+<li>存在该字符串，返回引用实例，不存在，实例化该字符串并放入池中</li>
+</ul>
+<p><strong>三种字符串操作(Jdk1.7 及以上版本)</strong></p>
+<ul>
+<li>直接赋值字符串</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String s = <span class="string">&quot;zhuge&quot;</span>;  <span class="comment">// s指向常量池中的引用</span></span><br></pre></td></tr></table></figure>
+
+<p>这种方式创建的字符串对象，只会在常量池中。</p>
+<p>因为有”zhuge”这个字面量，创建对象s的时候，JVM会先去常量池中通过 equals(key) 方法，判断是否有相同的对象</p>
+<p>如果有，则直接返回该对象在常量池中的引用；</p>
+<p>如果没有，则会在常量池中创建一个新对象，再返回引用。</p>
+<ul>
+<li>new String();</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String s1 = <span class="keyword">new</span> String(<span class="string">&quot;zhuge&quot;</span>);  <span class="comment">// s1指向内存中的对象引用</span></span><br></pre></td></tr></table></figure>
+
+<p>这种方式会保证字符串常量池和堆中都有这个对象，没有就创建，最后返回堆内存中的对象引用。</p>
+<p>步骤大致如下：</p>
+<p>因为有”zhuge”这个字面量，所以会先检查字符串常量池中是否存在字符串”zhuge”</p>
+<p>不存在，先在字符串常量池里创建一个字符串对象；再去内存中创建一个字符串对象”zhuge”；</p>
+<p>存在的话，就直接去堆内存中创建一个字符串对象”zhuge”；</p>
+<p>最后，将内存中的引用返回。</p>
+<ul>
+<li>intern方法</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">String s1 = <span class="keyword">new</span> String(<span class="string">&quot;zhuge&quot;</span>);   </span><br><span class="line">String s2 = s1.intern();</span><br><span class="line"></span><br><span class="line">System.out.println(s1 == s2);  <span class="comment">//false</span></span><br></pre></td></tr></table></figure>
+
+<p>String中的intern方法是一个 native 的方法，当调用 intern方法时，如果池已经包含一个等于此String对象的字符串（用equals(oject)方法确定），则返回池中的字符串。<strong>否则，将intern返回的引用指向当前字符串 s1</strong>(<strong>jdk1.6版本需要将 s1 复制到字符串常量池里</strong>)。</p>
+<p><strong>字符串常量池位置</strong></p>
+<p>Jdk1.6及之前： 有永久代, 运行时常量池在永久代，运行时常量池包含字符串常量池</p>
+<p>Jdk1.7：有永久代，但已经逐步“去永久代”，字符串常量池从永久代里的运行时常量池分离到堆里</p>
+<p>Jdk1.8及之后： 无永久代，运行时常量池在元空间，字符串常量池里依然在堆里</p>
+<p>用一个程序证明下字符串常量池在哪里：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * jdk6：-Xms6M -Xmx6M -XX:PermSize=6M -XX:MaxPermSize=6M  </span></span><br><span class="line"><span class="comment"> * jdk8：-Xms6M -Xmx6M -XX:MetaspaceSize=6M -XX:MaxMetaspaceSize=6M</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RuntimeConstantPoolOOM</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        ArrayList&lt;String&gt; list = <span class="keyword">new</span> ArrayList&lt;String&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10000000</span>; i++) &#123;</span><br><span class="line">            String str = String.valueOf(i).intern();</span><br><span class="line">            list.add(str);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">运行结果：</span><br><span class="line">jdk7及以上：Exception in thread <span class="string">&quot;main&quot;</span> java.lang.OutOfMemoryError: Java heap space</span><br><span class="line">jdk6：Exception in thread <span class="string">&quot;main&quot;</span> java.lang.OutOfMemoryError: PermGen space</span><br></pre></td></tr></table></figure>
+
+<p><strong>字符串常量池设计原理</strong></p>
+<p>　　字符串常量池底层是hotspot的C++实现的，底层类似一个 HashTable， 保存的本质上是字符串对象的引用。</p>
+<p>看一道比较常见的面试题，下面的代码创建了多少个 String 对象？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">String s1 = <span class="keyword">new</span> String(<span class="string">&quot;he&quot;</span>) + <span class="keyword">new</span> String(<span class="string">&quot;llo&quot;</span>);</span><br><span class="line">String s2 = s1.intern();</span><br><span class="line"> </span><br><span class="line">System.out.println(s1 == s2);</span><br><span class="line"><span class="comment">// 在 JDK 1.6 下输出是 false，创建了 6 个对象 s2指向的是永久代中字符串常量池的对象指针，s1是队中对象的指针，所以未false</span></span><br><span class="line"><span class="comment">// 在 JDK 1.7 及以上的版本输出是 true，创建了 5 个对象 s1指向的是队中的对象指针，由于jdk1.7 字符串常量池移到了堆中，故s2也是指向的堆中的对象的指针，所以为true;</span></span><br><span class="line"><span class="comment">// 当然我们这里没有考虑GC，但这些对象确实存在或存在过</span></span><br></pre></td></tr></table></figure>
+
+<p>为什么输出会有这些变化呢？主要还是字符串池从永久代中脱离、移入堆区的原因， intern() 方法也相应发生了变化：</p>
+<p>1、在 JDK 1.6 中，调用 intern() 首先会在字符串池中寻找 equal() 相等的字符串，假如字符串存在就返回该字符串在字符串池中的引用；假如字符串不存在，虚拟机会重新在永久代上创建一个实例，将 StringTable 的一个表项指向这个新创建的实例。</p>
+<p><img src="/2022/04/24/00-00-08-Jvm%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E8%AF%A6%E8%A7%A3/clipboard-1650812898896.png" alt="img"></p>
+<p>JDK1.6，字符串常量池在永久代中， 执行new String(“he”) + new String(“llo”); 会在队中生成”hello”字符串，同时会在字符串常量池生成”hello”字符串，所以会有6个</p>
+<p>字符串常量池底层类似是一个hashtable结构：key是引用，value是具体对象的值。</p>
+<p>2、在 JDK 1.7 (及以上版本)中，由于字符串池不在永久代了，intern() 做了一些修改，更方便地利用堆中的对象。字符串存在时和 JDK 1.6一样，但是字符串不存在时不再需要重新创建实例，可以直接指向堆上的实例。</p>
+<p><img src="/2022/04/24/00-00-08-Jvm%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E8%AF%A6%E8%A7%A3/clipboard-1650812898896.png" alt="img"></p>
+<p>　　由上面两个图，也不难理解为什么 JDK 1.6 字符串池溢出会抛出 OutOfMemoryError: PermGen space ，而在 JDK 1.7 及以上版本抛出 OutOfMemoryError: Java heap space 。</p>
+<p><strong>String常量池问题的几个例子</strong></p>
+<p>示例1：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">String s0=<span class="string">&quot;zhuge&quot;</span>;</span><br><span class="line">String s1=<span class="string">&quot;zhuge&quot;</span>;</span><br><span class="line">String s2=<span class="string">&quot;zhu&quot;</span> + <span class="string">&quot;ge&quot;</span>;</span><br><span class="line">System.out.println( s0==s1 ); <span class="comment">//true</span></span><br><span class="line">System.out.println( s0==s2 ); <span class="comment">//true</span></span><br></pre></td></tr></table></figure>
+
+<p>分析：因为例子中的 s0和s1中的”zhuge”都是字符串常量，它们在编译期就被确定了，所以s0 == s1为true；而”zhu”和”ge”也都是字符串常量，当一个字 符串由多个字符串常量连接而成时，它自己肯定也是字符串常量，所以s2也同样在编译期就被优化为一个字符串常量”zhuge”，所以s2也是常量池中” zhuge”的一个引用。所以我们得出s0== s1 ==s2；</p>
+<p>示例2：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">String s0=<span class="string">&quot;zhuge&quot;</span>;</span><br><span class="line">String s1=<span class="keyword">new</span> String(<span class="string">&quot;zhuge&quot;</span>);</span><br><span class="line">String s2=<span class="string">&quot;zhu&quot;</span> + <span class="keyword">new</span> String(<span class="string">&quot;ge&quot;</span>);</span><br><span class="line">System.out.println( s0==s1 );　　<span class="comment">// false</span></span><br><span class="line">System.out.println( s0==s2 )；　 <span class="comment">// false</span></span><br><span class="line">System.out.println( s1==s2 );　　<span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+
+<p>分析：用new String() 创建的字符串不是常量，不能在编译期就确定，所以new String() 创建的字符串不放入常量池中，它们有自己的地址空间。</p>
+<p>s0还是常量池 中”zhuge”的引用，s1因为无法在编译期确定，所以是运行时创建的新对象”zhuge”的引用，s2因为有后半部分 new String(”ge”)所以也无法在编译期确定，所以也是一个新创建对象”zhuge”的引用;明白了这些也就知道为何得出此结果了。</p>
+<p>示例3：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">String a = <span class="string">&quot;a1&quot;</span>;</span><br><span class="line">  String b = <span class="string">&quot;a&quot;</span> + <span class="number">1</span>;</span><br><span class="line">  System.out.println(a == b); <span class="comment">// true </span></span><br><span class="line">  </span><br><span class="line">  String a = <span class="string">&quot;atrue&quot;</span>;</span><br><span class="line">  String b = <span class="string">&quot;a&quot;</span> + <span class="string">&quot;true&quot;</span>;</span><br><span class="line">  System.out.println(a == b); <span class="comment">// true </span></span><br><span class="line">  </span><br><span class="line">  String a = <span class="string">&quot;a3.4&quot;</span>;</span><br><span class="line">  String b = <span class="string">&quot;a&quot;</span> + <span class="number">3.4</span>;</span><br><span class="line">  System.out.println(a == b); <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p>分析：JVM对于字符串常量的”+”号连接，将在程序编译期，JVM就将常量字符串的”+”连接优化为连接后的值，拿”a” + 1来说，经编译器优化后在class中就已经是a1。在编译期其字符串常量的值就确定下来，故上面程序最终的结果都为true。</p>
+<p>示例4：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">String a = <span class="string">&quot;ab&quot;</span>;</span><br><span class="line">String bb = <span class="string">&quot;b&quot;</span>;</span><br><span class="line">String b = <span class="string">&quot;a&quot;</span> + bb; <span class="comment">//java 注意这个+号，java里面重载了+，</span></span><br><span class="line"><span class="comment">//其实调用了stringBuild，会new对象。</span></span><br><span class="line"></span><br><span class="line">System.out.println(a == b); <span class="comment">// false  </span></span><br></pre></td></tr></table></figure>
+
+<p>分析：JVM对于字符串引用，由于在字符串的”+”连接中，有字符串引用存在，而引用的值在程序编译期是无法确定的，即”a” + bb无法被编译器优化，只有在程序运行期来动态分配并将连接后的新地址赋给b。所以上面程序的结果也就为false。</p>
+<p>示例5：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">String a = <span class="string">&quot;ab&quot;</span>;</span><br><span class="line"><span class="keyword">final</span> String bb = <span class="string">&quot;b&quot;</span>;</span><br><span class="line">String b = <span class="string">&quot;a&quot;</span> + bb;</span><br><span class="line"></span><br><span class="line">System.out.println(a == b); <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p>分析：和示例4中唯一不同的是bb字符串加了final修饰，对于final修饰的变量，它在编译时被解析为常量值的一个本地拷贝存储到自己的常量池中或嵌入到它的字节码流中。所以此时的”a” + bb和”a” + “b”效果是一样的。故上面程序的结果为true。</p>
+<p>示例6：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">String a = <span class="string">&quot;ab&quot;</span>;</span><br><span class="line"><span class="keyword">final</span> String bb = getBB();</span><br><span class="line">String b = <span class="string">&quot;a&quot;</span> + bb;</span><br><span class="line"></span><br><span class="line">System.out.println(a == b); <span class="comment">// false</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> String <span class="title">getBB</span><span class="params">()</span> </span></span><br><span class="line"><span class="function"></span>&#123;  </span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;b&quot;</span>;  </span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>分析：JVM对于字符串引用bb，它的值在编译期无法确定，只有在程序运行期调用方法后，将方法的返回值和”a”来动态连接并分配地址为b，故上面 程序的结果为false。</p>
+<p><strong>关于String是不可变的</strong></p>
+<p>​    通过上面例子可以得出得知：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">String  s  =  <span class="string">&quot;a&quot;</span> + <span class="string">&quot;b&quot;</span> + <span class="string">&quot;c&quot;</span>;  <span class="comment">//就等价于String s = &quot;abc&quot;;</span></span><br><span class="line">String  a  =  <span class="string">&quot;a&quot;</span>;</span><br><span class="line">String  b  =  <span class="string">&quot;b&quot;</span>;</span><br><span class="line">String  c  =  <span class="string">&quot;c&quot;</span>;</span><br><span class="line">String  s1  =   a  +  b  +  c;</span><br></pre></td></tr></table></figure>
+
+<p>s1 这个就不一样了，可以通过观察其<strong>JVM指令码</strong>发现s1的”+”操作会变成如下操作：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">StringBuilder temp = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">temp.append(a).append(b).append(c);</span><br><span class="line">String s = temp.toString();</span><br></pre></td></tr></table></figure>
+
+<p><strong>最后再看一个例子</strong>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//字符串常量池：&quot;计算机&quot;和&quot;技术&quot;     堆内存：str1引用的对象&quot;计算机技术&quot;  </span></span><br><span class="line"><span class="comment">//堆内存中还有个StringBuilder的对象，但是会被gc回收，StringBuilder的toString方法会new String()，这个String才是真正返回的对象引用</span></span><br><span class="line">String str2 = <span class="keyword">new</span> StringBuilder(<span class="string">&quot;计算机&quot;</span>).append(<span class="string">&quot;技术&quot;</span>).toString();   <span class="comment">//没有出现&quot;计算机技术&quot;字面量，所以不会在常量池里生成&quot;计算机技术&quot;对象</span></span><br><span class="line">System.out.println(str2 == str2.intern());  <span class="comment">//true</span></span><br><span class="line"><span class="comment">//&quot;计算机技术&quot; 在池中没有，但是在heap中存在，则intern时，会直接返回该heap中的引用</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//字符串常量池：&quot;ja&quot;和&quot;va&quot;     堆内存：str1引用的对象&quot;java&quot;  </span></span><br><span class="line"><span class="comment">//堆内存中还有个StringBuilder的对象，但是会被gc回收，StringBuilder的toString方法会new String()，这个String才是真正返回的对象引用</span></span><br><span class="line">String str1 = <span class="keyword">new</span> StringBuilder(<span class="string">&quot;ja&quot;</span>).append(<span class="string">&quot;va&quot;</span>).toString();    <span class="comment">//没有出现&quot;java&quot;字面量，所以不会在常量池里生成&quot;java&quot;对象</span></span><br><span class="line">System.out.println(str1 == str1.intern());  <span class="comment">//false</span></span><br><span class="line"><span class="comment">//java是关键字，在JVM初始化的相关类里肯定早就放进字符串常量池了</span></span><br><span class="line"></span><br><span class="line">String s1=<span class="keyword">new</span> String(<span class="string">&quot;test&quot;</span>);  </span><br><span class="line">System.out.println(s1==s1.intern());   <span class="comment">//false</span></span><br><span class="line"><span class="comment">//&quot;test&quot;作为字面量，放入了池中，而new时s1指向的是heap中新生成的string对象，s1.intern()指向的是&quot;test&quot;字面量之前在池中生成的字符串对象</span></span><br><span class="line"></span><br><span class="line">String s2=<span class="keyword">new</span> StringBuilder(<span class="string">&quot;abc&quot;</span>).toString();</span><br><span class="line">System.out.println(s2==s2.intern());  <span class="comment">//false</span></span><br><span class="line"><span class="comment">//同上</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>八种基本类型的包装类和对象池</strong></p>
+<p>java中基本类型的包装类的大部分都实现了常量池技术(严格来说应该叫<strong>对象池，</strong>在堆上)，这些类是Byte,Short,Integer,Long,Character,Boolean,另外两种浮点数类型的包装类则没有实现。另外Byte,Short,Integer,Long,Character这5种整型的包装类也只是在对应值小于等于127时才可使用对象池，也即对象不负责创建和管理大于127的这些类的对象。因为一般这种比较小的数用到的概率相对较大。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//5种整形的包装类Byte,Short,Integer,Long,Character的对象，  </span></span><br><span class="line">        <span class="comment">//在值小于127时可以使用对象池  </span></span><br><span class="line">        Integer i1 = <span class="number">127</span>;  <span class="comment">//这种调用底层实际是执行的Integer.valueOf(127)，里面用到了IntegerCache对象池</span></span><br><span class="line">        Integer i2 = <span class="number">127</span>;</span><br><span class="line">        System.out.println(i1 == i2);<span class="comment">//输出true  </span></span><br><span class="line"></span><br><span class="line">        <span class="comment">//值大于127时，不会从对象池中取对象  </span></span><br><span class="line">        Integer i3 = <span class="number">128</span>;</span><br><span class="line">        Integer i4 = <span class="number">128</span>;</span><br><span class="line">        System.out.println(i3 == i4);<span class="comment">//输出false  </span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">//用new关键词新生成对象不会使用对象池</span></span><br><span class="line">        Integer i5 = <span class="keyword">new</span> Integer(<span class="number">127</span>);  </span><br><span class="line">        Integer i6 = <span class="keyword">new</span> Integer(<span class="number">127</span>);</span><br><span class="line">        System.out.println(i5 == i6);<span class="comment">//输出false </span></span><br><span class="line"></span><br><span class="line">        <span class="comment">//Boolean类也实现了对象池技术  </span></span><br><span class="line">        Boolean bool1 = <span class="keyword">true</span>;</span><br><span class="line">        Boolean bool2 = <span class="keyword">true</span>;</span><br><span class="line">        System.out.println(bool1 == bool2);<span class="comment">//输出true  </span></span><br><span class="line"></span><br><span class="line">        <span class="comment">//浮点类型的包装类没有实现对象池技术  </span></span><br><span class="line">        Double d1 = <span class="number">1.0</span>;</span><br><span class="line">        Double d2 = <span class="number">1.0</span>;</span><br><span class="line">        System.out.println(d1 == d2);<span class="comment">//输出false  </span></span><br><span class="line">    &#125;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/04/24/00-00-08-Jvm%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E8%AF%A6%E8%A7%A3/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Jvm/" rel="tag">Jvm</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/" rel="tag">性能调优</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/04/25/10-00-00-hexo%E8%A7%A3%E5%86%B3%E6%8E%A8%E9%80%81github-ssh-key%E8%BF%87%E6%9C%9F%E9%97%AE%E9%A2%98/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            hexo解决推送github ssh key过期问题
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/04/23/00-00-07-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3%E5%8F%8A%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">JVM调优工具详解及调优实战</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2022
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

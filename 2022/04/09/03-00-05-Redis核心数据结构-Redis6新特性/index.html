@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>Redis底层核心数据结构&amp;Redis6新特性【上】 |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-03-00-05-Redis核心数据结构-Redis6新特性"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  Redis底层核心数据结构&amp;Redis6新特性【上】
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/" class="article-date">
+  <time datetime="2022-04-09T13:56:35.000Z" itemprop="datePublished">2022-04-09</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a> / <a class="article-category-link" href="/categories/Java/%E5%88%86%E5%B8%83%E5%BC%8F/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">3.4k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">13 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p id="hitokoto">正在加载一言...</p>
+
+<h2 id="Redis核心数据结构-amp-Redis6新特性"><a href="#Redis核心数据结构-amp-Redis6新特性" class="headerlink" title="Redis核心数据结构&amp;Redis6新特性"></a>Redis核心数据结构&amp;Redis6新特性</h2><h3 id="1、Redis-C底层数据结构"><a href="#1、Redis-C底层数据结构" class="headerlink" title="1、Redis C底层数据结构"></a>1、Redis C底层数据结构</h3><ul>
+<li><p>Redis 字符串</p>
+<blockquote>
+<p>Redis底层C语言实现的，c语言字符串底层是字符数组，redis服务端需要跟各种语言打交道，比如java，php，go等，他们的字符串类型都是不可控的，c语言以\0作为字符串结尾，其它语言也有可能有其它的处理。</p>
+<p>Redis底层字符串通过SDS（simple dynamic string）来实现【二进制安全的数据结构】</p>
+<ul>
+<li><p>数据结构</p>
+<p>好处：</p>
+<p>二进制安全的数据结构</p>
+<p>提供了内存预分配机制，避免了频繁的内存分配</p>
+<p>兼容c语言的函数库</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">redis <span class="number">3.2</span> 以前</span><br><span class="line">struct sdshdr &#123;</span><br><span class="line">    <span class="keyword">int</span> len; <span class="comment">// 当前长度  4字节 最大为2的32次方-1 比较大 所以3.2之后优化成了多个不同大小的字符串数据结构  </span></span><br><span class="line">    <span class="keyword">int</span> free; <span class="comment">// 剩余可用长度</span></span><br><span class="line">    <span class="keyword">char</span> buf[];</span><br><span class="line">&#125;;</span><br><span class="line">redis <span class="number">3.2</span> 后</span><br><span class="line"></span><br><span class="line">typedef <span class="keyword">char</span> *sds;</span><br><span class="line"></span><br><span class="line"><span class="function">struct <span class="title">__attribute__</span> <span class="params">((__packed__)</span>) sdshdr5 </span>&#123;</span><br><span class="line">    unsigned <span class="keyword">char</span> flags; <span class="comment">/* 3 lsb of type, and 5 msb of string length */</span></span><br><span class="line">    <span class="keyword">char</span> buf[];</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function">struct <span class="title">__attribute__</span> <span class="params">((__packed__)</span>) sdshdr8 </span>&#123;</span><br><span class="line">    uint8_t len; <span class="comment">/* used */</span></span><br><span class="line">    uint8_t alloc; <span class="comment">/* excluding the header and null terminator */</span></span><br><span class="line">    unsigned <span class="keyword">char</span> flags; <span class="comment">/* 3 lsb of type, 5 unused bits */</span></span><br><span class="line">    <span class="keyword">char</span> buf[];</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function">struct <span class="title">__attribute__</span> <span class="params">((__packed__)</span>) sdshdr16 </span>&#123;</span><br><span class="line">    uint16_t len; <span class="comment">/* used */</span></span><br><span class="line">    uint16_t alloc; <span class="comment">/* excluding the header and null terminator */</span></span><br><span class="line">    unsigned <span class="keyword">char</span> flags; <span class="comment">/* 3 lsb of type, 5 unused bits */</span></span><br><span class="line">    <span class="keyword">char</span> buf[];</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function">struct <span class="title">__attribute__</span> <span class="params">((__packed__)</span>) sdshdr32 </span>&#123;</span><br><span class="line">    uint32_t len; <span class="comment">/* used */</span></span><br><span class="line">    uint32_t alloc; <span class="comment">/* excluding the header and null terminator */</span></span><br><span class="line">    unsigned <span class="keyword">char</span> flags; <span class="comment">/* 3 lsb of type, 5 unused bits */</span></span><br><span class="line">    <span class="keyword">char</span> buf[];</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function">struct <span class="title">__attribute__</span> <span class="params">((__packed__)</span>) sdshdr64 </span>&#123;</span><br><span class="line">........</span><br><span class="line">    </span><br><span class="line">## 举例：</span><br><span class="line">有如下字符串：</span><br><span class="line">sds:</span><br><span class="line">    free:<span class="number">0</span></span><br><span class="line">	len:<span class="number">6</span></span><br><span class="line">    <span class="keyword">char</span> buf[] = <span class="string">&quot;zzzaaa&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="string">&quot;zzzaaa&quot;</span>  ----&gt; <span class="string">&quot;zzzaaaccc&quot;</span></span><br><span class="line">则会计算需要增加的长度：</span><br><span class="line">len = <span class="number">6</span>;addlen = <span class="number">3</span></span><br><span class="line">扩容两倍【长度不超过1M即<span class="number">1024</span>*<span class="number">1024</span>，成倍扩容，超过的化 每次增加1M长度】</span><br><span class="line">（len + addlen） * <span class="number">2</span> = <span class="number">18</span></span><br><span class="line">====&gt;</span><br><span class="line">sds:</span><br><span class="line">    free:<span class="number">9</span></span><br><span class="line">    len:<span class="number">9</span></span><br><span class="line">    <span class="keyword">char</span> buf[]=<span class="string">&quot;zzzaaaccc&quot;</span> </span><br><span class="line">====&gt;改为zzzaaaccc123</span><br><span class="line">sds:</span><br><span class="line">    free:<span class="number">6</span></span><br><span class="line">    len:<span class="number">12</span></span><br><span class="line">    <span class="keyword">char</span> buf[]=<span class="string">&quot;zzzaaaccc123&quot;</span></span><br><span class="line"></span><br><span class="line">好处：字符串增加不用额外再分配空间</span><br><span class="line">空间换时间 长度只扩大 不缩小                </span><br></pre></td></tr></table></figure></li>
+</ul>
+</blockquote>
+</li>
+<li><p>RedisDB：redis 数据库，select db</p>
+</li>
+<li><p>Dict：字典，所有的k,v都是存在于字典里面；字典里面包含两个dictht【两个dictht原因是扩容使用，redis的渐进式rehash扩容，当需要扩容时不是一次性将数据迁移过去，而是分多次】，扩容是主线程进行的。</p>
+<blockquote>
+<p>1.Redis扩容并不是一次性把数据全部迁移到新数组。当然首先会去帮你扩容，扩容完之后，挨个hash桶位进行迁移，这就是渐进式的rehash。</p>
+<p>2.动态扩容是指新增的数据会放入新的hashtable中，如果是老数据则先从旧的hashtable中迁移到新的hashtable，会操作两个DB。<br>老DB是用ht[0]指向的，新DB使用ht[1]指向的。如果没有rehash，ht[1]是指向null的。<br>如果有新数据插入，会先在老DB中判断，ht[0]没有就会放入ht[1]里面，ht[0]存在就迁移到ht[1]。</p>
+</blockquote>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/358366217">渐进式rehash</a></p>
+<p>  dictht：就是一个数组，里面存储的是dictEntity指针，指向dictEntity，dictht默认大小4。当dictht使用的长度达到dictht长度时，则进行扩容。当扩容没有结束时，查询数据会去dictht[0]、doctht[1]中分别查找。</p>
+<p>  dictEntity：dictht里面存储的数据，包含 key、value、next【当键发生hash冲突的时候将冲突的值使用next指针指向，并且采用头插法，后面进来的数据放到表头，用来解决hash冲突】；value指向redisObject对象，存放具体的值</p>
+<p>  redisObject：封装redis 键值对的值数据的，type：指定用什么类型【string、list、hash、set、zset】，encoding用来表示编码类型【raw、int、embstr、ziplist】、*ptr指向真实存储的位置</p>
+  <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">## redis数据结构<span class="comment">// 字典【其它不重要的略过】</span></span><br><span class="line">ReidsDb:</span><br><span class="line">	dict *dict; ---&gt;dict:</span><br><span class="line">				dictht ht[<span class="number">2</span>]; ---&gt;dictEntry:</span><br><span class="line">										  	  *key <span class="comment">// sds</span></span><br><span class="line">                                            *val  <span class="comment">// 存储数据 -------&gt;redisObject:</span></span><br><span class="line">                                            *next <span class="comment">// 解决hash冲突   	type</span></span><br><span class="line">                                                					  encoding</span><br><span class="line">                                                					  *ptr <span class="comment">// 真正指向真实数据-----&gt;	</span></span><br></pre></td></tr></table></figure>
+
+<h3 id><a href="#" class="headerlink" title></a><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/RedisDB%E4%B8%BB%E4%BD%93%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.png" alt="RedisDB主体数据结构"></h3><p>redis数据类型</p>
+<p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/image-20220605183209350.png" alt="image-20220605183209350"></p>
+<ul>
+<li><p>bitmap</p>
+<p>底层是string数据结构，即sds，通过char[]数组实现，一个数组元素表示8个bit位，bitmap因为基于string，所以最大为512M，长度最大为2的32次方-1</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">设置bitmap  offset位置的值命令：  set key offset value[<span class="number">0</span>/<span class="number">1</span>]   [bit位的值默认是<span class="number">0</span>]</span><br><span class="line">获取bitmap  offset位置的值命令：  get key offset</span><br><span class="line">统计bitmap  位的值为<span class="number">1</span>的数量命令：  bitcount key start end [start end 为起始终止值，单位是字节数]</span><br><span class="line">查询位数字bitmap的字节数命令： strlen key</span><br><span class="line">## 使用场景</span><br><span class="line"><span class="number">1</span>、统计日活，按照每天日期作为key</span><br><span class="line">用户id（数字类型）作为offset</span><br><span class="line"><span class="number">2</span>、连续登录的情况</span><br><span class="line">昨天登录的bitmap</span><br><span class="line">和今天登录的bitmap</span><br><span class="line">命令：bitop and|or  key1 key2 destkey  [bitop是位运算的操作  and|or 表示按位与|或  key1和key2表示他们参与运算   destkey 表示目标结果存储在destkey]</span><br><span class="line">bitmap按位与</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/image-20220605193508999.png" alt="bitmap基本操作"></p>
+</li>
+</ul>
+<p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/image-20220605195034410.png" alt="bitmap按位与|或"></p>
+<h2 id="2、List数据结构"><a href="#2、List数据结构" class="headerlink" title="2、List数据结构"></a>2、List数据结构</h2><p><code>List数据结构</code></p>
+<p>List是一个有序的数据结构（按加入的时序排序），Redis采用quicklist（双端链表）和ziplist作为list的底层实现。可以通过设置每个ziplist的最大容量，quicklist的数据压缩范围，提升数据存取效率。</p>
+<p><code>List常用操作</code></p>
+<p>LPUSH  key  value [value …]         //将一个或多个值value插入到key列表的表头(最左边)</p>
+<p>RPUSH  key  value [value …]         //将一个或多个值value插入到key列表的表尾(最右边)</p>
+<p>LPOP  key            //移除并返回key列表的头元素</p>
+<p>RPOP  key            //移除并返回key列表的尾元素</p>
+<p>LRANGE  key  start  stop        //返回列表key中指定区间内的元素，区间以偏移量start和stop指定</p>
+<p>BLPOP  key  [key …]  timeout    //从key列表表头弹出一个元素，若列表中没有元素，阻塞等待                    timeout秒,如果timeout=0,一直阻塞等待</p>
+<p>BRPOP  key  [key …]  timeout     //从key列表表尾弹出一个元素，若列表中没有元素，阻塞等待                    timeout秒,如果timeout=0,一直阻塞等待</p>
+<p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/image-20220409221812515.png" alt="Redis数据结构之List"></p>
+<p><code>常用数据结构</code></p>
+<p>Stack(栈) = LPUSH + LPOP</p>
+<p>Queue(队列）= LPUSH + RPOP</p>
+<p>Blocking MQ(阻塞队列）= LPUSH + BRPOP</p>
+<p><code>redis List数据结构为什么不用链表实现</code></p>
+<p>List数据结构可以使用数组和链表实现，redis底层为什么不用链表来实现list呢？</p>
+<ul>
+<li>1)胖指针问题，链表需要存储下一个元素指针，这个通常占用较大空间</li>
+<li>2)链表数据随机存储，产生大量的内存碎片，没法很好的利用cpu读取内存的空间局部性原理</li>
+</ul>
+<p><code>ziplist【底层是一段连续的空间】</code></p>
+<p>zlbytes：4个字节，标识当前ziplist存多少数据</p>
+<p>zltail：4个字节，尾节点的索引的位置，可以通过o(1)的时间复杂度找到尾结点，方便从尾到头遍历</p>
+<p>zllen：当前ziplist有多少个元素</p>
+<p>zlend：恒等于255，标识数据结尾</p>
+<p>entry：包含三个部分，prerawlen：前面元素的信息，方便从前往后，从后往前遍历；len：当前数据的信息，例如类型</p>
+<p>ziplist：是一个非常紧凑的二进制数据结构，Redis并没有直接将数据存储在ziplist中。</p>
+<p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/ziplist.png" alt="ziplist"></p>
+<blockquote>
+<p>每个entry包含三部分：</p>
+<ul>
+<li>prerawlen：前面一个元素的信息，如果前面要给元素的大小（字节数）小于254，说明前面的元素是比较小的节点，数据量小于254，此时prerawlen占用一个字节（一个字节最大表示255）；如果前面一个元素大于254，用五个字节表示</li>
+<li>len：当前元素的信息，表示的信息见上图</li>
+<li>data：当前元素的信息</li>
+</ul>
+<p>为什么这样设计呢？</p>
+<p>如果使用链表的 pre,next表示双向链表，因为指针存在胖指针问题（即指针占用空间很大）导致内存被大量使用，所以设计ziplist，可以减轻内存占用</p>
+<p>为什么没有直接使用zipList存储元素呢？</p>
+<p>ziplist删除和修改比较麻烦，会涉及到多个数据结构的修改。因此采用下面的双端链表来实现。</p>
+</blockquote>
+<p><code>quicklist双端链表 + ziplist 实现Redis list存储</code></p>
+<p>双端链表：把整个ziplist分块，用链表对其关联，每一个链表的节点对应非常多的元素，包含头节点head，尾节点tail;</p>
+<p>quicklistNode：存放每个节点的信息</p>
+<p>每个ziplist数据越来越多的时候，ziplist也会进行分裂，分裂成多个节点，具体多大就分裂，参考下面配置list-max-ziplist-size参数</p>
+<p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/quicklist.png" alt="quicklist"></p>
+<p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/image-20220409233909847.png"></p>
+<h3 id="3、Hash数据结构"><a href="#3、Hash数据结构" class="headerlink" title="3、Hash数据结构"></a>3、Hash数据结构</h3><p>Hash 数据结构底层实现为一个字典( dict ),也是RedisBb用来存储K-V的数据结构,当数据量比较小，或者单个元素比较小时，底层用ziplist存储，数据大小和元素数量阈值可以通过如下参数设置</p>
+<p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/image-20220410162948512.png" alt="image-20220410162948512"></p>
+<p>hash-max-ziplist-entries  512    //  ziplist 元素个数超过 512 ，将改为hashtable编码 【即使用hashtable存储】<br>hash-max-ziplist-value    64      //  单个元素大小超过 64 byte时，将改为hashtable编码</p>
+<p><strong>String和hash两个数据结构的优缺点？</strong></p>
+<ul>
+<li>频繁使用string数据结构，可能导致redisdb频繁扩容，因为有多个key；而使用hash结构，多个数据公用一个key，不同的field。hash结构一定程度上可以避免频繁扩容。</li>
+<li>使用string方便设置过期时间，而hash只能对外层的key设置过期时间，对field无法设置过期时间。</li>
+</ul>
+<h3 id="4、Set数据结构"><a href="#4、Set数据结构" class="headerlink" title="4、Set数据结构"></a>4、Set数据结构</h3><p>Set 为无序的，自动去重的集合数据类型，Set 数据结构底层实现为一个value 为 null 的 字典( dict ),当数据可以用整形表示时，Set集合将被编码为intset数据结构。两个条件任意满足时<br>Set将用hashtable存储数据。1， 元素个数大于 set-max-intset-entries , 2 ， 元素无法用整形表示 </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">set-max-intset-entries <span class="number">512</span>       <span class="comment">// intset 能存储的最大元素个数，超过则用hashtable编码</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5、ZSet数据结构"><a href="#5、ZSet数据结构" class="headerlink" title="5、ZSet数据结构"></a>5、ZSet数据结构</h3><p>ZSet  为有序的，自动去重的集合数据类型，ZSet 数据结构底层实现为 字典(dict) + 跳表(skiplist) ,当数据比较少时，用ziplist编码结构存储。 </p>
+<p><strong>ZSet如果用内存连续的数组实现行不行？</strong></p>
+<p>不行，数组实现的化，当数据插入或删除时，会有大量的数据移动；所以redis底层采用了链表的方式实现。</p>
+<p>ZSet底层是跳表实现：</p>
+<p>时间复杂度为logN</p>
+<p>跳表是空间换时间的方式。</p>
+<p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/image-20220606214824573.png" alt="image-20220606214824573"></p>
+<p>ZSet底层采用dict + 跳表实现的：</p>
+<blockquote>
+<p>dict用于快速查找分值</p>
+<p>跳表快速查找数据，实现排序</p>
+</blockquote>
+<p>Redis底层跳表的实现：</p>
+<p>头节点不存储数据，用作索引层。</p>
+<p>同一层的数据通过forward指针指向【从前往后遍历】，同时每个节点通过回退指针backword指向【便于从后往前遍历】。</p>
+<p>遍历数据时从最高的层高往下遍历。</p>
+<p><img src="/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/image-20220606220124338.png" alt="image-20220606220124338"></p>
+<h3 id="6、GeoHash算法"><a href="#6、GeoHash算法" class="headerlink" title="6、GeoHash算法"></a>6、GeoHash算法</h3><p>GeoHash是一种地理位置编码方法。 由Gustavo Niemeyer 和 G.M. Morton于2008年发明，它将地理位置编码为一串简短的字母和数字。它是一种分层的空间数据结构，将空间细分为网格形状的桶，这是所谓的z顺序曲线的众多应用之一，通常是空间填充曲线。</p>
+<blockquote>
+<p>Redis GEO 主要用于存储地理位置信息，并对存储的信息进行操作，该功能在 Redis 3.2 版本新增。</p>
+<p>Redis GEO 操作方法有：</p>
+<ul>
+<li>geoadd：添加地理位置的坐标。</li>
+<li>geopos：获取地理位置的坐标。</li>
+<li>geodist：计算两个位置之间的距离。</li>
+<li>georadius：根据用户给定的经纬度坐标来获取指定范围内的地理位置集合。</li>
+<li>georadiusbymember：根据储存在位置集合里面的某个地点获取指定范围内的地理位置集合。</li>
+<li>geohash：返回一个或多个位置对象的 geohash 值。</li>
+</ul>
+</blockquote>
+<p>geo底层基于zset</p>
+<h3 id="7、Redis-6-0新特性"><a href="#7、Redis-6-0新特性" class="headerlink" title="7、Redis 6.0新特性"></a>7、Redis 6.0新特性</h3><ol>
+<li><p><strong>多线程</strong></p>
+<p>redis 6.0 提供了多线程的支持，redis 6 以前的版本，严格来说也是多线程，只不过执行用户命令的请求时单线程模型，还有一些线程用来执行后台任务， 比如 unlink 删除 大key，rdb持久化等。</p>
+<p>redis 6.0 提供了多线程的读写IO, 但是最终执行用户命令的线程依然是单线程的，这样，就没有多线程数据的竞争关系，依然很高效。</p>
+</li>
+<li><p><strong>Client Side Cache</strong></p>
+<p>客户端缓存：redis 6 提供了服务端追踪key的变化，客户端缓存数据的特性，这需要客户端实现</p>
+<p>执行流程为， 当客户端访问某个key时，服务端将记录key 和 client ，客户端拿到数据后，进行客户端缓存，这时，当key再次被访问时，key将被直接返回，避免了与redis 服务器的再次交互，节省服务端资源，当数据被其他请求修改时，服务端将主动通知客户端失效的key，客户端进行本地失效，下次请求时，重新获取最新数据。</p>
+</li>
+<li><p><strong>Acls</strong></p>
+<p>ACL 是对于命令的访问和执行权限的控制，默认情况下，可以有执行任意的指令，兼容以前版本</p>
+<p>ACL设置有两种方式：</p>
+<ol>
+<li>命令方式</li>
+</ol>
+<p>​    ACL SETUSER + 具体的权限规则， 通过 ACL SAVE 进行持久化</p>
+<ol start="2">
+<li>对 ACL 配置文件进行编写，并且执行 ACL LOAD 进行加载</li>
+</ol>
+<p>ACL存储有两种方式，但是两种方式不能同时配置，否则直接报错退出进程</p>
+<ol>
+<li><p>redis 配置文件： redis.conf</p>
+</li>
+<li><p>ACL配置文件, 在redis.conf 中通过 aclfile  /path  配置acl文件的路径</p>
+</li>
+</ol>
+</li>
+</ol>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/04/09/03-00-05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-Redis6%E6%96%B0%E7%89%B9%E6%80%A7/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java/" rel="tag">Java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/04/10/09-00-00-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E7%BD%91%E7%BB%9C-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E6%80%BB%E7%BB%93/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            操作系统&amp;网络&amp;基础数据结构总结
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/04/09/06-00-04-%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E9%98%9F%E5%88%97/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">基础数据结构-队列</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2022
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

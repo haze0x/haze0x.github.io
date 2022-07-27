@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>RoketMQ源码分析 |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-03-04-05-RoketMQ源码分析"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  RoketMQ源码分析
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="article-date">
+  <time datetime="2022-07-23T01:45:11.000Z" itemprop="datePublished">2022-07-23</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a> / <a class="article-category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a> / <a class="article-category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/RocketMQ/">RocketMQ</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">4.5k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">16 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p id="hitokoto">正在加载一言...</p>
+
+<h1 id="RocketMQ源码分析"><a href="#RocketMQ源码分析" class="headerlink" title="RocketMQ源码分析"></a>RocketMQ源码分析</h1><h2 id="1、源码环境搭建"><a href="#1、源码环境搭建" class="headerlink" title="1、源码环境搭建"></a>1、源码环境搭建</h2><blockquote>
+<p>RocketMQ官方仓库：<a target="_blank" rel="noopener" href="https://github.com/apache/rocketmq">https://github.com/apache/rocketmq</a> ，选用4.7.1版本</p>
+<p>几个模块：</p>
+<ul>
+<li>broker: broker 模块（broke 启动进程）</li>
+<li>client ：消息客户端，包含消息生产者、消息消费者相关类</li>
+<li>example: RocketMQ 例代码</li>
+<li>namesrv：NameServer实现相关类（NameServer启动进程）</li>
+<li>store：消息存储实现相关类</li>
+</ul>
+</blockquote>
+<h2 id="2、-启动nameServer"><a href="#2、-启动nameServer" class="headerlink" title="2、 启动nameServer"></a>2、 启动nameServer</h2><blockquote>
+<p>源码路径：namesrv-&gt;NamesrvStartup-&gt;main()方法</p>
+<p>nameserver作用：</p>
+<ul>
+<li>维护Broker的服务地址并进行及时的更新</li>
+<li>给Producer和Consumer提供服务获取Broker列表</li>
+</ul>
+</blockquote>
+<h3 id="2-1、启动流程"><a href="#2-1、启动流程" class="headerlink" title="2.1、启动流程"></a>2.1、启动流程</h3><p><img src="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/NameServer%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B.png" alt="NameServer启动流程"></p>
+<h3 id="2-2、源码核心"><a href="#2-2、源码核心" class="headerlink" title="2.2、源码核心"></a>2.2、源码核心</h3><p>整个NameServer的核心就是一个NamesrvController对象。这个controller对象就跟java Web开发中的Controller功能类似，都是响应客户端请求的。</p>
+<p>在创建NamesrvController对象时，有两个关键的配置</p>
+<ul>
+<li>NamesrvConfig 这个是NameServer自己运行需要的配置信息。</li>
+<li>NettyServerConfig 包含Netty服务端的配置参数，默认占用了9876端口。可以在配置文件中覆盖。</li>
+</ul>
+<p>然后在启动服务时，启动几个重要组件：</p>
+<ul>
+<li>RemotingServer 这个就是用来响应请求的。</li>
+<li>还有一个定时任务会定时扫描不活动的Broker。这个Broker管理是通过routeInfoManager这个功能组件。</li>
+</ul>
+<p>在关闭服务时，关闭了四个东西</p>
+<ul>
+<li>RemotingServer</li>
+<li>remotingExecutor Netty服务线程池;</li>
+<li>scheduledExecutorService 定时任务;</li>
+<li>fileWatchService 这个是用来跟踪TLS配置的。这是跟权限相关的，我们暂不关注。</li>
+<li>从启动和关闭这两个关键步骤，我们可以总结出NameServer的组件其实并不是很多，整个NameServer的结构是这样：</li>
+</ul>
+<p><img src="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E6%BA%90%E7%A0%81Nameserver1.png" alt="源码Nameserver1"></p>
+<h2 id="3、启动Broker"><a href="#3、启动Broker" class="headerlink" title="3、启动Broker"></a>3、启动Broker</h2><blockquote>
+<p>源码路径：</p>
+<p>Broker是整个RocketMQ的业务核心，所有消息存储、转发这些最为重要的业务都是在Broker中进行处理的。</p>
+<p>而Broker的内部架构，有点类似于JavaWeb开发的MVC架构。有Controller负责响应请求，各种Service组件负责具体业务，然后还有负责消息存盘的功能模块则类似于Dao。</p>
+<p>所以我们这一段的重点，是通过Broker的启动过程，观察总结出Broker的内部结构。</p>
+</blockquote>
+<p>Broker启动的入口在BrokerStartup这个类，可以从他的main方法开始调试。</p>
+<p>启动过程关键点：</p>
+<p>重点也是围绕一个BrokerController对象，先创建，然后再启动。</p>
+<p><strong>首先：</strong> 在BrokerStartup.createBrokerController方法中可以看到Broker的几个核心配置：</p>
+<p> BrokerConfig</p>
+<p> NettyServerConfig ：Netty服务端占用了10911端口。同样也可以在配置文件中覆盖。</p>
+<p> NettyClientConfig</p>
+<p> MessageStoreConfig</p>
+<p><strong>然后：</strong> 在BrokerController.start方法可以看到启动了一大堆Broker的核心服务，我们挑一些重要的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">this.messageStore.start();启动核心的消息存储组件</span><br><span class="line"></span><br><span class="line">this.remotingServer.start();</span><br><span class="line">this.fastRemotingServer.start(); 启动两个Netty服务</span><br><span class="line"></span><br><span class="line">this.brokerOuterAPI.start();启动客户端，往外发请求</span><br><span class="line"></span><br><span class="line">BrokerController.this.registerBrokerAll： 向NameServer注册心跳。</span><br><span class="line"></span><br><span class="line">this.brokerStatsManager.start();</span><br><span class="line">this.brokerFastFailure.start();这也是一些负责具体业务的功能组件</span><br></pre></td></tr></table></figure>
+
+<p>我们现在不需要了解这些核心组件的具体功能，只要有个大概，Broker中有一大堆的功能组件负责具体的业务。后面等到分析具体业务时再去深入每个服务的细节。</p>
+<p>我们需要抽象出Broker的一个整体结构：</p>
+<p><img src="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Broker%E6%A0%B8%E5%BF%83%E7%BB%84%E6%88%90.png" alt="Broker核心组成"></p>
+<h2 id="4、Broker注册"><a href="#4、Broker注册" class="headerlink" title="4、Broker注册"></a>4、Broker注册</h2><blockquote>
+<p> 在之前我们已经介绍到了。Broker会在启动时向NameServer注册自己的服务信息，并且会定时的往NameServer发送心跳信息。而NameServer会维护Broker的路由列表，并对路由列表进行实时更新。</p>
+</blockquote>
+<h3 id="4-1-源码重点"><a href="#4-1-源码重点" class="headerlink" title="4.1 源码重点"></a>4.1 源码重点</h3><p>BrokerController.this.registerBrokerAll方法会发起向NameServer注册心跳。启动时会立即注册，同时也会启动一个线程池，以10秒延迟，默认30秒的间隔 持续向NameServer发送心跳。</p>
+<p>BrokerController.this.registerBrokerAll这个方法就是注册心跳的入口。</p>
+<p><img src="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Broker%E6%B3%A8%E5%86%8C%E6%B5%81%E7%A8%8B.png" alt="Broker注册流程"></p>
+<p>然后，在NameServer中也会启动一个定时任务，扫描不活动的Broker。具体观察NamesrvController.initialize方法</p>
+<h2 id="5、Producer"><a href="#5、Producer" class="headerlink" title="5、Producer"></a>5、Producer</h2><blockquote>
+<p>Producer有两种</p>
+<ul>
+<li>一种是普通发送者：DefaultMQProducer。这个只需要构建一个Netty客户端，往Broker发送消息就行了。注意，异步回调只是在Producer接收到Broker的响应后自行调整流程，不需要提供Netty服务。</li>
+<li>另一种是事务消息发送者： TransactionMQProducer。这个需要构建一个Netty客户端，往Broker发送消息。同时也要构建Netty服务端，供Broker回查本地事务状态。</li>
+</ul>
+<p>由于整个Producer的流程，其实还是挺复杂的，我们这里只关注DefaultMQProducer的整个过程。TransactionMQProducer就不在课上带大家看了。</p>
+</blockquote>
+<h3 id="5-1-源码重点"><a href="#5-1-源码重点" class="headerlink" title="5.1 源码重点"></a>5.1 源码重点</h3><p>整个Producer的流程，大致分两个步骤</p>
+<ul>
+<li>start方法，进行一大堆的准备工作</li>
+<li>各种各样的send方法，进行消息发送。</li>
+</ul>
+<p>那我们重点关注以下几个问题：</p>
+<p><strong>首先</strong> 我们关注下Broker的核心启动流程：</p>
+<p>在mQClientFactory的start方法中，启动了生产者的一大堆重要服务。</p>
+<p>然后在DefaultMQProducerImpl的start方法中，又回到了生产者的mqClientFactory的启动过程，这中间有服务状态的管理。</p>
+<p><strong>其次：</strong>关于Borker路由信息的管理： Producer需要拉取Broker列表，然后跟Broker建立连接等等很多核心的流程，其实都是在发送消息时建立的。因为在启动时，还不知道要拉取哪个Topic的Broker列表呢。所以对于这个问题，我们关注的重点，不应该是start方法，而是send方法。</p>
+<p>而对NameServer的地址管理，则是散布在启动和发送的多个过程当中，并且NameServer地址可以通过一个Http服务来获取。</p>
+<p>Send方法中，首先需要获得Topic的路由信息。这会从本地缓存中获取，如果本地缓存中没有，就从NameServer中去申请。</p>
+<p>核心在 org.apache.rocketmq.client.impl.producer.DefaultMQProducerImpl#tryToFindTopicPublishInfo方法</p>
+<p>路由信息大致的管理流程：</p>
+<p><img src="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E8%B7%AF%E7%94%B1%E7%AE%A1%E7%90%86.png" alt="路由管理"></p>
+<p><strong>然后</strong> 关于Producer的负载均衡。</p>
+<p>在之前介绍RocketMQ的顺序消息时，讲到了Producer的负载均衡策略，默认会把消息平均的发送到所有MessageQueue里的。那到底是怎么进行负载均衡的呢？</p>
+<p><img src="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Producer%E9%80%89%E6%8B%A9Queue.png" alt="Producer选择Queue"></p>
+<p><strong>然后</strong> 在发送Netty请求时，实际上是指定的MessageQueue，而不是Topic。Topic只是用来找MessageQueue。</p>
+<p>然后根据MessageQueue再找所在的Broker，往Broker发送请求。</p>
+<h1 id="六、消息存储"><a href="#六、消息存储" class="headerlink" title="六、消息存储"></a>六、消息存储</h1><h2 id="1、功能回顾"><a href="#1、功能回顾" class="headerlink" title="1、功能回顾"></a>1、功能回顾</h2><p>我们接着上面的流程，Producer把消息发到了Broker，接下来就关注下Broker接收到消息后是如何把消息进行存储的。最终存储的文件有哪些？</p>
+<ul>
+<li>commitLog：消息存储目录</li>
+<li>config：运行期间一些配置信息</li>
+<li>consumerqueue：消息消费队列存储目录</li>
+<li>index：消息索引文件存储目录</li>
+<li>abort：如果存在改文件寿命Broker非正常关闭</li>
+<li>checkpoint：文件检查点，存储CommitLog文件最后一次刷盘时间戳、consumerquueue最后一次刷盘时间，index索引文件最后一次刷盘时间戳。</li>
+</ul>
+<p>还记得我们之前看到的Broker的核心组件吗？其中messageStore就是负责消息存储的核心组件。</p>
+<h2 id="2、源码重点："><a href="#2、源码重点：" class="headerlink" title="2、源码重点："></a>2、源码重点：</h2><p>消息存储的入口在：DefaultMessageStore.putMessage</p>
+<p><strong>1-commitLog写入</strong></p>
+<p>CommitLog的doAppend方法就是Broker写入消息的实际入口。这个方法最终会把消息追加到MappedFile映射的一块内存里，并没有直接写入磁盘。写入消息的过程是串行的，一次只会允许一个线程写入。</p>
+<p><strong>2-分发ConsumeQueue和IndexFile</strong></p>
+<pre><code>当CommitLog写入一条消息后，在DefaultMessageStore的start方法中，会启动一个后台线程reputMessageService每隔1毫秒就会去拉取CommitLog中最新更新的一批消息，然后分别转发到ComsumeQueue和IndexFile里去，这就是他底层的实现逻辑。
+
+并且，如果服务异常宕机，会造成CommitLog和ConsumeQueue、IndexFile文件不一致，有消息写入CommitLog后，没有分发到索引文件，这样消息就丢失了。DefaultMappedStore的load方法提供了恢复索引文件的方法，入口在load方法。
+</code></pre>
+<p><strong>3、文件同步刷盘与异步刷盘</strong></p>
+<pre><code>入口：CommitLog.putMessage -&gt; CommitLog.handleDiskFlush
+
+其中主要涉及到是否开启了对外内存。TransientStorePoolEnable。如果开启了堆外内存，会在启动时申请一个跟CommitLog文件大小一致的堆外内存，这部分内存就可以确保不会被交换到虚拟内存中。
+</code></pre>
+<p><strong>4、过期文件删除</strong></p>
+<pre><code>入口： DefaultMessageStore.addScheduleTask -&gt; DefaultMessageStore.this.cleanFilesPeriodically()
+
+默认情况下， Broker会启动后台线程，每60秒，检查CommitLog、ConsumeQueue文件。然后对超过72小时的数据进行删除。也就是说，默认情况下， RocketMQ只会保存3天内的数据。这个时间可以通过fileReservedTime来配置。注意他删除时，并不会检查消息是否被消费了。
+</code></pre>
+<p>整个文件存储的核心入口入口在DefaultMessageStore的start方法中。</p>
+<p><img src="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/image-20220723221300813.png" alt="image-20220723221300813"></p>
+<p><strong>5文件存储部分的总结</strong>：</p>
+<p>RocketMQ的存储文件包括消息文件（Commitlog）、消息消费队列文件（ConsumerQueue）、Hash索引文件（IndexFile）、监测点文件（checkPoint）、abort（关闭异常文件）。单个消息存储文件、消息消费队列文件、Hash索引文件长度固定以便使用内存映射机制进行文件的读写操作。RocketMQ组织文件以文件的起始偏移量来命令文件，这样根据偏移量能快速定位到真实的物理文件。RocketMQ基于内存映射文件机制提供了同步刷盘和异步刷盘两种机制，异步刷盘是指在消息存储时先追加到内存映射文件，然后启动专门的刷盘线程定时将内存中的文件数据刷写到磁盘。</p>
+<p>CommitLog，消息存储文件，RocketMQ为了保证消息发送的高吞吐量，采用单一文件存储所有主题消息，保证消息存储是完全的顺序写，但这样给文件读取带来了不便，为此RocketMQ为了方便消息消费构建了消息消费队列文件，基于主题与队列进行组织，同时RocketMQ为消息实现了Hash索引，可以为消息设置索引键，根据所以能够快速从CommitLog文件中检索消息。</p>
+<p>当消息达到CommitLog后，会通过ReputMessageService线程接近实时地将消息转发给消息消费队列文件与索引文件。为了安全起见，RocketMQ引入abort文件，记录Broker的停机是否是正常关闭还是异常关闭，在重启Broker时为了保证CommitLog文件，消息消费队列文件与Hash索引文件的正确性，分别采用不同策略来恢复文件。</p>
+<p>RocketMQ不会永久存储消息文件、消息消费队列文件，而是启动文件过期机制并在磁盘空间不足或者默认凌晨4点删除过期文件，文件保存72小时并且在删除文件时并不会判断该消息文件上的消息是否被消费。</p>
+<h1 id="七、消费者"><a href="#七、消费者" class="headerlink" title="七、消费者"></a>七、消费者</h1><h2 id="1、功能回顾-1"><a href="#1、功能回顾-1" class="headerlink" title="1、功能回顾"></a>1、功能回顾</h2><p>结合我们之前的示例，回顾下消费者这一块的几个重点：</p>
+<ul>
+<li><p>消费者也是有两种，推模式消费者和拉模式消费者。消费者的使用过程也跟生产者差不多，都是先start()然后再开始消费。</p>
+</li>
+<li><p>消费者以消费者组的模式开展。消费者组之间有集群模式和广播模式两种消费模式。我们就要了解下这两种集群模式是如何做的逻辑封装。</p>
+</li>
+<li><p>然后我们关注下消费者端的负载均衡的原理。即消费者是如何绑定消费队列的。</p>
+</li>
+<li><p>最后我们来关注下在推模式的消费者中，MessageListenerConcurrently 和MessageListenerOrderly这两种消息监听器的处理逻辑到底有什么不同，为什么后者能保持消息顺序。</p>
+</li>
+</ul>
+<p>我们接下来就通过这几个问题来把RocketMQ的消费者部分源码串起来。</p>
+<h2 id="2、源码重点：-1"><a href="#2、源码重点：-1" class="headerlink" title="2、源码重点："></a>2、源码重点：</h2><p><strong>1、启动</strong></p>
+<pre><code>DefaultMQPushConsumer.start方法
+
+启动过程不用太过关注，有个概念就行，然后客户端启动的核心是mQClientFactory 主要是启动了一大堆的服务。
+
+这些服务可以结合具体场景再进行深入。例如pullMessageService主要处理拉取消息服务，rebalanceService主要处理客户端的负载均衡。
+</code></pre>
+<p><strong>2、消息拉取：</strong></p>
+<pre><code>拉模式： PullMessageService
+</code></pre>
+<p>PullRequest里有messageQueue和processQueue，其中messageQueue负责拉取消息，拉取到后，将消息存入processQueue，进行处理。 存入后就可以清空messageQueue，继续拉取了。</p>
+<p><img src="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/image-20220723221432079.png" alt="image-20220723221432079"></p>
+<p><strong>3 客户端负载均衡策略</strong></p>
+<p>在消费者示例的start方法中，启动RebalanceService，这个是客户端进行负载均衡策略的启动服务。他只负责根据负载均衡策略获取当前客户端分配到的MessageQueue示例。</p>
+<p>五种负载策略，可以由Consumer的allocateMessageQueueStrategy属性来选择。</p>
+<p>最常用的是AllocateMessageQueueAveragely平均分配和AllocateMessageQueueAveragelyByCircle平均轮询分配。    </p>
+<p>平均分配是把MessageQueue按组内的消费者个数平均分配。</p>
+<p>而平均轮询分配就是把MessageQueue按组内的消费者一个一个轮询分配。</p>
+<blockquote>
+<p> 例如，六个队列q1,q2,q3,q4,q5,q6，分配给三个消费者c1,c2,c3</p>
+<p> 平均分配的结果就是:  c1:{q1,q2},c2:{q3,q4},c3{q5,q6}</p>
+<p> 平均轮询分配的结果就是： c1:{q1,q4},c2:{q2,q5},c3:{q3,q6}</p>
+</blockquote>
+<p><strong>4 并发消费与顺序消费的过程</strong></p>
+<p>消费的过程依然是在DefaultMQPushConsumerImpl的 consumeMessageService中。他有两个子类ConsumeMessageConcurrentlyService和ConsumeMessageOrderlyService。其中最主要的差别是ConsumeMessageOrderlyService会在消费前把队列锁起来，优先保证拉取同一个队列里的消息。</p>
+<p>消费过程的入口在DefaultMQPushConsumerImpl的pullMessage中定义的PullCallback中。</p>
+<h1 id="八、延迟消息"><a href="#八、延迟消息" class="headerlink" title="八、延迟消息"></a>八、延迟消息</h1><h2 id="1、功能回顾-2"><a href="#1、功能回顾-2" class="headerlink" title="1、功能回顾"></a>1、功能回顾</h2><p>我们这里，就用一个典型的延迟消息的流程，来把上面看到的各个组件，结合一下。</p>
+<p>延迟消息的核心使用方法就是在Message中设定一个MessageDelayLevel参数，对应18个延迟级别。然后Broker中会创建一个默认的Schedule_Topic主题，这个主题下有18个队列，对应18个延迟级别。消息发过来之后，会先把消息存入Schedule_Topic主题中对应的队列。然后等延迟时间到了，再转发到目标队列，推送给消费者进行消费。</p>
+<p>整个延迟消息的实现方式是这样的：</p>
+<p><img src="/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/image-20220723221513122.png" alt="image-20220723221513122"></p>
+<h2 id="2、源码重点"><a href="#2、源码重点" class="headerlink" title="2、源码重点"></a>2、源码重点</h2><p>延迟消息的处理入口在scheduleMessageService这个组件中。 他会在broker启动时也一起加载。</p>
+<p><strong>1、消息写入：</strong></p>
+<p>代码见CommitLog.putMessage方法。</p>
+<p>在CommitLog写入消息时，会判断消息的延迟级别，然后修改Message的Topic和Queue，达到转储Message的目的。</p>
+<p><strong>2、消息转储到目标Topic</strong></p>
+<p>这个转储的核心服务是scheduleMessageService，他也是Broker启动过程中的一个功能组件、</p>
+<p>然后ScheduleMessageService会每隔1秒钟执行一个executeOnTimeup任务，将消息从延迟队列中写入正常Topic中。 代码见ScheduleMessageService中的DeliverDelayedMessageTimerTask.executeOnTimeup方法。</p>
+<p>这个其中有个需要注意的点就是在ScheduleMessageService的start方法中。有一个很关键的CAS操作：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (started.compareAndSet(<span class="keyword">false</span>, <span class="keyword">true</span>)) &#123;</span><br></pre></td></tr></table></figure>
+
+<p>这个CAS操作保证了同一时间只会有一个DeliverDelayedMessageTimerTask执行。保证了消息安全的同时也限制了消息进行回传的效率。所以，这也是很多互联网公司在使用RocketMQ时，对源码进行定制的一个重点。</p>
+<h2 id="3-消费者部分小结："><a href="#3-消费者部分小结：" class="headerlink" title="3 消费者部分小结："></a>3 消费者部分小结：</h2><p>RocketMQ消息消费方式分别为集群模式、广播模式。</p>
+<p>消息队列负载由RebalanceService线程默认每隔20s进行一次消息队列负载，根据当前消费者组内消费者个数与主题队列数量按照某一种负载算法进行队列分配，分配原则为同一个消费者可以分配多个消息消费队列，同一个消息消费队列同一个时间只会分配给一个消费者。</p>
+<p>消息拉取由PullMessageService线程根据RebalanceService线程创建的拉取任务进行拉取，默认每次拉取32条消息，提交给消费者消费线程后继续下一次消息拉取。如果消息消费过慢产生消息堆积会触发消息消费拉取流控。 </p>
+<p>并发消息消费指消费线程池中的线程可以并发对同一个消息队列的消息进行消费，消费成功后，取出消息队列中最小的消息偏移量作为消息消费进度偏移量存储在于消息消费进度存储文件中，集群模式消息消费进度存储在Broker（消息服务器），广播模式消息消费进度存储在消费者端。</p>
+<p>RocketMQ不支持任意精度的定时调度消息，只支持自定义的消息延迟级别，例如1s、2s、5s等，可通过在broker配置文件中设置messageDelayLevel。</p>
+<p>顺序消息一般使用集群模式，是指对消息消费者内的线程池中的线程对消息消费队列只能串行消费。与并发消息消费最本质的区别是消息消费时必须成功锁定消息消费队列，在Broker端会存储消息消费队列的锁占用情况。</p>
+<h1 id="源码解读小结"><a href="#源码解读小结" class="headerlink" title="源码解读小结"></a>源码解读小结</h1><p>关于RocketMQ的源码部分，我们就带大家解读到这里。到目前为止，几个核心的流程我们已经解读完成了，我们按照由大到小，由粗到细的方式对几条主线进行了解读。通过解读源码，我们可以对之前提到的各种高级特性有更深入的理解。对有些有争议的问题，带着问题来源码中找答案是最好的。例如我们经常有人讨论NameServer全部挂了之后，生产者和消费者是否能够用他本地的缓存继续工作一段时间？ 这样的一些问题，看过源码之后是不是有更清晰的了解？</p>
+<p>至于其他的代码，大家也可以按照自己的关注点，以业务线的方式来逐步解读。</p>
+<p><img src="https://note.youdao.com/yws/res/267174/8C06BD7D32624201A2F7558CEC37A53A" alt="image"></p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/07/23/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/RocketMQ/" rel="tag">RocketMQ</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" rel="tag">消息队列</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/07/23/03-04-06-RocketMQ%E5%AE%9E%E8%B7%B5%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            RocketMQ实践问题总结
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/07/20/03-04-03-RocketMQ%E9%AB%98%E7%BA%A7%E5%8E%9F%E7%90%86/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">RocketMQ高级原理</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2022
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

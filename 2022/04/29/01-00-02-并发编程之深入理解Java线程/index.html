@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>并发编程之深入理解Java线程 |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-01-00-02-并发编程之深入理解Java线程"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  并发编程之深入理解Java线程
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/04/29/01-00-02-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B/" class="article-date">
+  <time datetime="2022-04-29T15:05:52.000Z" itemprop="datePublished">2022-04-29</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/">并发编程</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">5.2k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">18 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h2 id="并发编程之深入理解Java线程"><a href="#并发编程之深入理解Java线程" class="headerlink" title="并发编程之深入理解Java线程"></a>并发编程之深入理解Java线程</h2><h3 id="1-线程基础知识"><a href="#1-线程基础知识" class="headerlink" title="1. 线程基础知识"></a>1. 线程基础知识</h3><p><code>线程和进程</code></p>
+<p><strong>进程</strong> </p>
+<ul>
+<li>程序由指令和数据组成，但这些指令要运行，数据要读写，就必须将指令加载至 CPU，数据加载至内存。在指令运行过程中</li>
+</ul>
+<p>​              还需要用到磁盘、网络等设备。进程就是用来加载指令、管理内存、管理 IO 的 。</p>
+<ul>
+<li>当一个程序被运行，从磁盘加载这个程序的代码至内存，这时就开启了一个进程。 </li>
+<li>进程就可以视为程序的一个实例。大部分程序可以同时运行多个实例进程（例如记事本、画图、浏览器 等），也有的程序只</li>
+</ul>
+<p>​               能启动一个实例进程（例如网易云音乐、360 安全卫士等）。</p>
+<ul>
+<li>操作系统会以进程为单位，分配系统资源（CPU时间片、内存等资源），进程是资源分配的最小单位。</li>
+</ul>
+<p><strong>线程</strong> </p>
+<ul>
+<li>线程是进程中的实体，一个进程可以拥有多个线程，一个线程必须有一个父进程。 </li>
+<li>一个线程就是一个指令流，将指令流中的一条条指令以一定的顺序交给 CPU 执行 。</li>
+<li>线程，有时被称为轻量级进程(Lightweight Process，LWP），是操作系统调度（CPU调度）执行的最小单位。</li>
+</ul>
+<p><img src="/2022/04/29/01-00-02-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B/29111.png" alt="img"></p>
+<p><strong>进程与线程的区别</strong></p>
+<ul>
+<li><p>进程基本上相互独立的，而线程存在于进程内，是进程的一个子集</p>
+</li>
+<li><p>进程拥有共享的资源，如内存空间等，供其内部的线程共享</p>
+</li>
+<li><p>进程间通信较为复杂</p>
+</li>
+<li><ul>
+<li>同一台计算机的进程通信称为 IPC（Inter-process communication）</li>
+<li>不同计算机之间的进程通信，需要通过网络，并遵守共同的协议，例如 HTTP</li>
+</ul>
+</li>
+<li><p>线程通信相对简单，因为它们共享进程内的内存，一个例子是多个线程可以访问同一个共享变量</p>
+</li>
+<li><p>线程更轻量，线程上下文切换成本一般上要比进程上下文切换低</p>
+</li>
+</ul>
+<p><strong>进程间通信的方式</strong></p>
+<ol>
+<li><strong>管道（pipe）及有名管道（named pipe）</strong>：管道可用于具有亲缘关系的父子进程间的通信，有名管道除了具有管道所具有的功能外，它还允许无亲缘关系进程间的通信。</li>
+<li><strong>信号（signal）</strong>：信号是在软件层次上对中断机制的一种模拟，它是比较复杂的通信方式，用于通知进程有某事件发生，一个进程收到一个信号与处理器收到一个中断请求效果上可以说是一致的。</li>
+<li><strong>消息队列（message queue）</strong>：消息队列是消息的链接表，它克服了上两种通信方式中信号量有限的缺点，具有写权限得进程可以按照一定得规则向消息队列中添加新信息；对消息队列有读权限得进程则可以从消息队列中读取信息。</li>
+<li><strong>共享内存（shared memory）</strong>：可以说这是最有用的进程间通信方式。它使得多个进程可以访问同一块内存空间，不同进程可以及时看到对方进程中对共享内存中数据得更新。这种方式需要依靠某种同步操作，如互斥锁和信号量等。</li>
+<li><strong>信号量（semaphore）</strong>：主要作为进程之间及同一种进程的不同线程之间得同步和互斥手段。</li>
+<li><strong>套接字（socket）</strong>：这是一种更为一般得进程间通信机制，它可用于网络中不同机器之间的进程间通信，应用非常广泛。</li>
+</ol>
+<p><code>线程的同步互斥</code></p>
+<p><strong>线程同步</strong>是指线程之间所具有的一种制约关系，一个线程的执行依赖另一个线程的消息，当它没有得到另一个线程的消息时应等待，直到消息到达时才被唤醒。</p>
+<p><strong>线程互斥</strong>是指对于共享的进程系统资源，在各单个线程访问时的排它性。当有若干个线程都要使用某一共享资源时，任何时刻最多只允许一个线程去使用，其它要使用该资源的线程必须等待，直到占用资源者释放该资源。线程互斥可以看成是一种特殊的线程同步。</p>
+<p><strong>四种线程同步互斥的控制方法</strong></p>
+<ul>
+<li><strong>临界区</strong>:通过对多线程的串行化来访问公共资源或一段代码，速度快，适合控制数据访问。（在一段时间内只允许一个线程访问的资源就称为临界资源）。</li>
+<li><strong>互斥量</strong>:为协调共同对一个共享资源的单独访问而设计的。</li>
+<li><strong>信号量</strong>:为控制一个具有有限数量用户资源而设计。</li>
+<li><strong>事件</strong>:用来通知线程有一些事件已发生，从而启动后继任务的开始。</li>
+</ul>
+<p><code>上下文切换（Context switch）</code></p>
+<p>上下文切换是指CPU(中央处理单元)从一个进程或线程到另一个进程或线程的切换。</p>
+<p>上下文切换可以更详细地描述为内核(即操作系统的核心)对CPU上的进程(包括线程)执行以下活动:</p>
+<ol>
+<li>暂停一个进程的处理，并将该进程的CPU状态(即上下文)存储在内存中的某个地方</li>
+<li>从内存中获取下一个进程的上下文，并在CPU的寄存器中恢复它</li>
+<li>返回到程序计数器指示的位置(即返回到进程被中断的代码行)以恢复进程。</li>
+</ol>
+<p><img src="/2022/04/29/01-00-02-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B/26506.png" alt="img"></p>
+<p>上下文切换具有以下特性：</p>
+<p><strong>上下文切换只能在内核模式下发生</strong>。内核模式是CPU的特权模式，其中只有内核运行，并提供对所有内存位置和所有其他系统资源的访问。其他程序(包括应用程序)最初在用户模式下运行，但它们可以通过系统调用运行部分内核代码。</p>
+<p><a target="_blank" rel="noopener" href="http://note.youdao.com/noteshare?id=a12216347600326ac714d4539db03585&sub=F8CDC14DC2424449A322F98B0182974E">内核模式（Kernel Mode）vs 用户模式（User Mode）</a></p>
+<p><strong>上下文切换是多任务操作系统的一个基本特性</strong>。在多任务操作系统中，多个进程似乎同时在一个CPU上执行，彼此之间互不干扰。这种并发的错觉是通过快速连续发生的上下文切换(每秒数十次或数百次)来实现的。这些上下文切换发生的原因是进程自愿放弃它们在CPU中的时间，或者是调度器在进程耗尽其CPU时间片时进行切换的结果。</p>
+<p><strong>上下文切换通常是计算密集型的</strong>。就CPU时间而言，上下文切换对系统来说是一个巨大的成本，实际上，它可能是操作系统上成本最高的操作。因此，操作系统设计中的一个主要焦点是尽可能地避免不必要的上下文切换。与其他操作系统(包括一些其他类unix系统)相比，Linux的众多优势之一是它的上下文切换和模式切换成本极低。</p>
+<p><strong>通过命令查看CPU上下文切换情况</strong>：</p>
+<p>linux系统可以通过命令统计CPU上下文切换数据：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vmstat 1 （#可以看到整个操作系统每1秒CPU上下文切换的统计 ）</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/04/29/01-00-02-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B/26504.png" alt="img"></p>
+<p>其中cs列就是CPU上下文切换的统计。当然，CPU上下文切换不等价于线程切换，很多操作会造成CPU上下文切换：</p>
+<ul>
+<li>线程、进程切换</li>
+<li>系统调用</li>
+<li>中断</li>
+</ul>
+<p><strong>查看某一个线程\进程的上下文切换</strong></p>
+<ul>
+<li> 1、<strong>使用pidstat命令</strong></li>
+</ul>
+<p>常用的参数：</p>
+<p>-u 默认参数，显示各个进程的 CPU 统计信息</p>
+<p>-r 显示各个进程的内存使用情况</p>
+<p>-d 显示各个进程的 IO 使用</p>
+<p>-w 显示各个进程的上下文切换</p>
+<p>-p PID 指定 PID</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 显示进程5598每一秒的切换情况</span><br><span class="line">pidstat -w -p 5598 1</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/04/29/01-00-02-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B/26507.png" alt="img"></p>
+<p>其中cswch表示主动切换，nvcswch表示被动切换。从统计数据中看到，该进程每秒主动切换次数达到将近500次，因此代码中存在大量的 睡眠\唤醒 操作。</p>
+<ul>
+<li>2、<strong>从进程的状态信息中查看</strong></li>
+</ul>
+<p>通过命令 cat /proc/5598/status 查看进程的状态信息</p>
+<p>voluntary_ctxt_switches: 40469351</p>
+<p>nonvoluntary_ctxt_switches: 2268</p>
+<p>这2项就是该进程从启动到当前总的上下文切换情况。</p>
+<p><code>操作系统层面线程生命周期</code></p>
+<p>操作系统层面的线程生命周期基本上可以用下图这个“五态模型”来描述。这五态分别是：初始状态、可运行状态、运行状态、休眠状态和终止状态。</p>
+<p><img src="/2022/04/29/01-00-02-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B/26575.png" alt="img"></p>
+<ol>
+<li>初始状态，指的是线程已经被创建，但是还不允许分配 CPU 执行。这个状态属于编程语言特有的，不过这里所谓的被创建，仅仅是在编程语言层面被创建，而在操作系统层面，真正的线程还没有创建。</li>
+<li>可运行状态，指的是线程可以分配 CPU 执行。在这种状态下，真正的操作系统线程已经被成功创建了，所以可以分配 CPU 执行。</li>
+<li>当有空闲的 CPU 时，操作系统会将其分配给一个处于可运行状态的线程，被分配到 CPU 的线程的状态就转换成了运行状态。</li>
+<li>运行状态的线程如果调用一个阻塞的 API（例如以阻塞方式读文件）或者等待某个事件（例如条件变量），那么线程的状态就会转换到休眠状态，同时释放 CPU 使用权，休眠状态的线程永远没有机会获得 CPU 使用权。当等待的事件出现了，线程就会从休眠状态转换到可运行状态。</li>
+<li>线程执行完或者出现异常就会进入终止状态，终止状态的线程不会切换到其他任何状态，进入终止状态也就意味着线程的生命周期结束了。</li>
+</ol>
+<p>这五种状态在不同编程语言里会有简化合并。例如，C 语言的 POSIX Threads 规范，就把初始状态和可运行状态合并了；Java 语言里则把可运行状态和运行状态合并了，这两个状态在操作系统调度层面有用，而 JVM 层面不关心这两个状态，因为 JVM 把线程调度交给操作系统处理了。</p>
+<p><strong>查看进程线程的方法</strong></p>
+<table>
+<thead>
+<tr>
+<th>环境</th>
+<th align="left">查看进程的方法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>windows</strong></td>
+<td align="left">任务管理器可以查看进程和线程数，也可以用来杀死进程  <br>tasklist 查看进程 <br>taskkill 杀死进程</td>
+</tr>
+<tr>
+<td><strong>linux</strong></td>
+<td align="left">ps -fe 查看所有进程<br>ps -fT -p <PID> 查看某个进程（PID）的所有线程 <br>kill 杀死进程 <br>top 按大写 H 切换是否显示线程<br>top -H -p <PID> 查看某个进程（PID）的所有线程</PID></PID></td>
+</tr>
+<tr>
+<td><strong>Java</strong></td>
+<td align="left">jps 命令查看所有 Java 进程 <br>jstack <PID> 查看某个 Java 进程（PID）的所有线程状态 <br>jconsole 来查看某个 Java 进程中线程的运行情况（图形界面）</PID></td>
+</tr>
+</tbody></table>
+<p> <strong>Linux系统中线程实现方式</strong></p>
+<ul>
+<li>LinuxThreads       linux/glibc包在2.3.2之前只实现了LinuxThreads</li>
+<li>NPTL(Native POSIX Thread Library)</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">可以通过以下命令查看系统是使用哪种线程实现 </span><br><span class="line">getconf GNU_LIBPTHREAD_VERSION </span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/04/29/01-00-02-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B/26557.png" alt="img"></p>
+<h3 id="2、Java线程详解"><a href="#2、Java线程详解" class="headerlink" title="2、Java线程详解"></a>2、Java线程详解</h3><p><code> Java线程的实现方式</code></p>
+<ul>
+<li><p><strong>方式1：使用 Thread类或继承Thread类</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建线程对象</span></span><br><span class="line">Thread t = <span class="keyword">new</span> Thread() &#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 要执行的任务</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 启动线程</span></span><br><span class="line">t.start();</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>方式2：实现 Runnable 接口配合Thread</strong></p>
+<p>把【线程】和【任务】（要执行的代码）分开</p>
+<ul>
+<li>Thread 代表线程</li>
+<li>Runnable 可运行的任务（线程要执行的代码）</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Runnable runnable = <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">// 要执行的任务</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 创建线程对象</span></span><br><span class="line">Thread t = <span class="keyword">new</span> Thread( runnable );</span><br><span class="line"><span class="comment">// 启动线程</span></span><br><span class="line">t.start();</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>方式3：使用有返回值的 Callable</strong> </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CallableTask</span> <span class="keyword">implements</span> <span class="title">Callable</span>&lt;<span class="title">Integer</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Random().nextInt();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//创建线程池</span></span><br><span class="line">ExecutorService service = Executors.newFixedThreadPool(<span class="number">10</span>);</span><br><span class="line"><span class="comment">//提交任务，并用 Future提交返回结果</span></span><br><span class="line">Future&lt;Integer&gt; future = service.submit(<span class="keyword">new</span> CallableTask());</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>方式4：使用 lambda</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> Thread(() -&gt; System.out.println(Thread.currentThread().getName())).start();</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>总结：</strong>本质上Java中实现线程只有一种方式【执行任务的方式有很多种】，都是通过new Thread()创建线程，调用Thread#start启动线程最终都会调用Thread#run方法</p>
+<p><code>Java线程实现原理</code></p>
+<p><strong>思考</strong>：Java线程执行为什么不能直接调用run()方法,而要调用start()方法？</p>
+<p>调用start()方法底层操作系统会创建线程，Java Thread-&gt;Jvm Thread-&gt;os Thread   Jvm Thread 到os Thread之间会有用户态到内核态的切换，java层面的线程对象会和内核态线程建立绑定关系；</p>
+<p>调用run()方法只是普通的方法调用。</p>
+<p><strong>两种线程</strong></p>
+<ul>
+<li><p><strong>内核级线程（Kernel Level Thread ，KLT</strong>）：它们是依赖于内核的，即无论是用户进程中的线程，还是系统进程中的线程，它们的创建、撤消、切换都由内核实现。</p>
+</li>
+<li><p><strong>用户级线程（User Level Thread，ULT）</strong>：操作系统内核不知道应用线程的存在。</p>
+</li>
+</ul>
+<p><strong>Java线程属于内核级线程</strong></p>
+<p><strong>Java中的协程框架：</strong> kilim  quasar</p>
+<p><img src="/2022/04/29/01-00-02-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B/26621.png" alt="img"></p>
+<p><strong>协程：</strong>英文Coroutines, 是一种基于线程之上，但又比线程更加轻量级的存在，协程不是被操作系统内核所管理，而完全是由程序所控制（也就是在用户态执行），具有对内核来说不可见的特性。这样带来的好处就是性能得到了很大的提升，不会像线程切换那样消耗资源。</p>
+<p><img src="/2022/04/29/01-00-02-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B/29203.png" alt="img"></p>
+<h3 id="3、Java线程的调度机制"><a href="#3、Java线程的调度机制" class="headerlink" title="3、Java线程的调度机制"></a>3、Java线程的调度机制</h3><p>线程调度是指系统为线程分配处理器使用权的过程，主要调度方式分两种，分别是协同式线程调度和抢占式线程调度</p>
+<ul>
+<li><strong>协同式线程调度</strong></li>
+</ul>
+<p><strong>线程执行时间由线程本身来控制</strong>，线程把自己的工作执行完之后，要主动通知系统切换到另外一个线程上。最大好处是实现简单，且切换操作对线程自己是可知的，没啥线程同步问题。坏处是线程执行时间不可控制，如果一个线程有问题，可能一直阻塞在那里。</p>
+<ul>
+<li><strong>抢占式线程调度</strong></li>
+</ul>
+<p><strong>每个线程将由系统来分配执行时间，线程的切换不由线程本身来决定</strong>（Java中，Thread.yield()可以让出执行时间，但无法获取执行时间）。线程执行时间系统可控，也不会有一个线程导致整个进程阻塞。</p>
+<ul>
+<li><strong>Java线程调度就是抢占式调度</strong></li>
+</ul>
+<p>希望系统能给某些线程多分配一些时间，给一些线程少分配一些时间，可以通过设置线程优先级来完成。Java语言一共10个级别的线程优先级（Thread.MIN_PRIORITY至Thread.MAX_PRIORITY），在两线程同时处于ready状态时，优先级越高的线程越容易被系统选择执行。但优先级并不是很靠谱，因为Java线程是通过映射到系统的原生线程上来实现的，所以线程调度最终还是取决于操作系统。</p>
+<h3 id="4、Java线程的生命周期"><a href="#4、Java线程的生命周期" class="headerlink" title="4、Java线程的生命周期"></a>4、Java线程的生命周期</h3><p>Java 语言中线程共有六种状态，分别是：</p>
+<ol>
+<li>NEW（初始化状态）</li>
+<li>RUNNABLE（可运行状态+运行状态）</li>
+<li>BLOCKED（阻塞状态、只针对synchorinzed）</li>
+<li>WAITING（无时限等待）</li>
+<li>TIMED_WAITING（有时限等待）</li>
+<li>TERMINATED（终止状态）</li>
+</ol>
+<p>在操作系统层面，Java 线程中的 BLOCKED、WAITING、TIMED_WAITING 是一种状态，即前面我们提到的休眠状态。也就是说只要 Java 线程处于这三种状态之一，那么这个线程就永远没有 CPU 的使用权。</p>
+<p><img src="/2022/04/29/01-00-02-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B/26544.png" alt="img"></p>
+<p><strong>从JavaThread的角度，JVM定义了一些针对Java Thread对象的状态（jvm.h）</strong></p>
+<p><img src="/2022/04/29/01-00-02-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B/27079.png" alt="img"></p>
+<p><strong>从OSThread的角度，JVM还定义了一些线程状态给外部使用，比如用jstack输出的线程堆栈信息中线程的状态（osThread.hpp）</strong></p>
+<p><img src="/2022/04/29/01-00-02-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B/27086.png" alt="img"></p>
+<h3 id="5、Thread常用方法"><a href="#5、Thread常用方法" class="headerlink" title="5、Thread常用方法"></a>5、<strong>Thread常用方法</strong></h3><p><strong>sleep方法</strong></p>
+<ul>
+<li>调用 sleep 会让当前线程从 <em>Running</em> 进入TIMED_WAITING状态，不会释放对象锁</li>
+<li>其它线程可以使用 interrupt 方法打断正在睡眠的线程，这时 sleep 方法会抛出 InterruptedException，并且会清除中断标志</li>
+<li>睡眠结束后的线程未必会立刻得到执行</li>
+<li>sleep当传入参数为0时，和yield相同</li>
+</ul>
+<p><strong>yield方法</strong></p>
+<ul>
+<li>yield会释放CPU资源，让当前线程从 Running 进入 Runnable状态，让优先级更高（至少是相同）的线程获得执行机会，不会释放对象锁；</li>
+<li>假设当前进程只有main线程，当调用yield之后，main线程会继续运行，因为没有比它优先级更高的线程；</li>
+<li>具体的实现依赖于操作系统的任务调度器</li>
+</ul>
+<p><strong>join方法</strong>    </p>
+<p>等待调用join方法的线程结束之后，程序再继续执行，一般用于等待异步线程执行完结果之后才能继续运行的场景。</p>
+<p><strong>stop方法</strong></p>
+<p>stop()方法已经被jdk废弃，原因就是stop()方法太过于暴力，强行把执行到一半的线程终止。</p>
+<h3 id="6、Java线程的中断机制"><a href="#6、Java线程的中断机制" class="headerlink" title="6、Java线程的中断机制"></a>6、<strong>Java线程的中断机制</strong></h3><p>Java没有提供一种安全、直接的方法来停止某个线程，而是提供了中断机制。中断机制是一种协作机制，也就是说通过中断并不能直接终止另一个线程，而需要被中断的线程自己处理。被中断的线程拥有完全的自主权，它既可以选择立即停止，也可以选择一段时间后停止，也可以选择压根不停止。</p>
+<p><strong>API的使用</strong></p>
+<ul>
+<li>interrupt()： 将线程的中断标志位设置为true，不会停止线程</li>
+<li>isInterrupted(): 判断当前线程的中断标志位是否为true，不会清除中断标志位</li>
+<li>Thread.interrupted()：判断当前线程的中断标志位是否为true，并清除中断标志位，重置为fasle</li>
+</ul>
+<p>Thread.sleep()能够响应中断，并清除中断标志位。</p>
+<p><strong>sleep 期间能否感受到中断</strong></p>
+<p>修改上面的代码，线程执行任务期间有休眠需求</p>
+<p>处于休眠中的线程被中断，线程是可以感受到中断信号的，并且会抛出一个 InterruptedException 异常，同时清除中断信号，将中断标记位设置成 false。这样就会导致while条件Thread.currentThread().isInterrupted()为false，程序会在不满足count &lt; 1000这个条件时退出。如果不在catch中重新手动添加中断信号，不做任何处理，就会屏蔽中断请求，有可能导致线程无法正确停止。</p>
+<h3 id="7、Java线程间通信"><a href="#7、Java线程间通信" class="headerlink" title="7、Java线程间通信"></a>7、<strong>Java线程间通信</strong></h3><ul>
+<li><strong>volatile</strong></li>
+</ul>
+<p>volatile有两大特性，一是可见性，二是有序性，禁止指令重排序，其中可见性就是可以让线程之间进行通信。</p>
+<ul>
+<li><strong>等待唤醒(等待通知)机制</strong></li>
+</ul>
+<p>等待唤醒机制可以基于wait和notify方法来实现，在一个线程内调用该线程锁对象的wait方法，线程将进入等待队列进行等待直到被唤醒。</p>
+<p>LockSupport是JDK中用来实现线程阻塞和唤醒的工具，线程调用park则等待“许可”，调用unpark则为指定线程提供“许可”。使用它可以在任何场合使线程阻塞，可以指定任何线程进行唤醒，并且不用担心阻塞和唤醒操作的顺序，但要注意连续多次唤醒的效果和一次唤醒是一样的。</p>
+<ul>
+<li><strong>管道输入输出流</strong></li>
+</ul>
+<p>管道输入/输出流和普通的文件输入/输出流或者网络输入/输出流不同之处在于，它主要用于线程之间的数据传输，而传输的媒介为内存。管道输入/输出流主要包括了如下4种具体实现：PipedOutputStream、PipedInputStream、PipedReader和PipedWriter，前两种面向字节，而后两种面向字符。</p>
+<ul>
+<li><strong>Thread.join</strong></li>
+</ul>
+<p>join可以理解成是线程合并，当在一个线程调用另一个线程的join方法时，当前线程阻塞等待被调用join方法的线程执行完毕才能继续执行，所以join的好处能够保证线程的执行顺序，但是如果调用线程的join方法其实已经失去了并行的意义，虽然存在多个线程，但是本质上还是串行的，最后join的实现其实是基于等待通知机制的。</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/04/29/01-00-02-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JMM/" rel="tag">JMM</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" rel="tag">并发编程</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BA%BF%E7%A8%8B/" rel="tag">线程</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/04/30/01-00-03-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3CAS/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            并发编程之深入理解CAS
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/04/28/01-00-01-CPU%E7%BC%93%E5%AD%98%E6%9E%B6%E6%9E%84-%E7%BC%93%E5%AD%98%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">CPU缓存架构&amp;缓存一致性协议</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2022
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

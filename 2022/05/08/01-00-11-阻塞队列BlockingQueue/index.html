@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>阻塞队列BlockingQueue |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-01-00-11-阻塞队列BlockingQueue"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  阻塞队列BlockingQueue
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/05/08/01-00-11-%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97BlockingQueue/" class="article-date">
+  <time datetime="2022-05-08T13:20:06.000Z" itemprop="datePublished">2022-05-08</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/">并发编程</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">5k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">19 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p id="hitokoto">正在加载一言...</p>
+
+<h2 id="阻塞队列BlockingQueue"><a href="#阻塞队列BlockingQueue" class="headerlink" title="阻塞队列BlockingQueue"></a>阻塞队列BlockingQueue</h2><h3 id="1、阻塞队列顶层父类Queue接口"><a href="#1、阻塞队列顶层父类Queue接口" class="headerlink" title="1、阻塞队列顶层父类Queue接口"></a>1、阻塞队列顶层父类Queue接口</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Queue</span>&lt;<span class="title">E</span>&gt; <span class="keyword">extends</span> <span class="title">Collection</span>&lt;<span class="title">E</span>&gt; </span>&#123;</span><br><span class="line">    <span class="comment">//添加一个元素，添加成功返回true, 如果队列满了，就会抛出异常 底层调用 offer()方法</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">add</span><span class="params">(E e)</span></span>;</span><br><span class="line">    <span class="comment">//添加一个元素，添加成功返回true, 如果队列满了，返回false</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">offer</span><span class="params">(E e)</span></span>;</span><br><span class="line">    <span class="comment">//返回并删除队首元素，队列为空则抛出异常</span></span><br><span class="line">    <span class="function">E <span class="title">remove</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">//返回并删除队首元素，队列为空则返回null</span></span><br><span class="line">    <span class="function">E <span class="title">poll</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">//返回队首元素，但不移除，队列为空则抛出异常</span></span><br><span class="line">    <span class="function">E <span class="title">element</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">//获取队首元素，但不移除，队列为空则返回null</span></span><br><span class="line">    <span class="function">E <span class="title">peek</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2、BlockingQueue"><a href="#2、BlockingQueue" class="headerlink" title="2、BlockingQueue"></a>2、BlockingQueue</h3><p>BlockingQueue例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BlockingQueueTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        addTest();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * add 方法是往队列里添加一个元素，如果队列满了，就会抛出异常来提示队列已满。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">addTest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        BlockingQueue&lt;Integer&gt; blockingQueue = <span class="keyword">new</span> ArrayBlockingQueue&lt;Integer&gt;(<span class="number">2</span>);</span><br><span class="line">        System.out.println(blockingQueue.add(<span class="number">1</span>));</span><br><span class="line">        System.out.println(blockingQueue.add(<span class="number">2</span>));</span><br><span class="line">        System.out.println(blockingQueue.add(<span class="number">3</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * remove 方法的作用是删除元素并返回队列的头节点，如果删除的队列是空的， remove 方法就会抛出异常。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">removeTest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        ArrayBlockingQueue&lt;Integer&gt; blockingQueue = <span class="keyword">new</span> ArrayBlockingQueue&lt;Integer&gt;(<span class="number">2</span>);</span><br><span class="line">        blockingQueue.add(<span class="number">1</span>);</span><br><span class="line">        blockingQueue.add(<span class="number">2</span>);</span><br><span class="line">        System.out.println(blockingQueue.remove());</span><br><span class="line">        System.out.println(blockingQueue.remove());</span><br><span class="line">        System.out.println(blockingQueue.remove());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * element 方法是返回队列的头部节点，但是并不删除。如果队列为空，抛出异常</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">elementTest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        ArrayBlockingQueue&lt;Integer&gt; blockingQueue = <span class="keyword">new</span> ArrayBlockingQueue&lt;Integer&gt;(<span class="number">2</span>);</span><br><span class="line">        blockingQueue.element();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * offer 方法用来插入一个元素。如果添加成功会返回 true，而如果队列已经满了，返回false</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">offerTest</span><span class="params">()</span></span>&#123;</span><br><span class="line">        ArrayBlockingQueue&lt;Integer&gt; blockingQueue = <span class="keyword">new</span> ArrayBlockingQueue&lt;Integer&gt;(<span class="number">2</span>);</span><br><span class="line">        System.out.println(blockingQueue.offer(<span class="number">1</span>));</span><br><span class="line">        System.out.println(blockingQueue.offer(<span class="number">2</span>));</span><br><span class="line">        System.out.println(blockingQueue.offer(<span class="number">3</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * poll 方法作用也是移除并返回队列的头节点。 如果队列为空，返回null</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">pollTest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        ArrayBlockingQueue&lt;Integer&gt; blockingQueue = <span class="keyword">new</span> ArrayBlockingQueue&lt;Integer&gt;(<span class="number">3</span>);</span><br><span class="line">        blockingQueue.offer(<span class="number">1</span>);</span><br><span class="line">        blockingQueue.offer(<span class="number">2</span>);</span><br><span class="line">        blockingQueue.offer(<span class="number">3</span>);</span><br><span class="line">        System.out.println(blockingQueue.poll());</span><br><span class="line">        System.out.println(blockingQueue.poll());</span><br><span class="line">        System.out.println(blockingQueue.poll());</span><br><span class="line">        System.out.println(blockingQueue.poll());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * peek 方法返回队列的头元素但并不删除。 如果队列为空，返回null</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">peekTest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        ArrayBlockingQueue&lt;Integer&gt; blockingQueue = <span class="keyword">new</span> ArrayBlockingQueue&lt;Integer&gt;(<span class="number">2</span>);</span><br><span class="line">        System.out.println(blockingQueue.peek());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * put 方法的作用是插入元素。如果队列已满就无法继续插入,阻塞插入线程，直至队列空出位置 </span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">putTest</span><span class="params">()</span></span>&#123;</span><br><span class="line">        BlockingQueue&lt;Integer&gt; blockingQueue = <span class="keyword">new</span> ArrayBlockingQueue&lt;Integer&gt;(<span class="number">2</span>);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            blockingQueue.put(<span class="number">1</span>);</span><br><span class="line">            blockingQueue.put(<span class="number">2</span>);</span><br><span class="line">            blockingQueue.put(<span class="number">3</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * take 方法的作用是获取并移除队列的头结点。如果执队列里无数据，则阻塞，直到队列里有数据</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">takeTest</span><span class="params">()</span></span>&#123;</span><br><span class="line">        BlockingQueue&lt;Integer&gt; blockingQueue = <span class="keyword">new</span> ArrayBlockingQueue&lt;Integer&gt;(<span class="number">2</span>);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            blockingQueue.take();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>BlockingQueue 继承了 Queue 接口，是队列的一种。Queue 和 BlockingQueue 都是在 Java 5 中加入的。阻塞队列（BlockingQueue）是一个在队列基础上又支持了两个附加操作的队列，常用解耦。两个附加操作:</p>
+<ul>
+<li>支持阻塞的插入方法put: 队列满时，队列会阻塞插入元素的线程，直到队列不满。</li>
+<li>支持阻塞的移除方法take: 队列空时，获取元素的线程会等待队列变为非空</li>
+</ul>
+<p>BlockingQueue和JDK集合包中的Queue接口兼容，同时在其基础上增加了阻塞功能。</p>
+<p><strong>入队：</strong></p>
+<p>（1）offer(E e)：如果队列没满，返回true，如果队列已满，返回false（不阻塞）</p>
+<p>（2）offer(E e, long timeout, TimeUnit unit)：可以设置阻塞时间，如果队列已满，则进行阻塞。超过阻塞时间，则返回false</p>
+<p>（3）put(E e)：队列没满的时候是正常的插入，如果队列已满，则阻塞，直至队列空出位置 </p>
+<p><strong>出队：</strong></p>
+<p>（1）poll()：如果有数据，出队，如果没有数据，返回null   （不阻塞）</p>
+<p>（2）poll(long timeout, TimeUnit unit)：可以设置阻塞时间，如果没有数据，则阻塞，超过阻塞时间，则返回null</p>
+<p>（3）take()：队列里有数据会正常取出数据并删除；但是如果队列里无数据，则阻塞，直到队列里有数据</p>
+<p><strong>BlockingQueue常用方法示例</strong></p>
+<p>当队列满了无法添加元素，或者是队列空了无法移除元素时：</p>
+<ol>
+<li>抛出异常：add、remove、element</li>
+<li>返回结果但不抛出异常：offer、poll、peek</li>
+<li>阻塞：put、take</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>抛出异常</th>
+<th>返回特定值</th>
+<th>阻塞</th>
+<th>阻塞特定时间</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>入队</td>
+<td>add(e)</td>
+<td>offer(e)</td>
+<td>put(e)</td>
+<td>offer(e, time, unit)</td>
+</tr>
+<tr>
+<td>出队</td>
+<td>remove()</td>
+<td>poll()</td>
+<td>take()</td>
+<td>poll(time, unit)</td>
+</tr>
+<tr>
+<td>获取队首元素</td>
+<td>element()</td>
+<td>peek()</td>
+<td>不支持</td>
+<td>不支持</td>
+</tr>
+</tbody></table>
+<pre><code>   ### 3、ArrayBlockingQueue的使用
+</code></pre>
+<p><code>基本数据结构</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//数据元素数组</span></span><br><span class="line"><span class="keyword">final</span> Object[] items;</span><br><span class="line"><span class="comment">//下一个待取出元素索引</span></span><br><span class="line"><span class="keyword">int</span> takeIndex;</span><br><span class="line"><span class="comment">//下一个待添加元素索引</span></span><br><span class="line"><span class="keyword">int</span> putIndex;</span><br><span class="line"><span class="comment">//元素个数</span></span><br><span class="line"><span class="keyword">int</span> count;</span><br><span class="line"><span class="comment">//内部锁</span></span><br><span class="line"><span class="keyword">final</span> ReentrantLock lock;</span><br><span class="line"><span class="comment">//消费者</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Condition notEmpty;</span><br><span class="line"><span class="comment">//生产者</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Condition notFull;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ArrayBlockingQueue</span><span class="params">(<span class="keyword">int</span> capacity)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>(capacity, <span class="keyword">false</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ArrayBlockingQueue</span><span class="params">(<span class="keyword">int</span> capacity, <span class="keyword">boolean</span> fair)</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    lock = <span class="keyword">new</span> ReentrantLock(fair); <span class="comment">//公平，非公平</span></span><br><span class="line">    notEmpty = lock.newCondition();</span><br><span class="line">    notFull =  lock.newCondition();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>入队put方法【入队关键方法】</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">put</span><span class="params">(E e)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">	<span class="comment">//检查是否为空</span></span><br><span class="line">    checkNotNull(e);</span><br><span class="line">    <span class="keyword">final</span> ReentrantLock lock = <span class="keyword">this</span>.lock;</span><br><span class="line">    <span class="comment">//加锁，如果线程中断抛出异常 </span></span><br><span class="line">    lock.lockInterruptibly();  <span class="comment">// 可中断的锁</span></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">       <span class="comment">//阻塞队列已满，则将生产者挂起，等待消费者唤醒</span></span><br><span class="line">       <span class="comment">//设计注意点： 用while不用if是为了防止虚假唤醒</span></span><br><span class="line">        <span class="keyword">while</span> (count == items.length)</span><br><span class="line">            notFull.await(); <span class="comment">//队列满了，使用notFull等待（生产者阻塞）</span></span><br><span class="line">        <span class="comment">// 入队</span></span><br><span class="line">        enqueue(e);</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        lock.unlock(); <span class="comment">// 唤醒消费者线程</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">    </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">enqueue</span><span class="params">(E x)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> Object[] items = <span class="keyword">this</span>.items;</span><br><span class="line">    <span class="comment">//入队   使用的putIndex</span></span><br><span class="line">    items[putIndex] = x;</span><br><span class="line">    <span class="keyword">if</span> (++putIndex == items.length) </span><br><span class="line">        putIndex = <span class="number">0</span>;  <span class="comment">//设计的精髓： 环形数组，putIndex指针到数组尽头了，返回头部</span></span><br><span class="line">    count++;</span><br><span class="line">    <span class="comment">//notEmpty条件队列转同步队列，准备唤醒消费者线程，因为入队了一个元素，肯定不为空了</span></span><br><span class="line">    notEmpty.signal(); <span class="comment">// 条件队列转同步队列</span></span><br><span class="line">&#125;</span><br><span class="line">思考：入队代码为什么设计成环形数组</span><br><span class="line">非环形数组删除数据时间复杂度为O(N),设计成环形数组时间复杂度为O(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+<p><code><strong>出队take方法</strong></code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> E <span class="title">take</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> ReentrantLock lock = <span class="keyword">this</span>.lock; <span class="comment">// 和插入操作是同一把锁，因此高并发下，性能不太行</span></span><br><span class="line">    <span class="comment">//加锁，如果线程中断抛出异常 </span></span><br><span class="line">    lock.lockInterruptibly();</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">       <span class="comment">//如果队列为空，则消费者挂起</span></span><br><span class="line">        <span class="keyword">while</span> (count == <span class="number">0</span>)</span><br><span class="line">            notEmpty.await();</span><br><span class="line">        <span class="comment">//出队</span></span><br><span class="line">        <span class="keyword">return</span> dequeue();</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        lock.unlock();<span class="comment">// 唤醒生产者线程</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 出队方法</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> E <span class="title">dequeue</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> Object[] items = <span class="keyword">this</span>.items;</span><br><span class="line">    <span class="meta">@SuppressWarnings(&quot;unchecked&quot;)</span></span><br><span class="line">    E x = (E) items[takeIndex]; <span class="comment">//取出takeIndex位置的元素</span></span><br><span class="line">    items[takeIndex] = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">if</span> (++takeIndex == items.length)</span><br><span class="line">        takeIndex = <span class="number">0</span>; <span class="comment">//设计的精髓： 环形数组，takeIndex 指针到数组尽头了，返回头部</span></span><br><span class="line">    count--;</span><br><span class="line">    <span class="keyword">if</span> (itrs != <span class="keyword">null</span>)</span><br><span class="line">        itrs.elementDequeued();</span><br><span class="line">    <span class="comment">//notFull条件队列转同步队列，准备唤醒生产者线程，此时队列有空位</span></span><br><span class="line">    notFull.signal(); <span class="comment">// 唤醒之前因为队列满而阻塞的线程</span></span><br><span class="line">    <span class="keyword">return</span> x;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>思考： 为什么对数组操作要设计成双指针？</p>
+<p>普通数组删除元素时间复杂度O(N)，环形数组删除元素时间复杂度O(1)</p>
+<h3 id="4、LinkedBlockingQueue的使用"><a href="#4、LinkedBlockingQueue的使用" class="headerlink" title="4、LinkedBlockingQueue的使用"></a>4、<strong>LinkedBlockingQueue</strong>的使用</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//指定队列的大小创建有界队列</span></span><br><span class="line">BlockingQueue&lt;Integer&gt; boundedQueue = <span class="keyword">new</span> LinkedBlockingQueue&lt;&gt;(<span class="number">100</span>);</span><br><span class="line"><span class="comment">//无界队列 也不是真正的无解 最大为Integer.MAX_VALUE</span></span><br><span class="line">BlockingQueue&lt;Integer&gt; unboundedQueue = <span class="keyword">new</span> LinkedBlockingQueue&lt;&gt;();</span><br></pre></td></tr></table></figure>
+
+
+
+<p><code>LinkedBlockingQueue数据结构</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 容量,指定容量就是有界队列</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> capacity;</span><br><span class="line"><span class="comment">// 元素数量</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> AtomicInteger count = <span class="keyword">new</span> AtomicInteger();</span><br><span class="line"><span class="comment">// 链表头  本身是不存储任何元素的，初始化时item指向null</span></span><br><span class="line"><span class="keyword">transient</span> Node&lt;E&gt; head;</span><br><span class="line"><span class="comment">// 链表尾</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">transient</span> Node&lt;E&gt; last;</span><br><span class="line"><span class="comment">// take锁   锁分离，提高效率</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> ReentrantLock takeLock = <span class="keyword">new</span> ReentrantLock();</span><br><span class="line"><span class="comment">// notEmpty条件</span></span><br><span class="line"><span class="comment">// 当队列无元素时，take锁会阻塞在notEmpty条件上，等待其它线程唤醒</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Condition notEmpty = takeLock.newCondition();</span><br><span class="line"><span class="comment">// put锁</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> ReentrantLock putLock = <span class="keyword">new</span> ReentrantLock();</span><br><span class="line"><span class="comment">// notFull条件</span></span><br><span class="line"><span class="comment">// 当队列满了时，put锁会会阻塞在notFull上，等待其它线程唤醒</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Condition notFull = putLock.newCondition();</span><br><span class="line"></span><br><span class="line"><span class="comment">//典型的单链表结构</span></span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Node</span>&lt;<span class="title">E</span>&gt; </span>&#123;</span><br><span class="line">    E item;  <span class="comment">//存储元素</span></span><br><span class="line">    Node&lt;E&gt; next;  <span class="comment">//后继节点    单链表结构</span></span><br><span class="line">    Node(E x) &#123; item = x; &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 构造器</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">LinkedBlockingQueue</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 如果没传容量，就使用最大int值初始化其容量</span></span><br><span class="line">    <span class="keyword">this</span>(Integer.MAX_VALUE);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">LinkedBlockingQueue</span><span class="params">(<span class="keyword">int</span> capacity)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (capacity &lt;= <span class="number">0</span>) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException();</span><br><span class="line">    <span class="keyword">this</span>.capacity = capacity;</span><br><span class="line">    <span class="comment">// 初始化head和last指针为空值节点</span></span><br><span class="line">    last = head = <span class="keyword">new</span> Node&lt;E&gt;(<span class="keyword">null</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>入队put方法 (从尾部入队)</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">put</span><span class="params">(E e)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;    </span><br><span class="line">    <span class="comment">// 不允许null元素</span></span><br><span class="line">    <span class="keyword">if</span> (e == <span class="keyword">null</span>) <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line">    <span class="keyword">int</span> c = -<span class="number">1</span>;</span><br><span class="line">    <span class="comment">// 新建一个节点</span></span><br><span class="line">    Node&lt;E&gt; node = <span class="keyword">new</span> Node&lt;E&gt;(e);</span><br><span class="line">    <span class="keyword">final</span> ReentrantLock putLock = <span class="keyword">this</span>.putLock;</span><br><span class="line">    <span class="keyword">final</span> AtomicInteger count = <span class="keyword">this</span>.count;</span><br><span class="line">    <span class="comment">// 使用put锁加锁</span></span><br><span class="line">    putLock.lockInterruptibly();</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// 如果队列满了，就阻塞在notFull上等待被其它线程唤醒（阻塞生产者线程）</span></span><br><span class="line">        <span class="keyword">while</span> (count.get() == capacity) &#123;</span><br><span class="line">            notFull.await();</span><br><span class="line">        &#125;  </span><br><span class="line">        <span class="comment">// 队列不满，就入队</span></span><br><span class="line">        enqueue(node);</span><br><span class="line">        c = count.getAndIncrement();<span class="comment">// 队列长度加1，返回原值</span></span><br><span class="line">        <span class="comment">// 如果现队列长度小于容量，notFull条件队列转同步队列，准备唤醒一个阻塞在notFull条件上的线程(可以继续入队) </span></span><br><span class="line">        <span class="comment">// 这里为啥要唤醒一下呢？</span></span><br><span class="line">        <span class="comment">// 因为可能有很多线程阻塞在notFull这个条件上,而取元素时只有取之前队列是满的才会唤醒notFull,此处不用等到取元素时才唤醒</span></span><br><span class="line">        <span class="keyword">if</span> (c + <span class="number">1</span> &lt; capacity) <span class="comment">// 之前队列满了，可能有很多线程在阻塞，此时队列长度小于容量，唤醒那些之前因队列满而阻塞的线程，让其继续插入队列 提高吞吐量</span></span><br><span class="line">            notFull.signal();</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        putLock.unlock(); <span class="comment">// 真正唤醒生产者线程</span></span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="comment">// 如果原队列长度为0，现在加了一个元素后立即唤醒阻塞在notEmpty上的线程</span></span><br><span class="line">    <span class="keyword">if</span> (c == <span class="number">0</span>)</span><br><span class="line">        signalNotEmpty();</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">enqueue</span><span class="params">(Node&lt;E&gt; node)</span> </span>&#123; </span><br><span class="line">    <span class="comment">// 直接加到last后面,last指向入队元素</span></span><br><span class="line">    last = last.next = node;</span><br><span class="line">&#125;    </span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">signalNotEmpty</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> ReentrantLock takeLock = <span class="keyword">this</span>.takeLock; </span><br><span class="line">    takeLock.lock();<span class="comment">// 加take锁</span></span><br><span class="line">    <span class="keyword">try</span> &#123;  </span><br><span class="line">        notEmpty.signal();<span class="comment">// notEmpty条件队列转同步队列，准备唤醒阻塞在notEmpty上的线程</span></span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        takeLock.unlock();  <span class="comment">// 真正唤醒消费者线程</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>出队take方法 (从头部出队)</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> E <span class="title">take</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    E x;</span><br><span class="line">    <span class="keyword">int</span> c = -<span class="number">1</span>;</span><br><span class="line">    <span class="keyword">final</span> AtomicInteger count = <span class="keyword">this</span>.count;</span><br><span class="line">    <span class="keyword">final</span> ReentrantLock takeLock = <span class="keyword">this</span>.takeLock;</span><br><span class="line">    <span class="comment">// 使用takeLock加锁</span></span><br><span class="line">    takeLock.lockInterruptibly();</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// 如果队列无元素，则阻塞在notEmpty条件上（消费者线程阻塞）</span></span><br><span class="line">        <span class="keyword">while</span> (count.get() == <span class="number">0</span>) &#123;</span><br><span class="line">            notEmpty.await();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 否则，出队</span></span><br><span class="line">        x = dequeue();</span><br><span class="line">        c = count.getAndDecrement();<span class="comment">//长度-1，返回原值</span></span><br><span class="line">        <span class="keyword">if</span> (c &gt; <span class="number">1</span>)<span class="comment">// 如果取之前队列长度大于1，notEmpty条件队列转同步队列，准备唤醒阻塞在notEmpty上的线程，原因与入队同理</span></span><br><span class="line">            notEmpty.signal(); <span class="comment">// 队列里面有数据 则唤醒之前因为没有数据阻塞的线程，提高吞吐量</span></span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        takeLock.unlock(); <span class="comment">// 真正唤醒消费者线程</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 为什么队列是满的才唤醒阻塞在notFull上的线程呢？</span></span><br><span class="line">    <span class="comment">// 因为唤醒是需要加putLock的，这是为了减少锁的次数,所以，这里索性在放完元素就检测一下，未满就唤醒其它notFull上的线程,</span></span><br><span class="line">    <span class="comment">// 这也是锁分离带来的代价</span></span><br><span class="line">    <span class="comment">// 如果取之前队列长度等于容量（已满），则唤醒阻塞在notFull的线程</span></span><br><span class="line">    <span class="keyword">if</span> (c == capacity)</span><br><span class="line">        signalNotFull();</span><br><span class="line">    <span class="keyword">return</span> x;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 完成头节点出队</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> E <span class="title">dequeue</span><span class="params">()</span> </span>&#123;</span><br><span class="line">     <span class="comment">// head节点本身是不存储任何元素的</span></span><br><span class="line">    <span class="comment">// 这里把head删除，并把head下一个节点作为新的值</span></span><br><span class="line">    <span class="comment">// 并把其值置空，返回原来的值</span></span><br><span class="line">    Node&lt;E&gt; h = head;</span><br><span class="line">    Node&lt;E&gt; first = h.next;</span><br><span class="line">    h.next = h; <span class="comment">// 方便GC</span></span><br><span class="line">    head = first;</span><br><span class="line">    E x = first.item;</span><br><span class="line">    first.item = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">return</span> x;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">signalNotFull</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> ReentrantLock putLock = <span class="keyword">this</span>.putLock;</span><br><span class="line">    putLock.lock();</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        notFull.signal();<span class="comment">// notFull条件队列转同步队列，准备唤醒阻塞在notFull上的线程</span></span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        putLock.unlock(); <span class="comment">// 解锁，这才会真正的唤醒生产者线程</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>思考：线程池为什么用LinkedBlockingQueue而不用ArrayBlockingQueue?</p>
+<p>LinkedBlockingQueue出队入队分别用不同的锁，性能相对来说会更高些；ArrayBlockingQueue 出队入队都是用的同一个锁（数据存取互斥），高并发下性能不是很好</p>
+<h3 id="5、LinkedBlockingQueue与ArrayBlockingQueue对比"><a href="#5、LinkedBlockingQueue与ArrayBlockingQueue对比" class="headerlink" title="5、LinkedBlockingQueue与ArrayBlockingQueue对比"></a>5、LinkedBlockingQueue与ArrayBlockingQueue对比</h3><p>LinkedBlockingQueue是一个阻塞队列，内部由两个ReentrantLock来实现出入队列的线程安全，由各自的Condition对象的await和signal来实现等待和唤醒功能。它和ArrayBlockingQueue的不同点在于：</p>
+<ul>
+<li>队列大小有所不同，ArrayBlockingQueue是有界的初始化必须指定大小，而LinkedBlockingQueue可以是有界的也可以是无界的(Integer.MAX_VALUE)，对于后者而言，当添加速度大于移除速度时，在无界的情况下，可能会造成内存溢出等问题。</li>
+<li>数据存储容器不同，ArrayBlockingQueue采用的是数组作为数据存储容器，而LinkedBlockingQueue采用的则是以Node节点作为连接对象的链表。</li>
+<li>由于ArrayBlockingQueue采用的是数组的存储容器，因此在插入或删除元素时不会产生或销毁任何额外的对象实例，而LinkedBlockingQueue则会生成一个额外的Node对象。这可能在长时间内需要高效并发地处理大批量数据的时，对于GC可能存在较大影响。</li>
+<li>两者的实现队列添加或移除的锁不一样，ArrayBlockingQueue实现的队列中的锁是没有分离的，即添加操作和移除操作采用的同一个ReenterLock锁，而LinkedBlockingQueue实现的队列中的锁是分离的，其添加采用的是putLock，移除采用的则是takeLock，这样能大大提高队列的吞吐量，也意味着在高并发的情况下生产者和消费者可以并行地操作队列中的数据，以此来提高整个队列的并发性能。</li>
+</ul>
+<h3 id="6、BlockingQueue总结"><a href="#6、BlockingQueue总结" class="headerlink" title="6、BlockingQueue总结"></a>6、BlockingQueue总结</h3><p><strong>阻塞队列特性</strong></p>
+<p><strong>阻塞</strong></p>
+<p>阻塞队列区别于其他类型的队列的最主要的特点就是“阻塞”这两个字，所以下面重点介绍阻塞功能：阻塞功能使得生产者和消费者两端的能力得以平衡，当有任何一端速度过快时，阻塞队列便会把过快的速度给降下来。实现阻塞最重要的两个方法是 take 方法和 put 方法。</p>
+<p><strong>take 方法</strong></p>
+<p>take 方法的功能是获取并移除队列的头结点，通常在队列里有数据的时候是可以正常移除的。可是一旦执行 take 方法的时候，队列里无数据，则阻塞，直到队列里有数据。一旦队列里有数据了，就会立刻解除阻塞状态，并且取到数据</p>
+<p><strong>put 方法</strong></p>
+<p>put 方法插入元素时，如果队列没有满，那就和普通的插入一样是正常的插入，但是如果队列已满，那么就无法继续插入，则阻塞，直到队列里有了空闲空间。如果后续队列有了空闲空间，比如消费者消费了一个元素，那么此时队列就会解除阻塞状态，并把需要添加的数据添加到队列中</p>
+<p><strong>是否有界</strong></p>
+<p>阻塞队列还有一个非常重要的属性，那就是容量的大小，分为有界和无界两种。无界队列意味着里面可以容纳非常多的元素，例如 LinkedBlockingQueue 的上限是 Integer.MAX_VALUE，是非常大的一个数，可以近似认为是无限容量，因为我们几乎无法把这个容量装满。但是有的阻塞队列是有界的，例如 ArrayBlockingQueue 如果容量满了，也不会扩容，所以一旦满了就无法再往里放数据了。</p>
+<p><strong>应用场景</strong></p>
+<p>线程池里面大量使用到，线程池是生产者-消费者模式、利用线程工厂做线程复用，阻塞队列是线程安全的，阻塞队列可以解耦，生产者只管往队列里面添加数据，消费者只管消费数据</p>
+<p>BlockingQueue 是线程安全的，我们在很多场景下都可以利用线程安全的队列来优雅地解决我们业务自身的线程安全问题。比如说，使用生产者/消费者模式的时候，我们生产者只需要往队列里添加元素，而消费者只需要从队列里取出它们就可以了。</p>
+<p>因为阻塞队列是线程安全的，所以生产者和消费者都可以是多线程的，不会发生线程安全问题。生产者/消费者直接使用线程安全的队列就可以，而不需要自己去考虑更多的线程安全问题。这也就意味着，考虑锁等线程安全问题的重任从“你”转移到了“队列”上，降低了我们开发的难度和工作量。</p>
+<p>同时，队列它还能起到一个隔离的作用。比如说我们开发一个银行转账的程序，那么生产者线程不需要关心具体的转账逻辑，只需要把转账任务，如账户和金额等信息放到队列中就可以，而不需要去关心银行这个类如何实现具体的转账业务。而作为银行这个类来讲，它会去从队列里取出来将要执行的具体的任务，再去通过自己的各种方法来完成本次转账。这样就实现了具体任务与执行任务类之间的解耦，任务被放在了阻塞队列中，而负责放任务的线程是无法直接访问到我们银行具体实现转账操作的对象的，实现了隔离，提高了安全性。</p>
+<p><strong>常见阻塞队列</strong></p>
+<p>BlockingQueue 接口的实现类都被放在了 juc 包中，它们的区别主要体现在存储结构上或对元素操作上的不同，但是对于take与put操作的原理，却是类似的。</p>
+<table>
+<thead>
+<tr>
+<th><strong>队列</strong></th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>ArrayBlockingQueue</strong></td>
+<td>基于数组结构实现的一个有界阻塞队列</td>
+</tr>
+<tr>
+<td><strong>LinkedBlockingQueue</strong></td>
+<td>基于链表结构实现的一个有界阻塞队列</td>
+</tr>
+<tr>
+<td><strong>PriorityBlockingQueue</strong></td>
+<td>支持按优先级排序的无界阻塞队列，例如需要插队的场景</td>
+</tr>
+<tr>
+<td><strong>DelayQueue</strong></td>
+<td>基于优先级队列（PriorityBlockingQueue）实现的无界阻塞队列，延时队列</td>
+</tr>
+<tr>
+<td><strong>SynchronousQueue</strong></td>
+<td>不存储元素的阻塞队列，一个生产者对应一个消费者</td>
+</tr>
+<tr>
+<td><strong>LinkedTransferQueue</strong></td>
+<td>基于链表结构实现的一个无界阻塞队列</td>
+</tr>
+<tr>
+<td><strong>LinkedBlockingDeque</strong></td>
+<td>基于链表结构实现的一个双端阻塞队列</td>
+</tr>
+</tbody></table>
+<h3 id="7、锁活跃性问题"><a href="#7、锁活跃性问题" class="headerlink" title="7、锁活跃性问题"></a>7、锁活跃性问题</h3><p><strong>死锁与活锁的区别，死锁与饥饿的区别？</strong></p>
+<p><strong>死锁</strong>：是指两个或两个以上的进程（或线程）在执行过程中，因争夺资源而造成的一种互相等待的现象，若无外力作用，它们都将无法推进下去。</p>
+<p><strong>活锁</strong>：任务或者执行者没有被阻塞，由于某些条件没有满足，导致一直重复尝试，失败，尝试，失败。</p>
+<p>活锁和死锁的区别在于，处于活锁的实体是在不断的改变状态，这就是所谓的“活”， 而处于死锁的实体表现为等待；活锁有可能自行解开，死锁则不能。</p>
+<p><strong>饥饿</strong>：一个或者多个线程因为种种原因无法获得所需要的资源，导致一直无法执行的状态。</p>
+<p>Java 中导致饥饿的原因：</p>
+<p>1、高优先级线程吞噬所有的低优先级线程的 CPU 时间。</p>
+<p>2、线程被永久堵塞在一个等待进入同步块的状态，因为其他线程总是能在它之前持续地对该同步块进行访问。</p>
+<p>3、线程在等待一个本身也处于永久等待完成的对象(比如调用这个对象的 wait 方法)，因为其他线程总是被持续地获得唤醒。</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/05/08/01-00-11-%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97BlockingQueue/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/AQS/" rel="tag">AQS</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/BlockingQueue/" rel="tag">BlockingQueue</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" rel="tag">并发编程</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97/" rel="tag">阻塞队列</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/05/09/01-00-12-%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97%E4%B9%8BSynchronousQueue/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            阻塞队列之SynchronousQueue
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/05/07/01-00-10-AQS%E4%B9%8BReentrantReadWriteLock/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">AQS之ReentrantReadWriteLock</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2022
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>Spring之AOP底层源码解析 |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-02-00-08-Spring之AOP底层源码解析"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  Spring之AOP底层源码解析
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/07/02/02-00-08-Spring%E4%B9%8BAOP%E5%BA%95%E5%B1%82%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" class="article-date">
+  <time datetime="2022-07-02T02:34:48.000Z" itemprop="datePublished">2022-07-02</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6/">源码框架</a> / <a class="article-category-link" href="/categories/Java/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6/Spring/">Spring</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">3.6k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">16 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p id="hitokoto">正在加载一言...</p>
+
+<h1 id="Spring-AOP底层逻辑"><a href="#Spring-AOP底层逻辑" class="headerlink" title="Spring AOP底层逻辑"></a>Spring AOP底层逻辑</h1><h2 id="1、动态代理"><a href="#1、动态代理" class="headerlink" title="1、动态代理"></a>1、动态代理</h2><blockquote>
+<p>代理模式的解释：为<strong>其他对象</strong>提供一种<strong>代理</strong>以控制对这个对象的访问，增强一个类中的某个方法，对程序进行扩展。比如:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserService</span>  </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;test...&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>cglib动态代理</li>
+</ul>
+<p><strong>不修改UserService类的源码</strong>前提下，给test()增加额外逻辑，那么就可以使用动态代理机制来创建UserService对象</p>
+<blockquote>
+<p>得到的都是UserService对象，但是执行test()方法时的效果却不一样了，这就是代理所带来的效果。</p>
+<p>上面是通过cglib来实现的代理对象的创建，是基于<strong>父子类</strong>的，被代理类（UserService）是父类，代理类是子类，代理对象就是代理类的实例对象，代理类是由cglib创建的，对于程序员来说不用关心。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">UserService target = <span class="keyword">new</span> UserService();</span><br><span class="line"><span class="comment">// 通过cglib技术</span></span><br><span class="line">Enhancer enhancer = <span class="keyword">new</span> Enhancer();</span><br><span class="line">enhancer.setSuperclass(UserService.class);</span><br><span class="line"><span class="comment">// 定义额外逻辑，也就是代理逻辑</span></span><br><span class="line">enhancer.setCallbacks(<span class="keyword">new</span> Callback[]&#123;<span class="keyword">new</span> MethodInterceptor() &#123;</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Object <span class="title">intercept</span><span class="params">(Object o<span class="comment">/**代理后的对象*/</span>, Method method, Object[] objects, MethodProxy methodProxy)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;before...&quot;</span>);</span><br><span class="line">		Object result = methodProxy.invoke(target, objects);</span><br><span class="line">  		<span class="comment">// Object result = methodProxy.invokeSuper(target, objects); // 调用父类，也可以达到目的</span></span><br><span class="line">		System.out.println(<span class="string">&quot;after...&quot;</span>);</span><br><span class="line">		<span class="keyword">return</span> result;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;,NoOp.INSTANCE&#125;);<span class="comment">/** 可以指定多个callback方法NoOp.INSTANCE表示不做任何事情 */</span></span><br><span class="line">enhancer.setCallbackFilter(<span class="keyword">new</span> CallbackFilter() &#123;</span><br><span class="line">   <span class="meta">@Override</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">accept</span><span class="params">(Method method)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">if</span>( <span class="string">&quot;test&quot;</span>.equals(method.getName()) )&#123; <span class="comment">// 表示如果方法名称是test，则指向第一个callback</span></span><br><span class="line">         <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 动态代理所创建出来的UserService对象</span></span><br><span class="line">UserService userService = (UserService) enhancer.create();</span><br><span class="line"><span class="comment">// 执行这个userService的test方法时，就会额外会执行一些其他逻辑</span></span><br><span class="line">userService.test();</span><br><span class="line">userService.a();</span><br><span class="line"><span class="comment">// 执行结果</span></span><br><span class="line">执行<span class="number">28</span>行：</span><br><span class="line">before...</span><br><span class="line">test</span><br><span class="line"></span><br><span class="line">after...</span><br><span class="line"></span><br><span class="line">执行<span class="number">29</span>行：</span><br><span class="line">a</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>JDK 动态代理</p>
+<blockquote>
+<p>除开cglib技术，jdk本身也提供了一种创建代理对象的动态代理机制，但是它只能代理接口，也就是UserService得先有一个接口才能利用jdk动态代理机制来生成一个代理对象</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">UserInterface</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserService</span> <span class="keyword">implements</span> <span class="title">UserInterface</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;test...&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## jdk 动态代理</span><br><span class="line">UserService target = <span class="keyword">new</span> UserService();</span><br><span class="line"><span class="comment">// UserInterface接口的代理对象</span></span><br><span class="line">Object proxy = Proxy.newProxyInstance(UserService.class.getClassLoader(), <span class="keyword">new</span> Class[]&#123;UserInterface.class&#125;, <span class="keyword">new</span> InvocationHandler() &#123;</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;before...&quot;</span>);</span><br><span class="line">		Object result = method.invoke(target, args);</span><br><span class="line">		System.out.println(<span class="string">&quot;after...&quot;</span>);</span><br><span class="line">		<span class="keyword">return</span> result;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;);</span><br><span class="line">UserInterface userService = (UserInterface) proxy;</span><br><span class="line">userService.test();</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>如果你把new Class[]{UserInterface.class}，替换成new Class[]{UserService.class}，允许代码会直接报错：</p>
+<p>Exception in thread “main” java.lang.IllegalArgumentException: com.zhouyu.service.UserService is not an interface</p>
+<p>表示一定要是个接口。</p>
+<p>由于这个限制，所以产生的代理对象的类型是UserInterface，而不是UserService，这是需要注意的。</p>
+</blockquote>
+</li>
+</ul>
+</blockquote>
+<h2 id="2、ProxyFactory"><a href="#2、ProxyFactory" class="headerlink" title="2、ProxyFactory"></a>2、<strong>ProxyFactory</strong></h2><blockquote>
+<p>上面我们介绍了两种动态代理技术，那么在Spring中进行了封装，封装出来的类叫做ProxyFactory，表示是创建代理对象的一个工厂，使用起来会比上面的更加方便，比如</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">UserService target = <span class="keyword">new</span> UserService();</span><br><span class="line">ProxyFactory proxyFactory = <span class="keyword">new</span> ProxyFactory();</span><br><span class="line">proxyFactory.setTarget(target);</span><br><span class="line">proxyFactory.addAdvice(<span class="keyword">new</span> MethodInterceptor() &#123;</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(MethodInvocation invocation)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;before...&quot;</span>);</span><br><span class="line">		Object result = invocation.proceed();</span><br><span class="line">		System.out.println(<span class="string">&quot;after...&quot;</span>);</span><br><span class="line">		<span class="keyword">return</span> result;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;);</span><br><span class="line">UserInterface userService = (UserInterface) proxyFactory.getProxy();</span><br><span class="line">userService.test();</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>通过ProxyFactory，我们可以不再关系到底是用cglib还是jdk动态代理了，ProxyFactory会帮我们去判断，如果UserService实现了接口，那么ProxyFactory底层就会用jdk动态代理，如果没有实现接口，就会用cglib技术，上面的代码，就是由于UserService实现了UserInterface接口，所以最后产生的代理对象是UserInterface类型。</p>
+</blockquote>
+</blockquote>
+<h2 id="3、Advice的使用"><a href="#3、Advice的使用" class="headerlink" title="3、Advice的使用"></a>3、Advice的使用</h2><ul>
+<li><strong>Advice的分类</strong></li>
+</ul>
+<ol>
+<li>Before Advice：方法之前执行</li>
+<li>After returning advice：方法return后执行</li>
+<li>After throwing advice：方法抛异常后执行</li>
+<li>After (finally) advice：方法执行完finally之后执行，这是最后的，比return更后</li>
+<li>Around advice：这是功能最强大的Advice，可以自定义执行顺序</li>
+</ol>
+<ul>
+<li><p><strong>Advice的使用(底层使用)</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line">## 方法返回后</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestAfterReturnAdvice</span> <span class="keyword">implements</span> <span class="title">AfterReturningAdvice</span> </span>&#123;</span><br><span class="line">   <span class="meta">@Override</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">afterReturning</span><span class="params">(Object returnValue, Method method, Object[] args, Object target)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">      System.out.println(<span class="string">&quot;方法return后执行&quot;</span>);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">## 方法执行前</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestBeforeAdvice</span> <span class="keyword">implements</span> <span class="title">MethodBeforeAdvice</span> </span>&#123;</span><br><span class="line">   <span class="meta">@Override</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">before</span><span class="params">(Method method, Object[] args, Object target)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">      System.out.println(<span class="string">&quot;方法执行前执行&quot;</span>);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line">## 方法抛出异常后执行</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestThrowAdvice</span> <span class="keyword">implements</span> <span class="title">ThrowsAdvice</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">afterThrowing</span><span class="params">(Method method, Object[] args, Object target, NullPointerException ex)</span></span>&#123;</span><br><span class="line">      System.out.println(<span class="string">&quot;方法抛出异常后执行&quot;</span>);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line">## 方法执行前后执行</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestAroundAdvice</span> <span class="keyword">implements</span> <span class="title">MethodInterceptor</span> </span>&#123;</span><br><span class="line">   <span class="meta">@Override</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(MethodInvocation invocation)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">      System.out.println(<span class="string">&quot;方法执行around前&quot;</span>);</span><br><span class="line">      Object proceed = invocation.proceed();</span><br><span class="line">      System.out.println(<span class="string">&quot;方法执行around后&quot;</span>);</span><br><span class="line">      <span class="keyword">return</span> proceed;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## UserService</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span></span>&#123;</span><br><span class="line">      System.out.println(<span class="string">&quot;test&quot;</span>);</span><br><span class="line">      <span class="comment">//     throw new NullPointerException();</span></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">a</span><span class="params">()</span></span>&#123;</span><br><span class="line">      System.out.println(<span class="string">&quot;a&quot;</span>);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">## 测试类</span><br><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">advice</span><span class="params">()</span></span>&#123;</span><br><span class="line">   UserService target = <span class="keyword">new</span> UserService();</span><br><span class="line">   ProxyFactory factory = <span class="keyword">new</span> ProxyFactory();</span><br><span class="line">   factory.setTarget(target);</span><br><span class="line">   <span class="comment">// advice表示一段代理逻辑</span></span><br><span class="line">   factory.addAdvice(<span class="keyword">new</span> TestBeforeAdvice());</span><br><span class="line">   factory.addAdvice(<span class="keyword">new</span> TestAfterReturnAdvice());</span><br><span class="line">   factory.addAdvice(<span class="keyword">new</span> TestThrowAdvice());</span><br><span class="line">   factory.addAdvice(<span class="keyword">new</span> TestAroundAdvice());</span><br><span class="line"></span><br><span class="line">   <span class="comment">// advisor  Advisor = Pointcut + Advice</span></span><br><span class="line">   factory.addAdvisor(<span class="keyword">new</span> PointcutAdvisor() &#123;</span><br><span class="line">      <span class="comment">// 切点  决定代理逻辑作用于何处</span></span><br><span class="line">      <span class="meta">@Override</span></span><br><span class="line">      <span class="function"><span class="keyword">public</span> Pointcut <span class="title">getPointcut</span><span class="params">()</span> </span>&#123;</span><br><span class="line">         <span class="keyword">return</span> <span class="keyword">new</span> StaticMethodMatcherPointcut() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">matches</span><span class="params">(Method method, Class&lt;?&gt; targetClass)</span> </span>&#123;</span><br><span class="line">               <span class="keyword">return</span> method.getName().equals(<span class="string">&quot;test&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">         &#125;;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// 一段代理逻辑</span></span><br><span class="line">      <span class="meta">@Override</span></span><br><span class="line">      <span class="function"><span class="keyword">public</span> Advice <span class="title">getAdvice</span><span class="params">()</span> </span>&#123;</span><br><span class="line">         <span class="keyword">return</span> <span class="keyword">new</span> TestBeforeAdvice();</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// 无用的方法</span></span><br><span class="line">      <span class="meta">@Override</span></span><br><span class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isPerInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">         <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;);</span><br><span class="line"></span><br><span class="line">   UserService proxy = (UserService)factory.getProxy();</span><br><span class="line">   proxy.test();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">## 结果</span><br><span class="line">方法执行前执行</span><br><span class="line">方法执行around前</span><br><span class="line">方法执行前执行</span><br><span class="line">test</span><br><span class="line">方法执行around后</span><br><span class="line">方法<span class="keyword">return</span>后执行</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>Advice的使用（上层使用）</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@ComponentScan(&quot;bat.ke.qq.com&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AppConfig</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">   <span class="meta">@Bean</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> ProxyFactoryBean <span class="title">userService</span><span class="params">()</span></span>&#123;</span><br><span class="line">      UserService userService = <span class="keyword">new</span> UserService();</span><br><span class="line">      ProxyFactoryBean proxyFactoryBean = <span class="keyword">new</span> ProxyFactoryBean();</span><br><span class="line">      proxyFactoryBean.addAdvice(<span class="keyword">new</span> TestBeforeAdvice());</span><br><span class="line">      proxyFactoryBean.setTarget(userService);</span><br><span class="line"></span><br><span class="line">      <span class="keyword">return</span> proxyFactoryBean;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">## 测试</span><br><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">adviceUpperUse</span><span class="params">()</span></span>&#123;</span><br><span class="line">   AnnotationConfigApplicationContext context = <span class="keyword">new</span> AnnotationConfigApplicationContext(AppConfig.class);</span><br><span class="line">   UserService userService = (UserService)context.getBean(<span class="string">&quot;userService&quot;</span>);</span><br><span class="line">   userService.test();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>Advisor的理解</strong></p>
+<blockquote>
+<p>Advisro = Advice（before/afterreturn/afterthrow…） + pointcut（切点）</p>
+</blockquote>
+<blockquote>
+<p>跟Advice类似的还有一个Advisor的概念，一个Advisor是有一个Pointcut和一个Advice组成的，通过Pointcut可以指定要需要被代理的逻辑，比如一个UserService类中有两个方法，按上面的例子，这两个方法都会被代理，被增强，那么我们现在可以通过Advisor，来控制到具体代理哪一个方法</p>
+<p>示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">UserService target = <span class="keyword">new</span> UserService();</span><br><span class="line">ProxyFactory proxyFactory = <span class="keyword">new</span> ProxyFactory();</span><br><span class="line">proxyFactory.setTarget(target);</span><br><span class="line">proxyFactory.addAdvisor(<span class="keyword">new</span> PointcutAdvisor() &#123;</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Pointcut <span class="title">getPointcut</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">new</span> StaticMethodMatcherPointcut() &#123;</span><br><span class="line">			<span class="meta">@Override</span></span><br><span class="line">			<span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">matches</span><span class="params">(Method method, Class&lt;?&gt; targetClass)</span> </span>&#123;</span><br><span class="line">				<span class="keyword">return</span> method.getName().equals(<span class="string">&quot;testAbc&quot;</span>);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Advice <span class="title">getAdvice</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">new</span> MethodInterceptor() &#123;</span><br><span class="line">			<span class="meta">@Override</span></span><br><span class="line">			<span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(MethodInvocation invocation)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">				System.out.println(<span class="string">&quot;before...&quot;</span>);</span><br><span class="line">				Object result = invocation.proceed();</span><br><span class="line">				System.out.println(<span class="string">&quot;after...&quot;</span>);</span><br><span class="line">				<span class="keyword">return</span> result;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isPerInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;);</span><br><span class="line">UserInterface userService = (UserInterface) proxyFactory.getProxy();</span><br><span class="line">userService.test();</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>上面代码表示，产生的代理对象，只有在执行testAbc这个方法时才会被增强，会执行额外的逻辑，而在执行其他方法时是不会增强的</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="4、创建代理对象的方式"><a href="#4、创建代理对象的方式" class="headerlink" title="4、创建代理对象的方式"></a>4、<strong>创建代理对象的方式</strong></h2><blockquote>
+<p>上面介绍了Spring中所提供了ProxyFactory、Advisor、Advice、PointCut等技术来实现代理对象的创建，但是我们在使用Spring时，我们并不会直接这么去使用ProxyFactory，比如说，我们希望ProxyFactory所产生的代理对象能直接就是Bean，能直接从Spring容器中得到UserSerivce的代理对象，而这些，Spring都是支持的，只不过，作为开发者的我们肯定得告诉Spring，那些类需要被代理，代理逻辑是什么。</p>
+</blockquote>
+<ul>
+<li><p><strong>ProxyFactoryBean</strong></p>
+<blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> ProxyFactoryBean <span class="title">userServiceProxy</span><span class="params">()</span></span>&#123;</span><br><span class="line">	UserService userService = <span class="keyword">new</span> UserService();</span><br><span class="line">	ProxyFactoryBean proxyFactoryBean = <span class="keyword">new</span> ProxyFactoryBean();</span><br><span class="line">	proxyFactoryBean.setTarget(userService);</span><br><span class="line">	proxyFactoryBean.addAdvice(<span class="keyword">new</span> MethodInterceptor() &#123;</span><br><span class="line">		<span class="meta">@Override</span></span><br><span class="line">		<span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(MethodInvocation invocation)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">			System.out.println(<span class="string">&quot;before...&quot;</span>);</span><br><span class="line">			Object result = invocation.proceed();</span><br><span class="line">			System.out.println(<span class="string">&quot;after...&quot;</span>);</span><br><span class="line">			<span class="keyword">return</span> result;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;);</span><br><span class="line">	<span class="keyword">return</span> proxyFactoryBean;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过这种方法来定义一个UserService的Bean，并且是经过了AOP的。但是这种方式<strong>只能针对某一个Bean</strong>。它是一个FactoryBean，所以利用的就是FactoryBean技术，间接的将UserService的代理对象作为了Bean。</p>
+<p>ProxyFactoryBean还有额外的功能，比如可以把某个Advise或Advisor定义成为Bean，然后在ProxyFactoryBean中进行设置</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> MethodInterceptor <span class="title">zhouyuAroundAdvise</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">new</span> MethodInterceptor() &#123;</span><br><span class="line">		<span class="meta">@Override</span></span><br><span class="line">		<span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(MethodInvocation invocation)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">			System.out.println(<span class="string">&quot;before...&quot;</span>);</span><br><span class="line">			Object result = invocation.proceed();</span><br><span class="line">			System.out.println(<span class="string">&quot;after...&quot;</span>);</span><br><span class="line">			<span class="keyword">return</span> result;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> ProxyFactoryBean <span class="title">userService</span><span class="params">()</span></span>&#123;</span><br><span class="line">	UserService userService = <span class="keyword">new</span> UserService();</span><br><span class="line">	</span><br><span class="line">    ProxyFactoryBean proxyFactoryBean = <span class="keyword">new</span> ProxyFactoryBean();</span><br><span class="line">	proxyFactoryBean.setTarget(userService);</span><br><span class="line">	proxyFactoryBean.setInterceptorNames(<span class="string">&quot;zhouyuAroundAdvise&quot;</span>);</span><br><span class="line">	<span class="keyword">return</span> proxyFactoryBean;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure></blockquote>
+</li>
+</ul>
+<h2 id="5、BeanNameAutoProxyCreator"><a href="#5、BeanNameAutoProxyCreator" class="headerlink" title="5、BeanNameAutoProxyCreator"></a>5、<strong>BeanNameAutoProxyCreator</strong></h2><blockquote>
+<p>ProxyFactoryBean得自己指定被代理的对象，那么我们可以通过BeanNameAutoProxyCreator来通过指定某个bean的名字，来对该bean进行代理</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> BeanNameAutoProxyCreator <span class="title">beanNameAutoProxyCreator</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	BeanNameAutoProxyCreator beanNameAutoProxyCreator = <span class="keyword">new</span> BeanNameAutoProxyCreator();</span><br><span class="line">	beanNameAutoProxyCreator.setBeanNames(<span class="string">&quot;userSe*&quot;</span>);</span><br><span class="line">	beanNameAutoProxyCreator.setInterceptorNames(<span class="string">&quot;zhouyuAroundAdvise&quot;</span>);</span><br><span class="line">	beanNameAutoProxyCreator.setProxyTargetClass(<span class="keyword">true</span>);</span><br><span class="line">    <span class="keyword">return</span> beanNameAutoProxyCreator;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过BeanNameAutoProxyCreator可以对批量的Bean进行AOP，并且指定了代理逻辑，指定了一个InterceptorName，也就是一个Advise，前提条件是这个Advise也得是一个Bean，这样Spring才能找到的，但是BeanNameAutoProxyCreator的缺点很明显，它只能根据beanName来指定想要代理的Bean。</p>
+</blockquote>
+<h2 id="6、BeanNameAutoProxyCreator（是一个BeanPostProcessor，可以对bean进行加工）使用"><a href="#6、BeanNameAutoProxyCreator（是一个BeanPostProcessor，可以对bean进行加工）使用" class="headerlink" title="6、BeanNameAutoProxyCreator（是一个BeanPostProcessor，可以对bean进行加工）使用"></a>6、<strong>BeanNameAutoProxyCreator（是一个BeanPostProcessor，可以对bean进行加工）使用</strong></h2><p>示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestAroundAdvice</span> <span class="keyword">implements</span> <span class="title">MethodInterceptor</span> </span>&#123;</span><br><span class="line">   <span class="meta">@Override</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(MethodInvocation invocation)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">      System.out.println(<span class="string">&quot;方法执行around前&quot;</span>);</span><br><span class="line">      Object proceed = invocation.proceed();</span><br><span class="line">      System.out.println(<span class="string">&quot;方法执行around后&quot;</span>);</span><br><span class="line">      <span class="keyword">return</span> proceed;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@ComponentScan(&quot;bat.ke.qq.com&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AppConfig</span> </span>&#123;</span><br><span class="line">   <span class="meta">@Bean</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> BeanNameAutoProxyCreator <span class="title">beanNameAutoProxyCreator</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      BeanNameAutoProxyCreator beanNameAutoProxyCreator = <span class="keyword">new</span> BeanNameAutoProxyCreator();</span><br><span class="line">      beanNameAutoProxyCreator.setBeanNames(<span class="string">&quot;userSe*&quot;</span>);</span><br><span class="line">      beanNameAutoProxyCreator.setInterceptorNames(<span class="string">&quot;testAroundAdvice&quot;</span>);</span><br><span class="line"><span class="comment">//    beanNameAutoProxyCreator.setProxyTargetClass(true);</span></span><br><span class="line">      <span class="keyword">return</span> beanNameAutoProxyCreator;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span></span>&#123;</span><br><span class="line">      System.out.println(<span class="string">&quot;test&quot;</span>);</span><br><span class="line"><span class="comment">//    throw new NullPointerException();</span></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">a</span><span class="params">()</span></span>&#123;</span><br><span class="line">      System.out.println(<span class="string">&quot;a&quot;</span>);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## test测试类</span><br><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testBeanNameAutoProxyCreator</span><span class="params">()</span></span>&#123;</span><br><span class="line">   AnnotationConfigApplicationContext context = <span class="keyword">new</span> AnnotationConfigApplicationContext(AppConfig.class);</span><br><span class="line">   UserService userService = (UserService)context.getBean(<span class="string">&quot;userService&quot;</span>);</span><br><span class="line">   userService.test();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">##结果</span><br><span class="line">方法执行around前</span><br><span class="line">test</span><br><span class="line">方法执行around后</span><br></pre></td></tr></table></figure>
+
+<h2 id="7、DefaultAdvisorAutoProxyCreator"><a href="#7、DefaultAdvisorAutoProxyCreator" class="headerlink" title="7、DefaultAdvisorAutoProxyCreator"></a>7、<strong>DefaultAdvisorAutoProxyCreator</strong></h2><blockquote>
+<p>示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> DefaultPointcutAdvisor <span class="title">defaultPointcutAdvisor</span><span class="params">()</span></span>&#123;</span><br><span class="line">	NameMatchMethodPointcut pointcut = <span class="keyword">new</span> NameMatchMethodPointcut();</span><br><span class="line">	pointcut.addMethodName(<span class="string">&quot;test&quot;</span>);</span><br><span class="line">    DefaultPointcutAdvisor defaultPointcutAdvisor = <span class="keyword">new</span> DefaultPointcutAdvisor();</span><br><span class="line">	defaultPointcutAdvisor.setPointcut(pointcut);</span><br><span class="line">	defaultPointcutAdvisor.setAdvice(<span class="keyword">new</span> ZhouyuAfterReturningAdvise());</span><br><span class="line">    <span class="keyword">return</span> defaultPointcutAdvisor;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> DefaultAdvisorAutoProxyCreator <span class="title">defaultAdvisorAutoProxyCreator</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	</span><br><span class="line">    DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator = <span class="keyword">new</span> DefaultAdvisorAutoProxyCreator();</span><br><span class="line">	<span class="keyword">return</span> defaultAdvisorAutoProxyCreator;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testBeanNameAutoProxyCreator</span><span class="params">()</span></span>&#123;</span><br><span class="line">   AnnotationConfigApplicationContext context = <span class="keyword">new</span> AnnotationConfigApplicationContext(AppConfig.class);</span><br><span class="line">   UserService userService = (UserService)context.getBean(<span class="string">&quot;userService&quot;</span>);</span><br><span class="line">   userService.test();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">##结果</span><br><span class="line">test</span><br><span class="line">方法<span class="keyword">return</span>后执行</span><br></pre></td></tr></table></figure>
+
+<p>通过DefaultAdvisorAutoProxyCreator会直接去找所有Advisor类型的Bean，根据Advisor中的PointCut和Advice信息，确定要代理的Bean以及代理逻辑。</p>
+<p>但是，我们发现，通过这种方式，我们得依靠某一个类来实现定义我们的Advisor，或者Advise，或者Pointcut，那么这个步骤能不能更加简化一点呢？</p>
+</blockquote>
+<h2 id="8、注解方式"><a href="#8、注解方式" class="headerlink" title="8、注解方式"></a>8、注解方式</h2><blockquote>
+<p>比如我们能不能只定义一个类，然后通过在类中的方法上通过某些注解，来定义PointCut以及Advice，可以的，比如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Aspect</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ZhouyuAspect</span> </span>&#123;</span><br><span class="line">	<span class="meta">@Before(&quot;execution(public void com.zhouyu.service.UserService.test())&quot;)</span> <span class="comment">// pointcut ---&gt;表面代理逻辑生效的地方 @Before是advice</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">zhouyuBefore</span><span class="params">(JoinPoint joinPoint)</span> </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;zhouyuBefore&quot;</span>); <span class="comment">// ---&gt;代理逻辑</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过上面这个类，我们就直接定义好了所要代理的方法(通过一个表达式)，以及代理逻辑（被@Before修饰的方法），简单明了，这样对于Spring来说，它要做的就是来解析这些注解了，解析之后得到对应的Pointcut对象、Advice对象，生成Advisor对象，扔进ProxyFactory中，进而产生对应的代理对象，具体怎么解析这些注解就是**@EnableAspectJAutoProxy注解**所要做的事情了，后面详细分析。</p>
+</blockquote>
+<h2 id="9、AOP中的概念"><a href="#9、AOP中的概念" class="headerlink" title="9、AOP中的概念"></a>9、<strong>AOP中的概念</strong></h2><ul>
+<li>基本概念</li>
+</ul>
+<blockquote>
+<ol>
+<li>Aspect：表示切面，比如被@Aspect注解的类就是切面，可以在切面中去定义Pointcut、Advice等等</li>
+<li>Join point：表示连接点，表示一个程序在执行过程中的一个点，比如一个方法的执行，比如一个异常的处理，在Spring AOP中，一个连接点通常表示一个方法的执行。【当前被代理的方法】</li>
+<li>Advice：表示通知，表示在一个特定连接点上所采取的动作。Advice分为不同的类型，后面详细讨论，在很多AOP框架中，包括Spring，会用Interceptor拦截器来实现Advice，并且在连接点周围维护一个Interceptor链</li>
+<li>Pointcut：表示切点，用来匹配一个或多个连接点，Advice与切点表达式是关联在一起的，Advice将会执行在和切点表达式所匹配的连接点上</li>
+<li>Introduction：可以使用@DeclareParents来给所匹配的类添加一个接口，并指定一个默认实现</li>
+<li>Target object：目标对象，被代理对象</li>
+<li>AOP proxy：表示代理工厂，用来创建代理对象的，在Spring Framework中，要么是JDK动态代理，要么是CGLIB代理</li>
+<li>Weaving：表示织入，表示创建代理对象的动作，这个动作可以发生在编译时期（比如Aspejctj），或者运行时，比如Spring AOP</li>
+</ol>
+</blockquote>
+<ul>
+<li><p><strong>Advice在Spring AOP中对应API</strong></p>
+<p>上面说到的Aspject中的注解，其中有五个是用来定义Advice的，表示代理逻辑，以及执行时机：</p>
+<ol>
+<li>@Before</li>
+<li>@AfterReturning</li>
+<li>@AfterThrowing</li>
+<li>@After</li>
+<li>@Around</li>
+</ol>
+<p>我们前面也提到过，Spring自己也提供了类似的执行实际的实现类：</p>
+<ol>
+<li>接口MethodBeforeAdvice，继承了接口BeforeAdvice</li>
+<li>接口AfterReturningAdvice</li>
+<li>接口ThrowsAdvice</li>
+<li>接口AfterAdvice</li>
+<li>接口MethodInterceptor</li>
+</ol>
+<p>Spring会把五个注解解析为对应的Advice类：</p>
+<ol>
+<li>@Before：AspectJMethodBeforeAdvice，实际上就是一个MethodBeforeAdvice</li>
+<li>@AfterReturning：AspectJAfterReturningAdvice，实际上就是一个AfterReturningAdvice</li>
+<li>@AfterThrowing：AspectJAfterThrowingAdvice，实际上就是一个MethodInterceptor</li>
+<li>@After：AspectJAfterAdvice，实际上就是一个MethodInterceptor</li>
+<li>@Around：AspectJAroundAdvice，实际上就是一个MethodInterceptor</li>
+</ol>
+</li>
+<li><p><strong>TargetSource的使用</strong></p>
+<blockquote>
+<p>在我们日常的AOP中，被代理对象就是Bean对象，是由BeanFactory给我们创建出来的，但是Spring AOP中提供了TargetSource机制，可以让我们用来自定义逻辑来创建<strong>被代理对象</strong>。</p>
+<p>比如之前所提到的@Lazy注解，当加在属性上时，会产生一个代理对象赋值给这个属性，产生代理对象的代码为：</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> Object <span class="title">buildLazyResolutionProxy</span><span class="params">(<span class="keyword">final</span> DependencyDescriptor descriptor, <span class="keyword">final</span> <span class="meta">@Nullable</span> String beanName)</span> </span>&#123;</span><br><span class="line">		BeanFactory beanFactory = getBeanFactory();</span><br><span class="line">		Assert.state(beanFactory <span class="keyword">instanceof</span> DefaultListableBeanFactory,</span><br><span class="line">				<span class="string">&quot;BeanFactory needs to be a DefaultListableBeanFactory&quot;</span>);</span><br><span class="line">		<span class="keyword">final</span> DefaultListableBeanFactory dlbf = (DefaultListableBeanFactory) beanFactory;</span><br><span class="line">		TargetSource ts = <span class="keyword">new</span> TargetSource() &#123;</span><br><span class="line">			<span class="meta">@Override</span></span><br><span class="line">			<span class="keyword">public</span> Class&lt;?&gt; getTargetClass() &#123;</span><br><span class="line">				<span class="keyword">return</span> descriptor.getDependencyType();</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="meta">@Override</span></span><br><span class="line">			<span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isStatic</span><span class="params">()</span> </span>&#123;</span><br><span class="line">				<span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="meta">@Override</span></span><br><span class="line">			<span class="function"><span class="keyword">public</span> Object <span class="title">getTarget</span><span class="params">()</span> </span>&#123;</span><br><span class="line">				Set&lt;String&gt; autowiredBeanNames = (beanName != <span class="keyword">null</span> ? <span class="keyword">new</span> LinkedHashSet&lt;&gt;(<span class="number">1</span>) : <span class="keyword">null</span>);</span><br><span class="line">				Object target = dlbf.doResolveDependency(descriptor, beanName, autowiredBeanNames, <span class="keyword">null</span>);</span><br><span class="line">				<span class="keyword">if</span> (target == <span class="keyword">null</span>) &#123;</span><br><span class="line">					Class&lt;?&gt; type = getTargetClass();</span><br><span class="line">					<span class="keyword">if</span> (Map.class == type) &#123;</span><br><span class="line">						<span class="keyword">return</span> Collections.emptyMap();</span><br><span class="line">					&#125;</span><br><span class="line">					<span class="keyword">else</span> <span class="keyword">if</span> (List.class == type) &#123;</span><br><span class="line">						<span class="keyword">return</span> Collections.emptyList();</span><br><span class="line">					&#125;</span><br><span class="line">					<span class="keyword">else</span> <span class="keyword">if</span> (Set.class == type || Collection.class == type) &#123;</span><br><span class="line">						<span class="keyword">return</span> Collections.emptySet();</span><br><span class="line">					&#125;</span><br><span class="line">					<span class="keyword">throw</span> <span class="keyword">new</span> NoSuchBeanDefinitionException(descriptor.getResolvableType(),</span><br><span class="line">							<span class="string">&quot;Optional dependency not present for lazy injection point&quot;</span>);</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">if</span> (autowiredBeanNames != <span class="keyword">null</span>) &#123;</span><br><span class="line">					<span class="keyword">for</span> (String autowiredBeanName : autowiredBeanNames) &#123;</span><br><span class="line">						<span class="keyword">if</span> (dlbf.containsBean(autowiredBeanName)) &#123;</span><br><span class="line">							dlbf.registerDependentBean(autowiredBeanName, beanName);</span><br><span class="line">						&#125;</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">return</span> target;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="meta">@Override</span></span><br><span class="line">			<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">releaseTarget</span><span class="params">(Object target)</span> </span>&#123;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;;</span><br><span class="line">		ProxyFactory pf = <span class="keyword">new</span> ProxyFactory();</span><br><span class="line">		pf.setTargetSource(ts);</span><br><span class="line">		Class&lt;?&gt; dependencyType = descriptor.getDependencyType();</span><br><span class="line">		<span class="keyword">if</span> (dependencyType.isInterface()) &#123;</span><br><span class="line">			pf.addInterface(dependencyType);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> pf.getProxy(dlbf.getBeanClassLoader());</span><br><span class="line">	&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这段代码就利用了ProxyFactory来生成代理对象，以及使用了TargetSource，以达到代理对象在执行某个方法时，调用TargetSource的getTarget()方法实时得到一个<strong>被代理对象</strong>。</p>
+</blockquote>
+</li>
+</ul>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/07/02/02-00-08-Spring%E4%B9%8BAOP%E5%BA%95%E5%B1%82%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-AOP/" rel="tag">Spring AOP</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6/" rel="tag">源码框架</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/07/03/02-00-09-Spring%E4%B9%8BAOP%E5%BA%95%E5%B1%82%E6%BA%90%E7%A0%81/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            Spring之AOP底层源码
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/06/30/02-00-07-Spring%E4%B9%8B%E9%85%8D%E7%BD%AE%E7%B1%BB%E8%A7%A3%E6%9E%90%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">Spring之配置类解析源码解析</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2022
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

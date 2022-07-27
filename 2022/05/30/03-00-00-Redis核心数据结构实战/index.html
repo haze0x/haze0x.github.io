@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>Redis核心数据结构实战 |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-03-00-00-Redis核心数据结构实战"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  Redis核心数据结构实战
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/05/30/03-00-00-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%AE%9E%E6%88%98/" class="article-date">
+  <time datetime="2022-05-30T14:21:10.000Z" itemprop="datePublished">2022-05-30</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a> / <a class="article-category-link" href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a> / <a class="article-category-link" href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/%E4%B8%AD%E9%97%B4%E4%BB%B6/redis/">redis</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">2.1k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">8 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p id="hitokoto">正在加载一言...</p>
+
+<h2 id="一、Redis核心数据结构与高性能原理"><a href="#一、Redis核心数据结构与高性能原理" class="headerlink" title="一、Redis核心数据结构与高性能原理"></a>一、Redis核心数据结构与高性能原理</h2><h3 id="1、Redis五大数据结构"><a href="#1、Redis五大数据结构" class="headerlink" title="1、Redis五大数据结构"></a>1、Redis五大数据结构</h3><h4 id="1-1-string-字符串"><a href="#1-1-string-字符串" class="headerlink" title="1.1 string 字符串"></a>1.1 string 字符串</h4><ul>
+<li><strong>字符串常用操作：</strong></li>
+</ul>
+<blockquote>
+<p>set key value // 存入字符串键值对</p>
+<p>get key // 获取一个字符串键值</p>
+<p>mset key value [key value] // 批量存储字符串键值对</p>
+<p>mget key [key…] // 批量获取字符串键值</p>
+<p>setnx key value  // 存入一个不存在的字符串键值对</p>
+<p>del  key  [key …]  // 删除一个键</p>
+<p>EXPIRE  key  seconds // 设置一个键的过期时间(秒)</p>
+</blockquote>
+<ul>
+<li><strong>原子加减</strong></li>
+</ul>
+<blockquote>
+<p>incr key // 将key中储存的数字值加1</p>
+<p>decr key // 将key中储存的数字值减1</p>
+<p>incrby  key  increment // 将key所储存的值加上increment</p>
+<p>decrby  key  decrement // 将key所储存的值减去decrement</p>
+</blockquote>
+<h4 id="1-2-字符串应用场景"><a href="#1-2-字符串应用场景" class="headerlink" title="1.2 字符串应用场景"></a>1.2 字符串应用场景</h4><ul>
+<li><p>单值缓存</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">set key value</span><br><span class="line">get key</span><br></pre></td></tr></table></figure></li>
+<li><p>对象缓存</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1) SET  user:1  value(json格式数据)</span><br><span class="line">2) MSET  user:1:name  zhangsan   user:1:balance  1888</span><br><span class="line">   MGET  user:1:name   user:1:balance </span><br></pre></td></tr></table></figure></li>
+<li><p>分布式锁</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SETNX  product:10001  true 		//返回1代表获取锁成功</span><br><span class="line">SETNX  product:10001  true 		//返回0代表获取锁失败</span><br><span class="line">。。。执行业务操作</span><br><span class="line">DEL  product:10001			//执行完业务释放锁</span><br><span class="line">SET product:10001 true  ex  10  nx	//防止程序意外终止导致死锁 ex:过期时间单位为秒  px:过期时间单位为毫秒  nx：不存在才设置</span><br></pre></td></tr></table></figure></li>
+<li><p>计数器</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">INCR article:readcount:&#123;文章id&#125;  	</span><br><span class="line">GET article:readcount:&#123;文章id&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>Web集群session共享</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">spring session + redis实现session共享</span><br></pre></td></tr></table></figure></li>
+<li><p>分布式系统全局序列号</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">INCRBY  orderId  1000		//redis批量生成序列号提升性能</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="1-3-Hash数据结构"><a href="#1-3-Hash数据结构" class="headerlink" title="1.3 Hash数据结构"></a>1.3 Hash数据结构</h4><ul>
+<li><p>hash常用操作</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">HSET  key  field  value 			<span class="comment">//存储一个哈希表key的键值</span></span><br><span class="line">HSETNX  key  field  value 		<span class="comment">//存储一个不存在的哈希表key的键值</span></span><br><span class="line">HMSET  key  field  value [field value ...] 	<span class="comment">//在一个哈希表key中存储多个键值对</span></span><br><span class="line">HGET  key  field 				<span class="comment">//获取哈希表key对应的field键值</span></span><br><span class="line">HMGET  key  field  [field ...] 		<span class="comment">//批量获取哈希表key中多个field键值</span></span><br><span class="line">HDEL  key  field  [field ...] 		<span class="comment">//删除哈希表key中的field键值</span></span><br><span class="line">HLEN  key				<span class="comment">//返回哈希表key中field的数量</span></span><br><span class="line">HGETALL  key				<span class="comment">//返回哈希表key中所有的键值</span></span><br><span class="line">HINCRBY  key  field  increment 		<span class="comment">//为哈希表key中field键的值加上增量increment</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="1-4-Hash数据结构"><a href="#1-4-Hash数据结构" class="headerlink" title="1.4 Hash数据结构"></a>1.4 Hash数据结构</h4><ul>
+<li>hash数据结构的应用场景</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">HMSET  user  &#123;userId&#125;:name  zhuge  &#123;userId&#125;:balance  <span class="number">1888</span></span><br><span class="line">HMSET  user  <span class="number">1</span>:name  zhuge  <span class="number">1</span>:balance  <span class="number">1888</span></span><br><span class="line">HMGET  user  <span class="number">1</span>:name  <span class="number">1</span>:balance  </span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>电商购物车</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span>）以用户id为key</span><br><span class="line"><span class="number">2</span>）商品id为field</span><br><span class="line"><span class="number">3</span>）商品数量为value</span><br><span class="line"></span><br><span class="line">购物车操作</span><br><span class="line">添加商品-&gt;hset cart:<span class="number">1001</span> <span class="number">10088</span> <span class="number">1</span></span><br><span class="line">增加数量-&gt;hincrby cart:<span class="number">1001</span> <span class="number">10088</span> <span class="number">1</span></span><br><span class="line">商品总数-&gt;hlen cart:<span class="number">1001</span></span><br><span class="line">删除商品-&gt;hdel cart:<span class="number">1001</span> <span class="number">10088</span></span><br><span class="line">获取购物车所有商品-&gt;hgetall cart:<span class="number">1001</span></span><br></pre></td></tr></table></figure></li>
+<li><p>Hash结构优缺点</p>
+<ul>
+<li><p>优点</p>
+<p>1）同类数据归类整合储存，方便数据管理<br>2）相比string操作消耗内存与cpu更小<br>3）相比string储存更节省空间</p>
+</li>
+<li><p>缺点</p>
+<p>1）过期功能不能使用在field上，只能用在key上<br>2）Redis集群架构下不适合大规模使用</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="1-5-List数据结构"><a href="#1-5-List数据结构" class="headerlink" title="1.5 List数据结构"></a>1.5 List数据结构</h4><ul>
+<li><p>List常用操作</p>
+<blockquote>
+<p>LPUSH  key  value [value …]         //将一个或多个值value插入到key列表的表头(最左边)<br>RPUSH  key  value [value …]         //将一个或多个值value插入到key列表的表尾(最右边)<br>LPOP  key            //移除并返回key列表的头元素<br>RPOP  key            //移除并返回key列表的尾元素<br>LRANGE  key  start  stop        //返回列表key中指定区间内的元素，区间以偏移量start和stop指定<br>BLPOP  key  [key …]  timeout    //从key列表表头弹出一个元素，若列表中没有元素，阻塞等待                    timeout秒,如果timeout=0,一直阻塞等待<br>BRPOP  key  [key …]  timeout     //从key列表表尾弹出一个元素，若列表中没有元素，阻塞等待                    timeout秒,如果timeout=0,一直阻塞等待</p>
+</blockquote>
+</li>
+<li><p>List应用场景</p>
+<blockquote>
+<p>Stack(栈) = LPUSH + LPOP<br>Queue(队列）= LPUSH + RPOP<br>Blocking MQ(阻塞队列）= LPUSH + BRPOP</p>
+<p>微博和微信公众号引流</p>
+</blockquote>
+</li>
+</ul>
+<h4 id="1-5-Set数据结构"><a href="#1-5-Set数据结构" class="headerlink" title="1.5 Set数据结构"></a>1.5 Set数据结构</h4><ul>
+<li><p>Set常用操作</p>
+<blockquote>
+<p>SADD  key  member  [member …]            //往集合key中存入元素，元素存在则忽略， 若key不存在则新建<br>SREM  key  member  [member …]            //从集合key中删除元素<br>SMEMBERS  key                    //获取集合key中所有元素<br>SCARD  key                    //获取集合key的元素个数<br>SISMEMBER  key  member            //判断member元素是否存在于集合key中<br>SRANDMEMBER  key  [count]            //从集合key中选出count个元素，元素不从key中删除<br>SPOP  key  [count]                //从集合key中选出count个元素，元素从key中删除</p>
+</blockquote>
+</li>
+<li><p>Set运算操作</p>
+<blockquote>
+<p>SINTER  key  [key …]                 //交集运算<br>SINTERSTORE  destination  key  [key ..]        //将交集结果存入新集合destination中<br>SUNION  key  [key ..]                 //并集运算<br>SUNIONSTORE  destination  key  [key …]        //将并集结果存入新集合destination中<br>SDIFF  key  [key …]                 //差集运算<br>SDIFFSTORE  destination  key  [key …]        //将差集结果存入新集合destination中</p>
+</blockquote>
+</li>
+<li><p>Set应用场景</p>
+<ul>
+<li><p>微信抽奖小程序</p>
+<blockquote>
+<p>1）点击参与抽奖加入集合<br>SADD key {userlD}<br>2）查看参与抽奖所有用户<br>SMEMBERS key<br>3）抽取count名中奖者<br>SRANDMEMBER key [count] / SPOP key [count]</p>
+</blockquote>
+</li>
+<li><p>微信微博点赞，收藏，标签</p>
+<blockquote>
+<ol>
+<li>点赞<br>SADD  like:{消息ID}  {用户ID}</li>
+<li>取消点赞<br>SREM like:{消息ID}  {用户ID}</li>
+<li>检查用户是否点过赞<br>SISMEMBER  like:{消息ID}  {用户ID}</li>
+<li>获取点赞的用户列表<br>SMEMBERS like:{消息ID}</li>
+<li>获取点赞用户数<br>SCARD like:{消息ID}</li>
+</ol>
+</blockquote>
+</li>
+<li><p>集合操作</p>
+<blockquote>
+<p>set1{a，b，c}     set2{b，c，d}    set3{c，d，e}</p>
+</blockquote>
+<blockquote>
+<p>SINTER set1 set2 set3  { c }<br>SUNION set1 set2 set3  { a,b,c,d,e }<br>SDIFF set1 set2 set3  { a }</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><p>微博/微信关注模型</p>
+<blockquote>
+<ol>
+<li>诸葛老师关注的人:<br>zhugeSet-&gt; {guojia, xushu}</li>
+<li>杨过老师关注的人:<br>yangguoSet–&gt; {zhuge, baiqi, guojia, xushu}</li>
+<li>郭嘉老师关注的人:<br>guojiaSet-&gt; {zhuge, yangguo, baiqi, xushu, xunyu)</li>
+<li>我和杨过老师共同关注:<br>SINTER zhugeSet yangguoSet–&gt; {guojia, xushu}</li>
+<li>我关注的人也关注他(杨过老师):<br>SISMEMBER guojiaSet yangguo<br>SISMEMBER xushuSet yangguo</li>
+<li>我可能认识的人:<br>SDIFF yangguoSet zhugeSet-&gt;(zhuge, baiqi}</li>
+</ol>
+</blockquote>
+</li>
+<li><p>集合操作实现电商商品筛选</p>
+<blockquote>
+<p>SADD  brand:huawei  P40<br>SADD  brand:xiaomi  mi-10<br>SADD  brand:iPhone iphone12<br>SADD os:android  P40  mi-10<br>SADD cpu:brand:intel  P40  mi-10<br>SADD ram:8G  P40  mi-10  iphone12<br>SINTER  os:android  cpu:brand:intel  ram:8G -&gt;  {P40，mi-10}</p>
+</blockquote>
+</li>
+</ul>
+<h4 id="1-6-ZSet数据结构"><a href="#1-6-ZSet数据结构" class="headerlink" title="1.6 ZSet数据结构"></a>1.6 ZSet数据结构</h4><ul>
+<li><p>ZSet常用操作</p>
+<blockquote>
+<p>ZADD key score member [[score member]…]    //往有序集合key中加入带分值元素<br>ZREM key member [member …]        //从有序集合key中删除元素<br>ZSCORE key member             //返回有序集合key中元素member的分值<br>ZINCRBY key increment member        //为有序集合key中元素member的分值加上increment<br>ZCARD key                //返回有序集合key中元素个数<br>ZRANGE key start stop [WITHSCORES]    //正序获取有序集合key从start下标到stop下标的元素<br>ZREVRANGE key start stop [WITHSCORES]    //倒序获取有序集合key从start下标到stop下标的元素</p>
+</blockquote>
+</li>
+<li><p>Zset集合操作</p>
+<p>ZUNIONSTORE destkey numkeys key [key …]     //并集计算<br>ZINTERSTORE destkey numkeys key [key …]    //交集计算</p>
+</li>
+<li><p>Zset集合操作实现排行榜</p>
+<blockquote>
+<p>1）点击新闻<br>ZINCRBY  hotNews:20190819  1  守护香港<br>2）展示当日排行前十<br>ZREVRANGE  hotNews:20190819  0  9  WITHSCORES<br>3）七日搜索榜单计算<br>ZUNIONSTORE  hotNews:20190813-20190819  7<br>hotNews:20190813  hotNews:20190814… hotNews:20190819<br>4）展示七日排行前十<br>ZREVRANGE hotNews:20190813-20190819  0  9  WITHSCORES</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="2、Redis高性能原理"><a href="#2、Redis高性能原理" class="headerlink" title="2、Redis高性能原理"></a>2、Redis高性能原理</h3><p>​    问题1：Redis是单线程的吗？</p>
+<p>​    Redis 的单线程主要是指 Redis 的网络 IO 和键值对读写是由一个线程来完成的，这也是 Redis 对外提供键值存储服务的主要流程。但 Redis 的其他功能，比如    持久化、异步删除、集群数据同步等，其实是由额外的线程执行的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">src/redis-benchmark get <span class="comment">// 压测get指令 单机qps理论上可以达到10w</span></span><br></pre></td></tr></table></figure>
+
+<p>​    问题2：Redis为什么那么快？</p>
+<p>​    因为它所有的数据都在<strong>内存</strong>中，所有的运算都是内存级别的运算，而且单线程避免了多线程的切换性能损耗问题。正因为 Redis 是单线程，所以要小心使用     Redis 指令，对于那些耗时的指令(比如keys)，一定要谨慎使用，一不小心就可能会导致 Redis 卡顿。 </p>
+<p>​    问题3：<strong>Redis 单线程如何处理那么多的并发客户端连接？</strong></p>
+<p>​    Redis的<strong>IO多路复用</strong>：redis利用epoll来实现IO多路复用，将连接信息和事件放到队列中，依次放到文件事件分派器，事件分派器将事件分发给事件处理器。</p>
+<p>​    问题4：Redis如何正确遍历key</p>
+<p>​    1&gt;keys * 命令：<strong>全量遍历键</strong>，用来列出所有满足特定正则字符串规则的key，当redis数据量比较大时，性能比较差，要避免使用</p>
+<p>​    2&gt;<strong>scan：渐进式遍历键</strong></p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/05/30/03-00-00-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%AE%9E%E6%88%98/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/05/31/06-00-06-%E7%AE%97%E6%B3%95%E9%A2%98%E5%A4%8D%E4%B9%A0/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            算法题复习
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/05/28/00-02-07-MySQL%E6%80%BB%E7%BB%93/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">MySQL总结</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2022
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

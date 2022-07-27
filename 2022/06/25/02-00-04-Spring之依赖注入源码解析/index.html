@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>Spring之依赖注入源码解析 |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-02-00-04-Spring之依赖注入源码解析"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  Spring之依赖注入源码解析
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/06/25/02-00-04-Spring%E4%B9%8B%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" class="article-date">
+  <time datetime="2022-06-25T02:42:07.000Z" itemprop="datePublished">2022-06-25</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java/">Java</a> / <a class="article-category-link" href="/categories/Java/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6/">源码框架</a> / <a class="article-category-link" href="/categories/Java/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6/Spring/">Spring</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">2.7k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">11 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p id="hitokoto">正在加载一言...</p>
+
+<h2 id="一、-Spring中依赖注入的方式"><a href="#一、-Spring中依赖注入的方式" class="headerlink" title="一、 Spring中依赖注入的方式"></a>一、 Spring中依赖注入的方式</h2><blockquote>
+<p>首先分两种：</p>
+<ol>
+<li>手动注入</li>
+<li>自动注入</li>
+</ol>
+</blockquote>
+<h3 id="1、手动注入"><a href="#1、手动注入" class="headerlink" title="1、手动注入"></a>1、手动注入</h3><p>在XML中定义Bean时，就是手动注入，因为是<strong>程序员手动给某个属性指定了值</strong>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;bean name=<span class="string">&quot;userService&quot;</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;com.luban.service.UserService&quot;</span>&gt;</span><br><span class="line">	&lt;property name=<span class="string">&quot;orderService&quot;</span> ref=<span class="string">&quot;orderService&quot;</span>/&gt;</span><br><span class="line">&lt;/bean&gt;</span><br></pre></td></tr></table></figure>
+<p>上面这种底层是通过<strong>set方法</strong>进行注入。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;bean name=<span class="string">&quot;userService&quot;</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;com.luban.service.UserService&quot;</span>&gt;</span><br><span class="line">	&lt;constructor-arg index=<span class="string">&quot;0&quot;</span> ref=<span class="string">&quot;orderService&quot;</span>/&gt;</span><br><span class="line">&lt;/bean&gt;</span><br></pre></td></tr></table></figure>
+<p>上面这种底层是通过<strong>构造方法</strong>进行注入。</p>
+<p>所以手动注入的底层也就是分为两种：</p>
+<ol>
+<li>set方法注入</li>
+<li>构造方法注入</li>
+</ol>
+<h3 id="2、自动注入"><a href="#2、自动注入" class="headerlink" title="2、自动注入"></a>2、自动注入</h3><p>自动注入又分为两种：</p>
+<ol>
+<li>XML的autowire自动注入</li>
+<li>@Autowired注解的自动注入</li>
+</ol>
+<h4 id="2-1-XML的autowire自动注入"><a href="#2-1-XML的autowire自动注入" class="headerlink" title="2.1 XML的autowire自动注入"></a>2.1 XML的autowire自动注入</h4><p>在XML中，我们可以在定义一个Bean时去指定这个Bean的自动注入模式：</p>
+<ol>
+<li>byType</li>
+<li>byName</li>
+<li>constructor</li>
+<li>default</li>
+<li>no</li>
+</ol>
+<p>比如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;bean id=<span class="string">&quot;userService&quot;</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;com.luban.service.UserService&quot;</span> autowire=<span class="string">&quot;byType&quot;</span>/&gt;</span><br></pre></td></tr></table></figure>
+<p>这么写，表示Spring会自动的给userService中所有的属性自动赋值（<strong>不需要</strong>这个属性上有@Autowired注解，但需要这个属性有对应的<strong>set方法</strong>）。</p>
+<p>在创建Bean的过程中，在填充属性时，Spring会去解析当前类，把<strong>当前类的所有方法</strong>都解析出来，Spring会去解析每个方法得到对应的PropertyDescriptor对象，PropertyDescriptor中有几个属性：</p>
+<ol>
+<li><strong>name：这个name并不是方法的名字，而是拿方法名字进过处理后的名字</strong><ol>
+<li><strong>如果方法名字以“get”开头，比如“getXXX”,那么name=XXX</strong></li>
+<li><strong>如果方法名字以“is”开头，比如“isXXX”,那么name=XXX</strong></li>
+<li><strong>如果方法名字以“set”开头，比如“setXXX”,那么name=XXX</strong></li>
+</ol>
+</li>
+<li><strong>readMethodRef：表示get方法的Method对象的引用</strong></li>
+<li><strong>readMethodName：表示get方法的名字</strong></li>
+<li><strong>writeMethodRef：表示set方法的Method对象的引用</strong></li>
+<li><strong>writeMethodName：表示set方法的名字</strong></li>
+<li><strong>propertyTypeRef：如果有get方法那么对应的就是返回值的类型，如果是set方法那么对应的就是set方法中唯一参数的类型</strong></li>
+</ol>
+<blockquote>
+<p><strong>get方法的定义是：</strong> 方法参数个数为0个，并且 （方法名字以”get”开头 或者 方法名字以”is”开头并且方法的返回类型为boolean）</p>
+<p><strong>set方法的定义是：</strong>方法参数个数为1个，并且 （方法名字以”set”开头并且方法返回类型为void）</p>
+<p>所以，Spring在通过byName的自动填充属性时流程是：</p>
+<ol>
+<li>找到所有set方法所对应的XXX部分的名字</li>
+<li>根据XXX部分的名字去获取bean</li>
+</ol>
+<p>Spring在通过byType的自动填充属性时流程是：</p>
+<ol>
+<li>获取到set方法中的唯一参数的参数类型，并且根据该类型去容器中获取bean</li>
+<li>如果找到多个，会报错。</li>
+</ol>
+</blockquote>
+<p>以上，分析了autowire的byType和byName情况，那么接下来分析constructor，constructor表示通过构造方法注入，其实这种情况就比较简单了，没有byType和byName那么复杂。</p>
+<p>如果是constructor，那么就可以不写set方法了，当某个bean是通过构造方法来注入时，spring利用构造方法的参数信息从Spring容器中去找bean，找到bean之后作为参数传给构造方法，从而实例化得到一个bean对象，并完成属性赋值（属性赋值的代码得程序员来写）。</p>
+<p>我们这里先不考虑一个类有多个构造方法的情况，后面单独讲<strong>推断构造方法</strong>。我们这里只考虑只有一个有参构造方法。</p>
+<p>其实构造方法注入相当于byType+byName，普通的byType是根据set方法中的参数类型去找bean，找到多个会报错，而constructor就是通过构造方法中的参数类型去找bean，如果找到多个会根据参数名确定。</p>
+<p>另外两个：</p>
+<ol>
+<li>no，表示关闭autowire</li>
+<li>default，表示默认值，我们一直演示的某个bean的autowire，而也可以直接在<beans>标签中设置autowire，如果设置了，那么<bean>标签中设置的autowire如果为default，那么则会用<beans>标签中设置的autowire。</beans></bean></beans></li>
+</ol>
+<p>可以发现XML中的自动注入是挺强大的，那么问题来了，<strong>为什么我们平时都是用的@Autowired注解呢？而没有用上文说的这种自动注入方式呢？</strong></p>
+<p>@Autowired注解相当于XML中的autowire属性的<strong>注解方式的替代</strong>。这是在官网上有提到的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Essentially, the <span class="meta">@Autowired</span> annotation provides the same capabilities as described in Autowiring Collaborators but with more fine-grained control and wider applicability</span><br></pre></td></tr></table></figure>
+
+
+<p>翻译一下：<br>从本质上讲，@Autowired注解提供了与autowire相同的功能，但是拥有更细粒度的控制和更广泛的适用性。</p>
+<p>注意：<strong>更细粒度的控制</strong>。</p>
+<p>XML中的autowire控制的是整个bean的所有属性，而@Autowired注解是直接写在某个属性、某个set方法、某个构造方法上的。</p>
+<p>再举个例子，如果一个类有多个构造方法，那么如果用XML的autowire=constructor，你无法控制到底用哪个构造方法，而你可以用@Autowired注解来直接指定你想用哪个构造方法。</p>
+<p>同时，用@Autowired注解，还可以控制，哪些属性想被自动注入，哪些属性不想，这也是细粒度的控制。</p>
+<p>但是@Autowired无法区分byType和byName，@Autowired是先byType，如果找到多个则byName。</p>
+<p>那么XML的自动注入底层其实也就是:</p>
+<ol>
+<li>set方法注入</li>
+<li>构造方法注入</li>
+</ol>
+<h4 id="2-2-Autowired注解的自动注入"><a href="#2-2-Autowired注解的自动注入" class="headerlink" title="2.2 @Autowired注解的自动注入"></a>2.2 @Autowired注解的自动注入</h4><blockquote>
+<p>上文说了@Autowired注解，是byType和byName的结合。</p>
+<p>@Autowired注解可以写在：</p>
+<ol>
+<li>属性上：先根据<strong>属性类型</strong>去找Bean，如果找到多个再根据<strong>属性名</strong>确定一个</li>
+<li>构造方法上：先根据方法<strong>参数类型</strong>去找Bean，如果找到多个再根据<strong>参数名</strong>确定一个</li>
+<li>set方法上：先根据方法<strong>参数类型</strong>去找Bean，如果找到多个再根据<strong>参数名</strong>确定一个</li>
+</ol>
+</blockquote>
+<blockquote>
+<p>而这种底层到了：</p>
+<ol>
+<li>属性注入</li>
+<li>set方法注入</li>
+<li>构造方法注入</li>
+</ol>
+</blockquote>
+<ul>
+<li><strong>寻找注入点</strong></li>
+</ul>
+<p>在创建一个Bean的过程中，Spring会利用AutowiredAnnotationBeanPostProcessor的**postProcessMergedBeanDefinition()**找出注入点并缓存，找注入点的流程为：</p>
+<ol>
+<li>遍历当前类的所有的属性字段Field</li>
+<li>查看字段上是否存在@Autowired、@Value、@Inject中的其中任意一个，存在则认为该字段是一个注入点</li>
+<li>如果字段是static的，则不进行注入</li>
+<li>获取@Autowired中的required属性的值</li>
+<li>将字段信息构造成一个<strong>AutowiredFieldElement对象</strong>，作为一个<strong>注入点对象</strong>添加到currElements集合中。</li>
+<li>遍历当前类的所有方法Method</li>
+<li>判断当前Method是否是<strong>桥接方法</strong>，如果是找到原方法</li>
+<li>查看方法上是否存在@Autowired、@Value、@Inject中的其中任意一个，存在则认为该方法是一个注入点</li>
+<li>如果方法是static的，则不进行注入</li>
+<li>获取@Autowired中的required属性的值</li>
+<li>将方法信息构造成一个<strong>AutowiredMethodElement对象</strong>，作为一个<strong>注入点对象</strong>添加到currElements集合中。</li>
+<li>遍历完当前类的字段和方法后，将<strong>遍历父类</strong>的，直到没有父类。</li>
+<li>最后将currElements集合封装成一个InjectionMetadata对象，作为当前Bean对于的注入点集合对象，并缓存。</li>
+</ol>
+<ul>
+<li>static的字段或方法为什么不支持</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Scope(&quot;prototype&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Scope(&quot;prototype&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserService</span>  </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Autowired</span></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> OrderService orderService;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;test123&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>看上面代码，UserService和OrderService都是原型Bean，假设Spring支持static字段进行自动注入，那么现在调用两次</p>
+<ol>
+<li>UserService userService1 = context.getBean(“userService”)</li>
+<li>UserService userService2 = context.getBean(“userService”)</li>
+</ol>
+<p>问此时，userService1的orderService值是什么？还是它自己注入的值吗？</p>
+<p>答案是不是，一旦userService2 创建好了之后，static orderService字段的值就发生了修改了，从而出现bug。</p>
+<ul>
+<li><strong>桥接方法</strong></li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">UserInterface</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">setOrderService</span><span class="params">(T t)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserService</span> <span class="keyword">implements</span> <span class="title">UserInterface</span>&lt;<span class="title">OrderService</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> OrderService orderService;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="meta">@Autowired</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setOrderService</span><span class="params">(OrderService orderService)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.orderService = orderService;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;test123&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>UserService对应的字节码为：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// class version 52.0 (52)</span></span><br><span class="line"><span class="comment">// access flags 0x21</span></span><br><span class="line"><span class="comment">// signature Ljava/lang/Object;Lcom/zhouyu/service/UserInterface&lt;Lcom/zhouyu/service/OrderService;&gt;;</span></span><br><span class="line"><span class="comment">// declaration: com/zhouyu/service/UserService implements com.zhouyu.service.UserInterface&lt;com.zhouyu.service.OrderService&gt;</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">com</span>/<span class="title">zhouyu</span>/<span class="title">service</span>/<span class="title">UserService</span> <span class="keyword">implements</span> <span class="title">com</span>/<span class="title">zhouyu</span>/<span class="title">service</span>/<span class="title">UserInterface</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// compiled from: UserService.java</span></span><br><span class="line"></span><br><span class="line">  <span class="meta">@Lorg</span>/springframework/stereotype/Component;()</span><br><span class="line"></span><br><span class="line">  <span class="comment">// access flags 0x2</span></span><br><span class="line">  <span class="keyword">private</span> Lcom/zhouyu/service/OrderService; orderService</span><br><span class="line"></span><br><span class="line">  <span class="comment">// access flags 0x1</span></span><br><span class="line">  <span class="keyword">public</span> &lt;init&gt;()V</span><br><span class="line">   L0</span><br><span class="line">    LINENUMBER <span class="number">12</span> L0</span><br><span class="line">    ALOAD <span class="number">0</span></span><br><span class="line">    INVOKESPECIAL java/lang/Object.&lt;init&gt; ()V</span><br><span class="line">    RETURN</span><br><span class="line">   L1</span><br><span class="line">    LOCALVARIABLE <span class="keyword">this</span> Lcom/zhouyu/service/UserService; L0 L1 <span class="number">0</span></span><br><span class="line">    MAXSTACK = <span class="number">1</span></span><br><span class="line">    MAXLOCALS = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// access flags 0x1</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="title">setOrderService</span><span class="params">(Lcom/zhouyu/service/OrderService;)</span>V</span></span><br><span class="line"><span class="function">  @Lorg/springframework/beans/factory/annotation/Autowired</span>;()</span><br><span class="line">   L0</span><br><span class="line">    LINENUMBER <span class="number">19</span> L0</span><br><span class="line">    ALOAD <span class="number">0</span></span><br><span class="line">    ALOAD <span class="number">1</span></span><br><span class="line">    PUTFIELD com/zhouyu/service/UserService.orderService : Lcom/zhouyu/service/OrderService;</span><br><span class="line">   L1</span><br><span class="line">    LINENUMBER <span class="number">20</span> L1</span><br><span class="line">    RETURN</span><br><span class="line">   L2</span><br><span class="line">    LOCALVARIABLE <span class="keyword">this</span> Lcom/zhouyu/service/UserService; L0 L2 <span class="number">0</span></span><br><span class="line">    LOCALVARIABLE orderService Lcom/zhouyu/service/OrderService; L0 L2 <span class="number">1</span></span><br><span class="line">    MAXSTACK = <span class="number">2</span></span><br><span class="line">    MAXLOCALS = <span class="number">2</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// access flags 0x1</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="title">test</span><span class="params">()</span>V</span></span><br><span class="line"><span class="function">   L0</span></span><br><span class="line"><span class="function">    LINENUMBER 23 L0</span></span><br><span class="line"><span class="function">    GETSTATIC java/lang/System.out : Ljava/io/PrintStream</span>;</span><br><span class="line">    LDC <span class="string">&quot;test123&quot;</span></span><br><span class="line">    INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/String;)V</span><br><span class="line">   L1</span><br><span class="line">    LINENUMBER <span class="number">24</span> L1</span><br><span class="line">    RETURN</span><br><span class="line">   L2</span><br><span class="line">    LOCALVARIABLE <span class="keyword">this</span> Lcom/zhouyu/service/UserService; L0 L2 <span class="number">0</span></span><br><span class="line">    MAXSTACK = <span class="number">2</span></span><br><span class="line">    MAXLOCALS = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// access flags 0x1041</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> synthetic bridge <span class="title">setOrderService</span><span class="params">(Ljava/lang/Object;)</span>V</span></span><br><span class="line"><span class="function">  @Lorg/springframework/beans/factory/annotation/Autowired</span>;()</span><br><span class="line">   L0</span><br><span class="line">    LINENUMBER <span class="number">11</span> L0</span><br><span class="line">    ALOAD <span class="number">0</span></span><br><span class="line">    ALOAD <span class="number">1</span></span><br><span class="line">    CHECKCAST com/zhouyu/service/OrderService</span><br><span class="line">    INVOKEVIRTUAL com/zhouyu/service/UserService.setOrderService (Lcom/zhouyu/service/OrderService;)V</span><br><span class="line">    RETURN</span><br><span class="line">   L1</span><br><span class="line">    LOCALVARIABLE <span class="keyword">this</span> Lcom/zhouyu/service/UserService; L0 L1 <span class="number">0</span></span><br><span class="line">    MAXSTACK = <span class="number">2</span></span><br><span class="line">    MAXLOCALS = <span class="number">2</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>可以看到在UserSerivce的字节码中有两个setOrderService方法：</p>
+<ol>
+<li> public setOrderService(Lcom/zhouyu/service/OrderService;)V</li>
+<li> public synthetic bridge setOrderService(Ljava/lang/Object;)V</li>
+</ol>
+<p>并且都是存在@Autowired注解的。</p>
+<p>所以在Spring中需要处理这种情况，当遍历到桥接方法时，得找到原方法。</p>
+<ul>
+<li><strong>注入点进行注入</strong></li>
+</ul>
+<blockquote>
+<p>Spring在AutowiredAnnotationBeanPostProcessor的**postProcessProperties()**方法中，会遍历所找到的注入点依次进行注入。</p>
+</blockquote>
+<p><strong>字段注入</strong></p>
+<blockquote>
+<ol>
+<li>遍历所有的<strong>AutowiredFieldElement对象。</strong></li>
+<li>将对应的字段封装为<strong>DependencyDescriptor对象</strong>。</li>
+<li>调用BeanFactory的resolveDependency()方法，传入<strong>DependencyDescriptor对象</strong>，进行依赖查找，找到当前字段所匹配的Bean对象。</li>
+<li>将<strong>DependencyDescriptor对象</strong>和所找到的<strong>结果对象beanName</strong>封装成一个<strong>ShortcutDependencyDescriptor对象</strong>作为缓存，比如如果当前Bean是原型Bean，那么下次再来创建该Bean时，就可以直接拿缓存的结果对象beanName去BeanFactory中去那bean对象了，不用再次进行查找了</li>
+<li>利用反射将结果对象赋值给字段。</li>
+</ol>
+</blockquote>
+<p> <strong>Set方法注入</strong></p>
+<blockquote>
+<ol>
+<li>遍历所有的<strong>AutowiredMethodElement对象</strong></li>
+<li>遍历将对应的方法的参数，将每个参数封装成<strong>MethodParameter对象</strong></li>
+<li>将<strong>MethodParameter对象</strong>封装为<strong>DependencyDescriptor对象</strong></li>
+<li>调用BeanFactory的resolveDependency()方法，传入<strong>DependencyDescriptor对象</strong>，进行依赖查找，找到当前方法参数所匹配的Bean对象。</li>
+<li>将<strong>DependencyDescriptor对象</strong>和所找到的<strong>结果对象beanName</strong>封装成一个<strong>ShortcutDependencyDescriptor对象</strong>作为缓存，比如如果当前Bean是原型Bean，那么下次再来创建该Bean时，就可以直接拿缓存的结果对象beanName去BeanFactory中去那bean对象了，不用再次进行查找了</li>
+<li>利用反射将找到的所有结果对象传给当前方法，并执行。</li>
+</ol>
+</blockquote>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/06/25/02-00-04-Spring%E4%B9%8B%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5/" rel="tag">Spring依赖注入</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6/" rel="tag">源码框架</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/06/26/02-00-05-Spring%E4%B9%8B%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E5%BA%95%E5%B1%82%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            Spring之循环依赖底层源码解析
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/06/22/02-00-03-Spring%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%80%BB%E7%BB%93/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">Spring生命周期总结</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2022
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>
