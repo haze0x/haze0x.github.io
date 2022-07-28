@@ -4432,7 +4432,7 @@ sync path
   </entry>
   <entry>
     <title>Kafka快速实战与基本原理详解</title>
-    <url>/2022/07/27/03-05-01-Kafka%E5%BF%AB%E9%80%9F%E5%AE%9E%E6%88%98%E4%B8%8E%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/</url>
+    <url>/2022/07/28/03-05-01-Kafka%E5%BF%AB%E9%80%9F%E5%AE%9E%E6%88%98%E4%B8%8E%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
 
 <h2 id="Kafka快速实战与基本原理详解"><a href="#Kafka快速实战与基本原理详解" class="headerlink" title="Kafka快速实战与基本原理详解"></a>Kafka快速实战与基本原理详解</h2><h3 id="1、Kafka的使用场景"><a href="#1、Kafka的使用场景" class="headerlink" title="1、Kafka的使用场景"></a>1、<strong>Kafka的使用场景</strong></h3><ul>
@@ -4476,7 +4476,7 @@ sync path
 </tr>
 </tbody></table>
 <p>因此，从一个较高的层面上来看，producer通过网络发送消息到Kafka集群，然后consumer来进行消费，如下图：</p>
-<p><img src="/2022/07/27/03-05-01-Kafka%E5%BF%AB%E9%80%9F%E5%AE%9E%E6%88%98%E4%B8%8E%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/image-20220728013835791.png" alt="image-20220728013835791"></p>
+<p><img src="/2022/07/28/03-05-01-Kafka%E5%BF%AB%E9%80%9F%E5%AE%9E%E6%88%98%E4%B8%8E%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/image-20220728013835791.png" alt="image-20220728013835791"></p>
 <blockquote>
 <p>服务端(brokers)和客户端(producer、consumer)之间通信通过<strong>TCP协议</strong>来完成。</p>
 </blockquote>
@@ -4593,7 +4593,7 @@ sync path
 <li><p><strong>查看消费组的消费偏移量</strong></p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">bin/kafka-consumer-groups.sh --bootstrap-server <span class="number">192.168</span><span class="number">.65</span><span class="number">.60</span>:<span class="number">9092</span> --describe --group testGroup</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2022/07/27/03-05-01-Kafka%E5%BF%AB%E9%80%9F%E5%AE%9E%E6%88%98%E4%B8%8E%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/image-20220728014609405.png" alt="image-20220728014609405"></p>
+<p><img src="/2022/07/28/03-05-01-Kafka%E5%BF%AB%E9%80%9F%E5%AE%9E%E6%88%98%E4%B8%8E%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/image-20220728014609405.png" alt="image-20220728014609405"></p>
 <p><strong>current-offset：</strong>当前消费组的已消费偏移量</p>
 <p><strong>log-end-offset：</strong>主题对应分区消息的结束偏移量(HW)</p>
 <p><strong>lag：</strong>当前消费组未消费的消息数</p>
