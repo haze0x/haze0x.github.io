@@ -11378,7 +11378,94 @@ sync path
   <entry>
     <title>Kafka生产问题总结及性能优化实践</title>
     <url>/2022/07/30/03-05-03-Kafka%E7%94%9F%E4%BA%A7%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93%E5%8F%8A%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E5%AE%9E%E8%B7%B5/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h2 id="一、kafka可视化管理工具"><a href="#一、kafka可视化管理工具" class="headerlink" title="一、kafka可视化管理工具"></a>一、kafka可视化管理工具</h2><p><strong>Kafka可视化管理工具kafka-manager</strong></p>
+<p><img src="/2022/07/30/03-05-03-Kafka%E7%94%9F%E4%BA%A7%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93%E5%8F%8A%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E5%AE%9E%E8%B7%B5/image-20220731123557477.png" alt="image-20220731123557477"></p>
+<blockquote>
+<p>安装及基本使用可参考：<a href="https://www.cnblogs.com/dadonggg/p/8205302.html">https://www.cnblogs.com/dadonggg/p/8205302.html</a></p>
+</blockquote>
+<h2 id="二、线上环境规划"><a href="#二、线上环境规划" class="headerlink" title="二、线上环境规划"></a>二、<strong>线上环境规划</strong></h2><p><img src="/2022/07/30/03-05-03-Kafka%E7%94%9F%E4%BA%A7%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93%E5%8F%8A%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E5%AE%9E%E8%B7%B5/image-20220731123625076.png" alt="image-20220731123625076"></p>
+<blockquote>
+<p><strong>JVM参数设置</strong></p>
+<p>kafka是scala语言开发，运行在JVM上，需要对JVM参数合理设置，参看JVM调优专题</p>
+<p>修改bin/kafka-start-server.sh中的jvm设置，假设机器是32G内存，可以如下设置：</p>
+<p>export KAFKA_HEAP_OPTS=”-Xmx16G -Xms16G -Xmn10G -XX:MetaspaceSize=256M -XX:+UseG1GC -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=16M”</p>
+<p>这种大内存的情况一般都要用G1垃圾收集器，因为年轻代内存比较大，用G1可以设置GC最大停顿时间，不至于一次minor gc就花费太长时间，当然，因为像kafka，rocketmq，es这些中间件，写数据到磁盘会用到操作系统的page cache，所以JVM内存不宜分配过大，需要给操作系统的缓存留出几个G。</p>
+</blockquote>
+<h2 id="三、线上问题及优化"><a href="#三、线上问题及优化" class="headerlink" title="三、线上问题及优化"></a>三、<strong>线上问题及优化</strong></h2><p><strong>1、消息丢失情况：</strong></p>
+<p><strong>消息发送端</strong>：</p>
+<p>（1）acks=0： 表示producer不需要等待任何broker确认收到消息的回复，就可以继续发送下一条消息。性能最高，但是最容易丢消息。大数据统计报表场景，对性能要求很高，对数据丢失不敏感的情况可以用这种。</p>
+<p>（2）acks=1： 至少要等待leader已经成功将数据写入本地log，但是不需要等待所有follower是否成功写入。就可以继续发送下一条消息。这种情况下，如果follower没有成功备份数据，而此时leader又挂掉，则消息会丢失。</p>
+<p>（3）acks=-1或all： 这意味着leader需要等待所有备份(min.insync.replicas配置的备份个数，默认1跟（2）相同，至少改为2才有效)都成功写入日志，这种策略会保证只要有一个备份存活就不会丢失数据。这是最强的数据保证。一般除非是金融级别，或跟钱打交道的场景才会使用这种配置。当然如果min.insync.replicas配置的是1则也可能丢消息，跟acks=1情况类似。</p>
+<p><strong>消息消费端</strong>：</p>
+<p>如果消费这边配置的是自动提交，万一消费到数据还没处理完，就自动提交offset了，但是此时你consumer直接宕机了，未处理完的数据丢失了，下次也消费不到了。</p>
+<p><strong>2、消息重复消费</strong></p>
+<p><strong>消息发送端</strong>：</p>
+<p>发送消息如果配置了重试机制，比如网络抖动时间过长导致发送端发送超时，实际broker可能已经接收到消息，但发送方会重新发送消息</p>
+<p><strong>消息消费端</strong>：</p>
+<p>如果消费这边配置的是自动提交，刚拉取了一批数据处理了一部分，但还没来得及提交，服务挂了，下次重启又会拉取相同的一批数据重复处理</p>
+<p>一般消费端都是要做<strong>消费幂等</strong>处理的。</p>
+<p><strong>3、消息乱序</strong></p>
+<p>如果发送端配置了重试机制，kafka不会等之前那条消息完全发送成功才去发送下一条消息，这样可能会出现，发送了1，2，3条消息，第一条超时了，后面两条发送成功，再重试发送第1条消息，这时消息在broker端的顺序就是2，3，1了</p>
+<p>所以，是否一定要配置重试要根据业务情况而定。也可以用同步发送的模式去发消息，当然acks不能设置为0，这样也能保证消息发送的有序。</p>
+<p>kafka保证全链路消息顺序消费，需要从发送端开始，将所有有序消息发送到同一个分区，然后用一个消费者去消费，但是这种性能比较低，可以在消费者端接收到消息后将需要保证顺序消费的几条消费发到内存队列(可以搞多个)，一个内存队列开启一个线程顺序处理消息。</p>
+<p><strong>如何保证消息发送到多个分区，消费的时候还能保证顺序消费？</strong></p>
+<p><strong>1、消费端等待所有的消息接收到之后，对消息进行排序，然后再消费端顺序消费</strong></p>
+<p><strong>4、消息积压</strong></p>
+<p>1）线上有时因为发送方发送消息速度过快，或者消费方处理消息过慢，可能会导致broker积压大量未消费消息。</p>
+<p>此种情况如果积压了上百万未消费消息需要紧急处理，可以修改消费端程序，让其将收到的消息快速转发到其他topic(可以设置很多分区)，然后再启动多个消费者同时消费新主题的不同分区。</p>
+<p>2）由于消息数据格式变动或消费者程序有bug，导致消费者一直消费不成功，也可能导致broker积压大量未消费消息。</p>
+<p>此种情况可以将这些消费不成功的消息转发到其它队列里去(类似<strong>死信队列</strong>)，后面再慢慢分析死信队列里的消息处理问题。</p>
+<p><strong>5、延时队列</strong></p>
+<p>延时队列存储的对象是延时消息。所谓的“延时消息”是指消息被发送以后，并不想让消费者立刻获取，而是等待特定的时间后，消费者才能获取这个消息进行消费，延时队列的使用场景有很多， 比如 ：</p>
+<p>1）在订单系统中， 一个用户下单之后通常有 30 分钟的时间进行支付，如果 30 分钟之内没有支付成功，那么这个订单将进行异常处理，这时就可以使用延时队列来处理这些订单了。</p>
+<p>2）订单完成1小时后通知用户进行评价。</p>
+<p><strong>实现思路：</strong>发送延时消息时先把消息按照不同的延迟时间段发送到指定的队列中（topic_1s，topic_5s，topic_10s，…topic_2h，这个一般不能支持任意时间段的延时），然后通过定时器进行轮训消费这些topic，查看消息是否到期，如果到期就把这个消息发送到具体业务处理的topic中，队列中消息越靠前的到期时间越早，具体来说就是定时器在一次消费过程中，对消息的发送时间做判断，看下是否延迟到对应时间了，如果到了就转发，如果还没到这一次定时任务就可以提前结束了。</p>
+<p><strong>6、消息回溯</strong></p>
+<p>如果某段时间对已消费消息计算的结果觉得有问题，可能是由于程序bug导致的计算错误，当程序bug修复后，这时可能需要对之前已消费的消息重新消费，可以指定从多久之前的消息回溯消费，这种可以用consumer的offsetsForTimes、seek等方法指定从某个offset偏移的消息开始消费，参见上节课的内容。</p>
+<p><strong>7、分区数越多吞吐量越高吗</strong></p>
+<p>可以用kafka压测工具自己测试分区数不同，各种情况下的吞吐量</p>
+<p># 往test里发送一百万消息，每条设置1KB # throughput 用来进行限流控制，当设定的值小于 0 时不限流，当设定的值大于 0 时，当发送的吞吐量大于该值时就会被阻塞一段时间 bin/kafka-producer-perf-test.sh –topic test –num-records 1000000 –record-size 1024 –throughput -1 –producer-props bootstrap.servers=192.168.65.60:9092 acks=1</p>
+<p><img src="/2022/07/30/03-05-03-Kafka%E7%94%9F%E4%BA%A7%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93%E5%8F%8A%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E5%AE%9E%E8%B7%B5/image-20220731123658526.png" alt="image-20220731123658526"></p>
+<p>网络上很多资料都说分区数越多吞吐量越高 ， 但从压测结果来看，分区数到达某个值吞吐量反而开始下降，实际上很多事情都会有一个临界值，当超过这个临界值之后，很多原本符合既定逻辑的走向又会变得不同。一般情况分区数跟集群机器数量相当就差不多了。</p>
+<p>当然吞吐量的数值和走势还会和磁盘、文件系统、 I/O调度策略等因素相关。</p>
+<p>注意：如果分区数设置过大，比如设置10000，可能会设置不成功，后台会报错”java.io.IOException : Too many open files”。</p>
+<p>异常中最关键的信息是“ Too many open flies”，这是一种常见的 Linux 系统错误，通常意味着文件描述符不足，它一般发生在创建线程、创建 Socket、打开文件这些场景下 。 在 Linux系统的默认设置下，这个文件描述符的个数不是很多 ，通过 ulimit -n 命令可以查看：一般默认是1024，可以将该值增大，比如：ulimit -n 65535</p>
+<p><strong>8、消息传递保障</strong></p>
+<ul>
+<li>at most once(消费者最多收到一次消息，0–1次)：acks = 0 可以实现。</li>
+<li>at least once(消费者至少收到一次消息，1–多次)：ack = all 可以实现。</li>
+<li>exactly once(消费者刚好收到一次消息)：at least once 加上消费者幂等性可以实现，还可以用<strong>kafka生产者的幂等性</strong>来实现。</li>
+</ul>
+<p><strong>kafka生产者的幂等性</strong>：因为发送端重试导致的消息重复发送问题，kafka的幂等性可以保证重复发送的消息只接收一次，只需在生产者加上参数 props.put(“enable.idempotence”, true) 即可，默认是false不开启。    </p>
+<p>具体实现原理是，kafka每次发送消息会生成PID和Sequence Number，并将这两个属性一起发送给broker，broker会将PID和Sequence Number跟消息绑定一起存起来，下次如果生产者重发相同消息，broker会检查PID和Sequence Number，如果相同不会再接收。</p>
+<p>PID：每个新的 Producer 在初始化的时候会被分配一个唯一的 PID，这个PID 对用户完全是透明的。生产者如果重启则会生成新的PID。 Sequence Number：对于每个 PID，该 Producer 发送到每个 Partition 的数据都有对应的序列号，这些序列号是从0开始单调递增的。</p>
+<p><strong>9、kafka的事务</strong></p>
+<p>Kafka的事务不同于Rocketmq，Rocketmq是保障本地事务(比如数据库)与mq消息发送的事务一致性，Kafka的事务主要是保障一次发送多条消息的事务一致性(要么同时成功要么同时失败)，一般在kafka的流式计算场景用得多一点，比如，kafka需要对一个topic里的消息做不同的流式计算处理，处理完分别发到不同的topic里，这些topic分别被不同的下游系统消费(比如hbase，redis，es等)，这种我们肯定希望系统发送到多个topic的数据保持事务一致性。Kafka要实现类似Rocketmq的分布式事务需要额外开发功能。</p>
+<p>kafka的事务处理可以参考<a href="http://kafka.apache.org/24/javadoc/index.html?org/apache/kafka/clients/producer/KafkaProducer.html">官方文档</a>：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Properties props = <span class="keyword">new</span> Properties();</span><br><span class="line"> props.put(<span class="string">&quot;bootstrap.servers&quot;</span>, <span class="string">&quot;localhost:9092&quot;</span>);</span><br><span class="line"> props.put(<span class="string">&quot;transactional.id&quot;</span>, <span class="string">&quot;my-transactional-id&quot;</span>);</span><br><span class="line"> Producer&lt;String, String&gt; producer = <span class="keyword">new</span> KafkaProducer&lt;&gt;(props, <span class="keyword">new</span> StringSerializer(), <span class="keyword">new</span> StringSerializer());</span><br><span class="line"> <span class="comment">//初始化事务</span></span><br><span class="line"> producer.initTransactions();</span><br><span class="line"></span><br><span class="line"> <span class="keyword">try</span> &#123;</span><br><span class="line">     <span class="comment">//开启事务</span></span><br><span class="line">     producer.beginTransaction();</span><br><span class="line">     <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>; i++)&#123;</span><br><span class="line">         <span class="comment">//发到不同的主题的不同分区</span></span><br><span class="line">         producer.send(<span class="keyword">new</span> ProducerRecord&lt;&gt;(<span class="string">&quot;hdfs-topic&quot;</span>, Integer.toString(i), Integer.toString(i)));</span><br><span class="line">         producer.send(<span class="keyword">new</span> ProducerRecord&lt;&gt;(<span class="string">&quot;es-topic&quot;</span>, Integer.toString(i), Integer.toString(i)));</span><br><span class="line">         producer.send(<span class="keyword">new</span> ProducerRecord&lt;&gt;(<span class="string">&quot;redis-topic&quot;</span>, Integer.toString(i), Integer.toString(i)));</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="comment">//提交事务</span></span><br><span class="line">     producer.commitTransaction();</span><br><span class="line"> &#125; <span class="keyword">catch</span> (ProducerFencedException | OutOfOrderSequenceException | AuthorizationException e) &#123;</span><br><span class="line">     <span class="comment">// We can&#x27;t recover from these exceptions, so our only option is to close the producer and exit.</span></span><br><span class="line">     producer.close();</span><br><span class="line"> &#125; <span class="keyword">catch</span> (KafkaException e) &#123;</span><br><span class="line">     <span class="comment">// For all other exceptions, just abort the transaction and try again.</span></span><br><span class="line">     <span class="comment">//回滚事务</span></span><br><span class="line">     producer.abortTransaction();</span><br><span class="line"> &#125;</span><br><span class="line"> producer.close();</span><br></pre></td></tr></table></figure>
+
+<p><strong>10、kafka高性能的原因</strong></p>
+<ul>
+<li>磁盘顺序读写：kafka消息不能修改以及不会从文件中间删除保证了磁盘顺序读，kafka的消息写入文件都是追加在文件末尾，不会写入文件中的某个位置(随机写)保证了磁盘顺序写。</li>
+<li>数据传输的零拷贝</li>
+<li>读写数据的批量batch处理以及压缩传输</li>
+</ul>
+<p>数据传输零拷贝原理：</p>
+<p><img src="/2022/07/30/03-05-03-Kafka%E7%94%9F%E4%BA%A7%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93%E5%8F%8A%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E5%AE%9E%E8%B7%B5/image-20220731123736229.png" alt="image-20220731123736229"></p>
+<p><strong>正常读文件：</strong></p>
+<p><strong>1、broker调用scala语言api获取磁盘消息，在用户空间执行命令，底层会调用操作系统的读文件的函数</strong></p>
+<p><strong>2、消息磁盘文件最先会被读到内核空间，读到操作系统的内核缓冲区</strong></p>
+<p><strong>3、将内核缓冲区的数据复制到用户空间的用户缓冲区（JVM中的堆内存）</strong></p>
+<p><strong>4、在程序中做一些处理，将处理之后的数据发送到socket缓冲区，在复制到网卡接口</strong></p>
+<p><strong>5、最后由kafka消费程序消费</strong></p>
+<p><strong>使用mmap零拷贝技术读文件：</strong></p>
+<p><strong>1、上述第三步，不在将内核缓冲区的数据拷贝到用户缓冲区，而是在用户缓冲区对内核缓冲区做了一个引用、映射。直接访问这个引用，可以直接操作内核缓冲区的数据</strong></p>
+<p><strong>2、kafka使用sendfile可以直接跳过socket缓冲区，直接将内核缓冲区的数据直接拷贝到网卡接口</strong></p>
+<p><strong>结论：</strong></p>
+<p><strong>四次拷贝变成两次</strong></p>
+]]></content>
       <categories>
         <category>中间件</category>
         <category>分布式</category>
