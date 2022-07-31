@@ -11477,4 +11477,19 @@ sync path
         <tag>kafka</tag>
       </tags>
   </entry>
+  <entry>
+    <title>kafka总结</title>
+    <url>/2022/07/31/03-05-04-kafka%E6%80%BB%E7%BB%93/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
+      <categories>
+        <category>中间件</category>
+        <category>分布式</category>
+        <category>kafka</category>
+      </categories>
+      <tags>
+        <tag>分布式</tag>
+        <tag>消息队列</tag>
+        <tag>kafka</tag>
+      </tags>
+  </entry>
 </search>
