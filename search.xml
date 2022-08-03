@@ -2605,7 +2605,7 @@
   </entry>
   <entry>
     <title>Spring之AOP底层源码</title>
-    <url>/2022/07/03/02-00-09-Spring%E4%B9%8BAOP%E5%BA%95%E5%B1%82%E6%BA%90%E7%A0%81/</url>
+    <url>/2022/08/03/02-00-09-Spring%E4%B9%8BAOP%E5%BA%95%E5%B1%82%E6%BA%90%E7%A0%81/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
 
 <h1 id="Spring之AOP底层源码"><a href="#Spring之AOP底层源码" class="headerlink" title="Spring之AOP底层源码"></a>Spring之AOP底层源码</h1><h2 id="1-ProxyFactory选择cglib或jdk动态代理原理"><a href="#1-ProxyFactory选择cglib或jdk动态代理原理" class="headerlink" title="1.ProxyFactory选择cglib或jdk动态代理原理"></a>1.ProxyFactory选择cglib或jdk动态代理原理</h2><p>ProxyFactory在生成代理对象之前需要决定到底是使用JDK动态代理还是CGLIB技术：</p>
@@ -2666,7 +2666,7 @@
 </ul>
 <h2 id="4、AbstractAdvisorAutoProxyCreator"><a href="#4、AbstractAdvisorAutoProxyCreator" class="headerlink" title="4、AbstractAdvisorAutoProxyCreator"></a>4、AbstractAdvisorAutoProxyCreator</h2><p>DefaultAdvisorAutoProxyCreator的父类是AbstractAdvisorAutoProxyCreator。</p>
 <p><strong>AbstractAdvisorAutoProxyCreator</strong>非常强大以及重要，只要Spring容器中存在这个类型的Bean，就相当于开启了AOP，AbstractAdvisorAutoProxyCreator实际上就是一个BeanPostProcessor，所以在创建某个Bean时，就会进入到它对应的生命周期方法中，比如：在某个Bean<strong>初始化之后</strong>，会调用wrapIfNecessary()方法进行AOP，底层逻辑是，AbstractAdvisorAutoProxyCreator会找到所有的Advisor，然后判断当前这个Bean是否存在某个Advisor与之匹配（根据Pointcut），如果匹配就表示当前这个Bean有对应的切面逻辑，需要进行AOP，需要产生一个代理对象。</p>
-<h3 id="4-1-EnableAspectJAutoProxy"><a href="#4-1-EnableAspectJAutoProxy" class="headerlink" title="4.1 @EnableAspectJAutoProxy"></a>4.1 @EnableAspectJAutoProxy</h3><p>这个注解主要就是往Spring容器中添加了一个AnnotationAwareAspectJAutoProxyCreator类型的Bean。<br><img src="/2022/07/03/02-00-09-Spring%E4%B9%8BAOP%E5%BA%95%E5%B1%82%E6%BA%90%E7%A0%81/1628753226288-643a0eb5-c2a9-4d8a-9d22-a5a47a6ffb0c.png" alt="AnnotationAwareAspectJAutoProxyCreator.png"><br><strong>AspectJAwareAdvisorAutoProxyCreator</strong>继承了<strong>AbstractAdvisorAutoProxyCreator</strong>，重写了findCandidateAdvisors()方法，<strong>AbstractAdvisorAutoProxyCreator</strong>只能找到所有Advisor类型的Bean对象，但是<strong>AspectJAwareAdvisorAutoProxyCreator</strong>除开可以找到所有Advisor类型的Bean对象，还能把@Aspect注解所标注的Bean中的@Before等注解及方法进行解析，并生成对应的Advisor对象。</p>
+<h3 id="4-1-EnableAspectJAutoProxy"><a href="#4-1-EnableAspectJAutoProxy" class="headerlink" title="4.1 @EnableAspectJAutoProxy"></a>4.1 @EnableAspectJAutoProxy</h3><p>这个注解主要就是往Spring容器中添加了一个AnnotationAwareAspectJAutoProxyCreator类型的Bean。<br><img src="/2022/08/03/02-00-09-Spring%E4%B9%8BAOP%E5%BA%95%E5%B1%82%E6%BA%90%E7%A0%81/1628753226288-643a0eb5-c2a9-4d8a-9d22-a5a47a6ffb0c.png" alt="AnnotationAwareAspectJAutoProxyCreator.png"><br><strong>AspectJAwareAdvisorAutoProxyCreator</strong>继承了<strong>AbstractAdvisorAutoProxyCreator</strong>，重写了findCandidateAdvisors()方法，<strong>AbstractAdvisorAutoProxyCreator</strong>只能找到所有Advisor类型的Bean对象，但是<strong>AspectJAwareAdvisorAutoProxyCreator</strong>除开可以找到所有Advisor类型的Bean对象，还能把@Aspect注解所标注的Bean中的@Before等注解及方法进行解析，并生成对应的Advisor对象。</p>
 <p>所以，我们可以理解@EnableAspectJAutoProxy，其实就是像Spring容器中添加了一个AbstractAdvisorAutoProxyCreator类型的Bean，从而开启了AOP，并且还会解析@Before等注解生成Advisor。</p>
 ]]></content>
       <categories>
