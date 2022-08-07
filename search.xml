@@ -4193,10 +4193,11 @@ sync path
   </entry>
   <entry>
     <title>RocketMQ环境搭建</title>
-    <url>/2022/07/18/03-04-01-RocketMQ%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/</url>
+    <url>/2022/08/07/03-04-01-RocketMQ%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
 
-<h1 id="RocketMQ环境搭建"><a href="#RocketMQ环境搭建" class="headerlink" title="RocketMQ环境搭建"></a>RocketMQ环境搭建</h1><h2 id="1、MQ介绍"><a href="#1、MQ介绍" class="headerlink" title="1、MQ介绍"></a>1、MQ介绍</h2><h3 id="1-1-概念"><a href="#1-1-概念" class="headerlink" title="1.1 概念"></a>1.1 概念</h3><p>MQ：MessageQueue，消息队列。 队列，是一种FIFO 先进先出的数据结构。消息由生产者发送到MQ进行排队，然后按原来的顺序交由消息的消费者进行处理。QQ和微信就是典型的MQ。</p>
+<h1 id="RocketMQ基本概念及环境搭建"><a href="#RocketMQ基本概念及环境搭建" class="headerlink" title="RocketMQ基本概念及环境搭建"></a>RocketMQ基本概念及环境搭建</h1><h2 id="1、MQ介绍"><a href="#1、MQ介绍" class="headerlink" title="1、MQ介绍"></a>1、MQ介绍</h2><h3 id="1-1-概念"><a href="#1-1-概念" class="headerlink" title="1.1 概念"></a>1.1 概念</h3><p>MQ：MessageQueue，消息队列。 队列，是一种FIFO 先进先出的数据结构。消息由生产者发送到MQ进行排队，然后按原来的顺序交由消息的消费者进行处理。QQ和微信就是典型的MQ。</p>
+<blockquote>
 <p>MQ的作用主要有以下三个方面：</p>
 <ul>
 <li><p>异步</p>
@@ -4214,6 +4215,7 @@ sync path
 <p>作用：以稳定的系统资源应对突发的流量冲击。</p>
 </li>
 </ul>
+</blockquote>
 <h3 id="1-2-MQ的优缺点"><a href="#1-2-MQ的优缺点" class="headerlink" title="1.2 MQ的优缺点"></a>1.2 MQ的优缺点</h3><p>上面MQ的所用也就是使用MQ的优点。 但是引入MQ也是有他的缺点的：</p>
 <ul>
 <li>系统可用性降低</li>
@@ -4227,7 +4229,7 @@ sync path
 <li>消息一致性问题</li>
 </ul>
 <p>A系统处理完业务，通过MQ发送消息给B、C系统进行后续的业务处理。如果B系统处理成功，C系统处理失败怎么办？这就需要考虑如何保证消息数据处理的一致性。</p>
-<h3 id="1-3-几大MQ产品比较"><a href="#1-3-几大MQ产品比较" class="headerlink" title="1.3 几大MQ产品比较"></a>1.3 几大MQ产品比较</h3><h2 id><a href="#" class="headerlink" title></a><img src="/2022/07/18/03-04-01-RocketMQ%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/MQ%E4%BA%A7%E5%93%81%E6%AF%94%E8%BE%83.png" alt="MQ产品比较"></h2><h2 id="2、RocketMQ环境搭建"><a href="#2、RocketMQ环境搭建" class="headerlink" title="2、RocketMQ环境搭建"></a>2、RocketMQ环境搭建</h2><h3 id="2-1-下载地址"><a href="#2-1-下载地址" class="headerlink" title="2.1 下载地址"></a>2.1 下载地址</h3><blockquote>
+<h3 id="1-3-几大MQ产品比较"><a href="#1-3-几大MQ产品比较" class="headerlink" title="1.3 几大MQ产品比较"></a>1.3 几大MQ产品比较</h3><h2 id><a href="#" class="headerlink" title></a><img src="/2022/08/07/03-04-01-RocketMQ%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/MQ%E4%BA%A7%E5%93%81%E6%AF%94%E8%BE%83.png" alt="MQ产品比较"></h2><h2 id="2、RocketMQ环境搭建"><a href="#2、RocketMQ环境搭建" class="headerlink" title="2、RocketMQ环境搭建"></a>2、RocketMQ环境搭建</h2><h3 id="2-1-下载地址"><a href="#2-1-下载地址" class="headerlink" title="2.1 下载地址"></a>2.1 下载地址</h3><blockquote>
 <p> RocketMQ运行版本下载地址： <a href="https://www.apache.org/dyn/closer.cgi?path=rocketmq/4.7.1/rocketmq-all-4.7.1-bin-release.zip">https://www.apache.org/dyn/closer.cgi?path=rocketmq/4.7.1/rocketmq-all-4.7.1-bin-release.zip</a></p>
 <p> RocketMQ源码版本下载地址： <a href="https://www.apache.org/dyn/closer.cgi?path=rocketmq/4.7.1/rocketmq-all-4.7.1-source-release.zip">https://www.apache.org/dyn/closer.cgi?path=rocketmq/4.7.1/rocketmq-all-4.7.1-source-release.zip</a></p>
 </blockquote>
@@ -4256,7 +4258,7 @@ sync path
 <p>这个ROCKETMQ_HOME的环境变量是必须要单独配置的，如果不配置的话，启动NameSever和Broker都会报错。</p>
 <p>这个环境变量的作用是用来加载$ROCKETMQ_HOME/conf下的除broker.conf以外的几个配置文件。所以实际情况中，可以不按这个配置，但是一定要能找到配置文件。</p>
 </blockquote>
-<h2 id="3、RocketMQ快速运行"><a href="#3、RocketMQ快速运行" class="headerlink" title="3、RocketMQ快速运行"></a>3、RocketMQ快速运行</h2><h3 id="3-1RocketMQ组件结构"><a href="#3-1RocketMQ组件结构" class="headerlink" title="3.1RocketMQ组件结构"></a>3.1RocketMQ组件结构</h3><p><img src="/2022/07/18/03-04-01-RocketMQ%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/RocketMQ%E7%BB%84%E4%BB%B6.png" alt="RocketMQ组件"></p>
+<h2 id="3、RocketMQ快速运行"><a href="#3、RocketMQ快速运行" class="headerlink" title="3、RocketMQ快速运行"></a>3、RocketMQ快速运行</h2><h3 id="3-1RocketMQ组件结构"><a href="#3-1RocketMQ组件结构" class="headerlink" title="3.1RocketMQ组件结构"></a>3.1RocketMQ组件结构</h3><p><img src="/2022/08/07/03-04-01-RocketMQ%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/RocketMQ%E7%BB%84%E4%BB%B6.png" alt="RocketMQ组件"></p>
 <p> RocketMQ由以下这几个组件组成</p>
 <ul>
 <li>NameServer : 提供轻量级的Broker路由服务。</li>
@@ -4306,6 +4308,7 @@ sync path
 <blockquote>
 <p>在我们之前的测试案例中，一个queueId就代表了一个MessageQueue。有哪些queueId？ 0，1，2，3四个MessageQueue</p>
 </blockquote>
+<p><a href="https://www.processon.com/view/link/62d96be7f346fb1ede177e68">RocketMQ总结</a></p>
 ]]></content>
       <categories>
         <category>中间件</category>
