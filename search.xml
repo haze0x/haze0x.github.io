@@ -11191,6 +11191,9 @@ sync path
 <blockquote>
 <p>动态Sql会通过组合者设计模式， 把每一行Sql解析成一个SqlNode的实现类（如 WhereSqlNode、IfSqlNode、TextSqlNode….）。  在执行数据库操作时通过参数再递归通过SqlNode.apply() 进行解析， 最终组合成一个sql语句</p>
 </blockquote>
+<p>mapper接口注解解析过程：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">new SqlSessionFactoryBuilder().build(reader)</span><br><span class="line">&gt;parser.parse()</span><br><span class="line">&gt;parseConfiguration(parser.evalNode(&quot;/configuration&quot;))</span><br><span class="line">&gt;mapperElement(root.evalNode(&quot;mappers&quot;))</span><br><span class="line">&gt;configuration.addMappers(mapperPackage)</span><br><span class="line">&gt;mapperRegistry.addMappers(packageName)</span><br><span class="line">&gt;addMapper(mapperClass)</span><br><span class="line">&gt;MapperAnnotationBuilder parser = new MapperAnnotationBuilder(config, type)</span><br><span class="line">&gt;parser.parse()</span><br><span class="line">&gt;Method[] methods = type.getMethods()</span><br><span class="line">&gt;for (Method method : methods)</span><br><span class="line">&gt;parseStatement(method)</span><br></pre></td></tr></table></figure>
+
 <p><strong>源码跟踪</strong></p>
 <p><a href="https://www.processon.com/view/link/62f12c441e0853714d3e98ef">MyBatis配置文件解析源码</a></p>
 ]]></content>
