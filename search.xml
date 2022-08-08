@@ -11187,6 +11187,10 @@ sync path
 <li>XMLStatementBuilder：解析mapper.xml映射文件中的节点，如select、insert、等节点</li>
 </ul>
 </blockquote>
+<p>简述MyBatis动态sql的解析流程?</p>
+<blockquote>
+<p>动态Sql会通过组合者设计模式， 把每一行Sql解析成一个SqlNode的实现类（如 WhereSqlNode、IfSqlNode、TextSqlNode….）。  在执行数据库操作时通过参数再递归通过SqlNode.apply() 进行解析， 最终组合成一个sql语句</p>
+</blockquote>
 <p><strong>源码跟踪</strong></p>
 <p><a href="https://www.processon.com/view/link/62f12c441e0853714d3e98ef">MyBatis配置文件解析源码</a></p>
 ]]></content>
