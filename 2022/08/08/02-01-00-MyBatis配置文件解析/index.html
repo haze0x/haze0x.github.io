@@ -172,6 +172,8 @@
 <p>mapper接口注解解析过程：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">new SqlSessionFactoryBuilder().build(reader)</span><br><span class="line">&gt;parser.parse()</span><br><span class="line">&gt;parseConfiguration(parser.evalNode(&quot;/configuration&quot;))</span><br><span class="line">&gt;mapperElement(root.evalNode(&quot;mappers&quot;))</span><br><span class="line">&gt;configuration.addMappers(mapperPackage)</span><br><span class="line">&gt;mapperRegistry.addMappers(packageName)</span><br><span class="line">&gt;addMapper(mapperClass)</span><br><span class="line">&gt;MapperAnnotationBuilder parser = new MapperAnnotationBuilder(config, type)</span><br><span class="line">&gt;parser.parse()</span><br><span class="line">&gt;Method[] methods = type.getMethods()</span><br><span class="line">&gt;for (Method method : methods)</span><br><span class="line">&gt;parseStatement(method)</span><br></pre></td></tr></table></figure>
 
+<p>SQL语句解析之后对象是这样：</p>
+<p><img src="/2022/08/08/02-01-00-MyBatis%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%A7%A3%E6%9E%90/image-20220809003651081.png" alt="image-20220809003651081"></p>
 <p><strong>源码跟踪</strong></p>
 <p><a target="_blank" rel="noopener" href="https://www.processon.com/view/link/62f12c441e0853714d3e98ef">MyBatis配置文件解析源码</a></p>
  
