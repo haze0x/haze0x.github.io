@@ -2269,7 +2269,8 @@
 <h3 id="11、初始化前"><a href="#11、初始化前" class="headerlink" title="11、初始化前"></a>11、初始化前</h3><blockquote>
 <p>在initializeBean方法里调用</p>
 </blockquote>
-<h3 id="12、初始化"><a href="#12、初始化" class="headerlink" title="12、初始化"></a>12、初始化</h3><h3 id="13、初始化后"><a href="#13、初始化后" class="headerlink" title="13、初始化后"></a>13、初始化后</h3>]]></content>
+<h3 id="12、初始化"><a href="#12、初始化" class="headerlink" title="12、初始化"></a>12、初始化</h3><h3 id="13、初始化后"><a href="#13、初始化后" class="headerlink" title="13、初始化后"></a>13、初始化后</h3><p><a href="https://www.processon.com/view/link/62f51fe4637689072eaf1851">Spring 生命周期</a></p>
+]]></content>
       <categories>
         <category>Java</category>
         <category>源码框架</category>
