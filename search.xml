@@ -2191,7 +2191,7 @@
   </entry>
   <entry>
     <title>Spring之Bean生命周期源码解析</title>
-    <url>/2022/06/19/02-00-02-Spring%E4%B9%8BBean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90%E4%B8%8A/</url>
+    <url>/2022/08/11/02-00-02-Spring%E4%B9%8BBean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90%E4%B8%8A/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
 
 <h2 id="一、Bean生命周期"><a href="#一、Bean生命周期" class="headerlink" title="一、Bean生命周期"></a>一、Bean生命周期</h2><h3 id="1、生成BeanDefinition"><a href="#1、生成BeanDefinition" class="headerlink" title="1、生成BeanDefinition"></a>1、生成BeanDefinition</h3><p><a href="https://www.processon.com/view/link/62af491e5653bb5256e05be7">spring底层类扫描流程图</a></p>
@@ -2214,7 +2214,7 @@
 <blockquote>
 <p>通过扫描得到所有BeanDefinition之后，就可以根据BeanDefinition创建Bean对象了，但是在Spring中支持父子BeanDefinition，和Java父子类类似，但是完全不是一回事。父子BeanDefinition实际用的比较少，使用是这样的。</p>
 </blockquote>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&lt;bean id=<span class="string">&quot;parent&quot;</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;com.zhouyu.service.Parent&quot;</span> scope=<span class="string">&quot;prototype&quot;</span>/&gt;</span><br><span class="line">&lt;bean id=<span class="string">&quot;child&quot;</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;com.zhouyu.service.Child&quot;</span>/&gt;</span><br><span class="line">    </span><br><span class="line">##结果：这么定义的情况下，child是单例Bean。</span><br><span class="line"></span><br><span class="line">&lt;bean id=<span class="string">&quot;parent&quot;</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;com.zhouyu.service.Parent&quot;</span> scope=<span class="string">&quot;prototype&quot;</span>/&gt;</span><br><span class="line">&lt;bean id=<span class="string">&quot;child&quot;</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;com.zhouyu.service.Child&quot;</span> parent=<span class="string">&quot;parent&quot;</span>/&gt;    </span><br><span class="line">##结果：</span><br><span class="line">但是这么定义的情况下，child就是原型Bean了。</span><br><span class="line">因为child的父BeanDefinition是parent，所以会继承parent上所定义的scope属性。</span><br><span class="line">而在根据child来生成Bean对象之前，需要进行BeanDefinition的合并，得到完整的child的BeanDefinition。</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&lt;bean id=<span class="string">&quot;parent&quot;</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;com.zhouyu.service.Parent&quot;</span> scope=<span class="string">&quot;prototype&quot;</span>/&gt;</span><br><span class="line">&lt;bean id=<span class="string">&quot;child&quot;</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;com.zhouyu.service.Child&quot;</span>/&gt;</span><br><span class="line">    </span><br><span class="line">##结果：这么定义的情况下，child是单例Bean。</span><br><span class="line"></span><br><span class="line">&lt;bean id=<span class="string">&quot;parent&quot;</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;com.zhouyu.service.Parent&quot;</span> scope=<span class="string">&quot;prototype&quot;</span>/&gt;</span><br><span class="line">&lt;bean id=<span class="string">&quot;child&quot;</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;com.zhouyu.service.Child&quot;</span> parent=<span class="string">&quot;parent&quot;</span>/&gt;    </span><br><span class="line"></span><br><span class="line">以上有两个Beandefinition 合并之后会生成第三个beandefinition,这样可以不影响前两个beandefinition</span><br><span class="line">    </span><br><span class="line">##结果：</span><br><span class="line">但是这么定义的情况下，child就是原型Bean了。（继承了父类）</span><br><span class="line">因为child的父BeanDefinition是parent，所以会继承parent上所定义的scope属性。</span><br><span class="line">而在根据child来生成Bean对象之前，需要进行BeanDefinition的合并，得到完整的child的BeanDefinition。</span><br></pre></td></tr></table></figure>
 
 <h3 id="3、加载类"><a href="#3、加载类" class="headerlink" title="3、加载类"></a>3、加载类</h3><p>Class&lt;?&gt; resolvedClass = resolveBeanClass(mbd, beanName); 方法进行类的加载。</p>
 <p><strong>ClassUtils.getDefaultClassLoader()</strong></p>
@@ -11348,6 +11348,7 @@ sync path
 <li>FactoryBean：mybatis就是用的这种，比较灵活，bean生成可以自己控制。<strong>可以使用的思路</strong>。</li>
 <li>设置Beandefinition的FactoryMethodName：设置工厂方法，配合Beandefinition使用，<strong>可以使用的思路</strong>。</li>
 </ul>
+<p>最后使用的是factoryBean，详细流程图见上图。</p>
 ]]></content>
       <categories>
         <category>Java</category>
