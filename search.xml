@@ -10734,7 +10734,7 @@ sync path
   </entry>
   <entry>
     <title>RocketMQ实战</title>
-    <url>/2022/07/19/03-04-02-RocketMQ%E5%AE%9E%E6%88%98/</url>
+    <url>/2022/08/18/03-04-02-RocketMQ%E5%AE%9E%E6%88%98/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
 
 <h1 id="一、RocketMQ的使用"><a href="#一、RocketMQ的使用" class="headerlink" title="一、RocketMQ的使用"></a>一、RocketMQ的使用</h1><h2 id="1-1环境搭建"><a href="#1-1环境搭建" class="headerlink" title="1.1环境搭建"></a>1.1环境搭建</h2><p>新建maven项目，引入如下依赖</p>
@@ -10873,7 +10873,7 @@ sync path
 <p> 5、提交给用户的目标主题消息可能会失败，目前这依日志的记录而定。它的高可用性通过 RocketMQ 本身的高可用性机制来保证，如果希望确保事务消息不丢失、并且事务完整性得到保证，建议使用同步的双重写入机制。</p>
 <p> 6、事务消息的生产者 ID 不能与其他类型消息的生产者 ID 共享。与其他类型的消息不同，事务消息允许反向查询、MQ服务器能通过它们的生产者 ID 查询到消费者。</p>
 <p> <strong>接下来</strong>，我们还要了解下事务消息的实现机制，参见下图：</p>
-<p><img src="/2022/07/19/03-04-02-RocketMQ%E5%AE%9E%E6%88%98/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF.png" alt="RocketMQ事务消息"></p>
+<p><img src="/2022/08/18/03-04-02-RocketMQ%E5%AE%9E%E6%88%98/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF.png" alt="RocketMQ事务消息"></p>
 <p>half消息：一种经过特殊处理的普通消息，它对下游不可见，发送half消息，可以检测rocket mq 的状态。half消息会被存放到系统主题RMQ_SYS_TRANS_HALF_TOPIC中<br>执行本地事务：本地事务可能执行成功，可能执行失败，执行成功，rocket mq会发送消息给下游，执行失败，消息回滚，不会发送消息给下游，保证了本地事务和下游事务的一致性（同时执行，同时不执行）<br>状态回查：可能执行本地事务时间较长，rocket mq会过段时间再进行回查<br>整个流程的作用：保证本地事务和消息发送的原子性<br>rocketMQ事务消息只保证了分布式事务的一半，如果下游系统执行失败，本地事务没法进行回滚</p>
 <p> 事务消息机制的关键是在发送消息时，会将消息转为一个half半消息，并存入RocketMQ内部的一个 RMQ_SYS_TRANS_HALF_TOPIC 这个Topic，这样对消费者是不可见的。再经过一系列事务检查通过后，再将消息转存到目标Topic，这样对消费者就可见了。</p>
 <p> <strong>最后</strong>，我们还需要思考下事务消息的作用。</p>
