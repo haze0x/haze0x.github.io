@@ -4442,7 +4442,7 @@ sync path
   </entry>
   <entry>
     <title>RocketMQ高级原理</title>
-    <url>/2022/08/19/03-04-03-RocketMQ%E9%AB%98%E7%BA%A7%E5%8E%9F%E7%90%86/</url>
+    <url>/2022/08/20/03-04-03-RocketMQ%E9%AB%98%E7%BA%A7%E5%8E%9F%E7%90%86/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
 
 <h1 id="一、基础概念："><a href="#一、基础概念：" class="headerlink" title="一、基础概念："></a>一、基础概念：</h1><p> 这一部分我们先来总结下RocketMQ的一些重要的基础概念：</p>
@@ -4488,7 +4488,7 @@ sync path
 <p>首先：每个节点有三个状态，Leader，follower和candidate(候选人)。正常运行的情况下，集群中会有一个leader，其他都是follower，follower只响应Leader和Candidate的请求，而客户端的请求全部由Leader处理，即使有客户端请求到了一个follower，也会将请求转发到leader。</p>
 <p> 集群刚启动时，每个节点都是follower状态，之后集群内部会发送一个timeout信号，所有follower就转成candidate去拉取选票，获得大多数选票的节点选为leader，其他候选人转为follower。如果一个timeout信号发出时，没有选出leader，将会重新开始一次新的选举。而Leader节点会往其他节点发送心跳信号，确认他的leader状态。</p>
 <p>– 然后会启动定时器，如果在指定时间内没有收到Leader的心跳，就会转为Candidate状态，然后向其他成员发起投票请求，如果收到半数以上成员的投票，则Candidate会晋升为Leader。然后leader也有可能会退化成follower。</p>
-<p> 然后，在Raft协议中，会将时间分为一些任意时间长度的时间片段，叫做term。term会使用一个全局唯一，连续递增的编号作为标识，也就是起到了一个逻辑时钟的作用。<img src="/2022/08/19/03-04-03-RocketMQ%E9%AB%98%E7%BA%A7%E5%8E%9F%E7%90%86/RaftTerms.png" alt="RaftTerms"></p>
+<p> 然后，在Raft协议中，会将时间分为一些任意时间长度的时间片段，叫做term。term会使用一个全局唯一，连续递增的编号作为标识，也就是起到了一个逻辑时钟的作用。<img src="/2022/08/20/03-04-03-RocketMQ%E9%AB%98%E7%BA%A7%E5%8E%9F%E7%90%86/RaftTerms.png" alt="RaftTerms"></p>
 <p> 在每一个term时间片里，都会进行新的选举，每一个Candidate都会努力争取成为leader。获得票数最多的节点就会被选举为Leader。被选为Leader的这个节点，在一个term时间片里就会保持leader状态。这样，就会保证在同一时间段内，集群中只会有一个Leader。在某些情况下，选票可能会被各个节点瓜分，形成不了多数派，那这个term可能直到结束都没有leader，直到下一个term再重新发起选举，这也就没有了Zookeeper中的脑裂问题。而在每次重新选举的过程中， leader也有可能会退化成为follower。也就是说，在这个集群中， leader节点是会不断变化的。</p>
 <p> 然后，每次选举的过程中，每个节点都会存储当前term编号，并在节点之间进行交流时，都会带上自己的term编号。如果一个节点发现他的编号比另外一个小，那么他就会将自己的编号更新为较大的那一个。而如果leader或者candidate发现自己的编号不是最新的，他就会自动转成follower。如果接收到的请求term编号小于自己的编号，term将会拒绝执行。</p>
 <p> 在选举过程中，Raft协议会通过心跳机制发起leader选举。节点都是从follower状态开始的，如果收到了来自leader或者candidate的心跳RPC请求，那他就会保持follower状态，避免争抢成为candidate。而leader会往其他节点发送心跳信号，来确认自己的地位。如果follower一段时间(两个timeout信号)内没有收到Leader的心跳信号，他就会认为leader挂了，发起新一轮选举。</p>
