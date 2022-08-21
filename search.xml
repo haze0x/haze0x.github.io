@@ -9552,7 +9552,7 @@ sync path
   </entry>
   <entry>
     <title>RoketMQ源码分析</title>
-    <url>/2022/08/20/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</url>
+    <url>/2022/08/21/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
 
 <h1 id="RocketMQ源码分析"><a href="#RocketMQ源码分析" class="headerlink" title="RocketMQ源码分析"></a>RocketMQ源码分析</h1><h2 id="1、源码环境搭建"><a href="#1、源码环境搭建" class="headerlink" title="1、源码环境搭建"></a>1、源码环境搭建</h2><blockquote>
@@ -9574,7 +9574,7 @@ sync path
 <li>给Producer和Consumer提供服务获取Broker列表</li>
 </ul>
 </blockquote>
-<h3 id="2-1、启动流程"><a href="#2-1、启动流程" class="headerlink" title="2.1、启动流程"></a>2.1、启动流程</h3><p><img src="/2022/08/20/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/NameServer%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B.png" alt="NameServer启动流程"></p>
+<h3 id="2-1、启动流程"><a href="#2-1、启动流程" class="headerlink" title="2.1、启动流程"></a>2.1、启动流程</h3><p><img src="/2022/08/21/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/NameServer%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B.png" alt="NameServer启动流程"></p>
 <h3 id="2-2、源码核心"><a href="#2-2、源码核心" class="headerlink" title="2.2、源码核心"></a>2.2、源码核心</h3><p>整个NameServer的核心就是一个NamesrvController对象。这个controller对象就跟java Web开发中的Controller功能类似，都是响应客户端请求的。</p>
 <p>在创建NamesrvController对象时，有两个关键的配置</p>
 <ul>
@@ -9594,7 +9594,7 @@ sync path
 <li>fileWatchService 这个是用来跟踪TLS配置的。这是跟权限相关的，我们暂不关注。</li>
 <li>从启动和关闭这两个关键步骤，我们可以总结出NameServer的组件其实并不是很多，整个NameServer的结构是这样：</li>
 </ul>
-<p><img src="/2022/08/20/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E6%BA%90%E7%A0%81Nameserver1.png" alt="源码Nameserver1"></p>
+<p><img src="/2022/08/21/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E6%BA%90%E7%A0%81Nameserver1.png" alt="源码Nameserver1"></p>
 <h2 id="3、启动Broker"><a href="#3、启动Broker" class="headerlink" title="3、启动Broker"></a>3、启动Broker</h2><blockquote>
 <p>源码路径：</p>
 <p>Broker是整个RocketMQ的业务核心，所有消息存储、转发这些最为重要的业务都是在Broker中进行处理的。</p>
@@ -9614,13 +9614,13 @@ sync path
 
 <p>我们现在不需要了解这些核心组件的具体功能，只要有个大概，Broker中有一大堆的功能组件负责具体的业务。后面等到分析具体业务时再去深入每个服务的细节。</p>
 <p>我们需要抽象出Broker的一个整体结构：</p>
-<p><img src="/2022/08/20/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Broker%E6%A0%B8%E5%BF%83%E7%BB%84%E6%88%90.png" alt="Broker核心组成"></p>
+<p><img src="/2022/08/21/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Broker%E6%A0%B8%E5%BF%83%E7%BB%84%E6%88%90.png" alt="Broker核心组成"></p>
 <h2 id="4、Broker注册"><a href="#4、Broker注册" class="headerlink" title="4、Broker注册"></a>4、Broker注册</h2><blockquote>
 <p> 在之前我们已经介绍到了。Broker会在启动时向NameServer注册自己的服务信息，并且会定时的往NameServer发送心跳信息。而NameServer会维护Broker的路由列表，并对路由列表进行实时更新。</p>
 </blockquote>
 <h3 id="4-1-源码重点"><a href="#4-1-源码重点" class="headerlink" title="4.1 源码重点"></a>4.1 源码重点</h3><p>BrokerController.this.registerBrokerAll方法会发起向NameServer注册心跳。启动时会立即注册，同时也会启动一个线程池，以10秒延迟，默认30秒的间隔 持续向NameServer发送心跳。</p>
 <p>BrokerController.this.registerBrokerAll这个方法就是注册心跳的入口。</p>
-<p><img src="/2022/08/20/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Broker%E6%B3%A8%E5%86%8C%E6%B5%81%E7%A8%8B.png" alt="Broker注册流程"></p>
+<p><img src="/2022/08/21/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Broker%E6%B3%A8%E5%86%8C%E6%B5%81%E7%A8%8B.png" alt="Broker注册流程"></p>
 <p>然后，在NameServer中也会启动一个定时任务，扫描不活动的Broker。具体观察NamesrvController.initialize方法</p>
 <h2 id="5、Producer"><a href="#5、Producer" class="headerlink" title="5、Producer"></a>5、Producer</h2><blockquote>
 <p>Producer有两种</p>
@@ -9644,10 +9644,10 @@ sync path
 <p>Send方法中，首先需要获得Topic的路由信息。这会从本地缓存中获取，如果本地缓存中没有，就从NameServer中去申请。</p>
 <p>核心在 org.apache.rocketmq.client.impl.producer.DefaultMQProducerImpl#tryToFindTopicPublishInfo方法</p>
 <p>路由信息大致的管理流程：</p>
-<p><img src="/2022/08/20/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E8%B7%AF%E7%94%B1%E7%AE%A1%E7%90%86.png" alt="路由管理"></p>
+<p><img src="/2022/08/21/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E8%B7%AF%E7%94%B1%E7%AE%A1%E7%90%86.png" alt="路由管理"></p>
 <p><strong>然后</strong> 关于Producer的负载均衡。</p>
 <p>在之前介绍RocketMQ的顺序消息时，讲到了Producer的负载均衡策略，默认会把消息平均的发送到所有MessageQueue里的。那到底是怎么进行负载均衡的呢？</p>
-<p><img src="/2022/08/20/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Producer%E9%80%89%E6%8B%A9Queue.png" alt="Producer选择Queue"></p>
+<p><img src="/2022/08/21/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Producer%E9%80%89%E6%8B%A9Queue.png" alt="Producer选择Queue"></p>
 <p><strong>然后</strong> 在发送Netty请求时，实际上是指定的MessageQueue，而不是Topic。Topic只是用来找MessageQueue。</p>
 <p>然后根据MessageQueue再找所在的Broker，往Broker发送请求。</p>
 <h1 id="六、消息存储"><a href="#六、消息存储" class="headerlink" title="六、消息存储"></a>六、消息存储</h1><h2 id="1、功能回顾"><a href="#1、功能回顾" class="headerlink" title="1、功能回顾"></a>1、功能回顾</h2><p>我们接着上面的流程，Producer把消息发到了Broker，接下来就关注下Broker接收到消息后是如何把消息进行存储的。最终存储的文件有哪些？</p>
@@ -9679,7 +9679,7 @@ sync path
 默认情况下， Broker会启动后台线程，每60秒，检查CommitLog、ConsumeQueue文件。然后对超过72小时的数据进行删除。也就是说，默认情况下， RocketMQ只会保存3天内的数据。这个时间可以通过fileReservedTime来配置。注意他删除时，并不会检查消息是否被消费了。
 </code></pre>
 <p>整个文件存储的核心入口入口在DefaultMessageStore的start方法中。</p>
-<p><img src="/2022/08/20/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/image-20220723221300813.png" alt="image-20220723221300813"></p>
+<p><img src="/2022/08/21/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/image-20220723221300813.png" alt="image-20220723221300813"></p>
 <p><strong>5文件存储部分的总结</strong>：</p>
 <p>RocketMQ的存储文件包括消息文件（Commitlog）、消息消费队列文件（ConsumerQueue）、Hash索引文件（IndexFile）、监测点文件（checkPoint）、abort（关闭异常文件）。单个消息存储文件、消息消费队列文件、Hash索引文件长度固定以便使用内存映射机制进行文件的读写操作。RocketMQ组织文件以文件的起始偏移量来命令文件，这样根据偏移量能快速定位到真实的物理文件。RocketMQ基于内存映射文件机制提供了同步刷盘和异步刷盘两种机制，异步刷盘是指在消息存储时先追加到内存映射文件，然后启动专门的刷盘线程定时将内存中的文件数据刷写到磁盘。</p>
 <p>CommitLog，消息存储文件，RocketMQ为了保证消息发送的高吞吐量，采用单一文件存储所有主题消息，保证消息存储是完全的顺序写，但这样给文件读取带来了不便，为此RocketMQ为了方便消息消费构建了消息消费队列文件，基于主题与队列进行组织，同时RocketMQ为消息实现了Hash索引，可以为消息设置索引键，根据所以能够快速从CommitLog文件中检索消息。</p>
@@ -9708,7 +9708,7 @@ sync path
 <pre><code>拉模式： PullMessageService
 </code></pre>
 <p>PullRequest里有messageQueue和processQueue，其中messageQueue负责拉取消息，拉取到后，将消息存入processQueue，进行处理。 存入后就可以清空messageQueue，继续拉取了。</p>
-<p><img src="/2022/08/20/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/image-20220723221432079.png" alt="image-20220723221432079"></p>
+<p><img src="/2022/08/21/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/image-20220723221432079.png" alt="image-20220723221432079"></p>
 <p><strong>3 客户端负载均衡策略</strong></p>
 <p>在消费者示例的start方法中，启动RebalanceService，这个是客户端进行负载均衡策略的启动服务。他只负责根据负载均衡策略获取当前客户端分配到的MessageQueue示例。</p>
 <p>五种负载策略，可以由Consumer的allocateMessageQueueStrategy属性来选择。</p>
@@ -9726,7 +9726,7 @@ sync path
 <h1 id="八、延迟消息"><a href="#八、延迟消息" class="headerlink" title="八、延迟消息"></a>八、延迟消息</h1><h2 id="1、功能回顾-2"><a href="#1、功能回顾-2" class="headerlink" title="1、功能回顾"></a>1、功能回顾</h2><p>我们这里，就用一个典型的延迟消息的流程，来把上面看到的各个组件，结合一下。</p>
 <p>延迟消息的核心使用方法就是在Message中设定一个MessageDelayLevel参数，对应18个延迟级别。然后Broker中会创建一个默认的Schedule_Topic主题，这个主题下有18个队列，对应18个延迟级别。消息发过来之后，会先把消息存入Schedule_Topic主题中对应的队列。然后等延迟时间到了，再转发到目标队列，推送给消费者进行消费。</p>
 <p>整个延迟消息的实现方式是这样的：</p>
-<p><img src="/2022/08/20/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/image-20220723221513122.png" alt="image-20220723221513122"></p>
+<p><img src="/2022/08/21/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/image-20220723221513122.png" alt="image-20220723221513122"></p>
 <h2 id="2、源码重点"><a href="#2、源码重点" class="headerlink" title="2、源码重点"></a>2、源码重点</h2><p>延迟消息的处理入口在scheduleMessageService这个组件中。 他会在broker启动时也一起加载。</p>
 <p><strong>1、消息写入：</strong></p>
 <p>代码见CommitLog.putMessage方法。</p>
@@ -9746,7 +9746,8 @@ sync path
 <p>顺序消息一般使用集群模式，是指对消息消费者内的线程池中的线程对消息消费队列只能串行消费。与并发消息消费最本质的区别是消息消费时必须成功锁定消息消费队列，在Broker端会存储消息消费队列的锁占用情况。</p>
 <h1 id="源码解读小结"><a href="#源码解读小结" class="headerlink" title="源码解读小结"></a>源码解读小结</h1><p>关于RocketMQ的源码部分，我们就带大家解读到这里。到目前为止，几个核心的流程我们已经解读完成了，我们按照由大到小，由粗到细的方式对几条主线进行了解读。通过解读源码，我们可以对之前提到的各种高级特性有更深入的理解。对有些有争议的问题，带着问题来源码中找答案是最好的。例如我们经常有人讨论NameServer全部挂了之后，生产者和消费者是否能够用他本地的缓存继续工作一段时间？ 这样的一些问题，看过源码之后是不是有更清晰的了解？</p>
 <p>至于其他的代码，大家也可以按照自己的关注点，以业务线的方式来逐步解读。</p>
-<p><img src="https://note.youdao.com/yws/res/267174/8C06BD7D32624201A2F7558CEC37A53A" alt="image"></p>
+<p>![RocektMQ源码 (1)](03-04-05-RoketMQ源码分析/RocektMQ源码 (1).jpg)</p>
+<p><a href="https://www.processon.com/view/link/630234d3e401fd27b3cde689">RocketMQ_源码部分</a></p>
 ]]></content>
       <categories>
         <category>中间件</category>
