@@ -89,7 +89,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">4.6k</span>
+            <span class="post-count">4.5k</span>
         </span>
     </span>
 
@@ -306,7 +306,7 @@
 <p>顺序消息一般使用集群模式，是指对消息消费者内的线程池中的线程对消息消费队列只能串行消费。与并发消息消费最本质的区别是消息消费时必须成功锁定消息消费队列，在Broker端会存储消息消费队列的锁占用情况。</p>
 <h1 id="源码解读小结"><a href="#源码解读小结" class="headerlink" title="源码解读小结"></a>源码解读小结</h1><p>关于RocketMQ的源码部分，我们就带大家解读到这里。到目前为止，几个核心的流程我们已经解读完成了，我们按照由大到小，由粗到细的方式对几条主线进行了解读。通过解读源码，我们可以对之前提到的各种高级特性有更深入的理解。对有些有争议的问题，带着问题来源码中找答案是最好的。例如我们经常有人讨论NameServer全部挂了之后，生产者和消费者是否能够用他本地的缓存继续工作一段时间？ 这样的一些问题，看过源码之后是不是有更清晰的了解？</p>
 <p>至于其他的代码，大家也可以按照自己的关注点，以业务线的方式来逐步解读。</p>
-<p>![RocektMQ源码 (1)](03-04-05-RoketMQ源码分析/RocektMQ源码 (1).jpg)</p>
+<p><img src="/2022/08/21/03-04-05-RoketMQ%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/RocektMQ%E6%BA%90%E7%A0%81.jpg" alt="RocektMQ源码"></p>
 <p><a target="_blank" rel="noopener" href="https://www.processon.com/view/link/630234d3e401fd27b3cde689">RocketMQ_源码部分</a></p>
  
       <!-- reward -->
