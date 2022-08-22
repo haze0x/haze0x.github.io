@@ -9762,14 +9762,14 @@ sync path
   </entry>
   <entry>
     <title>RocketMQ实践问题总结</title>
-    <url>/2022/07/23/03-04-06-RocketMQ%E5%AE%9E%E8%B7%B5%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/</url>
+    <url>/2022/08/22/03-04-06-RocketMQ%E5%AE%9E%E8%B7%B5%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
 
 <h1 id="RocketMQ-常见问题总结"><a href="#RocketMQ-常见问题总结" class="headerlink" title="RocketMQ 常见问题总结"></a>RocketMQ 常见问题总结</h1><h2 id="一、使用RocketMQ如何保证消息不丢失？"><a href="#一、使用RocketMQ如何保证消息不丢失？" class="headerlink" title="一、使用RocketMQ如何保证消息不丢失？"></a>一、使用RocketMQ如何保证消息不丢失？</h2><blockquote>
 <p>面试高频问题</p>
 </blockquote>
 <h3 id="1-1哪些环节会有丢消息的可能？"><a href="#1-1哪些环节会有丢消息的可能？" class="headerlink" title="1.1哪些环节会有丢消息的可能？"></a>1.1哪些环节会有丢消息的可能？</h3><p>我们考虑一个通用的MQ场景：</p>
-<p><img src="/2022/07/23/03-04-06-RocketMQ%E5%AE%9E%E8%B7%B5%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/image-20220723223418102.png" alt="image-20220723223418102"></p>
+<p><img src="/2022/08/22/03-04-06-RocketMQ%E5%AE%9E%E8%B7%B5%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/image-20220723223418102.png" alt="image-20220723223418102"></p>
 <p>其中，1（生产者发送消息），2（mq主从消息同步），4（消息消费）三个场景都是跨网络的，而跨网络就肯定会有丢消息的可能。</p>
 <p>然后关于3这个环节，通常MQ存盘时都会先写入操作系统的缓存page cache中，然后再由操作系统异步的将消息写入硬盘。这个中间有个时间差，就可能会造成消息丢失。如果服务挂了，缓存中还没有来得及写入硬盘的消息就会丢失。这个是MQ场景都会面对的通用的丢消息问题。</p>
 <h3 id="1-2RocketMQ消息零丢失方案"><a href="#1-2RocketMQ消息零丢失方案" class="headerlink" title="1.2RocketMQ消息零丢失方案"></a>1.2<strong>RocketMQ消息零丢失方案</strong></h3><ul>
@@ -9777,7 +9777,7 @@ sync path
 <blockquote>
 <p>这个结论比较容易理解，因为RocketMQ的事务消息机制就是为了保证零丢失来设计的，并且经过阿里的验证，肯定是非常靠谱的。</p>
 <p>但是如果深入一点的话，我们还是要理解下这个事务消息到底是不是靠谱。我们以最常见的电商订单场景为例，来简单分析下事务消息机制如何保证消息不丢失。我们看下下面这个流程图：</p>
-<p><img src="/2022/07/23/03-04-06-RocketMQ%E5%AE%9E%E8%B7%B5%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/image-20220723223826513.png" alt="image-20220723223826513"></p>
+<p><img src="/2022/08/22/03-04-06-RocketMQ%E5%AE%9E%E8%B7%B5%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/image-20220723223826513.png" alt="image-20220723223826513"></p>
 <p><strong>1、为什么要发送个half消息？有什么用？</strong></p>
 <p>这个half消息是在订单系统进行下单操作前发送，并且对下游服务的消费者是不可见的。那这个消息的作用更多的体现在确认RocketMQ的服务是否正常。相当于嗅探下RocketMQ服务是否正常，并且通知RocketMQ，我马上就要发一个很重要的消息了，你做好准备。</p>
 <p><strong>2.half消息如果写入失败了怎么办？</strong></p>
@@ -9801,7 +9801,7 @@ sync path
 <p><strong>1、同步刷盘</strong></p>
 <p>这个从我们之前的分析，就很好理解了。我们可以简单的把RocketMQ的刷盘方式 flushDiskType配置成同步刷盘就可以保证消息在刷盘过程中不会丢失了。</p>
 <p><strong>2、Dledger的文件同步</strong></p>
-<p><img src="/2022/07/23/03-04-06-RocketMQ%E5%AE%9E%E8%B7%B5%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/image-20220723223946088.png" alt="image-20220723223946088"></p>
+<p><img src="/2022/08/22/03-04-06-RocketMQ%E5%AE%9E%E8%B7%B5%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/image-20220723223946088.png" alt="image-20220723223946088"></p>
 </li>
 </ul>
 <p>在使用Dledger技术搭建的RocketMQ集群中，Dledger会通过两阶段提交的方式保证文件在主从之间成功同步。</p>
@@ -9847,7 +9847,7 @@ sync path
 <p>​    对于消息积压，如果是RocketMQ或者kafka还好，他们的消息积压不会对性能造成很大的影响。而如果是RabbitMQ的话，那就惨了，大量的消息积压可以瞬间造成性能直线下滑。</p>
 <p>​    对于RocketMQ来说，有个最简单的方式来确定消息是否有积压。那就是使用web控制台，就能直接看到消息的积压情况。</p>
 <p>​    在Web控制台的主题页面，可以通过 Consumer管理 按钮实时看到消息的积压情况。</p>
-<p><img src="/2022/07/23/03-04-06-RocketMQ%E5%AE%9E%E8%B7%B5%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/image-20220723224322757.png" alt="image-20220723224322757"></p>
+<p><img src="/2022/08/22/03-04-06-RocketMQ%E5%AE%9E%E8%B7%B5%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/image-20220723224322757.png" alt="image-20220723224322757"></p>
 <p>另外，也可以通过mqadmin指令在后台检查各个Topic的消息延迟情况。</p>
 <p>还有RocketMQ也会在他的 ${storePathRootDir}/config 目录下落地一系列的json文件，也可以用来跟踪消息积压情况。</p>
 <h3 id="3-2如何处理大量积压的消息？"><a href="#3-2如何处理大量积压的消息？" class="headerlink" title="3.2如何处理大量积压的消息？"></a>3.2<strong>如何处理大量积压的消息？</strong></h3><p>队列不可用动态扩容，创建topic的时候就已经指定好了队列。</p>
@@ -9892,13 +9892,15 @@ sync path
 
 <p>这个配置的默认值是false。也就是说默认是关闭的。</p>
 <h3 id="4-3消息轨迹数据存储"><a href="#4-3消息轨迹数据存储" class="headerlink" title="4.3消息轨迹数据存储"></a>4.3<strong>消息轨迹数据存储</strong></h3><p>默认情况下，消息轨迹数据是存于一个系统级别的Topic ,RMQ_SYS_TRACE_TOPIC。这个Topic在Broker节点启动时，会自动创建出来。</p>
-<p><img src="/2022/07/23/03-04-06-RocketMQ%E5%AE%9E%E8%B7%B5%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/image-20220723224605560.png" alt="image-20220723224605560"></p>
+<p><img src="/2022/08/22/03-04-06-RocketMQ%E5%AE%9E%E8%B7%B5%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/image-20220723224605560.png" alt="image-20220723224605560"></p>
 <p>另外，也支持客户端自定义轨迹数据存储的Topic。</p>
 <p>在客户端的两个核心对象 DefaultMQProducer和DefaultMQPushConsumer，他们的构造函数中，都有两个可选的参数来打开消息轨迹存储</p>
 <ul>
 <li>enableMsgTrace：是否打开消息轨迹。默认是false。</li>
 <li>customizedTraceTopic：配置将消息轨迹数据存储到用户指定的Topic 。</li>
 </ul>
+<p><a href="https://www.processon.com/view/link/630234d3e401fd27b3cde689">RocketMQ_源码部分</a></p>
+<p><a href="https://www.processon.com/view/link/62d96be7f346fb1ede177e68">RocketMQ_思维导图</a></p>
 ]]></content>
       <categories>
         <category>中间件</category>
