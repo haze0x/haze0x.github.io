@@ -4556,10 +4556,10 @@ sync path
   </entry>
   <entry>
     <title>Kafka设计原理详解</title>
-    <url>/2022/07/29/03-05-02-Kafka%E8%AE%BE%E8%AE%A1%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/</url>
+    <url>/2022/08/24/03-05-02-Kafka%E8%AE%BE%E8%AE%A1%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
 
-<h1 id="Kafka设计原理详解"><a href="#Kafka设计原理详解" class="headerlink" title="Kafka设计原理详解"></a>Kafka设计原理详解</h1><h2 id="1、kafka结构图"><a href="#1、kafka结构图" class="headerlink" title="1、kafka结构图"></a>1、kafka结构图</h2><p><img src="/2022/07/29/03-05-02-Kafka%E8%AE%BE%E8%AE%A1%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/image-20220730111347748.png" alt="image-20220730111347748"></p>
+<h1 id="Kafka设计原理详解"><a href="#Kafka设计原理详解" class="headerlink" title="Kafka设计原理详解"></a>Kafka设计原理详解</h1><h2 id="1、kafka结构图"><a href="#1、kafka结构图" class="headerlink" title="1、kafka结构图"></a>1、kafka结构图</h2><p><img src="/2022/08/24/03-05-02-Kafka%E8%AE%BE%E8%AE%A1%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/image-20220730111347748.png" alt="image-20220730111347748"></p>
 <h2 id="2、Kafka核心总控制器Controller"><a href="#2、Kafka核心总控制器Controller" class="headerlink" title="2、Kafka核心总控制器Controller"></a>2、<strong>Kafka核心总控制器Controller</strong></h2><p>在Kafka集群中会有一个或者多个broker，其中有一个broker会被选举为控制器（Kafka Controller），它负责管理整个集群中所有分区和副本的状态。</p>
 <ul>
 <li>当某个分区的leader副本出现故障时，由控制器负责为该分区选举新的leader副本。</li>
@@ -4585,6 +4585,7 @@ sync path
 <p> 因为__consumer_offsets可能会接收高并发的请求，kafka默认给其<strong>分配50个分区</strong>(可以通过offsets.topic.num.partitions设置)，这样可以通过加机器的方式抗大并发。</p>
 <p>通过如下公式可以选出consumer消费的offset要提交到__consumer_offsets的哪个分区</p>
 <p>公式：<strong>hash(consumerGroupId) % __consumer_offsets主题的分区数</strong></p>
+<p><a href="https://www.processon.com/view/link/62e7be845653bb07161a4b37">kafka思维导图</a></p>
 ]]></content>
       <categories>
         <category>中间件</category>

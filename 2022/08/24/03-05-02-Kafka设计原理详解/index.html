@@ -77,8 +77,8 @@
     </header>
      
     <div class="article-meta">
-      <a href="/2022/07/29/03-05-02-Kafka%E8%AE%BE%E8%AE%A1%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/" class="article-date">
-  <time datetime="2022-07-29T15:49:55.000Z" itemprop="datePublished">2022-07-29</time>
+      <a href="/2022/08/24/03-05-02-Kafka%E8%AE%BE%E8%AE%A1%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/" class="article-date">
+  <time datetime="2022-08-24T15:49:55.000Z" itemprop="datePublished">2022-08-24</time>
 </a> 
   <div class="article-category">
     <a class="article-category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a> / <a class="article-category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a> / <a class="article-category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/kafka/">kafka</a>
@@ -89,7 +89,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">946</span>
+            <span class="post-count">951</span>
         </span>
     </span>
 
@@ -115,7 +115,7 @@
        
   <p id="hitokoto">正在加载一言...</p>
 
-<h1 id="Kafka设计原理详解"><a href="#Kafka设计原理详解" class="headerlink" title="Kafka设计原理详解"></a>Kafka设计原理详解</h1><h2 id="1、kafka结构图"><a href="#1、kafka结构图" class="headerlink" title="1、kafka结构图"></a>1、kafka结构图</h2><p><img src="/2022/07/29/03-05-02-Kafka%E8%AE%BE%E8%AE%A1%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/image-20220730111347748.png" alt="image-20220730111347748"></p>
+<h1 id="Kafka设计原理详解"><a href="#Kafka设计原理详解" class="headerlink" title="Kafka设计原理详解"></a>Kafka设计原理详解</h1><h2 id="1、kafka结构图"><a href="#1、kafka结构图" class="headerlink" title="1、kafka结构图"></a>1、kafka结构图</h2><p><img src="/2022/08/24/03-05-02-Kafka%E8%AE%BE%E8%AE%A1%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/image-20220730111347748.png" alt="image-20220730111347748"></p>
 <h2 id="2、Kafka核心总控制器Controller"><a href="#2、Kafka核心总控制器Controller" class="headerlink" title="2、Kafka核心总控制器Controller"></a>2、<strong>Kafka核心总控制器Controller</strong></h2><p>在Kafka集群中会有一个或者多个broker，其中有一个broker会被选举为控制器（Kafka Controller），它负责管理整个集群中所有分区和副本的状态。</p>
 <ul>
 <li>当某个分区的leader副本出现故障时，由控制器负责为该分区选举新的leader副本。</li>
@@ -141,6 +141,7 @@
 <p> 因为__consumer_offsets可能会接收高并发的请求，kafka默认给其<strong>分配50个分区</strong>(可以通过offsets.topic.num.partitions设置)，这样可以通过加机器的方式抗大并发。</p>
 <p>通过如下公式可以选出consumer消费的offset要提交到__consumer_offsets的哪个分区</p>
 <p>公式：<strong>hash(consumerGroupId) % __consumer_offsets主题的分区数</strong></p>
+<p><a target="_blank" rel="noopener" href="https://www.processon.com/view/link/62e7be845653bb07161a4b37">kafka思维导图</a></p>
  
       <!-- reward -->
       
@@ -205,7 +206,7 @@
     <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/07/29/03-05-02-Kafka%E8%AE%BE%E8%AE%A1%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/" alt="微信分享二维码">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2022/08/24/03-05-02-Kafka%E8%AE%BE%E8%AE%A1%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -218,19 +219,10 @@
    
   <nav class="article-nav">
     
-      <a href="/2022/07/30/03-05-03-Kafka%E7%94%9F%E4%BA%A7%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93%E5%8F%8A%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E5%AE%9E%E8%B7%B5/" class="article-nav-link">
-        <strong class="article-nav-caption">上一篇</strong>
-        <div class="article-nav-title">
-          
-            Kafka生产问题总结及性能优化实践
-          
-        </div>
-      </a>
     
-    
-      <a href="/2022/07/27/10-00-01-%E4%BC%98%E9%9B%85%E7%9A%84%E4%BB%A3%E7%A0%81%E6%98%AF%E4%B8%80%E7%A7%8D%E8%89%BA%E6%9C%AF/" class="article-nav-link">
+      <a href="/2022/08/23/03-05-01-Kafka%E5%BF%AB%E9%80%9F%E5%AE%9E%E6%88%98%E4%B8%8E%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">优雅的代码是一种艺术</div>
+        <div class="article-nav-title">Kafka快速实战与基本原理详解</div>
       </a>
     
   </nav>
