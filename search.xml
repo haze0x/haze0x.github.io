@@ -4600,15 +4600,15 @@ sync path
   </entry>
   <entry>
     <title>Kafka生产问题总结及性能优化实践</title>
-    <url>/2022/07/30/03-05-03-Kafka%E7%94%9F%E4%BA%A7%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93%E5%8F%8A%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E5%AE%9E%E8%B7%B5/</url>
+    <url>/2022/08/25/03-05-03-Kafka%E7%94%9F%E4%BA%A7%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93%E5%8F%8A%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E5%AE%9E%E8%B7%B5/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
 
 <h2 id="一、kafka可视化管理工具"><a href="#一、kafka可视化管理工具" class="headerlink" title="一、kafka可视化管理工具"></a>一、kafka可视化管理工具</h2><p><strong>Kafka可视化管理工具kafka-manager</strong></p>
-<p><img src="/2022/07/30/03-05-03-Kafka%E7%94%9F%E4%BA%A7%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93%E5%8F%8A%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E5%AE%9E%E8%B7%B5/image-20220731123557477.png" alt="image-20220731123557477"></p>
+<p><img src="/2022/08/25/03-05-03-Kafka%E7%94%9F%E4%BA%A7%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93%E5%8F%8A%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E5%AE%9E%E8%B7%B5/image-20220731123557477.png" alt="image-20220731123557477"></p>
 <blockquote>
 <p>安装及基本使用可参考：<a href="https://www.cnblogs.com/dadonggg/p/8205302.html">https://www.cnblogs.com/dadonggg/p/8205302.html</a></p>
 </blockquote>
-<h2 id="二、线上环境规划"><a href="#二、线上环境规划" class="headerlink" title="二、线上环境规划"></a>二、<strong>线上环境规划</strong></h2><p><img src="/2022/07/30/03-05-03-Kafka%E7%94%9F%E4%BA%A7%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93%E5%8F%8A%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E5%AE%9E%E8%B7%B5/image-20220731123625076.png" alt="image-20220731123625076"></p>
+<h2 id="二、线上环境规划"><a href="#二、线上环境规划" class="headerlink" title="二、线上环境规划"></a>二、<strong>线上环境规划</strong></h2><p><img src="/2022/08/25/03-05-03-Kafka%E7%94%9F%E4%BA%A7%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93%E5%8F%8A%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E5%AE%9E%E8%B7%B5/image-20220731123625076.png" alt="image-20220731123625076"></p>
 <blockquote>
 <p><strong>JVM参数设置</strong></p>
 <p>kafka是scala语言开发，运行在JVM上，需要对JVM参数合理设置，参看JVM调优专题</p>
@@ -4650,7 +4650,7 @@ sync path
 <p><strong>7、分区数越多吞吐量越高吗</strong></p>
 <p>可以用kafka压测工具自己测试分区数不同，各种情况下的吞吐量</p>
 <p># 往test里发送一百万消息，每条设置1KB # throughput 用来进行限流控制，当设定的值小于 0 时不限流，当设定的值大于 0 时，当发送的吞吐量大于该值时就会被阻塞一段时间 bin/kafka-producer-perf-test.sh –topic test –num-records 1000000 –record-size 1024 –throughput -1 –producer-props bootstrap.servers=192.168.65.60:9092 acks=1</p>
-<p><img src="/2022/07/30/03-05-03-Kafka%E7%94%9F%E4%BA%A7%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93%E5%8F%8A%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E5%AE%9E%E8%B7%B5/image-20220731123658526.png" alt="image-20220731123658526"></p>
+<p><img src="/2022/08/25/03-05-03-Kafka%E7%94%9F%E4%BA%A7%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93%E5%8F%8A%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E5%AE%9E%E8%B7%B5/image-20220731123658526.png" alt="image-20220731123658526"></p>
 <p>网络上很多资料都说分区数越多吞吐量越高 ， 但从压测结果来看，分区数到达某个值吞吐量反而开始下降，实际上很多事情都会有一个临界值，当超过这个临界值之后，很多原本符合既定逻辑的走向又会变得不同。一般情况分区数跟集群机器数量相当就差不多了。</p>
 <p>当然吞吐量的数值和走势还会和磁盘、文件系统、 I/O调度策略等因素相关。</p>
 <p>注意：如果分区数设置过大，比如设置10000，可能会设置不成功，后台会报错”java.io.IOException : Too many open files”。</p>
@@ -4676,7 +4676,7 @@ sync path
 <li>读写数据的批量batch处理以及压缩传输</li>
 </ul>
 <p>数据传输零拷贝原理：</p>
-<p><img src="/2022/07/30/03-05-03-Kafka%E7%94%9F%E4%BA%A7%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93%E5%8F%8A%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E5%AE%9E%E8%B7%B5/image-20220731123736229.png" alt="image-20220731123736229"></p>
+<p><img src="/2022/08/25/03-05-03-Kafka%E7%94%9F%E4%BA%A7%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93%E5%8F%8A%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E5%AE%9E%E8%B7%B5/image-20220731123736229.png" alt="image-20220731123736229"></p>
 <p><strong>正常读文件：</strong></p>
 <p><strong>1、broker调用scala语言api获取磁盘消息，在用户空间执行命令，底层会调用操作系统的读文件的函数</strong></p>
 <p><strong>2、消息磁盘文件最先会被读到内核空间，读到操作系统的内核缓冲区</strong></p>
@@ -4688,6 +4688,7 @@ sync path
 <p><strong>2、kafka使用sendfile可以直接跳过socket缓冲区，直接将内核缓冲区的数据直接拷贝到网卡接口</strong></p>
 <p><strong>结论：</strong></p>
 <p><strong>四次拷贝变成两次</strong></p>
+<p><a href="https://www.processon.com/view/link/62e7be845653bb07161a4b37">kafka思维导图</a></p>
 ]]></content>
       <categories>
         <category>中间件</category>
