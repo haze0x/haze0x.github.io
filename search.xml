@@ -5372,6 +5372,7 @@ sync path
 <p><a href="https://github.com/dongfanger/pycnblog">markdown博客同步到博客园</a></p>
 <p><a href="https://www.cnblogs.com/zongfa/p/14982504.html">markdown博客同步到博客园</a></p>
 <p><a href="https://www.cnblogs.com/liuxianan/p/build-blog-website-by-hexo-github.html">hexo 博客搭建</a></p>
+<p><a href="https://www.cnblogs.com/liuxianan/p/build-blog-website-by-hexo-github.html">hexo搭建博客教程</a></p>
 <p><img src="/2022/04/25/10-00-00-hexo%E8%A7%A3%E5%86%B3%E6%8E%A8%E9%80%81github-ssh-key%E8%BF%87%E6%9C%9F%E9%97%AE%E9%A2%98/avator.jpg"></p>
 <h2 id="背景图"><a href="#背景图" class="headerlink" title="背景图"></a>背景图</h2><p><img src="/2022/04/25/10-00-00-hexo%E8%A7%A3%E5%86%B3%E6%8E%A8%E9%80%81github-ssh-key%E8%BF%87%E6%9C%9F%E9%97%AE%E9%A2%98/wallhaven-2ew3pm.webp" alt="wallhaven-2ew3pm"></p>
 <p><img src="/2022/04/25/10-00-00-hexo%E8%A7%A3%E5%86%B3%E6%8E%A8%E9%80%81github-ssh-key%E8%BF%87%E6%9C%9F%E9%97%AE%E9%A2%98/wallhaven-4ylgl0.webp" alt="wallhaven-4ylgl0"></p>
@@ -11395,6 +11396,104 @@ sync path
       </categories>
       <tags>
         <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>04_00_01_SpringBoot自动配置核心原理</title>
+    <url>/2022/11/04/04-00-01-SpringBoot%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
+  </entry>
+  <entry>
+    <title>05_01_00_开源商城项目实战一</title>
+    <url>/2023/02/12/05-01-00-%E5%BC%80%E6%BA%90%E5%95%86%E5%9F%8E%E9%A1%B9%E7%9B%AE%E5%AE%9E%E6%88%98%E4%B8%80/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>]]></content>
+  </entry>
+  <entry>
+    <title>12_00_01_DDD概述</title>
+    <url>/2022/09/19/12-00-01-DDD%E6%A6%82%E8%BF%B0/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h1 id="DDD概述"><a href="#DDD概述" class="headerlink" title="DDD概述"></a>DDD概述</h1><h2 id="1、系统怎么就”老”了？"><a href="#1、系统怎么就”老”了？" class="headerlink" title="1、系统怎么就”老”了？"></a>1、系统怎么就”老”了？</h2><h3 id="1-1-“DDD”-VS-DDD"><a href="#1-1-“DDD”-VS-DDD" class="headerlink" title="1.1 “DDD”  VS DDD"></a>1.1 “DDD”  VS DDD</h3><blockquote>
+<p>“DDD”【Data Driven Design】：传统的数据驱动开发</p>
+<p>DDD【Domain Driven Design】：领域驱动设计</p>
+</blockquote>
+<h3 id="1-3-系统怎么就”老化”了"><a href="#1-3-系统怎么就”老化”了" class="headerlink" title="1.3 系统怎么就”老化”了"></a>1.3 系统怎么就”老化”了</h3><ul>
+<li><p>沟通难：开发和产品对需求意见不统一，系统越来越复杂，产品不知道如何提需求。沟通困难，导致内耗。</p>
+</li>
+<li><p>开发难：一个类上前行代码，阅读困难，不敢随意修改，导致代码越来越乱。</p>
+</li>
+<li><p>测试难：没办法单元测试，一个小需求又需要做回归测试，测试工作量大。</p>
+</li>
+<li><p>创新难：新技术日新月异，老系统没时间重构，导致系统越拖越烂。</p>
+</li>
+</ul>
+<h3 id="1-3-1-代码层面的系统老化"><a href="#1-3-1-代码层面的系统老化" class="headerlink" title="1.3.1 代码层面的系统老化"></a>1.3.1 代码层面的系统老化</h3><p><strong>贫血模型</strong>：普通pojo，不带任何业务方法，</p>
+<p><strong>事务脚本</strong>：传统的按照过程编写业务，就叫事务脚本。</p>
+<p><img src="/2022/09/19/12-00-01-DDD%E6%A6%82%E8%BF%B0/image-20221023004122076.png" alt="image-20221023004122076"></p>
+<h3 id="1-3-2-架构层面的系统老化"><a href="#1-3-2-架构层面的系统老化" class="headerlink" title="1.3.2 架构层面的系统老化"></a>1.3.2 架构层面的系统老化</h3><blockquote>
+<p>业务纠缠，造成模型直接重用。</p>
+</blockquote>
+<p><img src="/2022/09/19/12-00-01-DDD%E6%A6%82%E8%BF%B0/image-20221023215014521.png" alt="image-20221023215014521"></p>
+<h2 id="2、DDD如何防止系统老化？"><a href="#2、DDD如何防止系统老化？" class="headerlink" title="2、DDD如何防止系统老化？"></a>2、DDD如何防止系统老化？</h2><blockquote>
+<p>将真实世界与软件世界联系在一起。<br>以领域划分代替功能模块划分。</p>
+<p>BC：Bound Context，边界上下文。</p>
+</blockquote>
+<p><img src="/2022/09/19/12-00-01-DDD%E6%A6%82%E8%BF%B0/image-20221023215202622.png" alt="image-20221023215202622"></p>
+]]></content>
+      <categories>
+        <category>架构</category>
+      </categories>
+      <tags>
+        <tag>DDD</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>DDD优化小实战</title>
+    <url>/2022/10/23/12-00-02-DDD%E4%BC%98%E5%8C%96%E5%B0%8F%E5%AE%9E%E6%88%98/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p id="hitokoto">正在加载一言...</p>
+
+<h1 id="DDD优化小实战"><a href="#DDD优化小实战" class="headerlink" title="DDD优化小实战"></a>DDD优化小实战</h1><h2 id="1、转账功能概述"><a href="#1、转账功能概述" class="headerlink" title="1、转账功能概述"></a>1、转账功能概述</h2><blockquote>
+<p>需求：用户购买商品后，向商家进行支付。</p>
+</blockquote>
+<blockquote>
+<p>产品设计：实现步骤拆解：<br>1、 从数据库中查出用户和商户的账户信息。<br>2、调用风控系统的微服务，进行风险评估。<br>3、实现转入转出操作，计算双方的金额变化，保存到数据库。<br>4、发送交易情况给kafka，进行后续审计和风控。</p>
+</blockquote>
+<blockquote>
+<p>开发：MVC 随手就来 ，代码如下：</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PaymentController</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> PayService payService;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Result <span class="title">pay</span><span class="params">(String merchantAccount,BigDecimal amount)</span></span>&#123;</span><br><span class="line">        Long userId = (Long) session.getAttribute(<span class="string">&quot;userId&quot;</span>);</span><br><span class="line">       <span class="keyword">return</span> payService.pay(userId, merchantAccount, amount);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PayServiceImpl</span> <span class="keyword">extends</span> <span class="title">PayService</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> AccountDao accountDao;<span class="comment">//操作数据库</span></span><br><span class="line">    <span class="keyword">private</span> KafkaTemplate&lt;String, String&gt; kafkaTemplate;<span class="comment">//操作kafka</span></span><br><span class="line">    <span class="keyword">private</span> RiskCheckService riskCheckService;<span class="comment">//风控微服务接口</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Result <span class="title">pay</span><span class="params">(Long userId,String merchantAccount,BigDecimal amount)</span></span>&#123;</span><br><span class="line">        <span class="comment">// 1. 从数据库读取数据</span></span><br><span class="line">        AccountDO clientDO = accountDAO.selectByUserId(userId);</span><br><span class="line">        AccountDO merchantDO =</span><br><span class="line">        accountDAO.selectByAccountNumber(merchantAccount);</span><br><span class="line">        <span class="comment">// 2. 业务参数校验</span></span><br><span class="line">        <span class="keyword">if</span> (amount&gt;(clientDO.getAvailable()) &#123;</span><br><span class="line">        	<span class="keyword">throw</span> <span class="keyword">new</span> NoMoneyException();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 3. 调用风控微服务</span></span><br><span class="line">        RiskCode riskCode = riskCheckService.checkPayment(...);</span><br><span class="line">        <span class="comment">// 4. 检查交易合法性</span></span><br><span class="line">        <span class="keyword">if</span>(<span class="string">&quot;0000&quot;</span>!= riskCode)&#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> InvalideOperException();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 5. 计算新值，并且更新字段</span></span><br><span class="line">        BigDecimal newSource = clientDO.getAvailable().subtract(amount);</span><br><span class="line">        BigDecimal newTarget = merchantDO.getAvailable().add(amount);</span><br><span class="line">        clientDO.setAvailable(newSource);</span><br><span class="line">        merchantDO.setAvailable(newTarget);</span><br><span class="line">        <span class="comment">// 6. 更新到数据库</span></span><br><span class="line">        accountDAO.update(clientDO);</span><br><span class="line">        accountDAO.update(merchantDO);</span><br><span class="line">        <span class="comment">// 7. 发送审计消息</span></span><br><span class="line">        String message = sourceUserId + <span class="string">&quot;,&quot;</span> + targetAccountNumber + <span class="string">&quot;,&quot;</span> + targetAmount;</span><br><span class="line">        kafkaTemplate.send(TOPIC_AUDIT_LOG, message);</span><br><span class="line">        <span class="keyword">return</span> Result.SUCCESS;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在代码层面和系统层面有些什么问题？</p>
+<p>单一职责原则，依赖反转原则，开放封闭原则</p>
+</blockquote>
+<h2 id="2、DDD改造"><a href="#2、DDD改造" class="headerlink" title="2、DDD改造"></a>2、DDD改造</h2><h3 id="2-1第一步：抽象数据存储层"><a href="#2-1第一步：抽象数据存储层" class="headerlink" title="2.1第一步：抽象数据存储层"></a>2.1第一步：抽象数据存储层</h3><ul>
+<li><p>贫血模型：原有的<strong>Account</strong>只是单纯的数据库映射，映射数据库的表结构，只有数据，属性，和getter和setter，没有具体的业务行为，这种就是称为贫血模型。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Account</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line">    <span class="keyword">private</span> Long accountNumber;</span><br><span class="line">    <span class="keyword">private</span> BigDecimal available;</span><br><span class="line">    </span><br><span class="line">    ...get set 方法省略</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>充血模型：不在只是具有属性，而是具有领域逻辑的实体，属性是为领域行为来进行操作的，这些字段属性不在是与数据库存储对应，而是与它的业务行为对应。这些领域行为通常是完全内敛的，即在实体内全部完成。有了充血模型，Account这个实体有哪些行为就可以直接看Account实体方法就知道了，不需要去service中去找了。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Account</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line">    <span class="keyword">private</span> Long accountNumber;</span><br><span class="line">    <span class="keyword">private</span> BigDecimal available;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">withdraw</span><span class="params">(BigDecimal money)</span></span>&#123;</span><br><span class="line">        <span class="comment">//转入操作</span></span><br><span class="line">        available = available + money;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">deposit</span><span class="params">(BigDecimal money)</span></span>&#123;</span><br><span class="line">        <span class="comment">//转出操作</span></span><br><span class="line">        <span class="keyword">if</span>(available &lt; money)&#123;</span><br><span class="line">            <span class="function"><span class="keyword">throws</span> new <span class="title">InsufficientMoneyException</span><span class="params">()</span></span>;</span><br><span class="line">        &#125;</span><br><span class="line">        available = available - money;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+<li><p>如何避免业务逻辑代码和数据库之间的耦合？</p>
+<blockquote>
+<p>通过抽象出Repository 仓库来实现。</p>
+<p>1、原本AccountDao对应的是一个数据库表的特定操作，相当于是对SQL封装，所有的操作对象都是面向数据库实体。</p>
+<p>2、Repository对应的是实体，即充血模型的Account去进行操作。对实体的保存查询操作就可以封装在Repository中。</p>
+</blockquote>
+</li>
+<li><p>实体、值对象、仓库和工厂</p>
+<p>值对象：无唯一业务ID</p>
+<p>实体：有唯一业务ID</p>
+</li>
+</ul>
+<h3 id="2-2-第二步：抽象第三方服务"><a href="#2-2-第二步：抽象第三方服务" class="headerlink" title="2.2 第二步：抽象第三方服务"></a>2.2 第二步：抽象第三方服务</h3><blockquote>
+<p>对第三方服务通过接口进行隔离，防止第三方服务带来问题。</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public interface BusiSafeService&#123;</span><br><span class="line">    .......</span><br><span class="line">&#125;</span><br><span class="line">public class BusiSafeServiceImpl implements BusiSafeService&#123;</span><br><span class="line">    @Autowired</span><br><span class="line">    private RiskChkService riskChkService;</span><br><span class="line">    </span><br><span class="line">    public Result checkBusi(Long userId,Long mechantAccount,BigDecimal money)&#123;</span><br><span class="line">        //参数封装</span><br><span class="line">        RiskCode riskCode = riskCheckService.checkPayment(...);</span><br><span class="line">        if(&quot;0000&quot;.equals(reskCode.getCode())&#123;</span><br><span class="line">            return Result.SUCCESS;</span><br><span class="line">        &#125;</span><br><span class="line">        return Result.REJECT;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>架构</category>
+      </categories>
+      <tags>
+        <tag>DDD实战</tag>
       </tags>
   </entry>
 </search>
