@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>Nginx安装与核心配置 |  Sword Heart</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Sword Heart" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-03-10-00Nginx安装与核心配置"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  Nginx安装与核心配置
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2023/02/12/03-10-00Nginx%E5%AE%89%E8%A3%85%E4%B8%8E%E6%A0%B8%E5%BF%83%E9%85%8D%E7%BD%AE/" class="article-date">
+  <time datetime="2023-02-12T09:22:28.000Z" itemprop="datePublished">2023-02-12</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a> / <a class="article-category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a> / <a class="article-category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/nginx/">nginx</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">2.9k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">12 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p id="hitokoto">正在加载一言...</p>
+
+<h2 id="一、Nginx的编译与安装"><a href="#一、Nginx的编译与安装" class="headerlink" title="一、Nginx的编译与安装"></a>一、Nginx的编译与安装</h2><h3 id="1、Nginx安装环境准备"><a href="#1、Nginx安装环境准备" class="headerlink" title="1、Nginx安装环境准备"></a>1、Nginx安装环境准备</h3><p>（1）Linux内核2.6及以上版本</p>
+<p>只有2.6之后才支持epool ，在此之前使用select或pool多路复用的IO模型，无法解决高并发压力的问题。通过命</p>
+<p>令 uname  -a 即可查看。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#查看 linux 内核</span><br><span class="line">uname -a  </span><br></pre></td></tr></table></figure>
+
+<p>（2）GCC编译器</p>
+<p>GCC（GNU Compiler Collection）可用来编译C语言程序。Nginx不会直接提供二进制可执行程序,只能下载源码进行编译。</p>
+<p>（3）PCRE库</p>
+<p>PCRE（Perl Compatible Regular Expressions，Perl兼容正则表达式）是由Philip Hazel开发的函数库，目前为很多软件所使用，该库支持正则表达式。</p>
+<p>（4）zlib库</p>
+<p>zlib库用于对HTTP包的内容做gzip格式的压缩，如果我们在nginx.conf里配置了gzip on，并指定对于某些类型（content-type）的HTTP响应使用gzip来进行压缩以减少网络传输量。</p>
+<p>（5）OpenSSL开发库</p>
+<p>如果我们的服务器不只是要支持HTTP，还需要在更安全的SSL协议上传输HTTP，那么就需要拥有OpenSSL了。另外，如果我们想使用MD5、SHA1等散列函数，那么也需要安装它。</p>
+<p>上面几个库都是Nginx 基础功能所必需的，为简单起见我们可以通过yum 命令统一安装。</p>
+<h3 id="2、安装步骤"><a href="#2、安装步骤" class="headerlink" title="2、安装步骤"></a>2、安装步骤</h3><h3 id="2-1-yum-安装nginx-环境"><a href="#2-1-yum-安装nginx-环境" class="headerlink" title="2.1 yum 安装nginx 环境"></a>2.1 yum 安装nginx 环境</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum -y install make zlib zlib-devel gcc-c++ libtool openssl openssl-devel pcre pcre-devel</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2获取Nginx源码"><a href="#2-2获取Nginx源码" class="headerlink" title="2.2获取Nginx源码"></a>2.2获取Nginx源码</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">一、进入安装目录</span><br><span class="line">cd /usr/local/devlop/</span><br><span class="line">mkdir nginx  [放在nginx目录下]</span><br><span class="line">nginx 下载页：http:<span class="comment">//nginx.org/en/download.html 。</span></span><br><span class="line">二、下载nginx 最新稳定版本</span><br><span class="line">wget http:<span class="comment">//nginx.org/download/nginx-1.14.0.tar.gz</span></span><br><span class="line">#解压</span><br><span class="line">tar -zxvf nginx-<span class="number">1.14</span><span class="number">.0</span>.tar.gz</span><br><span class="line">进入解压之后的目录</span><br><span class="line">cd /usr/local/devlop/nginx-<span class="number">1.14</span><span class="number">.0</span></span><br><span class="line">三、编译安装</span><br><span class="line">第一种，最简单的安装：</span><br><span class="line"># 全部采用默认安装</span><br><span class="line">./configure &amp;&amp; make &amp;&amp; make install  </span><br><span class="line">执行完成之后 nginx 运行文件 就会被安装在 /usr/local/nginx 下。</span><br><span class="line"></span><br><span class="line">第二种 </span><br><span class="line"><span class="number">2.1</span> 这里用第二种，基于参数构建</span><br><span class="line">./configure --prefix=/usr/local/devlop/nginx --with-pcre --with-http_stub_status_module --with-http_ssl_module     [完整命令 包含http]</span><br><span class="line">    </span><br><span class="line">解释 ： ## 指定编译目录</span><br><span class="line">./configure --prefix=/home/user/local/devlop/nginx </span><br><span class="line"># --prefix= 指定编译目录</span><br><span class="line"></span><br><span class="line"><span class="number">2.2</span> make 安装 打包成二进制文件 在nginx/objs下生成 nginx </span><br><span class="line"><span class="number">2.3</span> make install 部署到指定目录 即上面命令指定的 prefix中去</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">四、模块更新</span><br><span class="line"># 添加状态查查看等其它模块</span><br><span class="line">./configure --with-pcre --with-http_stub_status_module --with-http_ssl_module</span><br><span class="line"># 重新创建主文件</span><br><span class="line">make</span><br><span class="line"># 将新生成的nginx 文件覆盖 旧文件。</span><br><span class="line">cp objs/nginx /usr/local/devlop/nginx/sbin/</span><br><span class="line"># 查看是否更新成功 显示了 configure 构建参数表示成功</span><br><span class="line">/usr/local/devlop/nginx/sbin/nginx -V</span><br><span class="line">    </span><br><span class="line">注：每次新增模块，需要带上之前增加的模块的参数[通过 /usr/local/devlop/nginx/sbin/nginx -V 查看]，防止覆盖掉了之前的模块导致丢失</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-3-Nginx常用命令"><a href="#2-3-Nginx常用命令" class="headerlink" title="2.3 Nginx常用命令"></a>2.3 Nginx常用命令</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">cd /usr/local/devlop/nginx</span><br><span class="line">#查看命令帮助</span><br><span class="line">./sbin/nginx -?</span><br><span class="line">#默认方式启动：</span><br><span class="line">./sbin/nginx </span><br><span class="line">#指定配置文件启动 </span><br><span class="line">./sbin/nginx -c /tmp/nginx.conf </span><br><span class="line">#指定nginx程序目录启动</span><br><span class="line">./sbin/nginx -p /usr/local/nginx/</span><br><span class="line"># nginx语法检查 用来检查nginx.conf文件配置是否正确</span><br><span class="line">./sbin/nginx -t</span><br><span class="line">#快速停止</span><br><span class="line">./sbin/nginx -s stop  [会直接杀掉进程，非常粗暴]</span><br><span class="line">#优雅停止</span><br><span class="line">./sbin/nginx -s quit [请求进来，处理完之后再停止，关闭端口]</span><br><span class="line"></span><br><span class="line"># 热装载配置文件 </span><br><span class="line">./sbin/nginx -s reload [热装载，载不重启nginx的前提下 让大部分配置变更生效 http、service、location模块里面的变更都支持热装载]    </span><br><span class="line"></span><br><span class="line"># 重新打开日志文件</span><br><span class="line">./sbin/nginx -s reopen [重新打开日志]</span><br><span class="line">    <span class="number">0</span>&gt;cd /usr/local/devlop/nginx/logs</span><br><span class="line">    <span class="number">1</span>&gt;/usr/local/devlop/nginx/logs/access.log 日志文件改名为 access.log.backup之后</span><br><span class="line">    <span class="number">2</span>&gt;touch access.log</span><br><span class="line">    <span class="number">3</span>&gt;nginx日志文件会继续写入access.log中</span><br><span class="line">    <span class="number">4</span>&gt;执行reopen命令之后 /usr/local/devlop/nginx/sbin/nginx -s reopen之后</span><br><span class="line">    <span class="number">5</span>&gt;日志就可以正常写入的新建的access.log中了</span><br><span class="line"># 设置全局命令，如下表示设置启动用户为root</span><br><span class="line">./sbin/nginx -g <span class="string">&quot;user root;&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="二、Nginx架构说明"><a href="#二、Nginx架构说明" class="headerlink" title="二、Nginx架构说明"></a>二、Nginx架构说明</h2><h3 id="2-1Nginx-架构图"><a href="#2-1Nginx-架构图" class="headerlink" title="2.1Nginx 架构图:"></a>2.1<strong>Nginx 架构图:</strong></h3><p><img src="/2023/02/12/03-10-00Nginx%E5%AE%89%E8%A3%85%E4%B8%8E%E6%A0%B8%E5%BF%83%E9%85%8D%E7%BD%AE/image-20230212212728818.png" alt="image-20230212212728818"></p>
+<blockquote>
+<p>用户发送HTTP/HTTPS请求，由Nginx进程接收，Nginx有两种进程，一种是Master进程，一种是Worker进程，Worker进程作用：请求只会发给Worker进程，由Worker进程进行Web服务的处理，Worker进程除了可以对静态文件进行处理（将静态文件返回给用户），还可以做反向代理（Nginx后端还可以跟上应用服务，比如php服务，tomcat，netty，甚至是另一个Nginx），同时还可以进行缓存。也就是说请求不光Nginx可以进行处理，也可以转发给后端服务进行反向代理，也可以指向缓存。</p>
+<p>Master进程作用：类似项目经理的作用，只管理，不干活。用来专门监测Worker进程的工作状态，看它有没有挂掉，master进程也会去监测后端服务的健康状况，如果后端进程挂掉了，worker进程就没必要往后端发了。健康检查的工作全部由master进程完成。 reload、reopen这些命令都是发送给master进程，由master进程进行处理。</p>
+</blockquote>
+<p><img src="/2023/02/12/03-10-00Nginx%E5%AE%89%E8%A3%85%E4%B8%8E%E6%A0%B8%E5%BF%83%E9%85%8D%E7%BD%AE/image-20230212214944254.png" alt="image-20230212214944254"></p>
+<p>可以通过修改配置来修改worker进程的数量。</p>
+<h3 id="2-2-Nginx-核心模块："><a href="#2-2-Nginx-核心模块：" class="headerlink" title="2.2 Nginx 核心模块："></a>2.2 <strong>Nginx 核心模块：</strong></h3><p><img src="/2023/02/12/03-10-00Nginx%E5%AE%89%E8%A3%85%E4%B8%8E%E6%A0%B8%E5%BF%83%E9%85%8D%E7%BD%AE/image-20230212215527354.png" alt="image-20230212215527354"></p>
+<blockquote>
+<p>Nginx核心模块文档：<a target="_blank" rel="noopener" href="https://nginx.org/en/docs/">https://nginx.org/en/docs/</a></p>
+</blockquote>
+<h2 id="三、Nginx-配置与使用"><a href="#三、Nginx-配置与使用" class="headerlink" title="三、Nginx 配置与使用"></a>三、Nginx 配置与使用</h2><h3 id="3-1-Nginx配置文件语法"><a href="#3-1-Nginx配置文件语法" class="headerlink" title="3.1 Nginx配置文件语法"></a>3.1 Nginx配置文件语法</h3><figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 配置Nginx的worker进程数量为1</span></span><br><span class="line"><span class="attribute">worker_processes</span>  <span class="number">1</span>;</span><br><span class="line"><span class="comment"># 配置块</span></span><br><span class="line"><span class="comment"># 事件模块的配置</span></span><br><span class="line"><span class="section">events</span> &#123;</span><br><span class="line">    <span class="attribute">worker_connections</span>  <span class="number">1024</span>; <span class="comment"># 属性名 属性参数值 表示每个worker进程最大可以接收1024个并发的连接</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># http根路径，只能配置一个</span></span><br><span class="line"><span class="section">http</span> &#123;</span><br><span class="line">    <span class="attribute">include</span>       mime.types; <span class="comment"># 引入mime.types文件 对应nginx 安装目录下的 conf目录的mime.types文件 纯粹的文本引入 类型复制文本进来</span></span><br><span class="line">    <span class="attribute">default_type</span>  application/octet-stream; <span class="comment"># 默认类别</span></span><br><span class="line">    <span class="attribute">sendfile</span>        <span class="literal">on</span>; <span class="comment"># 是否可以发送文件</span></span><br><span class="line">    <span class="attribute">keepalive_timeout</span>  <span class="number">65</span>; <span class="comment"># 长连接的超时时间</span></span><br><span class="line">	<span class="comment"># 服务模块配置 可以有多个 多个的话 listen server_name 不能都完全一模一样</span></span><br><span class="line">    <span class="section">server</span> &#123;</span><br><span class="line">        <span class="attribute">listen</span>       <span class="number">80</span>; <span class="comment"># 端口号 监听的端口号 多个server的情况下 listen + server_name 不能完全重复</span></span><br><span class="line">        <span class="attribute">server_name</span>  localhost; <span class="comment"># 指向哪个服务器 可以配置多个 如果没有用域名访问 会访问默认模块【即多个server配置取最前面的 或者通过加default来指定 比如 server_name www.test.com default; 】</span></span><br><span class="line">        <span class="attribute">location</span> / &#123; <span class="comment"># 一个server里面可以有多个location  server里面的参数 即上面的参数会被location继承   / 表示只要以/ 开头的请求 都由这个location进行处理</span></span><br><span class="line">            <span class="attribute">root</span>   html; <span class="comment"># 代表当前站点的根目录 这里的html是一个相对路径 相对于nginx的根目录[/usr/local/devlop/nginx  路径下有名字为html的文件 即浏览器80端口打开的页面]的html  【最好使用绝对路径】</span></span><br><span class="line">            <span class="attribute">index</span>  index.html index.htm; <span class="comment"># 主页文件</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="attribute">error_page</span>   <span class="number">500</span> <span class="number">502</span> <span class="number">503</span> <span class="number">504</span>  /50x.html;</span><br><span class="line">        <span class="attribute">location</span> = /50x.html &#123;</span><br><span class="line">            <span class="attribute">root</span>   html;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment"># 每个server代表一个服务  每个server会继承上面的属性和属性值</span></span><br><span class="line">    <span class="section">server</span> &#123;</span><br><span class="line">        <span class="attribute">listen</span>       <span class="number">80</span>;</span><br><span class="line">        <span class="attribute">server_name</span>  www.test.com www.shop.com <span class="regexp">*.shop.com</span> shop.com <span class="regexp">shop.*</span>; <span class="comment"># 可以配置多个 空格隔开 支撑通配符 不支持正则表达式 匹配优先级 ： 全路径匹配&gt; *号在左边的 &gt; 先后顺序 </span></span><br><span class="line">        <span class="attribute">location</span> / &#123; <span class="comment"># 默认访问这个路径</span></span><br><span class="line">            <span class="attribute">root</span>   html;</span><br><span class="line">            <span class="comment"># proxy http:/upsteam/ 可以配置proxy 进行代理</span></span><br><span class="line">            <span class="attribute">index</span>  index.html index.htm;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="attribute">location</span> /static &#123; <span class="comment"># 可以配置静态文件访问这个路径 请求以/static开头 就由这个location进行处理</span></span><br><span class="line">            <span class="attribute">root</span>   html;</span><br><span class="line">            <span class="attribute">index</span>  index.html index.htm;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="attribute">error_page</span>   <span class="number">500</span> <span class="number">502</span> <span class="number">503</span> <span class="number">504</span>  /50x.html;</span><br><span class="line">        <span class="attribute">location</span> = /50x.html &#123;</span><br><span class="line">            <span class="attribute">root</span>   html;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Nginx配置分为三种：模块、属性、参数。</p>
+<p>1、放在根路径的为属性&lt;属性名称    属性参数&gt;。 如：worker_processes  1;</p>
+<p>2、用大括号包裹起来的叫配置块。</p>
+<p>http模块配置详解 层级关系</p>
+<p>http{</p>
+<p>​    server{</p>
+<p>​                location / {</p>
+<p>​                }</p>
+<p>​                location / { # location 路径 指定访问路径的意思</p>
+<p>​                }</p>
+<p>​    }</p>
+<p>server{</p>
+<p>​                location / {</p>
+<p>​                </p>
+<p>​                }</p>
+<p>​                location / {</p>
+<p>​                }</p>
+<p>​    }</p>
+<p>}</p>
+</blockquote>
+<blockquote>
+<p>root 配置踩坑躲避：</p>
+<p>root  /www/shop/;  路径以/开头 表示绝对路径，如果想配置相对路径的话前面不要加/</p>
+<p>root /use/local/devlop/shop;  可以配置绝对路径【推荐】</p>
+<p>root www/shop/; 路径非/开头表示相对路径 会以nginx 的html文件为根路径，然后拼接 www/shop路径。</p>
+</blockquote>
+<h3 id="3-2-配置第一个静态WEB服务"><a href="#3-2-配置第一个静态WEB服务" class="headerlink" title="3.2 配置第一个静态WEB服务"></a>3.2 配置第一个静态WEB服务</h3><p><img src="/2023/02/12/03-10-00Nginx%E5%AE%89%E8%A3%85%E4%B8%8E%E6%A0%B8%E5%BF%83%E9%85%8D%E7%BD%AE/image-20230212233428636.png" alt="image-20230212233428636"></p>
+<blockquote>
+<p>红框中 通过root指定 地址 访问的时候会默认加上location后面配置的 /wj  即路径变成/www/wj/wj</p>
+<p>解决办法：不指定root，而是通过指定alias 即配置变成 </p>
+<p>location /wj {</p>
+<p>​        alias /www/wj/;</p>
+<p>​        index index.html;</p>
+<p>}</p>
+</blockquote>
+<h3 id="3-3-配置案例"><a href="#3-3-配置案例" class="headerlink" title="3.3  配置案例"></a>3.3  配置案例</h3><h4 id="3-3-1-动静分离实现"><a href="#3-3-1-动静分离实现" class="headerlink" title="3.3.1 动静分离实现"></a>3.3.1 动静分离实现</h4><p><strong>基于目录动静分离</strong></p>
+<p>Nginx关键配置如下：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">server</span> &#123;</span><br><span class="line">        <span class="attribute">listen</span> <span class="number">80</span>;</span><br><span class="line">        <span class="attribute">server_name</span> www.shop.com;</span><br><span class="line">        <span class="attribute">root</span> /www/shop/;</span><br><span class="line">        <span class="attribute">location</span> / &#123; <span class="comment"># 进行动态访问</span></span><br><span class="line">            <span class="attribute">index</span> index.html;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="attribute">location</span> /static &#123; <span class="comment"># 进行静态访问</span></span><br><span class="line">            <span class="attribute">alias</span> www/test/static;</span><br><span class="line">            <span class="attribute">index</span> index.html;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>基于正则动静分离</strong></p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">location</span> <span class="regexp">~* \.(gif|jpg|png|css|js)$</span> &#123;</span><br><span class="line"></span><br><span class="line">   <span class="attribute">root</span> /usr/www/static;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">访问www.shop.com/code.css即可访问到 /usr/www/static/code.css文件</span><br><span class="line">注：</span><br><span class="line">~代表使用正则表达式</span><br><span class="line">*表示不区分大小写</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="3-3-2-防盗链"><a href="#3-3-2-防盗链" class="headerlink" title="3.3.2 防盗链"></a>3.3.2 防盗链</h4><p>一般针对图片等静态资源。</p>
+<p>Nginx配置</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 加入至指定location 即可实现</span></span><br><span class="line"><span class="attribute">valid_referers</span> <span class="literal">none</span> <span class="literal">blocked</span> <span class="regexp">*.shop.com</span>;</span><br><span class="line"><span class="attribute">if</span> ($invalid_referer) &#123;</span><br><span class="line">       <span class="attribute">return</span> <span class="number">403</span>;</span><br><span class="line">&#125;</span><br><span class="line">表明 只能由来自 *.shop.com的请求来访问 ，否则返回403</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">完整server配置</span><br><span class="line"></span><br><span class="line"><span class="section">server</span> &#123;</span><br><span class="line">        <span class="attribute">listen</span> <span class="number">80</span>;</span><br><span class="line">        <span class="attribute">server_name</span> www.shop.com default;</span><br><span class="line">        <span class="attribute">location</span> / &#123;</span><br><span class="line">     <span class="comment">#       root /usr/local/devlop/nginx/www/shop/;</span></span><br><span class="line">            <span class="attribute">root</span> www/shop/;</span><br><span class="line">            <span class="attribute">index</span> index.html;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="attribute">location</span> /xiaogang &#123;</span><br><span class="line"><span class="comment">#            alias /usr/local/devlop/nginx/www/xiaogang;</span></span><br><span class="line">            <span class="attribute">alias</span> www/xiaogang/;</span><br><span class="line">            <span class="attribute">index</span> index.html;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="attribute">location</span> <span class="regexp">~* \.(gif|jpg|png|css|js)$</span> &#123;</span><br><span class="line">            <span class="attribute">valid_referers</span> <span class="literal">none</span> <span class="literal">blocked</span> <span class="regexp">*.shop.com</span>;</span><br><span class="line">            <span class="attribute">if</span> ($invalid_referer) &#123;</span><br><span class="line">               <span class="attribute">return</span> <span class="number">403</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="attribute">root</span> www/static;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>结果：</p>
+<p><img src="/2023/02/12/03-10-00Nginx%E5%AE%89%E8%A3%85%E4%B8%8E%E6%A0%B8%E5%BF%83%E9%85%8D%E7%BD%AE/image-20230215233433189.png" alt="image-20230215233433189"></p>
+<p><img src="/2023/02/12/03-10-00Nginx%E5%AE%89%E8%A3%85%E4%B8%8E%E6%A0%B8%E5%BF%83%E9%85%8D%E7%BD%AE/image-20230215233459554.png" alt="image-20230215233459554"></p>
+<h4 id="3-3-3-多域名站点"><a href="#3-3-3-多域名站点" class="headerlink" title="3.3.3 多域名站点"></a>3.3.3 多域名站点</h4><h4 id="3-3-4-下载限速"><a href="#3-3-4-下载限速" class="headerlink" title="3.3.4 下载限速"></a>3.3.4 下载限速</h4><p>Ngnix配置</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">location</span> /download &#123;</span><br><span class="line">    <span class="attribute">limit_rate</span> <span class="number">1m</span>; //限制每S下载速度</span><br><span class="line">    <span class="attribute">limit_rate_after</span> <span class="number">30m</span>; // 超过30 之 后在下载  超过30M之后再限速</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">可以写在location中，也可以写在server里面</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="3-3-5-IP-黑名单"><a href="#3-3-5-IP-黑名单" class="headerlink" title="3.3.5 IP 黑名单"></a>3.3.5 IP 黑名单</h4><figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#封禁指定IP</span></span><br><span class="line"><span class="attribute">deny</span> <span class="number">192.168.0.1</span>;</span><br><span class="line"><span class="attribute">allow</span> <span class="number">192.168.0.1</span>;</span><br><span class="line"><span class="comment">#开放指定IP 段</span></span><br><span class="line"><span class="attribute">allow</span> <span class="number">192.168.0.0</span>/<span class="number">24</span>;</span><br><span class="line"><span class="comment">#封禁所有</span></span><br><span class="line"><span class="attribute">deny</span>    all;</span><br><span class="line"><span class="comment">#开放所有</span></span><br><span class="line"><span class="attribute">allow</span>    all;</span><br><span class="line"><span class="comment"># 创建黑名单文件</span></span><br><span class="line"><span class="attribute">echo</span> <span class="string">&#x27;deny 192.168.0.132;&#x27;</span> &gt;&gt; balck.ip</span><br><span class="line"><span class="comment">#http 配置块中引入 黑名单文件</span></span><br><span class="line">include       black.ip;</span><br><span class="line"></span><br><span class="line">如果写在http层级，则对所有的都生效</span><br><span class="line">如果写在server层级，则对特定的server生效</span><br><span class="line">如果写在location层级，则对特定的location生效</span><br></pre></td></tr></table></figure>
+
+<p>通过include引入 black.ip 文件  include是直接复制内容到配置文件中，所以分号一定不能少；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">deny <span class="number">192.168</span><span class="number">.1</span><span class="number">.104</span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">http&#123;</span><br><span class="line">    <span class="comment"># include black.ip;</span></span><br><span class="line">    <span class="section">server</span> &#123;</span><br><span class="line">            <span class="comment"># include black.ip;</span></span><br><span class="line">            <span class="attribute">listen</span> <span class="number">80</span>;</span><br><span class="line">            <span class="attribute">server_name</span> www.shop.com default;</span><br><span class="line">            <span class="attribute">location</span> / &#123;</span><br><span class="line">         <span class="comment">#       root /usr/local/devlop/nginx/www/shop/;</span></span><br><span class="line">                <span class="attribute">root</span> www/shop/;</span><br><span class="line">                <span class="attribute">index</span> index.html;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="attribute">location</span> /xiaogang &#123;</span><br><span class="line">                <span class="attribute">include</span> black.ip;</span><br><span class="line">    <span class="comment">#            alias /usr/local/devlop/nginx/www/xiaogang;</span></span><br><span class="line">                <span class="attribute">alias</span> www/xiaogang/;</span><br><span class="line">                <span class="attribute">index</span> index.html;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="attribute">location</span> <span class="regexp">~* \.(gif|jpg|png|css|js)$</span> &#123;</span><br><span class="line">                <span class="attribute">valid_referers</span> <span class="literal">none</span> <span class="literal">blocked</span> <span class="regexp">*.shop.com</span>;</span><br><span class="line">                <span class="attribute">if</span> ($invalid_referer) &#123;</span><br><span class="line">                   <span class="attribute">return</span> <span class="number">403</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="attribute">root</span> www/static;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="3-3-6-基于user-agent分流"><a href="#3-3-6-基于user-agent分流" class="headerlink" title="3.3.6 基于user-agent分流"></a>3.3.6 基于user-agent分流</h4><h4 id="3-4-日志配置"><a href="#3-4-日志配置" class="headerlink" title="3.4  日志配置"></a>3.4  日志配置</h4><p><em><strong>*日志配置：*</strong></em></p>
+<p><strong>日志格式：</strong></p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">log_format</span> main <span class="string">&#x27;$remote_addr - $remote_user [$time_local]  &quot;$request&quot; &#x27;</span></span><br><span class="line"></span><br><span class="line">​           <span class="string">&#x27;$status $body_bytes_sent &quot;$http_referer&quot; &#x27;</span></span><br><span class="line"></span><br><span class="line">​         <span class="string">&#x27;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="attribute">access_log</span> logs/access.log main;</span><br></pre></td></tr></table></figure>
+
+<p>#基于域名打印日志</p>
+<p>access_log logs/$host.access.log main;</p>
+<p><strong>error日志的设置</strong></p>
+<p>语法：error_log /path/file level;</p>
+<p>默认：error_log logs/error.log error;</p>
+<p>level是日志的输出级别，取值范围是debug、info、notice、warn、error、crit、alert、emerg，</p>
+<p><strong>针对指定的客户端输出debug级别的日志</strong></p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">语法：debug_connection[IP|CIDR]</span><br><span class="line"></span><br><span class="line"><span class="section">events</span> &#123;</span><br><span class="line"></span><br><span class="line"><span class="attribute">debug_connection</span> <span class="number">192.168.0.147</span>; </span><br><span class="line"></span><br><span class="line"><span class="attribute">debug_connection</span> <span class="number">10.224.57.0</span>/<span class="number">200</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意：debug 日志开启 必须在安装时 添加  –with-debug (允许debug)</p>
+<p><a target="_blank" rel="noopener" href="https://attachments-cdn.shimo.im/uhMsgcdhudg2yAND/nginx.conf">nginx.conf</a></p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://haze0x.github.io/2023/02/12/03-10-00Nginx%E5%AE%89%E8%A3%85%E4%B8%8E%E6%A0%B8%E5%BF%83%E9%85%8D%E7%BD%AE/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nginx/" rel="tag">nginx</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" rel="tag">消息队列</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2023/02/18/03-10-01-Nginx%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E4%B8%8E%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83%E5%BA%94%E7%94%A8/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            Nginx负载均衡与生产环境应用
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2023/02/12/05-01-00-%E5%BC%80%E6%BA%90%E5%95%86%E5%9F%8E%E9%A1%B9%E7%9B%AE%E5%AE%9E%E6%88%98%E4%B8%80/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">开源商城项目实战一</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "z7pjLOiS1FEJ17pkhGOjBQm4-gzGzoHsz",
+    app_key: "Ytw1ShVWHkcjtz9lybfPBsVT",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2023
+        <i class="ri-heart-fill heart_icon"></i> John Doe
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="Sword Heart"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/Jvm">性能调优</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B">并发编程</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E6%BA%90%E7%A0%81%E6%A1%86%E6%9E%B6">源码框架</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F">分布式</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/%E7%AE%97%E6%B3%95">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2021/12/11/about">关于我</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/player">播放器</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+  
+  <!-- 一言API -->
+<!-- 现代写法，推荐 -->
+<!-- 兼容低版本浏览器 (包括 IE)，可移除 -->
+<script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
+<!--End-->
+<script>
+  fetch('https://v1.hitokoto.cn')
+    .then(function (res){
+      return res.json();
+    })
+    .then(function (data) {
+      var hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto + '——【' + data.from + '】';
+    })
+    .catch(function (err) {
+      console.error(err);
+    })
+</script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>
