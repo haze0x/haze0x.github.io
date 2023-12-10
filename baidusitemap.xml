@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://haze0x.github.io/2023/02/12/03-10-00Nginx%E5%AE%89%E8%A3%85%E4%B8%8E%E6%A0%B8%E5%BF%83%E9%85%8D%E7%BD%AE/</loc>
-    <lastmod>2023-02-19</lastmod>
+    <loc>https://haze0x.github.io/2022/06/18/02-00-00-Spring%E5%BA%95%E5%B1%82%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/</loc>
+    <lastmod>2023-12-10</lastmod>
+  </url>
+  <url>
+    <loc>https://haze0x.github.io/2023/03/25/03-08-01-Dubbo%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%BA%94%E7%94%A8%E4%B8%8E%E9%AB%98%E7%BA%A7%E5%BA%94%E7%94%A8/</loc>
+    <lastmod>2023-03-25</lastmod>
   </url>
   <url>
     <loc>https://haze0x.github.io/2023/02/18/03-10-01-Nginx%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E4%B8%8E%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83%E5%BA%94%E7%94%A8/</loc>
+    <lastmod>2023-03-01</lastmod>
+  </url>
+  <url>
+    <loc>https://haze0x.github.io/2023/02/12/03-10-00Nginx%E5%AE%89%E8%A3%85%E4%B8%8E%E6%A0%B8%E5%BF%83%E9%85%8D%E7%BD%AE/</loc>
     <lastmod>2023-02-19</lastmod>
   </url>
   <url>
@@ -147,10 +155,6 @@
   <url>
     <loc>https://haze0x.github.io/2021/12/29/10-00-01-%E8%A7%A3%E5%86%B3maven-jar%E5%8C%85%E4%B8%8B%E8%BD%BD%E6%BA%90%E7%A0%81%E9%97%AE%E9%A2%98/</loc>
     <lastmod>2022-07-09</lastmod>
-  </url>
-  <url>
-    <loc>https://haze0x.github.io/2022/06/18/02-00-00-Spring%E5%BA%95%E5%B1%82%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/</loc>
-    <lastmod>2022-07-08</lastmod>
   </url>
   <url>
     <loc>https://haze0x.github.io/2021/12/11/about/</loc>

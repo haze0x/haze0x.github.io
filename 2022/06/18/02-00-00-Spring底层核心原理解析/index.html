@@ -127,7 +127,7 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ClassPathXmlApplicationContext context = <span class="keyword">new</span> ClassPathXmlApplicationContext(<span class="string">&quot;spring.xml&quot;</span>);</span><br><span class="line">UserService userService = (UserService) context.getBean(<span class="string">&quot;userService&quot;</span>);</span><br><span class="line">userService.test();</span><br></pre></td></tr></table></figure>
 
 <blockquote>
-<p>对于这三行代码应该，大部分同学应该都是比较熟悉，这是学习Spring的hello world。可是，这三行代码底层都做了什么，比如：</p>
+<p>对于这三行代码应该，大家应该都是比较熟悉，这是学习Spring的hello world。可是，这三行代码底层都做了什么，比如：</p>
 <ol>
 <li>第一行代码，会构造一个ClassPathXmlApplicationContext对象，ClassPathXmlApplicationContext该如何理解，调用该构造方法除开会实例化得到一个对象，还会做哪些事情？</li>
 <li>第二行代码，会调用ClassPathXmlApplicationContext的getBean方法，会得到一个UserService对象，getBean()是如何实现的？返回的UserService对象和我们自己直接new的UserService对象有区别吗？</li>
